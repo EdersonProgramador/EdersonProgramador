@@ -18,7 +18,7 @@ export type PortfolioGithubItem = {
 export const AGENCY_META = {
   name: "Ederson Programador",
   domain: "https://edersonprogramador.com.br",
-  tagline: "Engenharia de produto digital — do primeiro commit ao domínio no ar.",
+  tagline: "Soluções digitais que geram resultados",
   github: "https://github.com/EdersonProgramador",
   /** PDF oficial — servido em /public */
   resumePath: "/curriculo-ederson-almeida.pdf",

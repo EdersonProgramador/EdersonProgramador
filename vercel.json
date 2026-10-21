@@ -5,5 +5,5 @@
   "buildCommand": "npm run build --workspace=@ederson-agencia/shared && npm run build --workspace=@ederson-agencia/web",
   "outputDirectory": "dist",
   "framework": null,
-  "rewrites": [{ "source": "/((?!assets/|.*\\.pdf$).*)", "destination": "/index.html" }]
+  "rewrites": [{ "source": "/((?!assets/|brand/|.*\\.(pdf|jpg|jpeg|png|webp|svg)$).*)", "destination": "/index.html" }]
 }

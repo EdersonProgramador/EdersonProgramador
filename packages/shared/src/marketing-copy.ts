@@ -7,7 +7,7 @@ export const MARKETING_COPY = {
   /** AIDA — arco emocional → racional → decisão */
   aida: {
     attention: {
-      eyebrow: "Software sob medida · do briefing ao domínio no ar",
+      eyebrow: "Soluções digitais que geram resultados",
       title: "Pare de remendar. Construa o sistema que a operação já pediu há meses.",
       subtitle:
         "Sites e plataformas feitos para converter, escalar e não te deixar refém de template. Um engenheiro no comando — escopo fechado, entregas que você vê, código que aguenta a próxima fase do negócio.",
@@ -43,10 +43,30 @@ export const MARKETING_COPY = {
   },
 
   stats: [
-    { value: "2+", label: "Produtos reais em produção hoje" },
-    { value: "~40d", label: "Referência para MVP enxuto aprovado" },
-    { value: "4", label: "Marcos com entrega e aprovação sua" },
-    { value: "0", label: "Surpresa de escopo após proposta assinada*" }
+    {
+      value: "2+",
+      label: "Produtos reais em produção hoje",
+      emphasis: "Abra no navegador — entrega real, não mockup",
+      href: "#producao"
+    },
+    {
+      value: "~40d",
+      label: "Referência para MVP enxuto aprovado",
+      emphasis: "Cronograma combinado antes do primeiro commit",
+      href: "#processo"
+    },
+    {
+      value: "4",
+      label: "Etapas do método — entrega e ok seu em cada uma",
+      emphasis: "Briefing → UI → dev → deploy; nada avança no escuro",
+      href: "#processo"
+    },
+    {
+      value: "0",
+      label: "Surpresa de escopo após proposta assinada*",
+      emphasis: "O que está no paper é o que você paga",
+      href: "#investimento"
+    }
   ],
 
   hero: {
@@ -65,34 +85,39 @@ export const MARKETING_COPY = {
   },
 
   services: {
-    title: "O que resolvemos",
-    subtitle: "Quatro frentes para tirar o digital do modo “gambiarra” e colocar no modo operação.",
+    title: "Serviços",
+    subtitle: "Transformando ideias em soluções digitais — cinco frentes alinhadas à identidade Ederson Programador.",
     items: [
       {
-        title: "Sistemas web sob medida",
-        text: "Painéis, permissões, fluxos e relatórios desenhados em cima do seu processo — não do template genérico. Arquitetura pronta para crescer sem reescrever tudo.",
+        title: "Desenvolvimento de sistemas",
+        text: "Painéis, fluxos, permissões e regras de negócio sob medida — arquitetura pensada para evoluir com a operação.",
         mood: "trust" as const
       },
       {
-        title: "Sites e landing pages que vendem",
-        text: "Rápidos, responsivos e guiados por copy e hierarquia visual — para visitante entender, confiar e clicar, não só admirar animação.",
+        title: "Inteligência artificial",
+        text: "Recursos inteligentes integrados ao produto: automação de decisões, assistentes e pipelines com IA aplicada ao negócio.",
         mood: "desire" as const
       },
       {
-        title: "Integrações & automação",
-        text: "Pagamento, WhatsApp, e-mail, ERP, planilha ou API: menos copiar-colar, mais evento automático no lugar certo.",
+        title: "Automações e integrações",
+        text: "APIs, pagamentos, WhatsApp, e-mail e sistemas legados conectados — menos retrabalho manual, mais evento no lugar certo.",
         mood: "logic" as const
       },
       {
-        title: "Evolução pós-lançamento",
-        text: "Correção, feature nova e observabilidade — para o sistema continuar útil depois do “parabéns, foi pro ar”.",
-        mood: "calm" as const
+        title: "Sites e plataformas",
+        text: "Presença digital rápida, responsiva e orientada a conversão — da landing ao portal completo em produção.",
+        mood: "spectrum" as const
+      },
+      {
+        title: "Projetos digitais",
+        text: "Do diagnóstico ao deploy: MVPs, evolução contínua e entregas com foco em resultado mensurável.",
+        mood: "launch" as const
       }
     ]
   },
 
   process: {
-    title: "Método em 4 fases",
+    title: "Método em 4 etapas",
     subtitle:
       "Compromisso progressivo: você aprova cada marco antes do próximo. Reduz medo de investir no escuro e ativa consistência — o projeto anda porque você valida, não porque eu sumi.",
     steps: [
@@ -204,7 +229,7 @@ export const MARKETING_COPY = {
   },
 
   footer: {
-    tagline: "Engenharia de produto digital — do primeiro commit ao domínio no ar.",
+    tagline: "Soluções digitais que geram resultados",
     rights: "Todos os direitos reservados.",
     legalLinks: [
       { id: "privacidade", label: "Privacidade" },

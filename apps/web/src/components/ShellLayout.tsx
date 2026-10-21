@@ -15,7 +15,7 @@ export function ShellLayout({ title }: { title: string }) {
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4">
           <div>
             <Link to="/" className="group inline-block">
-              <BrandLogo size="sm" showDomain={false} />
+              <BrandLogo size="sm" />
             </Link>
             <p className="mt-1.5 pl-11 text-xs text-white/50">{title}</p>
           </div>

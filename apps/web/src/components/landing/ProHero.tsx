@@ -1,7 +1,9 @@
 import { ArrowRight, ChevronDown } from "lucide-react";
 import type { PortfolioProductionItem } from "@ederson-agencia/shared";
 import { MARKETING_COPY } from "@ederson-agencia/shared";
-import { BrandMark } from "../brand/BrandMark";
+import { BrandLogo } from "../brand/BrandLogo";
+import { BrandIdentityBar } from "./BrandIdentityBar";
+import { HeroStats } from "./HeroStats";
 
 type ProHeroProps = {
   production: PortfolioProductionItem[];
@@ -57,7 +59,7 @@ export function ProHero({ production }: ProHeroProps) {
                   <span className="h-2.5 w-2.5 rounded-full bg-red-400/80" />
                   <span className="h-2.5 w-2.5 rounded-full bg-amber-300/80" />
                   <span className="h-2.5 w-2.5 rounded-full bg-emerald-400/80" />
-                  <BrandMark size={22} className="ml-1 opacity-90" />
+                  <BrandLogo variant="mark" size="sm" className="ml-1 scale-75 opacity-90" />
                   <span className="truncate font-mono text-[10px] text-white/40">{copy.domainLabel}</span>
                 </div>
                 <div className="space-y-2.5 bg-gradient-to-b from-[#0f172a] to-[#070b14] p-4 sm:p-5">
@@ -83,14 +85,9 @@ export function ProHero({ production }: ProHeroProps) {
           </div>
         </div>
 
-        <dl className="mt-8 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-2.5 md:mt-9 lg:mt-10">
-          {copy.stats.map((stat) => (
-            <div key={stat.label} className="glass-metric px-3 py-2.5 sm:px-4 sm:py-3">
-              <dt className="font-display text-xl font-bold text-white sm:text-2xl lg:text-[1.65rem]">{stat.value}</dt>
-              <dd className="mt-0.5 text-[10px] leading-snug text-white/50 sm:text-[11px]">{stat.label}</dd>
-            </div>
-          ))}
-        </dl>
+        <HeroStats />
+
+        <BrandIdentityBar />
       </div>
 
       <div className="landing-container relative z-[1] mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 border-t border-white/10 pt-5 md:mt-9 md:justify-start md:gap-x-8 md:pt-6">

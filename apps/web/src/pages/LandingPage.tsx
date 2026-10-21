@@ -59,25 +59,29 @@ function SalesNav({ scrolled }: { scrolled: boolean }) {
       } backdrop-blur-xl`}
     >
       <div className="landing-container">
-        <div className="flex items-center justify-between gap-4 py-3 md:py-3.5">
+        <div className="relative flex items-center justify-between gap-2 py-3 sm:gap-3 sm:py-3.5 md:py-3.5 lg:gap-4">
           <a
             href="#topo"
-            className="group shrink-0"
+            className="group relative z-20 shrink-0"
             aria-label={`${copy.brand} — voltar ao início`}
             onClick={(event) => {
               event.preventDefault();
               scrollToLandingTop();
             }}
           >
-            <BrandLogo size="sm" compact className="md:hidden" />
+            <BrandLogo size="sm" className="md:hidden" />
             <BrandLogo size="md" className="hidden md:flex" />
           </a>
           <nav
-            className="hidden items-center gap-5 lg:flex xl:gap-7"
+            className="site-nav__links site-nav__links--center absolute left-1/2 top-1/2 z-10 hidden -translate-x-1/2 -translate-y-1/2 items-center justify-center gap-1 overflow-x-auto px-1 md:flex lg:gap-2 xl:gap-3.5"
             aria-label="Seções da página"
           >
             {LANDING_NAV.map((item) => (
-              <a key={item.href} href={item.href} className="btn-ghost whitespace-nowrap">
+              <a
+                key={item.href}
+                href={item.href}
+                className="btn-ghost shrink-0 whitespace-nowrap px-1 text-[11px] lg:px-1.5 lg:text-sm xl:px-0"
+              >
                 {item.label}
               </a>
             ))}
@@ -85,23 +89,23 @@ function SalesNav({ scrolled }: { scrolled: boolean }) {
               href={AGENCY_META.resumePath}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-ghost whitespace-nowrap"
+              className="btn-ghost shrink-0 whitespace-nowrap px-1 text-[11px] lg:px-1.5 lg:text-sm xl:px-0"
             >
               Currículo
             </a>
           </nav>
-          <div className="flex items-center gap-2">
-            <Link to="/login" className="btn-ghost hidden sm:inline">
+          <div className="relative z-20 flex shrink-0 items-center justify-end gap-1.5 sm:gap-2">
+            <Link to="/login" className="btn-ghost hidden max-w-[9rem] truncate text-xs lg:inline lg:max-w-none lg:text-sm">
               {copy.loginCta}
             </Link>
-            <a href="#reuniao" className="btn-primary px-4 py-2.5 text-xs md:text-sm">
+            <a href="#reuniao" className="btn-primary whitespace-nowrap px-3 py-2 text-xs sm:px-4 sm:py-2.5 lg:text-sm">
               Agendar
             </a>
           </div>
         </div>
         <nav
-          className="-mx-1 flex gap-1 overflow-x-auto border-t border-white/[0.06] py-2 [scrollbar-width:none] lg:hidden [&::-webkit-scrollbar]:hidden"
-          aria-label="Seções da página"
+          className="-mx-1 flex gap-1 overflow-x-auto border-t border-white/[0.06] py-2 [scrollbar-width:none] md:hidden [&::-webkit-scrollbar]:hidden"
+          aria-label="Seções da página (mobile)"
         >
           {LANDING_NAV.map((item) => (
             <a
@@ -133,7 +137,7 @@ function SalesFooter() {
         <p className="text-center text-xs leading-relaxed text-white/40 md:text-left">{legal.shortDisclaimer}</p>
         <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
           <div className="text-center md:text-left">
-            <BrandLogo size="sm" showDomain={false} />
+            <BrandLogo size="sm" />
             <p className="mt-3 text-sm text-white/50">{copy.footer.tagline}</p>
             <a
               href={AGENCY_META.resumePath}

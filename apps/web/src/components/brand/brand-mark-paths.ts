@@ -1,9 +1,7 @@
-/** Geometria EP — E com três barras + P com bowl (viewBox 0 0 40 40). */
+/** Monograma EP — geometria angular (identidade oficial). */
 
 export const BRAND_MARK_VIEWBOX = "0 0 40 40";
 
-export const BRAND_MARK_LETTER_E =
-  "M9 12h9v2.2H11.8v3.6H17v2.2h-5.2v3.6H18V26H9V12z";
-
-export const BRAND_MARK_LETTER_P =
-  "M21 12h6.8a4.4 4.4 0 010 8.8H23.5V26H21V12zm2.5 2.2v4.4h4.3a2.2 2.2 0 000-4.4h-4.3z";
+/** E + P compartilhando haste — preenchimento via gradiente de marca. */
+export const BRAND_MARK_SHAPE =
+  "M10 30V10h3v7h6.5V10H22.5v20H10zm12.5-20h7.5a5.5 5.5 0 010 11h-4.5v9H22.5V10zm3 3v5h4.5a2.75 2.75 0 000-5.5h-4.5z";
