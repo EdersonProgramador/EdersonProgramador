@@ -90,7 +90,7 @@ export function ProHero({ production }: ProHeroProps) {
         <BrandIdentityBar />
       </div>
 
-      <div className="landing-container relative z-[1] mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 border-t border-white/10 pt-5 md:mt-9 md:justify-start md:gap-x-8 md:pt-6">
+      <div className="landing-container relative z-[1] mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 border-t border-white/10 pt-5 md:mt-9 md:justify-start md:gap-x-8 md:pt-6 xl:mt-10 xl:justify-between xl:gap-x-10 xl:pt-8">
         <span className="text-[11px] uppercase tracking-widest text-white/35">Confiança em produção</span>
         {production.map((site) => (
           <a

@@ -59,10 +59,10 @@ function SalesNav({ scrolled }: { scrolled: boolean }) {
       } backdrop-blur-xl`}
     >
       <div className="landing-container">
-        <div className="relative flex items-center justify-between gap-2 py-3 sm:gap-3 sm:py-3.5 md:py-3.5 lg:gap-4">
+        <div className="site-nav__bar relative flex items-center justify-between gap-2 py-3 sm:gap-3 sm:py-3.5 md:grid md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:items-center md:gap-3 md:py-3 lg:gap-4 xl:gap-6 xl:py-3.5">
           <a
             href="#topo"
-            className="group relative z-20 shrink-0"
+            className="group relative z-20 shrink-0 md:justify-self-start md:self-center"
             aria-label={`${copy.brand} — voltar ao início`}
             onClick={(event) => {
               event.preventDefault();
@@ -70,17 +70,19 @@ function SalesNav({ scrolled }: { scrolled: boolean }) {
             }}
           >
             <BrandLogo size="sm" className="md:hidden" />
-            <BrandLogo size="md" className="hidden md:flex" />
+            <span className="site-nav__logo-slot hidden md:inline-flex">
+              <BrandLogo size="md" />
+            </span>
           </a>
           <nav
-            className="site-nav__links site-nav__links--center absolute left-1/2 top-1/2 z-10 hidden -translate-x-1/2 -translate-y-1/2 items-center justify-center gap-1 overflow-x-auto px-1 md:flex lg:gap-2 xl:gap-3.5"
+            className="site-nav__links site-nav__links--center hidden items-center justify-center gap-1 overflow-x-auto px-1 md:col-start-2 md:flex md:justify-self-center lg:gap-2.5 xl:gap-4 2xl:gap-5"
             aria-label="Seções da página"
           >
             {LANDING_NAV.map((item) => (
               <a
                 key={item.href}
                 href={item.href}
-                className="btn-ghost shrink-0 whitespace-nowrap px-1 text-[11px] lg:px-1.5 lg:text-sm xl:px-0"
+                className="btn-ghost shrink-0 whitespace-nowrap px-1 text-[11px] md:px-1.5 lg:text-sm xl:px-2 xl:text-[0.9375rem] 2xl:text-base"
               >
                 {item.label}
               </a>
@@ -89,12 +91,12 @@ function SalesNav({ scrolled }: { scrolled: boolean }) {
               href={AGENCY_META.resumePath}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-ghost shrink-0 whitespace-nowrap px-1 text-[11px] lg:px-1.5 lg:text-sm xl:px-0"
+              className="btn-ghost shrink-0 whitespace-nowrap px-1 text-[11px] md:px-1.5 lg:text-sm xl:px-2 xl:text-[0.9375rem] 2xl:text-base"
             >
               Currículo
             </a>
           </nav>
-          <div className="relative z-20 flex shrink-0 items-center justify-end gap-1.5 sm:gap-2">
+          <div className="relative z-20 flex shrink-0 items-center justify-end gap-1.5 sm:gap-2 md:col-start-3 md:justify-self-end xl:gap-3">
             <Link to="/login" className="btn-ghost hidden max-w-[9rem] truncate text-xs lg:inline lg:max-w-none lg:text-sm">
               {copy.loginCta}
             </Link>

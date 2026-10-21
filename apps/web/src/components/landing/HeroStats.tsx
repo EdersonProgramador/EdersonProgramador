@@ -85,7 +85,7 @@ function HeroStatItem({ stat, index, tone }: HeroStatItemProps) {
 export function HeroStats() {
   return (
     <div
-      className="hero-stats mt-8 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-2.5 md:mt-9 lg:mt-10"
+      className="hero-stats mt-8 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-2.5 md:mt-9 lg:mt-10 xl:mt-11 xl:gap-4 2xl:gap-5"
       role="list"
       aria-label="Indicadores de entrega e confiança"
     >
