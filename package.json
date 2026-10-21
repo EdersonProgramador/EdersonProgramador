@@ -1,0 +1,27 @@
+{
+  "name": "ederson-agencia",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Agência freelancer Ederson Programador — landing, contratos e portal com login.",
+  "workspaces": [
+    "packages/*",
+    "apps/web",
+    "apps/api"
+  ],
+  "scripts": {
+    "dev": "npm run build --workspace @ederson-agencia/shared && concurrently -n web,api -c cyan,magenta \"npm run dev --workspace @ederson-agencia/web\" \"npm run dev --workspace @ederson-agencia/api\"",
+    "dev:web": "npm run build --workspace @ederson-agencia/shared && npm run dev --workspace @ederson-agencia/web",
+    "dev:api": "npm run build --workspace @ederson-agencia/shared && npm run dev --workspace @ederson-agencia/api",
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run build --workspace @ederson-agencia/shared && npm run typecheck --workspaces --if-present",
+    "prisma:generate": "npm run prisma:generate --workspace @ederson-agencia/api",
+    "prisma:migrate": "npm run prisma:migrate --workspace @ederson-agencia/api",
+    "prisma:seed": "npm run prisma:seed --workspace @ederson-agencia/api"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

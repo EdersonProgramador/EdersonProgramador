@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    --app-bg: #000000;
+    --app-panel: #0a0f14;
+    --app-text: #f0f4f8;
+    --app-text-muted: #8fa3b8;
+    --blue-matte: #2a4a6b;
+    --blue-accent: #3d6a8c;
+    --blue-glow: #5a8fb8;
+    --cinema-bg: radial-gradient(ellipse 120% 80% at 50% -30%, rgba(42, 74, 107, 0.35), transparent 55%),
+      radial-gradient(circle at 85% 20%, rgba(61, 106, 140, 0.12), transparent 40%),
+      radial-gradient(circle at 10% 80%, rgba(26, 51, 72, 0.5), transparent 45%),
+      linear-gradient(180deg, #000000 0%, #030508 40%, #000000 100%);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  body {
+    @apply bg-ink text-[var(--app-text)] antialiased;
+    background: var(--cinema-bg);
+    background-attachment: fixed;
+  }
+}
+
+@layer components {
+  .cinema-grid {
+    background-image: linear-gradient(rgba(61, 106, 140, 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(61, 106, 140, 0.06) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, black 20%, transparent 75%);
+  }
+
+  .cinema-vignette {
+    box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.85);
+  }
+
+  .panel {
+    @apply rounded-2xl border border-blue-matte/25 bg-panel/80 shadow-panel backdrop-blur-md;
+  }
+
+  .panel-glow {
+    @apply rounded-2xl border border-blue-matte/25 bg-panel/80 shadow-glow-sm backdrop-blur-md;
+    background: linear-gradient(145deg, rgba(15, 22, 32, 0.95) 0%, rgba(10, 15, 20, 0.88) 100%);
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-matte-light to-blue-deep px-6 py-3.5 text-sm font-semibold text-white shadow-glow-sm transition duration-300 hover:shadow-glow;
+  }
+
+  .btn-primary:hover {
+    @apply from-blue-glow to-blue-matte-light;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-full border border-blue-matte/40 bg-black/40 px-6 py-3.5 text-sm font-semibold text-white/90 backdrop-blur transition hover:border-blue-glow/50 hover:bg-blue-deep/30;
+  }
+
+  .btn-ghost {
+    @apply text-sm font-medium text-blue-glow/90 transition hover:text-white;
+  }
+
+  .input {
+    @apply w-full rounded-xl border border-blue-matte/30 bg-black/50 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/35 focus:border-blue-glow/60 focus:ring-2 focus:ring-blue-matte/40;
+  }
+
+  .section-label {
+    @apply text-xs font-semibold uppercase tracking-[0.2em] text-blue-glow/80;
+  }
+
+  .hero-title {
+    @apply font-display text-4xl font-bold leading-[1.08] tracking-tight md:text-6xl lg:text-7xl;
+    text-shadow: 0 0 60px rgba(61, 106, 140, 0.35);
+  }
+}
