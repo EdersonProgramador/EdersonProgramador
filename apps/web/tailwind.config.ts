@@ -14,21 +14,27 @@ export default {
           light: "rgb(61 106 140 / <alpha-value>)"
         },
         "blue-glow": "rgb(90 143 184 / <alpha-value>)",
-        "blue-deep": "rgb(26 51 72 / <alpha-value>)"
+        "blue-deep": "rgb(26 51 72 / <alpha-value>)",
+        "amber-soft": "rgb(201 162 39 / <alpha-value>)",
+        "teal-soft": "rgb(45 212 191 / <alpha-value>)"
       },
       fontFamily: {
-        sans: ["Segoe UI", "system-ui", "sans-serif"],
-        display: ["Segoe UI", "system-ui", "sans-serif"]
+        sans: ["DM Sans", "Segoe UI", "system-ui", "sans-serif"],
+        display: ["Syne", "DM Sans", "sans-serif"],
+        mono: ["IBM Plex Mono", "ui-monospace", "monospace"]
       },
       boxShadow: {
         panel: "0 32px 100px rgba(0, 0, 0, 0.75)",
         glow: "0 0 80px rgba(61, 106, 140, 0.25)",
-        "glow-sm": "0 0 40px rgba(61, 106, 140, 0.18)"
+        "glow-sm": "0 0 40px rgba(61, 106, 140, 0.18)",
+        "glow-amber": "0 0 48px rgba(201, 162, 39, 0.15)"
       },
       animation: {
         "fade-up": "fadeUp 0.8s ease-out forwards",
         "pulse-glow": "pulseGlow 4s ease-in-out infinite",
-        shimmer: "shimmer 8s linear infinite"
+        shimmer: "shimmer 8s linear infinite",
+        "gradient-x": "gradientX 12s ease infinite",
+        float: "float 6s ease-in-out infinite"
       },
       keyframes: {
         fadeUp: {
@@ -42,6 +48,14 @@ export default {
         shimmer: {
           "0%": { backgroundPosition: "0% 50%" },
           "100%": { backgroundPosition: "200% 50%" }
+        },
+        gradientX: {
+          "0%, 100%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" }
+        },
+        float: {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-8px)" }
         }
       }
     }

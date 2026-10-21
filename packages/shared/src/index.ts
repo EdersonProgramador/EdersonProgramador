@@ -59,6 +59,7 @@ export type ContractPhaseKey = (typeof CONTRACT_DEFAULTS.phases)[number]["key"];
 
 export { CONTRACT_COPY } from "./contract-copy.js";
 export { MARKETING_COPY } from "./marketing-copy.js";
+export { LEGAL_NOTICES } from "./legal-notices.js";
 
 export {
   AGENCY_META,
