@@ -23,11 +23,22 @@ npm run dev
 
 Opcional: `npm run prisma:seed` apenas se você configurou as variáveis de seed no `.env` (veja `.env.example`).
 
-## Deploy
+## Deploy na Vercel (front)
 
-- **Front (Vercel):** importe o repositório; o `vercel.json` na raiz aponta para `apps/web/dist`.
-- **API:** hospede separadamente (Render, Railway, etc.), com `DATABASE_URL`, `JWT_SECRET` forte e `WEB_ORIGIN` do domínio do site.
-- Configure `VITE_API_URL` na Vercel quando a API estiver pública.
+Escolha **uma** configuração (Settings → General → Root Directory):
+
+| Root Directory | Output Directory (Build) | Observação |
+|----------------|--------------------------|------------|
+| `./` (raiz do repo) | `apps/web/dist` | Usa `vercel.json` na raiz |
+| `apps/web` | `dist` | Usa `apps/web/vercel.json` |
+
+Em **Build & Development**, deixe Framework Preset como **Other** ou deixe o `vercel.json` mandar (evite sobrescrever Output Directory com `dist` na raiz do monorepo).
+
+Opcional: `VITE_API_URL` quando a API estiver no ar.
+
+## Deploy da API
+
+Hospede em Render/Railway com `DATABASE_URL`, `JWT_SECRET` forte e `WEB_ORIGIN` incluindo o domínio do site.
 
 ## Segurança
 
