@@ -20,8 +20,7 @@ export const AGENCY_META = {
   domain: "https://edersonprogramador.com.br",
   tagline:
     "Desenvolvimento de sistemas e software sob medida — do briefing à publicação em produção.",
-  github: "https://github.com/EdersonProgramador",
-  email: "contato@edersonprogramador.com.br"
+  github: "https://github.com/EdersonProgramador"
 } as const;
 
 /** Sites e produtos já publicados */

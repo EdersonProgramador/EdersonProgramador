@@ -1,59 +1,37 @@
-# Ederson Agência
+# Ederson Programador — Site & Portal
 
-Monorepo da agência freelancer **Ederson Programador**, com página de vendas e portal autenticado (cliente, freelancer e admin).
+Monorepo com landing comercial e portal autenticado (web + API).
 
-Stack alinhada ao **ATLLY / AppTreino**:
-
-- **Web:** React 18, Vite, Tailwind CSS, React Router, Zustand, Axios, Zod
-- **API:** Fastify, Prisma, JWT, CORS, rate limit
-- **Shared:** pacote TypeScript com contrato padrão e tipos
-
-O **modelo de contrato** (valores, fases, multas, hora técnica) vem do arquivo `MODELO_CONTRATO.docx` e está codificado em `@ederson-agencia/shared` (`CONTRACT_DEFAULTS`).
-
-## Pré-requisitos
+## Requisitos
 
 - Node.js 20+
 
-## Configuração
+## Desenvolvimento local
+
+1. Copie `.env.example` para `.env` na raiz e **preencha com valores seus** (nunca commite o `.env`).
+2. Instale dependências e suba o ambiente:
 
 ```bash
-cd ederson-agencia
-copy .env.example .env
 npm install
 npm run prisma:generate
 npm run prisma:migrate
-npm run prisma:seed
 npm run dev
 ```
 
-- Landing: http://localhost:5174  
+- Web: http://localhost:5174  
 - API: http://localhost:3333/health  
 
-## Contas demo (seed)
+Opcional: `npm run prisma:seed` apenas se você configurou as variáveis de seed no `.env` (veja `.env.example`).
 
-| Papel       | E-mail                 | Senha        |
-|------------|------------------------|--------------|
-| Admin      | admin@ederson.dev      | admin123456  |
-| Cliente    | cliente@exemplo.dev    | cliente123   |
-| Freelancer | freelancer@exemplo.dev | freela123    |
+## Deploy
 
-## Fluxo
+- **Front (Vercel):** importe o repositório; o `vercel.json` na raiz aponta para `apps/web/dist`.
+- **API:** hospede separadamente (Render, Railway, etc.), com `DATABASE_URL`, `JWT_SECRET` forte e `WEB_ORIGIN` do domínio do site.
+- Configure `VITE_API_URL` na Vercel quando a API estiver pública.
 
-1. Visitante preenche **Solicitar proposta** na landing → lead no admin.
-2. Admin converte lead em **projeto** (cliente precisa ter conta).
-3. Projeto nasce com **4 fases** do contrato (gráfico, lógica, conteúdo, deploy).
-4. Cliente / freelancer / admin atualizam status das fases no painel.
+## Segurança
 
-## Deploy na Vercel (`edersonprogramador.com.br`)
-
-1. Importe o repositório na Vercel (root do monorepo — o `vercel.json` na raiz já aponta para `apps/web/dist`).
-2. Domínio customizado: **edersonprogramador.com.br** (e opcional `www` → redirect).
-3. A landing e o portfólio funcionam **sem API** (dados em `@ederson-agencia/shared`).
-4. Para **login** e **formulário de leads** em produção, hospede a API (Render/Railway/etc.) e configure na Vercel:
-   - `VITE_API_URL` = URL pública da API
-   - Na API: `WEB_ORIGIN` incluindo `https://edersonprogramador.com.br`
-
-## Deploy da API (Render ou similar)
-
-- Bind `0.0.0.0:$PORT`, `DATABASE_URL` PostgreSQL recomendado.
-- Defina `JWT_SECRET`, `WEB_ORIGIN` e variáveis de admin.
+- Não publique senhas, tokens ou dumps de banco no repositório.
+- Use `JWT_SECRET` longo e aleatório em produção.
+- Defina credenciais de administrador **somente** via variáveis de ambiente no servidor.
+- Mantenha `.env`, `*.db` e `node_modules` fora do Git (já listados no `.gitignore`).
