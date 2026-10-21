@@ -1,13 +1,15 @@
 import { cpSync, existsSync, rmSync } from "node:fs";
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
-/** Vercel às vezes espera ./dist na raiz do repo; espelha apps/web/dist. */
+/** Espelha apps/web/dist → ./dist na raiz (Vercel UI costuma exigir "dist"). */
 if (!process.env.VERCEL) {
   process.exit(0);
 }
 
-const webDist = resolve("apps/web/dist");
-const rootDist = resolve("dist");
+const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const webDist = resolve(repoRoot, "apps/web/dist");
+const rootDist = resolve(repoRoot, "dist");
 
 if (!existsSync(webDist)) {
   console.error("vercel-postbuild: apps/web/dist não encontrado.");

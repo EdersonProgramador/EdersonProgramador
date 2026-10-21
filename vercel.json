@@ -3,7 +3,7 @@
   "version": 2,
   "installCommand": "npm install --workspace=@ederson-agencia/web --workspace=@ederson-agencia/shared --include-workspace-root",
   "buildCommand": "npm run build --workspace=@ederson-agencia/shared && npm run build --workspace=@ederson-agencia/web",
-  "outputDirectory": "apps/web/dist",
+  "outputDirectory": "dist",
   "framework": null,
   "rewrites": [{ "source": "/((?!assets/).*)", "destination": "/index.html" }]
 }
