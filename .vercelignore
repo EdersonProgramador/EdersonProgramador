@@ -1,0 +1,5 @@
+apps/api/prisma/dev.db
+apps/api/uploads
+**/.env
+**/.env.*
+!**/.env.example

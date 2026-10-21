@@ -25,14 +25,19 @@ Opcional: `npm run prisma:seed` apenas se você configurou as variáveis de seed
 
 ## Deploy na Vercel (front)
 
-Escolha **uma** configuração (Settings → General → Root Directory):
+O `vercel.json` define install, build e **`outputDirectory: dist`**.
 
-| Root Directory | Output Directory (Build) | Observação |
-|----------------|--------------------------|------------|
-| `./` (raiz do repo) | `apps/web/dist` | Usa `vercel.json` na raiz |
-| `apps/web` | `dist` | Usa `apps/web/vercel.json` |
+**Settings → General → Root Directory:** deixe **vazio** (raiz do repositório).
 
-Em **Build & Development**, deixe Framework Preset como **Other** ou deixe o `vercel.json` mandar (evite sobrescrever Output Directory com `dist` na raiz do monorepo).
+**Settings → Build and Deployment:** use **Override** só se necessário — valores do repo:
+
+- Install: `npm install --workspace=@ederson-agencia/web --workspace=@ederson-agencia/shared --include-workspace-root`
+- Build: `npm run vercel-build`
+- Output: `dist`
+
+**Settings → Git → Production Branch:** `main`
+
+Se o Root Directory estiver em `apps/web`, o `apps/web/vercel.json` aplica os mesmos comandos (Output continua `dist` dentro de `apps/web`).
 
 Opcional: `VITE_API_URL` quando a API estiver no ar.
 
