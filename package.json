@@ -13,6 +13,7 @@
     "dev:web": "npm run build --workspace @ederson-agencia/shared && npm run dev --workspace @ederson-agencia/web",
     "dev:api": "npm run build --workspace @ederson-agencia/shared && npm run dev --workspace @ederson-agencia/api",
     "build": "npm run build --workspaces --if-present",
+    "build:web": "npm run build --workspace @ederson-agencia/shared && npm run build --workspace @ederson-agencia/web",
     "typecheck": "npm run build --workspace @ederson-agencia/shared && npm run typecheck --workspaces --if-present",
     "prisma:generate": "npm run prisma:generate --workspace @ederson-agencia/api",
     "prisma:migrate": "npm run prisma:migrate --workspace @ederson-agencia/api",
