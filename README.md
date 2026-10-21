@@ -25,15 +25,15 @@ Opcional: `npm run prisma:seed` apenas se você configurou as variáveis de seed
 
 ## Deploy na Vercel (front)
 
-O `vercel.json` define install, build e **`outputDirectory: dist`**.
+O `vercel.json` na raiz define install, build e **`outputDirectory: apps/web/dist`** (onde o Vite grava o artefato).
 
 **Settings → General → Root Directory:** deixe **vazio** (raiz do repositório).
 
-**Settings → Build and Deployment:** use **Override** só se necessário — valores do repo:
+**Settings → Build and Deployment:** remova overrides de Framework Preset (Vite) se o log mostrar só `@ederson-agencia/web build` — ou alinhe manualmente:
 
 - Install: `npm install --workspace=@ederson-agencia/web --workspace=@ederson-agencia/shared --include-workspace-root`
-- Build: `npm run vercel-build`
-- Output: `dist`
+- Build: `npm run vercel-build` (ou o comando do `vercel.json`)
+- Output: **`apps/web/dist`** (não `dist` na raiz)
 
 **Settings → Git → Production Branch:** `main`
 

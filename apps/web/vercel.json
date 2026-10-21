@@ -2,7 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
   "installCommand": "cd ../.. && npm install --workspace=@ederson-agencia/web --workspace=@ederson-agencia/shared --include-workspace-root",
-  "buildCommand": "cd ../.. && npm run vercel-build",
+  "buildCommand": "cd ../.. && npm run build --workspace=@ederson-agencia/shared && npm run build --workspace=@ederson-agencia/web",
   "outputDirectory": "dist",
   "framework": null,
   "rewrites": [{ "source": "/((?!assets/).*)", "destination": "/index.html" }]
