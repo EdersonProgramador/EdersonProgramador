@@ -19,7 +19,10 @@ export const AGENCY_META = {
   name: "Ederson Programador",
   domain: "https://edersonprogramador.com.br",
   tagline: "Engenharia de produto digital — do primeiro commit ao domínio no ar.",
-  github: "https://github.com/EdersonProgramador"
+  github: "https://github.com/EdersonProgramador",
+  /** PDF oficial — servido em /public */
+  resumePath: "/curriculo-ederson-almeida.pdf",
+  resumeLabel: "Currículo (PDF)"
 } as const;
 
 /** Sites e produtos já publicados */

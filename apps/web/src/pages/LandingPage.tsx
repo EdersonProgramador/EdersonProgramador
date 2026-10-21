@@ -81,6 +81,14 @@ function SalesNav({ scrolled }: { scrolled: boolean }) {
                 {item.label}
               </a>
             ))}
+            <a
+              href={AGENCY_META.resumePath}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-ghost whitespace-nowrap"
+            >
+              Currículo
+            </a>
           </nav>
           <div className="flex items-center gap-2">
             <Link to="/login" className="btn-ghost hidden sm:inline">
@@ -104,6 +112,14 @@ function SalesNav({ scrolled }: { scrolled: boolean }) {
               {item.label}
             </a>
           ))}
+          <a
+            href={AGENCY_META.resumePath}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 rounded-full border border-sky-400/25 bg-sky-500/10 px-3 py-1.5 text-xs font-medium text-sky-200/90 transition hover:border-sky-400/40"
+          >
+            Currículo
+          </a>
         </nav>
       </div>
     </header>
@@ -119,6 +135,15 @@ function SalesFooter() {
           <div className="text-center md:text-left">
             <BrandLogo size="sm" showDomain={false} />
             <p className="mt-3 text-sm text-white/50">{copy.footer.tagline}</p>
+            <a
+              href={AGENCY_META.resumePath}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-flex items-center gap-1 text-sm text-brand-primary hover:underline"
+            >
+              {AGENCY_META.resumeLabel}
+              <ExternalLink className="h-3.5 w-3.5" />
+            </a>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
             {LANDING_NAV.map((item) => (
@@ -126,6 +151,14 @@ function SalesFooter() {
                 {item.label}
               </a>
             ))}
+            <a
+              href={AGENCY_META.resumePath}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-white/45 transition hover:text-blue-glow"
+            >
+              Currículo
+            </a>
             <a href={AGENCY_META.github} target="_blank" rel="noreferrer" className="btn-ghost inline-flex gap-1">
               <Github className="h-4 w-4" /> GitHub
             </a>
