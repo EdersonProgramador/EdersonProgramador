@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import type { LucideIcon } from "lucide-react";
 import { BarChart3, Brain, Cloud, Code2, Monitor } from "lucide-react";
 import { BRAND_IDENTITY } from "@ederson-agencia/shared";
@@ -9,6 +10,8 @@ type PillarTheme = {
   tone: `brand-pillar--${PillarId}`;
   iconAnim: string;
 };
+
+const valueTagAccents = ["#38bdf8", "#34d399", "#a78bfa", "#fbbf24"] as const;
 
 const pillarThemes: Record<PillarId, PillarTheme> = {
   systems: { Icon: Code2, tone: "brand-pillar--systems", iconAnim: "brand-pillar__icon--pulse" },
@@ -45,13 +48,21 @@ export function BrandIdentityBar() {
         })}
       </ul>
       <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 border-t border-white/[0.06] py-3 md:justify-between xl:gap-x-8 xl:py-4 2xl:py-5">
-        <p className="text-center text-[11px] uppercase tracking-[0.2em] text-brand-primary/90 md:text-left xl:text-xs xl:tracking-[0.22em]">
+        <p className="brand-identity-bar__slogan text-center text-[11px] uppercase tracking-[0.2em] text-brand-primary/90 md:text-left xl:text-xs xl:tracking-[0.22em]">
           {BRAND_IDENTITY.sloganSecondary}
         </p>
-        <ul className="flex flex-wrap justify-center gap-2">
-          {BRAND_IDENTITY.values.map((value) => (
+        <ul className="brand-value-tags flex flex-wrap justify-center gap-2" aria-label="Valores da marca">
+          {BRAND_IDENTITY.values.map((value, index) => (
             <li key={value}>
-              <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider text-white/55 xl:px-3 xl:py-1.5 xl:text-[11px]">
+              <span
+                className="brand-value-tag rounded-full border px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider xl:px-3 xl:py-1.5 xl:text-[11px]"
+                style={
+                  {
+                    animationDelay: `${index * 2}s`,
+                    "--value-accent": valueTagAccents[index] ?? valueTagAccents[0]
+                  } as CSSProperties
+                }
+              >
                 {value}
               </span>
             </li>

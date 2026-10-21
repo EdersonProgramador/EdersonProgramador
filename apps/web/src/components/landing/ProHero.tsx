@@ -1,4 +1,4 @@
-import { ArrowRight, ChevronDown } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import type { PortfolioProductionItem } from "@ederson-agencia/shared";
 import { MARKETING_COPY } from "@ederson-agencia/shared";
 import { BrandLogo } from "../brand/BrandLogo";
@@ -89,29 +89,6 @@ export function ProHero({ production }: ProHeroProps) {
 
         <BrandIdentityBar />
       </div>
-
-      <div className="landing-container relative z-[1] mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 border-t border-white/10 pt-5 md:mt-9 md:justify-start md:gap-x-8 md:pt-6 xl:mt-10 xl:justify-between xl:gap-x-10 xl:pt-8">
-        <span className="text-[11px] uppercase tracking-widest text-white/35">Confiança em produção</span>
-        {production.map((site) => (
-          <a
-            key={site.url}
-            href={site.url}
-            target="_blank"
-            rel="noreferrer"
-            className="font-display text-sm font-semibold text-white/55 transition hover:text-sky-300"
-          >
-            {site.name}
-          </a>
-        ))}
-      </div>
-
-      <a
-        href="#interesse"
-        className="landing-container relative z-[1] mt-6 flex flex-col items-center gap-1.5 text-white/40 transition hover:text-sky-300 md:mt-8 md:items-start"
-      >
-        <span className="font-mono text-[10px] uppercase tracking-widest">Explorar</span>
-        <ChevronDown className="h-5 w-5 animate-float" />
-      </a>
     </section>
   );
 }
