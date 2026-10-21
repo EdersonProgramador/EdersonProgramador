@@ -57,6 +57,7 @@ export const CONTRACT_DEFAULTS = {
 
 export type ContractPhaseKey = (typeof CONTRACT_DEFAULTS.phases)[number]["key"];
 
+export { BRAND_IDENTITY } from "./brand.js";
 export { CONTRACT_COPY } from "./contract-copy.js";
 export { MARKETING_COPY } from "./marketing-copy.js";
 export { LEGAL_NOTICES } from "./legal-notices.js";

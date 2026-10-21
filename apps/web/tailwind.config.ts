@@ -15,6 +15,13 @@ export default {
         },
         "blue-glow": "rgb(90 143 184 / <alpha-value>)",
         "blue-deep": "rgb(26 51 72 / <alpha-value>)",
+        brand: {
+          primary: "#38bdf8",
+          soft: "#7dd3fc",
+          deep: "#0ea5e9",
+          indigo: "#818cf8",
+          surface: "#020617"
+        },
         "amber-soft": "rgb(201 162 39 / <alpha-value>)",
         "teal-soft": "rgb(45 212 191 / <alpha-value>)"
       },

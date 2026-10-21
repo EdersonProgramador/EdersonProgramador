@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" fill="none">
+  <rect width="1200" height="630" fill="#020617"/>
+  <rect width="1200" height="630" fill="url(#bg-mesh)" opacity="0.95"/>
+  <rect x="80" y="80" width="88" height="88" rx="20" fill="#0f172a"/>
+  <rect x="80.75" y="80.75" width="86.5" height="86.5" rx="19.25" stroke="url(#ep-border)" stroke-width="1.5"/>
+  <path d="M98 100h14v3.4h-10.6v5.6H110v3.4h-8.6v5.6H112v3.4H98V100z" fill="#f8fafc"/>
+  <path d="M116 100h10.6a6.6 6.6 0 010 13.2H118.8V148H116V100zm3.8 3.4v6.4h6.5a3.3 3.3 0 000-6.4h-6.5z" fill="#38bdf8"/>
+  <text x="200" y="132" fill="#f8fafc" font-family="system-ui, Segoe UI, sans-serif" font-size="52" font-weight="700">Ederson Programador</text>
+  <text x="200" y="188" fill="#94a3b8" font-family="system-ui, Segoe UI, sans-serif" font-size="28" font-weight="500">Engenharia de produto digital</text>
+  <text x="200" y="240" fill="#64748b" font-family="system-ui, Segoe UI, sans-serif" font-size="22">Sistemas web sob medida ù do briefing ao domùnio no ar</text>
+  <text x="200" y="520" fill="#38bdf8" font-family="ui-monospace, monospace" font-size="20" letter-spacing="0.12em">edersonprogramador.com.br</text>
+  <defs>
+    <linearGradient id="ep-border" x1="80" y1="80" x2="168" y2="168" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#38bdf8"/>
+      <stop offset="0.5" stop-color="#818cf8"/>
+      <stop offset="1" stop-color="#0ea5e9"/>
+    </linearGradient>
+    <radialGradient id="bg-mesh" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(600 -80) rotate(90) scale(520 900)">
+      <stop stop-color="#38bdf8" stop-opacity="0.35"/>
+      <stop offset="0.45" stop-color="#818cf8" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#020617" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+</svg>

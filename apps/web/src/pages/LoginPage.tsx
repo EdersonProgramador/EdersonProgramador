@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { apiPost, type LoginResponse } from "../api";
+import { BrandLogo } from "../components/brand/BrandLogo";
 import { useAuthStore } from "../stores/authStore";
 
 export function LoginPage() {
@@ -47,7 +48,10 @@ export function LoginPage() {
 
   return (
     <div className="mx-auto max-w-md space-y-6">
-      <div className="space-y-2 text-center">
+      <div className="space-y-4 text-center">
+        <Link to="/" className="inline-flex justify-center transition hover:opacity-90">
+          <BrandLogo size="md" />
+        </Link>
         <h1 className="text-3xl font-bold">{mode === "login" ? "Entrar" : "Criar conta"}</h1>
         <p className="text-sm text-white/60">
           Acesse sua área para acompanhar etapas e andamento do projeto contratado.
@@ -102,7 +106,7 @@ export function LoginPage() {
       </form>
 
       <p className="text-center text-sm text-white/60">
-        <Link to="/" className="text-blue-glow hover:underline">
+        <Link to="/" className="text-brand-primary hover:underline">
           Voltar ao site
         </Link>
       </p>

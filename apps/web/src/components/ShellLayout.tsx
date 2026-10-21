@@ -1,6 +1,7 @@
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { LogOut } from "lucide-react";
 import { homePathForRole } from "@ederson-agencia/shared";
+import { BrandLogo } from "./brand/BrandLogo";
 import { useAuthStore } from "../stores/authStore";
 
 export function ShellLayout({ title }: { title: string }) {
@@ -10,13 +11,13 @@ export function ShellLayout({ title }: { title: string }) {
 
   return (
     <div className="min-h-screen bg-black">
-      <header className="border-b border-blue-matte/20 bg-black/80 backdrop-blur-xl">
+      <header className="border-b border-white/10 bg-brand-surface/95 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4">
           <div>
-            <Link to="/" className="text-sm font-semibold text-blue-glow hover:text-white">
-              Ederson Programador
+            <Link to="/" className="group inline-block">
+              <BrandLogo size="sm" showDomain={false} />
             </Link>
-            <p className="text-xs text-white/50">{title}</p>
+            <p className="mt-1.5 pl-11 text-xs text-white/50">{title}</p>
           </div>
           <div className="flex items-center gap-3">
             {user ? (

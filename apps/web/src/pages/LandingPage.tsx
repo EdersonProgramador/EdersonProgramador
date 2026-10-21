@@ -4,7 +4,6 @@ import {
   ArrowRight,
   Calendar,
   Check,
-  ChevronDown,
   Code2,
   ExternalLink,
   Github,
@@ -13,8 +12,7 @@ import {
   MessageSquare,
   Rocket,
   Shield,
-  Sparkles,
-  Zap
+  Sparkles
 } from "lucide-react";
 import {
   AGENCY_META,
@@ -25,28 +23,33 @@ import {
   type PortfolioGithubItem,
   type PortfolioProductionItem
 } from "@ederson-agencia/shared";
-import { MoodProgress } from "../components/landing/MoodProgress";
+import { BrandLogo } from "../components/brand/BrandLogo";
+import { BentoServices } from "../components/landing/BentoServices";
+import { CtaBand } from "../components/landing/CtaBand";
 import { MoodSection } from "../components/landing/MoodSection";
+import { ProHero } from "../components/landing/ProHero";
 import { Reveal } from "../components/landing/Reveal";
+import { SectionHeader } from "../components/landing/SectionHeader";
+import { SpotlightBand } from "../components/landing/SpotlightBand";
 import { usePageMood } from "../hooks/usePageMood";
 import { apiGet, apiPost } from "../api";
+import { scrollToLandingTop } from "../lib/landing-scroll";
 
 const copy = MARKETING_COPY;
 const legal = LEGAL_NOTICES;
 
 const MEETING_URL = import.meta.env.VITE_MEETING_URL as string | undefined;
 
-const moodClass = {
-  trust: "section-mood-trust",
-  desire: "section-mood-desire",
-  logic: "section-mood-logic",
-  launch: "section-mood-launch",
-  calm: "section-mood-trust",
-  energy: "section-mood-energy"
-} as const;
-
-const serviceIcons = [Code2, Sparkles, Zap, Layers];
 const processIcons = [Sparkles, Layers, Code2, Rocket];
+
+const LANDING_NAV = [
+  { href: "#servicos", label: "Serviços" },
+  { href: "#processo", label: "Método" },
+  { href: "#producao", label: "Projetos" },
+  { href: "#investimento", label: "Investimento" },
+  { href: "#reuniao", label: "Reunião" },
+  { href: "#orcamento", label: "Orçamento" }
+] as const;
 
 function SalesNav({ scrolled }: { scrolled: boolean }) {
   return (
@@ -55,35 +58,53 @@ function SalesNav({ scrolled }: { scrolled: boolean }) {
         scrolled ? "is-scrolled border-white/10 bg-black/88" : "border-transparent bg-black/40"
       } backdrop-blur-xl`}
     >
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3.5 md:px-8">
-        <Link to="/" className="group flex flex-col">
-          <span className="font-display text-sm font-bold tracking-wide text-white group-hover:text-blue-glow">
-            {copy.brand}
-          </span>
-          <span className="font-mono text-[10px] uppercase tracking-widest text-white/40">{copy.domainLabel}</span>
-        </Link>
-        <nav className="hidden items-center gap-7 lg:flex">
-          <a href="#processo" className="btn-ghost">
-            Método
+      <div className="landing-container">
+        <div className="flex items-center justify-between gap-4 py-3 md:py-3.5">
+          <a
+            href="#topo"
+            className="group shrink-0"
+            aria-label={`${copy.brand} — voltar ao início`}
+            onClick={(event) => {
+              event.preventDefault();
+              scrollToLandingTop();
+            }}
+          >
+            <BrandLogo size="sm" compact className="md:hidden" />
+            <BrandLogo size="md" className="hidden md:flex" />
           </a>
-          <a href="#producao" className="btn-ghost">
-            Projetos
-          </a>
-          <a href="#reuniao" className="btn-ghost">
-            Reunião
-          </a>
-          <a href="#investimento" className="btn-ghost">
-            Investimento
-          </a>
-        </nav>
-        <div className="flex items-center gap-2">
-          <Link to="/login" className="btn-ghost hidden sm:inline">
-            {copy.loginCta}
-          </Link>
-          <a href="#reuniao" className="btn-primary px-4 py-2.5 text-xs md:text-sm">
-            Agendar
-          </a>
+          <nav
+            className="hidden items-center gap-5 lg:flex xl:gap-7"
+            aria-label="Seções da página"
+          >
+            {LANDING_NAV.map((item) => (
+              <a key={item.href} href={item.href} className="btn-ghost whitespace-nowrap">
+                {item.label}
+              </a>
+            ))}
+          </nav>
+          <div className="flex items-center gap-2">
+            <Link to="/login" className="btn-ghost hidden sm:inline">
+              {copy.loginCta}
+            </Link>
+            <a href="#reuniao" className="btn-primary px-4 py-2.5 text-xs md:text-sm">
+              Agendar
+            </a>
+          </div>
         </div>
+        <nav
+          className="-mx-1 flex gap-1 overflow-x-auto border-t border-white/[0.06] py-2 [scrollbar-width:none] lg:hidden [&::-webkit-scrollbar]:hidden"
+          aria-label="Seções da página"
+        >
+          {LANDING_NAV.map((item) => (
+            <a
+              key={item.href}
+              href={item.href}
+              className="shrink-0 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-white/75 transition hover:border-white/20 hover:text-white"
+            >
+              {item.label}
+            </a>
+          ))}
+        </nav>
       </div>
     </header>
   );
@@ -91,15 +112,20 @@ function SalesNav({ scrolled }: { scrolled: boolean }) {
 
 function SalesFooter() {
   return (
-    <footer className="section-mood-legal border-t border-white/10 bg-[#121820] py-14">
-      <div className="mx-auto max-w-7xl space-y-8 px-4 md:px-8">
+    <footer className="border-t border-white/10 bg-[#07090c] py-14">
+      <div className="landing-container space-y-8">
         <p className="text-center text-xs leading-relaxed text-white/40 md:text-left">{legal.shortDisclaimer}</p>
         <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
           <div className="text-center md:text-left">
-            <p className="font-display font-semibold text-white">{copy.brand}</p>
-            <p className="mt-1 text-sm text-white/50">{copy.footer.tagline}</p>
+            <BrandLogo size="sm" showDomain={false} />
+            <p className="mt-3 text-sm text-white/50">{copy.footer.tagline}</p>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-4">
+          <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+            {LANDING_NAV.map((item) => (
+              <a key={item.href} href={item.href} className="text-sm text-white/45 transition hover:text-blue-glow">
+                {item.label}
+              </a>
+            ))}
             <a href={AGENCY_META.github} target="_blank" rel="noreferrer" className="btn-ghost inline-flex gap-1">
               <Github className="h-4 w-4" /> GitHub
             </a>
@@ -167,7 +193,7 @@ function ProcessTimeline() {
         })}
       </div>
 
-      <div className="panel-glow sticky top-28 overflow-hidden p-8 md:p-10">
+      <div className="panel-glow sticky top-[calc(var(--hero-nav-offset,6rem)+0.75rem)] overflow-hidden p-6 sm:p-8 md:p-10">
         <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 mood-glow-orb rounded-full blur-3xl" />
         {copy.process.steps.map((step, index) =>
           active === index ? (
@@ -198,8 +224,8 @@ function ProcessTimeline() {
 
 function LegalSection() {
   return (
-    <MoodSection mood="legal" className="py-20">
-      <div className="mx-auto max-w-7xl space-y-12 px-4 md:px-8">
+    <MoodSection mood="legal" className="landing-section-y !py-16 md:!py-20">
+      <div className="landing-container space-y-10 md:space-y-12">
         <Reveal>
           <div className="flex items-center gap-3">
             <Shield className="h-5 w-5 text-blue-glow" />
@@ -251,7 +277,7 @@ export function LandingPage() {
   const [submitting, setSubmitting] = useState(false);
   const [consent, setConsent] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const activeMood = usePageMood();
+  usePageMood();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -307,98 +333,42 @@ export function LandingPage() {
   }
 
   return (
-    <div className="landing-shell relative overflow-hidden text-white">
-      <div className="pointer-events-none fixed inset-0 cinema-grid opacity-[0.12]" aria-hidden />
+    <div className="landing-shell relative bg-[#020617] text-white">
+      <div className="pointer-events-none fixed inset-0 cinema-grid opacity-[0.14]" aria-hidden />
 
-      <MoodProgress active={activeMood} />
       <SalesNav scrolled={scrolled} />
 
-      {/* A — Attention */}
-      <MoodSection mood="trust" id="topo" minHeight className="px-4 pb-20 pt-28 md:px-8">
-        <div className="mx-auto max-w-7xl">
-          <Reveal>
-            <p className="section-label mb-6">{copy.aida.attention.eyebrow}</p>
-          </Reveal>
-          <Reveal delayMs={80}>
-            <h1 className="hero-title max-w-5xl">
-              <span className="hero-title-gradient">{copy.aida.attention.title}</span>
-            </h1>
-          </Reveal>
-          <Reveal delayMs={160}>
-            <p className="mt-8 max-w-2xl text-lg leading-relaxed text-white/65 md:text-xl">{copy.aida.attention.subtitle}</p>
-          </Reveal>
-          <Reveal delayMs={240}>
-            <div className="mt-10 flex flex-wrap gap-4">
-              <a href="#reuniao" className="btn-primary group">
-                {copy.aida.attention.ctaPrimary}
-                <ArrowRight className="ml-2 h-4 w-4 transition group-hover:translate-x-0.5" />
-              </a>
-              <a href="#processo" className="btn-secondary">
-                {copy.aida.attention.ctaSecondary}
-              </a>
-            </div>
-          </Reveal>
-
-          <Reveal delayMs={320}>
-            <div className="mt-16 grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
-              {copy.stats.map((stat) => (
-                <div key={stat.label} className="stat-card">
-                  <p className="font-display text-2xl font-bold text-white md:text-3xl">{stat.value}</p>
-                  <p className="mt-1 text-xs text-white/50">{stat.label}</p>
-                </div>
-              ))}
-            </div>
-          </Reveal>
-
-          <div className="mt-16 flex justify-center md:justify-start">
-            <a href="#interesse" className="flex flex-col items-center gap-2 text-white/40 transition hover:text-blue-glow">
-              <span className="font-mono text-[10px] uppercase tracking-widest">Scroll</span>
-              <ChevronDown className="h-5 w-5 animate-float" />
-            </a>
-          </div>
-        </div>
-      </MoodSection>
+      <ProHero production={production} />
 
       {/* I — Interest */}
-      <MoodSection mood="energy" id="interesse" className="py-24 md:py-32">
-        <div className="mx-auto max-w-7xl px-4 md:px-8">
-          <Reveal>
-            <p className="section-label">{copy.aida.interest.label}</p>
-            <h2 className="mt-4 max-w-3xl font-display text-3xl font-bold md:text-4xl">{copy.aida.interest.title}</h2>
-            <p className="mt-4 max-w-2xl text-white/60">{copy.aida.interest.subtitle}</p>
-          </Reveal>
+      <MoodSection mood="energy" id="interesse" className="landing-section-y">
+        <div className="landing-container">
+          <SectionHeader label={copy.aida.interest.label} title={copy.aida.interest.title} description={copy.aida.interest.subtitle} />
           <ul className="mt-12 grid gap-4 md:grid-cols-3">
             {copy.aida.interest.pains.map((pain, i) => (
-              <Reveal key={pain} delayMs={i * 80}>
-                <li className="panel h-full border-amber-soft/20 p-6 transition duration-300 hover:border-amber-soft/40 hover:shadow-glow-amber">
-                  <span className="font-mono text-xs text-amber-soft/80">0{i + 1}</span>
-                  <p className="mt-3 text-sm leading-relaxed text-white/75">{pain}</p>
-                </li>
-              </Reveal>
+              <li key={pain} className="pain-card h-full">
+                <div className="relative z-[1]">
+                  <span className="font-mono text-xs text-[var(--mood-label)]">Desafio 0{i + 1}</span>
+                  <p className="mt-3 text-sm leading-relaxed text-white/80">{pain}</p>
+                </div>
+              </li>
             ))}
           </ul>
-          <Reveal delayMs={240}>
-            <p className="mt-10 max-w-3xl text-base text-white/70 md:text-lg">{copy.aida.interest.pivot}</p>
-          </Reveal>
+          <p className="mt-10 max-w-3xl text-base leading-relaxed text-white/75 md:text-lg">{copy.aida.interest.pivot}</p>
         </div>
       </MoodSection>
 
       {/* Desire — production */}
-      <MoodSection mood="desire" id="producao" className="py-24 md:py-32">
-        <div className="mx-auto max-w-7xl px-4 md:px-8">
-          <Reveal>
-            <p className="section-label">{copy.aida.desire.label}</p>
-            <h2 className="mt-4 max-w-3xl font-display text-3xl font-bold md:text-4xl">{copy.trust.title}</h2>
-            <p className="mt-3 max-w-2xl text-white/60">{copy.trust.subtitle}</p>
-          </Reveal>
+      <SpotlightBand id="producao" moodTrack="desire">
+          <SectionHeader label={copy.aida.desire.label} title={copy.trust.title} description={copy.trust.subtitle} />
           <div className="mt-14 grid gap-6 md:grid-cols-2">
-            {production.map((site, i) => (
-              <Reveal key={site.url} delayMs={i * 100}>
+            {production.map((site) => (
                 <a
+                  key={site.url}
                   href={site.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="panel-glow group relative flex h-full flex-col overflow-hidden p-8 transition duration-500 hover:-translate-y-1 hover:border-blue-glow/40"
+                  className="glass-card group relative flex h-full flex-col overflow-hidden p-8"
                 >
                   <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-blue-matte/20 blur-2xl transition group-hover:bg-blue-glow/25" />
                   <div className="relative flex items-start justify-between gap-4">
@@ -422,54 +392,28 @@ export function LandingPage() {
                     ))}
                   </div>
                 </a>
-              </Reveal>
             ))}
           </div>
-        </div>
-      </MoodSection>
+      </SpotlightBand>
 
-      {/* Services */}
-      <MoodSection mood="spectrum" id="servicos" className="py-24 md:py-32">
-        <div className="mx-auto max-w-7xl px-4 md:px-8">
-          <Reveal>
-            <p className="section-label">{copy.services.title}</p>
-            <h2 className="mt-4 max-w-2xl font-display text-3xl font-bold md:text-4xl">{copy.services.subtitle}</h2>
-          </Reveal>
-          <div className="mt-14 grid gap-6 sm:grid-cols-2">
-            {copy.services.items.map((item, i) => {
-              const Icon = serviceIcons[i] ?? Code2;
-              return (
-                <Reveal key={item.title} delayMs={i * 90}>
-                  <article
-                    className={`${moodClass[item.mood]} panel group p-8 transition duration-300 hover:-translate-y-0.5 hover:border-[var(--mood-accent)]/35`}
-                  >
-                    <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-blue-deep text-[var(--mood-accent)]">
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    <h3 className="font-display text-lg font-semibold text-white">{item.title}</h3>
-                    <p className="mt-3 text-sm leading-relaxed text-white/60">{item.text}</p>
-                  </article>
-                </Reveal>
-              );
-            })}
-          </div>
+      <MoodSection mood="spectrum" id="servicos" className="landing-section-y">
+        <div className="landing-container">
+          <SectionHeader label={copy.services.title} title={copy.services.subtitle} />
+          <BentoServices />
         </div>
       </MoodSection>
 
       {/* Process — step by step */}
-      <MoodSection mood="logic" id="processo" className="py-24 md:py-32">
-        <div className="mx-auto max-w-7xl px-4 md:px-8">
-          <Reveal>
-            <p className="section-label">{copy.process.title}</p>
-            <h2 className="mt-4 max-w-3xl font-display text-3xl font-bold md:text-4xl">{copy.process.subtitle}</h2>
-          </Reveal>
+      <MoodSection mood="logic" id="processo" className="landing-section-y">
+        <div className="landing-container">
+          <SectionHeader label={copy.process.title} title={copy.process.subtitle} />
           <ProcessTimeline />
         </div>
       </MoodSection>
 
       {/* GitHub */}
-      <MoodSection mood="vault" className="py-24 md:py-28">
-        <div className="mx-auto max-w-7xl px-4 md:px-8">
+      <MoodSection mood="vault" className="landing-section-y">
+        <div className="landing-container">
           <Reveal>
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
@@ -489,7 +433,7 @@ export function LandingPage() {
                   href={repo.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="panel block min-w-[260px] shrink-0 p-5 transition hover:border-violet-300/35"
+                  className="panel block min-w-[260px] shrink-0 p-5 transition hover:border-blue-glow/35"
                 >
                   <p className="font-medium text-white">{repo.name}</p>
                   <p className="mt-1 font-mono text-xs text-blue-glow/80">{repo.language}</p>
@@ -502,13 +446,13 @@ export function LandingPage() {
       </MoodSection>
 
       {/* Pricing */}
-      <MoodSection mood="value" id="investimento" className="py-24 md:py-32">
-        <div className="mx-auto max-w-7xl px-4 md:px-8">
+      <MoodSection mood="value" id="investimento" className="landing-section-y">
+        <div className="landing-container">
           <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
             <Reveal>
               <p className="section-label">{copy.pricing.title}</p>
               <h2 className="mt-4 font-display text-3xl font-bold md:text-4xl">{copy.pricing.subtitle}</h2>
-              <p className="mt-8 font-display text-4xl font-bold text-[var(--mood-accent)] md:text-5xl">{copy.pricing.highlight}</p>
+              <p className="mt-8 font-display text-4xl font-bold text-blue-glow md:text-5xl">{copy.pricing.highlight}</p>
               <p className="mt-4 text-sm text-white/55">{copy.pricing.note}</p>
               <p className="mt-3 text-xs text-white/40">{legal.shortDisclaimer}</p>
             </Reveal>
@@ -516,7 +460,7 @@ export function LandingPage() {
               <ul className="panel-glow space-y-4 p-8">
                 {copy.pricing.bullets.map((line) => (
                   <li key={line} className="flex gap-3 text-sm text-white/75">
-                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--mood-accent)]" />
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-glow" />
                     {line}
                   </li>
                 ))}
@@ -527,8 +471,8 @@ export function LandingPage() {
       </MoodSection>
 
       {/* Meeting — Action */}
-      <MoodSection mood="launch" id="reuniao" className="py-24 md:py-32">
-        <div className="mx-auto max-w-7xl px-4 md:px-8">
+      <MoodSection mood="launch" id="reuniao" className="landing-section-y">
+        <div className="landing-container">
           <Reveal>
             <p className="section-label">{copy.aida.action.label}</p>
             <h2 className="mt-4 max-w-3xl font-display text-3xl font-bold md:text-4xl">{copy.meeting.title}</h2>
@@ -578,9 +522,11 @@ export function LandingPage() {
         </div>
       </MoodSection>
 
+      <CtaBand />
+
       {/* FAQ */}
-      <MoodSection mood="calm" className="py-24">
-        <div className="mx-auto max-w-3xl px-4 md:px-8">
+      <MoodSection mood="calm" className="landing-section-y">
+        <div className="landing-container max-w-3xl">
           <Reveal>
             <p className="section-label text-center">Dúvidas frequentes</p>
           </Reveal>
@@ -588,7 +534,7 @@ export function LandingPage() {
             {copy.faq.map((item, i) => (
               <Reveal key={item.q} delayMs={i * 60}>
                 <details className="panel group p-6 open:border-white/20">
-                  <summary className="cursor-pointer list-none font-medium text-white marker:content-none group-open:text-[var(--mood-accent)]">
+                  <summary className="cursor-pointer list-none font-medium text-white marker:content-none group-open:text-blue-glow">
                     {item.q}
                   </summary>
                   <p className="mt-3 text-sm leading-relaxed text-white/60">{item.a}</p>
@@ -600,11 +546,11 @@ export function LandingPage() {
       </MoodSection>
 
       {/* Form */}
-      <MoodSection mood="commit" id="orcamento" className="py-24 md:py-32">
-        <div className="mx-auto max-w-7xl px-4 md:px-8">
+      <MoodSection mood="commit" id="orcamento" className="landing-section-y">
+        <div className="landing-container">
           <div className="panel-glow overflow-hidden">
             <div className="grid lg:grid-cols-2">
-              <div className="border-b border-blue-matte/20 p-10 md:p-14 lg:border-b-0 lg:border-r">
+              <div className="border-b border-blue-matte/20 p-6 sm:p-8 md:p-12 lg:border-b-0 lg:border-r lg:p-14">
                 <Reveal>
                   <p className="section-label">{copy.cta.formTitle}</p>
                   <h2 className="mt-4 font-display text-3xl font-bold md:text-4xl">{copy.cta.title}</h2>
@@ -612,7 +558,7 @@ export function LandingPage() {
                   <p className="mt-4 text-xs leading-relaxed text-white/40">{legal.shortDisclaimer}</p>
                 </Reveal>
               </div>
-              <form className="space-y-4 p-10 md:p-14" onSubmit={onLeadSubmit}>
+              <form className="space-y-4 p-6 sm:p-8 md:p-12 lg:p-14" onSubmit={onLeadSubmit}>
                 <select className="input" name="intent" defaultValue="reuniao" aria-label="Intenção do contato">
                   <option value="reuniao">Quero agendar reunião de diagnóstico</option>
                   <option value="orcamento">Quero orçamento por mensagem</option>

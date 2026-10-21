@@ -1,52 +1,52 @@
-/** Copy comercial — landing AIDA + processo + agendamento (sem substituir contrato). */
+/** Copy comercial — AIDA + gatilhos mentais (prova social, escassez, autoridade, reciprocidade, aversão à perda). */
 
 export const MARKETING_COPY = {
   brand: "Ederson Programador",
   domainLabel: "edersonprogramador.com.br",
 
-  /** AIDA — estrutura narrativa da página */
+  /** AIDA — arco emocional → racional → decisão */
   aida: {
     attention: {
-      eyebrow: "Engenharia de produto digital",
-      title: "Seu sistema no ar com clareza, ritmo e código que aguenta crescer.",
+      eyebrow: "Software sob medida · do briefing ao domínio no ar",
+      title: "Pare de remendar. Construa o sistema que a operação já pediu há meses.",
       subtitle:
-        "Do diagnóstico à publicação: sites e plataformas sob medida para quem precisa de resultado — não de mais uma página genérica.",
-      ctaPrimary: "Agendar conversa estratégica",
-      ctaSecondary: "Ver passo a passo do método"
+        "Sites e plataformas feitos para converter, escalar e não te deixar refém de template. Um engenheiro no comando — escopo fechado, entregas que você vê, código que aguenta a próxima fase do negócio.",
+      ctaPrimary: "Reservar diagnóstico gratuito",
+      ctaSecondary: "Ver as 4 fases do método"
     },
     interest: {
-      label: "Por que agora",
-      title: "Enquanto o projeto trava, o mercado não espera.",
+      label: "Custo de esperar",
+      title: "Cada semana sem sistema certo é receita, foco e credibilidade indo embora.",
       subtitle:
-        "Planilha, retrabalho e “jeitinho” custam caro: tempo da equipe, confiança do cliente e oportunidades que passam.",
+        "Não é falta de vontade — é acúmulo de atalhos: planilha que virou “sistema”, site que não gera lead, dev que sumiu no meio do caminho. O mercado não pausa enquanto você organiza o caos.",
       pains: [
-        "Site lento ou desatualizado que não converte visitante em lead",
-        "Processos manuais que repetem erro e consomem horas da operação",
-        "Fornecedor que some depois do deploy — e você fica refém do caos"
+        "Visitante entra, não entende a oferta em 5 segundos e some — você paga tráfego para aquecer concorrente",
+        "Time repete o mesmo cadastro em três lugares; erro humano vira retrabalho e cliente irritado na fila",
+        "Deploy feito, documentação zero: qualquer mudança vira negociação cara ou dependência de quem não responde"
       ],
       pivot:
-        "Invertemos o jogo com escopo claro, entregas parciais visíveis e stack moderna — para você decidir com segurança em cada fase."
+        "Trocamos improviso por roteiro: escopo aprovado por fase, homologação antes do go-live e stack moderna (React, APIs, cloud). Você decide com dados — não com promessa bonita no slide."
     },
     desire: {
-      label: "Prova & método",
-      title: "Produtos reais. Processo que você enxerga.",
+      label: "Prova + processo",
+      title: "Não é portfólio de mockup. É produto rodando e método que você acompanha.",
       subtitle:
-        "Cases em produção, repositório público e um roteiro de quatro fases alinhado ao que você aprova antes de ir para o código."
+        "Cases publicados, código no GitHub e um pipeline de quatro etapas: nada avança sem o seu “ok”. Autoridade técnica com transparência — o oposto do escuro “confia em mim”."
     },
     action: {
-      label: "Próximo passo",
-      title: "30 minutos para mapear viabilidade, prazo e investimento.",
+      label: "Decisão simples",
+      title: "30 minutos. Você sai sabendo se vale a pena, quanto custa e por onde começar.",
       subtitle:
-        "Reunião de diagnóstico sem compromisso de contratação. Se fizer sentido, você recebe proposta formal — assinatura e pagamento só depois de alinhados.",
-      urgencyNote: "Agenda limitada por mês para manter qualidade de entrega e acompanhamento próximo."
+        "Diagnóstico sem cartão e sem contrato automático. Se fizer sentido para os dois lados, proposta formal — assinatura e pagamento só depois do alinhamento por escrito.",
+      urgencyNote: "Abro poucas vagas de projeto por mês para manter acompanhamento próximo e prazo cumprido."
     }
   },
 
   stats: [
-    { value: "2+", label: "Produtos em produção citados" },
-    { value: "40d", label: "Referência para MVP enxuto" },
-    { value: "4", label: "Fases com entregáveis claros" },
-    { value: "100%", label: "Transparência antes de codar" }
+    { value: "2+", label: "Produtos reais em produção hoje" },
+    { value: "~40d", label: "Referência para MVP enxuto aprovado" },
+    { value: "4", label: "Marcos com entrega e aprovação sua" },
+    { value: "0", label: "Surpresa de escopo após proposta assinada*" }
   ],
 
   hero: {
@@ -59,72 +59,73 @@ export const MARKETING_COPY = {
   },
 
   trust: {
-    title: "Projetos que já estão no ar",
-    subtitle: "Experiência real entregando produtos digitais usados por pessoas e empresas todos os dias."
+    title: "Quem já confia no ar não precisa de discurso",
+    subtitle:
+      "Estes produtos estão publicados, recebendo tráfego e evoluindo — prova social concreta de entrega fim a fim, não só layout exportado do Figma."
   },
 
   services: {
-    title: "O que desenvolvemos",
-    subtitle: "Soluções completas para quem precisa de presença digital séria — não apenas uma página bonita.",
+    title: "O que resolvemos",
+    subtitle: "Quatro frentes para tirar o digital do modo “gambiarra” e colocar no modo operação.",
     items: [
       {
         title: "Sistemas web sob medida",
-        text: "Painéis, cadastros, fluxos de negócio, permissões e relatórios — arquitetura pensada para evoluir com você.",
+        text: "Painéis, permissões, fluxos e relatórios desenhados em cima do seu processo — não do template genérico. Arquitetura pronta para crescer sem reescrever tudo.",
         mood: "trust" as const
       },
       {
-        title: "Sites e landing pages premium",
-        text: "Páginas rápidas, responsivas e orientadas a conversão, com identidade visual alinhada à sua marca.",
+        title: "Sites e landing pages que vendem",
+        text: "Rápidos, responsivos e guiados por copy e hierarquia visual — para visitante entender, confiar e clicar, não só admirar animação.",
         mood: "desire" as const
       },
       {
         title: "Integrações & automação",
-        text: "Pagamentos, APIs, WhatsApp, e-mail, planilhas e serviços externos conectados ao seu produto.",
+        text: "Pagamento, WhatsApp, e-mail, ERP, planilha ou API: menos copiar-colar, mais evento automático no lugar certo.",
         mood: "logic" as const
       },
       {
-        title: "Evolução & suporte",
-        text: "Ajustes, novas funcionalidades e acompanhamento pós-lançamento para manter tudo estável em produção.",
+        title: "Evolução pós-lançamento",
+        text: "Correção, feature nova e observabilidade — para o sistema continuar útil depois do “parabéns, foi pro ar”.",
         mood: "calm" as const
       }
     ]
   },
 
   process: {
-    title: "Passo a passo do projeto",
+    title: "Método em 4 fases",
     subtitle:
-      "Quatro fases sequenciais — cada uma com aprovação sua antes de avançar. É assim que reduzimos surpresa e retrabalho.",
+      "Compromisso progressivo: você aprova cada marco antes do próximo. Reduz medo de investir no escuro e ativa consistência — o projeto anda porque você valida, não porque eu sumi.",
     steps: [
       {
         phase: "01",
-        title: "Briefing & escopo",
+        title: "Briefing & escopo fechado",
         days: "1–3 dias",
-        text: "Entendemos objetivo, público, funcionalidades e prazo. Você recebe proposta com investimento e cronograma.",
-        deliverables: ["Mapa de escopo", "Proposta comercial", "Cronograma macro"],
+        text: "Mapeamos objetivo, usuários, must-have e prazo. Você recebe proposta com investimento, marcos e o que fica explicitamente fora — clareza antes do código.",
+        deliverables: ["Mapa de escopo e prioridades", "Proposta comercial detalhada", "Cronograma com marcos de pagamento"],
         mood: "trust" as const
       },
       {
         phase: "02",
         title: "Interface & experiência",
         days: "~10 dias",
-        text: "Layout e navegação alinhados à sua marca. Você aprova a direção visual antes do desenvolvimento.",
-        deliverables: ["Wireframes / layout", "Fluxos principais", "Aprovação formal da UI"],
+        text: "Direção visual e fluxos principais alinhados à marca. Só depois do seu ok formal entra desenvolvimento — evita refazer tela inteira na reta final.",
+        deliverables: ["Layout / wireframe navegável", "Fluxos críticos validados", "Registro de aprovação da UI"],
         mood: "desire" as const
       },
       {
         phase: "03",
-        title: "Desenvolvimento",
+        title: "Desenvolvimento & homologação",
         days: "~15 dias",
-        text: "Código moderno, boas práticas e foco em velocidade. Integrações e regras de negócio com qualidade.",
-        deliverables: ["Ambiente de homologação", "Integrações acordadas", "Testes de fluxo crítico"],
+        text: "Código limpo, performance e regras de negócio testadas em ambiente de homologação. Você vê funcionando antes do domínio oficial.",
+        deliverables: ["URL de homologação", "Integrações acordadas ativas", "Checklist dos fluxos críticos"],
         mood: "logic" as const
       },
       {
         phase: "04",
-        title: "Conteúdo, deploy & handoff",
+        title: "Deploy, domínio & handoff",
         days: "~15 dias",
-        text: "Ajuste de conteúdo, publicação, testes finais e orientação para operação. Sistema no ar e documentado.",
-        deliverables: ["Deploy produção", "Domínio configurado", "Handoff e orientação de uso"],
+        text: "Conteúdo ajustado, publicação, testes finais e orientação de operação. Sistema no ar, domínio configurado — handoff para você não ficar refém.",
+        deliverables: ["Produção no ar", "DNS / SSL configurados", "Handoff + orientação de uso"],
         mood: "launch" as const
       }
     ]
@@ -132,74 +133,78 @@ export const MARKETING_COPY = {
 
   meeting: {
     title: "Agendar reunião de diagnóstico",
-    subtitle: "Escolha o formato. Confirmamos por e-mail ou WhatsApp com link e pauta.",
+    subtitle: "Reciprocidade na prática: você traz o contexto; eu trago viabilidade, ordem de prioridade e faixa de investimento. Confirmamos por e-mail ou WhatsApp.",
     options: [
       {
         title: "Videoconferência",
         duration: "30 min",
-        text: "Ideal para alinhar escopo, mostrar referências e estimar investimento.",
+        text: "Melhor para alinhar tela compartilhada, referências e estimativa rápida — ideal se você já tem ideia do escopo.",
         cta: "Solicitar horário"
       },
       {
-        title: "Mensagem detalhada",
+        title: "Briefing por mensagem",
         duration: "Assíncrono",
-        text: "Prefere escrever? Envie o formulário e respondemos com perguntas objetivas ou proposta de call.",
+        text: "Prefere escrever com calma? Formulário abaixo — respondo com perguntas objetivas ou proposta de call, no seu ritmo.",
         cta: "Enviar briefing"
       }
     ],
     agenda: [
-      "Contexto do negócio e quem usa o sistema",
-      "Funcionalidades essenciais vs. futuras",
-      "Prazo desejado e faixa de investimento",
-      "Próximos passos (proposta ou POC, se aplicável)"
+      "O que o negócio precisa resolver nos próximos 90 dias",
+      "Must-have vs. “fase 2” (para não inflar orçamento)",
+      "Prazo realista e faixa de investimento que faz sentido",
+      "Próximo passo: proposta, POC ou “ainda não é hora” — sem pressão"
     ]
   },
 
   pricing: {
     title: "Investimento",
-    subtitle: "Pacotes flexíveis conforme complexidade. Transparência desde a primeira conversa.",
-    highlight: "Projetos a partir de R$ 3.000",
-    note: "Valores variam conforme escopo, integrações e prazo. Entrada facilitada e parcelamento do saldo conforme marcos do projeto.",
+    subtitle: "Ancoragem honesta: projetos sob medida a partir de um patamar claro; o valor final depende do que entra no escopo — nunca do “achismo”.",
+    highlight: "A partir de R$ 3.000",
+    note: "Entrada alinhada ao marco 1; saldo atrelado a entregas aprovadas. Integrações complexas, conteúdo e prazo apertado ajustam a proposta — tudo documentado antes de começar.",
     bullets: [
-      "Proposta detalhada antes de iniciar",
-      "Pagamento alinhado às entregas",
-      "Hora técnica para demandas extras (sob consulta)",
-      "Uma versão principal inclusa; expansões orçadas à parte"
+      "Proposta por escrito antes de qualquer cobrança",
+      "Pagamento amarrado a marcos — não tudo adiantado no escuro",
+      "Hora técnica para demandas fora do escopo (tabela na proposta)",
+      "Uma linha de produto principal; expansões orçadas com novo aceite"
     ]
   },
 
   faq: [
     {
       q: "Quanto tempo leva um sistema?",
-      a: "Projetos enxutos podem ficar prontos em cerca de 40 dias. Escopos maiores seguem cronograma customizado na proposta."
+      a: "MVP enxuto e escopo travado: referência em torno de 40 dias. Projetos maiores ganham cronograma próprio na proposta — com datas, não “em breve”."
     },
     {
-      q: "Preciso ter todo o conteúdo pronto?",
-      a: "Textos, imagens e identidade visual aceleram o projeto. Podemos orientar o que falta ou incluir produção de conteúdo no orçamento."
+      q: "Preciso ter logo, textos e identidade prontos?",
+      a: "Quanto mais material, mais rápido. Se faltar algo, indico o que priorizar ou orço produção de conteúdo — sem te vender pacote que você não pediu."
     },
     {
-      q: "Você publica e configura o domínio?",
-      a: "Sim. A publicação e configuração inicial fazem parte da entrega final do projeto."
+      q: "Você publica e configura domínio?",
+      a: "Sim. Deploy, DNS e SSL entram na fase final. Objetivo: você clicar no link e ver seu produto no ar, não um zip na mão."
     },
     {
-      q: "Atende empresas e profissionais autônomos?",
-      a: "Sim. Atendemos desde landing pages até plataformas completas com login, pagamentos e painel administrativo."
+      q: "Atende empresa pequena e profissional solo?",
+      a: "Sim. De landing de alta conversão a plataforma com login, pagamentos e painel — o formato muda; o padrão de clareza e entrega, não."
     },
     {
-      q: "O que acontece depois da reunião?",
-      a: "Se houver fit, enviamos proposta comercial. Contrato e pagamento só após sua aprovação formal — nada automático."
+      q: "E se eu só quiser conversar e não fechar agora?",
+      a: "Perfeito. A reunião não gera contrato automático. Proposta só se houver fit dos dois lados — respeito seu tempo e o meu."
+    },
+    {
+      q: "O que significa o “0” nas estatísticas?",
+      a: "Compromisso de escopo: o que está na proposta assinada é o que será entregue nesse pacote. Mudança de rota = novo aceite e ajuste formal — sem cobrança surpresa escondida."
     }
   ],
 
   cta: {
-    title: "Vamos construir seu próximo sistema?",
+    title: "Seu próximo passo cabe em um formulário",
     subtitle:
-      "Conte sua ideia em poucos minutos. Retorno com diagnóstico inicial e caminhos possíveis — sem compromisso de contratação.",
+      "Conte objetivo, prazo e quem usa o sistema. Retorno com leitura honesta do caminho — diagnóstico inicial, não spam de vendas.",
     formTitle: "Briefing & orçamento"
   },
 
   footer: {
-    tagline: "Desenvolvimento de sistemas web — do código à produção.",
+    tagline: "Engenharia de produto digital — do primeiro commit ao domínio no ar.",
     rights: "Todos os direitos reservados.",
     legalLinks: [
       { id: "privacidade", label: "Privacidade" },
