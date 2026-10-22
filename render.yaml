@@ -1,0 +1,40 @@
+# Blueprint Render — API + Postgres (front continua na Vercel)
+# Aplicar: Render Dashboard → New → Blueprint → repo EdersonProgramador
+# Depois: Vercel → VITE_API_URL = URL pública deste Web Service → redeploy
+
+databases:
+  - name: ederson-agencia-db
+    databaseName: ederson_agencia
+    user: ederson_agencia
+    plan: free
+    region: saopaulo
+
+services:
+  - type: web
+    name: ederson-agencia-api
+    runtime: node
+    plan: free
+    region: saopaulo
+    branch: main
+    buildCommand: npm ci && npm run build:api:render
+    startCommand: npm run start --workspace=@ederson-agencia/api
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ederson-agencia-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: WEB_ORIGIN
+        value: https://www.edersonprogramador.com.br,https://edersonprogramador.com.br
+      - key: ADMIN_BOOTSTRAP
+        value: "true"
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: ADMIN_NAME
+        value: Ederson Programador

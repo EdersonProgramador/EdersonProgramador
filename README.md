@@ -39,11 +39,23 @@ O `vercel.json` na raiz define install, build e **`outputDirectory: dist`**. O s
 
 Se o Root Directory estiver em `apps/web`, o `apps/web/vercel.json` aplica os mesmos comandos (Output continua `dist` dentro de `apps/web`).
 
-Opcional: `VITE_API_URL` quando a API estiver no ar.
+## Deploy da API (Render Blueprint)
 
-## Deploy da API
+O repositório inclui [`render.yaml`](render.yaml) (API + Postgres em **São Paulo**).
 
-Hospede em Render/Railway com `DATABASE_URL`, `JWT_SECRET` forte e `WEB_ORIGIN` incluindo o domínio do site.
+1. [Render Dashboard](https://dashboard.render.com/) → **New** → **Blueprint** → conecte `EdersonProgramador/EdersonProgramador`.
+2. Antes do primeiro deploy, defina no serviço **ederson-agencia-api** (secrets, não commitar):
+   - `ADMIN_EMAIL` — e-mail do admin
+   - `ADMIN_PASSWORD` — senha forte (mín. 12 caracteres)
+3. Aguarde o deploy; copie a URL pública (ex.: `https://ederson-agencia-api.onrender.com`).
+4. Teste: `GET https://…/health` → `{ "status": "ok" }`.
+5. **Vercel** → Settings → Environment Variables:
+   - `VITE_API_URL` = URL da API (sem barra no final)
+   - Redeploy do front (Production).
+
+`JWT_SECRET` e `DATABASE_URL` vêm do Blueprint. Depois do primeiro admin criado, pode setar `ADMIN_BOOTSTRAP=false` no Render.
+
+**Local:** a API usa **PostgreSQL** (não SQLite). Suba um Postgres local ou use a URL do Render só em dev se preferir.
 
 ## Segurança
 
