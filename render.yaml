@@ -7,14 +7,14 @@ databases:
     databaseName: ederson_agencia
     user: ederson_agencia
     plan: free
-    region: saopaulo
+    region: virginia
 
 services:
   - type: web
     name: ederson-agencia-api
     runtime: node
     plan: free
-    region: saopaulo
+    region: virginia
     branch: main
     buildCommand: npm ci && npm run build:api:render
     startCommand: npm run start --workspace=@ederson-agencia/api

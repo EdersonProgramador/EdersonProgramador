@@ -41,7 +41,7 @@ Se o Root Directory estiver em `apps/web`, o `apps/web/vercel.json` aplica os me
 
 ## Deploy da API (Render Blueprint)
 
-O repositório inclui [`render.yaml`](render.yaml) (API + Postgres em **São Paulo**).
+O repositório inclui [`render.yaml`](render.yaml) (API + Postgres na região **Virginia**, EUA — Render ainda não tem São Paulo).
 
 1. [Render Dashboard](https://dashboard.render.com/) → **New** → **Blueprint** → conecte `EdersonProgramador/EdersonProgramador`.
 2. Antes do primeiro deploy, defina no serviço **ederson-agencia-api** (secrets, não commitar):
