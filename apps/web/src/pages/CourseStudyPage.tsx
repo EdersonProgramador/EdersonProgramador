@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { ChevronLeft, ChevronRight, LogOut, Menu } from "lucide-react";
 import { PortalNav } from "../components/portal/PortalNav";
 import { BrandLogo } from "../components/brand/BrandLogo";
+import { COURSES_UI } from "@ederson-agencia/shared";
 import { apiAssetUrl, apiGet, apiPut } from "../api";
 import {
   telegramLessonUrl,
@@ -123,14 +124,14 @@ export function CourseStudyPage() {
       <div className="mx-auto max-w-lg px-4 py-16 text-center">
         <p className="text-red-300">{error}</p>
         <Link to="/app/cursos" className="btn-primary mt-6 inline-block">
-          Voltar ao catálogo
+          Voltar à academia
         </Link>
       </div>
     );
   }
 
   if (!payload) {
-    return <div className="p-8 text-white/60">Carregando trilha…</div>;
+    return <div className="p-8 text-white/60">{COURSES_UI.study.loading}</div>;
   }
 
   const videoFile = (id: string) => payload.videoManifest.files[id];
@@ -164,17 +165,18 @@ export function CourseStudyPage() {
       <div className="course-study__layout">
         <aside className={`course-study__sidebar ${sidebarOpen ? "is-open" : ""}`}>
           <div className="course-study__sidebar-head">
-            <p className="text-xs uppercase tracking-wider text-brand-primary">Mapa oficial</p>
+            <p className="text-xs uppercase tracking-wider text-brand-primary">{COURSES_UI.study.sidebarEyebrow}</p>
             <h1 className="text-lg font-bold">{payload.course.title}</h1>
+            <p className="text-xs text-white/45">{COURSES_UI.study.sidebarSubtitle}</p>
             <input
               className="input mt-3 text-sm"
               type="search"
-              placeholder="Buscar F042 ou título…"
+              placeholder={COURSES_UI.study.searchPlaceholder}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
             <div className="mt-3 text-xs text-white/60">
-              {completed.size} / {items.length} · {progressPct}%
+              {COURSES_UI.study.progressLabel}: {completed.size} / {items.length} ({progressPct}%)
             </div>
             <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/10">
               <div className="h-full bg-brand-primary transition-all" style={{ width: `${progressPct}%` }} />
@@ -223,14 +225,10 @@ export function CourseStudyPage() {
             <div className="course-study__welcome panel p-8">
               <h2 className="text-2xl font-bold">{payload.course.title}</h2>
               {payload.course.summary ? <p className="mt-3 text-white/70">{payload.course.summary}</p> : null}
-              <p className="mt-4 text-sm text-white/50">
-                Vídeos locais: {payload.videoManifest.present} / {payload.videoManifest.total}. Enquanto não baixar os
-                arquivos, use <strong className="text-white/70">Abrir no Telegram</strong> em cada aula (canal com
-                acesso).
-              </p>
+              <p className="mt-4 text-sm leading-relaxed text-white/55">{COURSES_UI.study.welcomeHint}</p>
               {items[0] ? (
                 <button type="button" className="btn-primary mt-6" onClick={() => goLesson(items[0].slug)}>
-                  Começar trilha
+                  {COURSES_UI.study.startButton}
                 </button>
               ) : null}
             </div>
@@ -352,7 +350,7 @@ function TocTree({
       ))}
       {bonus.length ? (
         <details className="course-study__module">
-          <summary className="cursor-pointer text-sm font-medium">Módulo 12 — Bônus</summary>
+          <summary className="cursor-pointer text-sm font-medium">Módulo 12 — {COURSES_UI.study.bonusModule}</summary>
           <ul className="ml-2 mt-1 space-y-0.5">
             {bonus.map((b) => (
               <li key={b.slug}>
@@ -394,22 +392,20 @@ function TelegramPanel({
       aria-label="Aula no Telegram"
     >
       <p className="text-sm text-white/75">
-        {primary
-          ? "Assista esta aula no canal privado do Telegram (conta logada e com acesso ao grupo)."
-          : "Backup: mesma aula no Telegram."}
+        {primary ? COURSES_UI.study.telegramPrimary : COURSES_UI.study.telegramBackup}
       </p>
       <div className="mt-3 flex flex-wrap gap-2">
         <a className="btn-primary" href={url} target="_blank" rel="noopener noreferrer">
-          Abrir no Telegram
+          {COURSES_UI.study.telegramOpen}
         </a>
         {sumario ? (
           <a className="btn-secondary" href={sumario} target="_blank" rel="noopener noreferrer">
-            Sumário
+            {COURSES_UI.study.telegramIndex}
           </a>
         ) : null}
       </div>
       <p className="mt-2 text-xs text-white/45">
-        Mensagem <code className="text-brand-primary">{msgId}</code> · {item.id}
+        {COURSES_UI.study.telegramRef}: <code className="text-brand-primary">{msgId}</code> · {item.id}
       </p>
     </section>
   );
@@ -447,7 +443,7 @@ function LessonPanel({
       {item.type === "document" ? (
         <div className="mt-6 space-y-4">
           <object data={pdfUrl} type="application/pdf" className="h-[50vh] w-full rounded-lg bg-white/5">
-            <p className="text-sm text-white/60">PDF local indisponível — use o Telegram abaixo.</p>
+            <p className="text-sm text-white/60">{COURSES_UI.study.pdfFallback}</p>
           </object>
           <TelegramPanel item={item} telegram={telegram} messageMap={telegramMessageMap} primary />
         </div>
@@ -472,7 +468,7 @@ function LessonPanel({
 
       <label className="mt-6 flex cursor-pointer items-center gap-2 text-sm">
         <input type="checkbox" checked={done} onChange={(e) => onToggleDone(e.target.checked)} />
-        Marcar como concluída
+        {COURSES_UI.study.markDone}
       </label>
     </article>
   );

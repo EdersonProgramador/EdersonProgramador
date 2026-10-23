@@ -110,9 +110,9 @@ export function AdminCoursesPage() {
         <Link to="/app/admin" className="text-sm text-brand-primary hover:underline">
           ← Administração
         </Link>
-        <h1 className="mt-2 text-3xl font-bold">Cursos online</h1>
+        <h1 className="mt-2 text-3xl font-bold">Gestão da academia</h1>
         <p className="text-white/60">
-          Cadastre trilhas internas ou marque como venda pública (checkout PIX/cartão/boleto em integração).
+          Publique trilhas para o time ou prepare cursos para venda (pagamento online será ligado depois dos testes).
         </p>
       </div>
 

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { COURSES_UI } from "@ederson-agencia/shared";
 import { apiGet, apiPost } from "../api";
 
 type CourseCard = {
@@ -34,7 +35,7 @@ export function CoursesCatalogPage() {
   }, []);
 
   if (loading) {
-    return <p className="text-white/60">Carregando catálogo…</p>;
+    return <p className="text-white/60">{COURSES_UI.catalog.loading}</p>;
   }
 
   if (error) {
@@ -44,10 +45,8 @@ export function CoursesCatalogPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Cursos</h1>
-        <p className="mt-2 text-sm text-white/60">
-          Formação interna da Ederson Programador. Novos cursos serão cadastrados pelo administrador.
-        </p>
+        <h1 className="text-2xl font-bold">{COURSES_UI.catalog.title}</h1>
+        <p className="mt-2 text-sm text-white/60">{COURSES_UI.catalog.subtitle}</p>
       </div>
 
       <ul className="grid gap-4 md:grid-cols-2">
@@ -55,8 +54,8 @@ export function CoursesCatalogPage() {
           <li key={course.id}>
             <div className="panel flex h-full flex-col p-6">
               <p className="text-xs uppercase tracking-wider text-brand-primary">
-                {course.visibility === "INTERNAL" ? "Interno" : "À venda"}
-                {course.locked ? " · bloqueado" : ""}
+                {course.visibility === "INTERNAL" ? COURSES_UI.catalog.badgeInternal : COURSES_UI.catalog.badgeSale}
+                {course.locked ? " · aguardando compra" : ""}
               </p>
               <h2 className="mt-2 text-lg font-semibold">{course.title}</h2>
               {course.summary ? <p className="mt-2 flex-1 text-sm text-white/60">{course.summary}</p> : null}
@@ -73,11 +72,11 @@ export function CoursesCatalogPage() {
                   to={`/app/cursos/${course.slug}`}
                   className="mt-4 inline-block text-sm text-brand-primary hover:underline"
                 >
-                  Entrar na trilha →
+                  {COURSES_UI.catalog.enter} →
                 </Link>
               ) : course.locked ? (
                 <div className="mt-4 space-y-2">
-                  <p className="text-xs text-white/50">Compre para liberar o acesso (gateway em integração).</p>
+                  <p className="text-xs text-white/50">{COURSES_UI.catalog.lockedHint}</p>
                   <div className="flex flex-wrap gap-2">
                     {(["PIX", "CARD", "BOLETO"] as const).map((method) => (
                       <button
@@ -108,7 +107,7 @@ export function CoursesCatalogPage() {
       {checkoutMsg ? <p className="text-sm text-amber-200">{checkoutMsg}</p> : null}
 
       {courses.length === 0 ? (
-        <p className="text-sm text-white/50">Nenhum curso publicado no momento.</p>
+        <p className="text-sm text-white/50">{COURSES_UI.catalog.empty}</p>
       ) : null}
     </div>
   );

@@ -1,21 +1,22 @@
+import { FL_COURSE } from "@ederson-agencia/shared";
 import type { FastifyBaseLogger } from "fastify";
 import { prisma } from "./prisma.js";
 
 export async function ensureSeedCourses(log: FastifyBaseLogger) {
   const course = await prisma.course.upsert({
-    where: { slug: "fl-formula-de-lancamento" },
+    where: { slug: FL_COURSE.slug },
     create: {
-      slug: "fl-formula-de-lancamento",
-      title: "Fórmula de Lançamento — 6 em 7",
-      summary:
-        "Trilha interna na ordem oficial do mapa (Doc001 → módulos 2–11 → F340). Uso exclusivo da equipe Ederson Programador.",
+      slug: FL_COURSE.slug,
+      title: FL_COURSE.title,
+      summary: FL_COURSE.summary,
       status: "PUBLISHED",
       visibility: "INTERNAL",
       contentKey: "fl",
       sortOrder: 0
     },
     update: {
-      title: "Fórmula de Lançamento — 6 em 7",
+      title: FL_COURSE.title,
+      summary: FL_COURSE.summary,
       status: "PUBLISHED",
       contentKey: "fl"
     }

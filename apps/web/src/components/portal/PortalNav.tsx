@@ -19,7 +19,7 @@ export function PortalNav({ user }: { user: AuthUser }) {
         Início
       </Link>
       <Link to="/app/cursos" className={linkClass("/app/cursos")}>
-        Cursos
+        Academia
       </Link>
       <Link to={agencyPath} className={linkClass(agencyPath)}>
         Agência

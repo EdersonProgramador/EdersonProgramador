@@ -1,3 +1,5 @@
+export { COURSES_UI, FL_COURSE } from "./courses-copy.js";
+
 export type AgencyRole = "ADMIN" | "CLIENT" | "FREELANCER";
 
 export type AuthUser = {

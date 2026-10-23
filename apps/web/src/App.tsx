@@ -34,7 +34,7 @@ export default function App() {
       </Route>
 
       <Route element={<ProtectedRoute />}>
-        <Route element={<ShellLayout title="Cursos" />}>
+        <Route element={<ShellLayout title="Academia" />}>
           <Route path="/app/cursos" element={<CoursesCatalogPage />} />
         </Route>
       </Route>
