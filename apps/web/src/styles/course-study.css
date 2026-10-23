@@ -1,3 +1,25 @@
+/* Tipografia da Academia — contraste legível no fundo escuro */
+.course-study,
+.courses-academy {
+  --course-fg: #eef2f6;
+  --course-muted: #b8c5d4;
+  --course-subtle: #9aadc0;
+  --course-faint: #7d92a8;
+  color: var(--course-fg);
+}
+
+.course-text-muted {
+  color: var(--course-muted);
+}
+
+.course-text-subtle {
+  color: var(--course-subtle);
+}
+
+.course-text-faint {
+  color: var(--course-faint);
+}
+
 .course-study__layout {
   display: grid;
   min-height: calc(100vh - 4rem);
@@ -54,20 +76,31 @@
 .course-study__toc-link {
   border-radius: 0.5rem;
   padding: 0.35rem 0.5rem;
-  color: rgb(255 255 255 / 0.75);
+  color: var(--course-muted);
 }
 
 .course-study__toc-link:hover {
   background: rgb(255 255 255 / 0.06);
+  color: var(--course-fg);
 }
 
 .course-study__toc-link.is-active {
-  background: rgb(255 255 255 / 0.1);
-  color: white;
+  background: rgb(56 189 248 / 0.12);
+  color: var(--course-fg);
+  box-shadow: inset 0 0 0 1px rgb(56 189 248 / 0.25);
 }
 
 .course-study__toc-link.is-done {
-  opacity: 0.65;
+  color: var(--course-subtle);
+}
+
+.course-study__module summary,
+.course-study__module details summary {
+  color: var(--course-fg);
+}
+
+.course-study__module details details summary {
+  color: var(--course-muted);
 }
 
 .course-study__main {
@@ -85,9 +118,31 @@
   margin-bottom: 0.5rem;
 }
 
-.prose-invert a {
-  color: var(--color-brand-primary, #38bdf8);
+.course-lesson-prose {
+  color: var(--course-muted);
+  line-height: 1.65;
+}
+
+.course-lesson-prose :where(p, li, h3, h4) {
+  color: var(--course-fg);
+}
+
+.course-lesson-prose :where(em, strong) {
+  color: var(--course-fg);
+}
+
+/* HTML importado do FL costuma trazer preto inline */
+.course-lesson-prose :where([style*="color: rgb(0, 0, 0)"], [style*="color: rgb(29, 28, 29)"], [style*="color: black"]) {
+  color: var(--course-fg) !important;
+}
+
+.course-lesson-prose a {
+  color: var(--brand-primary-soft, #7dd3fc);
   text-decoration: underline;
+}
+
+.course-lesson-prose a:hover {
+  color: var(--brand-primary, #38bdf8);
 }
 
 .course-study__telegram {
@@ -100,4 +155,12 @@
 .course-study__telegram--primary {
   border-color: rgb(56 189 248 / 0.35);
   background: rgb(56 189 248 / 0.08);
+}
+
+.course-study__telegram p {
+  color: var(--course-fg);
+}
+
+.course-study__telegram--primary p {
+  color: #e0f2fe;
 }

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { COURSES_UI } from "@ederson-agencia/shared";
 import { apiGet, apiPost } from "../api";
+import "../styles/course-study.css";
 
 type CourseCard = {
   id: string;
@@ -35,7 +36,7 @@ export function CoursesCatalogPage() {
   }, []);
 
   if (loading) {
-    return <p className="text-white/60">{COURSES_UI.catalog.loading}</p>;
+    return <p className="course-text-muted">{COURSES_UI.catalog.loading}</p>;
   }
 
   if (error) {
@@ -43,10 +44,10 @@ export function CoursesCatalogPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="courses-academy space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">{COURSES_UI.catalog.title}</h1>
-        <p className="mt-2 text-sm text-white/60">{COURSES_UI.catalog.subtitle}</p>
+        <h1 className="text-2xl font-bold text-white">{COURSES_UI.catalog.title}</h1>
+        <p className="course-text-muted mt-2 text-sm">{COURSES_UI.catalog.subtitle}</p>
       </div>
 
       <ul className="grid gap-4 md:grid-cols-2">
@@ -57,10 +58,10 @@ export function CoursesCatalogPage() {
                 {course.visibility === "INTERNAL" ? COURSES_UI.catalog.badgeInternal : COURSES_UI.catalog.badgeSale}
                 {course.locked ? " · aguardando compra" : ""}
               </p>
-              <h2 className="mt-2 text-lg font-semibold">{course.title}</h2>
-              {course.summary ? <p className="mt-2 flex-1 text-sm text-white/60">{course.summary}</p> : null}
+              <h2 className="mt-2 text-lg font-semibold text-white">{course.title}</h2>
+              {course.summary ? <p className="course-text-muted mt-2 flex-1 text-sm leading-relaxed">{course.summary}</p> : null}
               {course.purchasable && course.priceCents != null ? (
-                <p className="mt-3 text-sm text-white/80">
+                <p className="mt-3 text-sm text-[var(--course-fg)]">
                   {(course.priceCents / 100).toLocaleString("pt-BR", {
                     style: "currency",
                     currency: "BRL"
@@ -76,7 +77,7 @@ export function CoursesCatalogPage() {
                 </Link>
               ) : course.locked ? (
                 <div className="mt-4 space-y-2">
-                  <p className="text-xs text-white/50">{COURSES_UI.catalog.lockedHint}</p>
+                  <p className="course-text-subtle text-xs">{COURSES_UI.catalog.lockedHint}</p>
                   <div className="flex flex-wrap gap-2">
                     {(["PIX", "CARD", "BOLETO"] as const).map((method) => (
                       <button
@@ -107,7 +108,7 @@ export function CoursesCatalogPage() {
       {checkoutMsg ? <p className="text-sm text-amber-200">{checkoutMsg}</p> : null}
 
       {courses.length === 0 ? (
-        <p className="text-sm text-white/50">{COURSES_UI.catalog.empty}</p>
+        <p className="course-text-subtle text-sm">{COURSES_UI.catalog.empty}</p>
       ) : null}
     </div>
   );

@@ -131,13 +131,13 @@ export function CourseStudyPage() {
   }
 
   if (!payload) {
-    return <div className="p-8 text-white/60">{COURSES_UI.study.loading}</div>;
+    return <div className="course-text-muted p-8">{COURSES_UI.study.loading}</div>;
   }
 
   const videoFile = (id: string) => payload.videoManifest.files[id];
 
   return (
-    <div className="course-study min-h-screen bg-black text-white">
+    <div className="course-study min-h-screen bg-black">
       <header className="border-b border-white/10 bg-brand-surface/95 backdrop-blur-xl">
         <div className="flex items-center justify-between gap-3 px-4 py-3">
           <div className="flex items-center gap-3">
@@ -167,7 +167,7 @@ export function CourseStudyPage() {
           <div className="course-study__sidebar-head">
             <p className="text-xs uppercase tracking-wider text-brand-primary">{COURSES_UI.study.sidebarEyebrow}</p>
             <h1 className="text-lg font-bold">{payload.course.title}</h1>
-            <p className="text-xs text-white/45">{COURSES_UI.study.sidebarSubtitle}</p>
+            <p className="course-text-subtle text-xs">{COURSES_UI.study.sidebarSubtitle}</p>
             <input
               className="input mt-3 text-sm"
               type="search"
@@ -175,7 +175,7 @@ export function CourseStudyPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
-            <div className="mt-3 text-xs text-white/60">
+            <div className="course-text-muted mt-3 text-xs">
               {COURSES_UI.study.progressLabel}: {completed.size} / {items.length} ({progressPct}%)
             </div>
             <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/10">
@@ -224,8 +224,8 @@ export function CourseStudyPage() {
           {!activeItem && !activeBonus ? (
             <div className="course-study__welcome panel p-8">
               <h2 className="text-2xl font-bold">{payload.course.title}</h2>
-              {payload.course.summary ? <p className="mt-3 text-white/70">{payload.course.summary}</p> : null}
-              <p className="mt-4 text-sm leading-relaxed text-white/55">{COURSES_UI.study.welcomeHint}</p>
+              {payload.course.summary ? <p className="course-text-muted mt-3 text-sm leading-relaxed">{payload.course.summary}</p> : null}
+              <p className="course-text-subtle mt-4 text-sm leading-relaxed">{COURSES_UI.study.welcomeHint}</p>
               {items[0] ? (
                 <button type="button" className="btn-primary mt-6" onClick={() => goLesson(items[0].slug)}>
                   {COURSES_UI.study.startButton}
@@ -236,7 +236,7 @@ export function CourseStudyPage() {
             <article className="panel p-6 md:p-8">
               <h2 className="text-xl font-bold">{activeBonus.title}</h2>
               {activeBonus.html ? (
-                <div className="prose-invert mt-4 text-sm" dangerouslySetInnerHTML={{ __html: activeBonus.html }} />
+                <div className="course-lesson-prose mt-4 text-sm" dangerouslySetInnerHTML={{ __html: activeBonus.html }} />
               ) : null}
             </article>
           ) : activeItem ? (
@@ -322,12 +322,12 @@ function TocTree({
       ) : null}
       {groups.map((g) => (
         <details key={g.module} className="course-study__module" open={g.module <= 3}>
-          <summary className="cursor-pointer text-sm font-medium text-white/90">
+          <summary className="cursor-pointer text-sm font-medium">
             Módulo {g.module} — {g.title}
           </summary>
           {[...g.sections.entries()].map(([sec, lessons]) => (
             <details key={sec} className="ml-2 mt-1">
-              <summary className="cursor-pointer text-xs text-white/70">
+              <summary className="course-text-muted cursor-pointer text-xs">
                 {lessons[0]?.sectionTitle ?? `Seção ${sec}`}
               </summary>
               <ul className="ml-2 mt-1 space-y-0.5">
@@ -391,9 +391,7 @@ function TelegramPanel({
       className={`course-study__telegram ${primary ? "course-study__telegram--primary" : ""}`}
       aria-label="Aula no Telegram"
     >
-      <p className="text-sm text-white/75">
-        {primary ? COURSES_UI.study.telegramPrimary : COURSES_UI.study.telegramBackup}
-      </p>
+      <p className="text-sm">{primary ? COURSES_UI.study.telegramPrimary : COURSES_UI.study.telegramBackup}</p>
       <div className="mt-3 flex flex-wrap gap-2">
         <a className="btn-primary" href={url} target="_blank" rel="noopener noreferrer">
           {COURSES_UI.study.telegramOpen}
@@ -404,7 +402,7 @@ function TelegramPanel({
           </a>
         ) : null}
       </div>
-      <p className="mt-2 text-xs text-white/45">
+      <p className="course-text-faint mt-2 text-xs">
         {COURSES_UI.study.telegramRef}: <code className="text-brand-primary">{msgId}</code> · {item.id}
       </p>
     </section>
@@ -436,14 +434,14 @@ function LessonPanel({
 
   return (
     <article className="panel p-6 md:p-8">
-      <p className="text-xs text-white/50">{item.breadcrumb.join(" › ")}</p>
-      <h2 className="mt-2 text-xl font-bold">{title}</h2>
+      <p className="course-text-subtle text-xs">{item.breadcrumb.join(" › ")}</p>
+      <h2 className="mt-2 text-xl font-bold text-white">{title}</h2>
       <p className="mt-1 font-mono text-sm text-brand-primary">{item.id}</p>
 
       {item.type === "document" ? (
         <div className="mt-6 space-y-4">
           <object data={pdfUrl} type="application/pdf" className="h-[50vh] w-full rounded-lg bg-white/5">
-            <p className="text-sm text-white/60">{COURSES_UI.study.pdfFallback}</p>
+            <p className="course-text-muted text-sm">{COURSES_UI.study.pdfFallback}</p>
           </object>
           <TelegramPanel item={item} telegram={telegram} messageMap={telegramMessageMap} primary />
         </div>
@@ -463,10 +461,10 @@ function LessonPanel({
       )}
 
       {note?.html ? (
-        <div className="prose-invert mt-6 border-t border-white/10 pt-6 text-sm" dangerouslySetInnerHTML={{ __html: note.html }} />
+        <div className="course-lesson-prose mt-6 border-t border-white/10 pt-6 text-sm" dangerouslySetInnerHTML={{ __html: note.html }} />
       ) : null}
 
-      <label className="mt-6 flex cursor-pointer items-center gap-2 text-sm">
+      <label className="course-text-muted mt-6 flex cursor-pointer items-center gap-2 text-sm">
         <input type="checkbox" checked={done} onChange={(e) => onToggleDone(e.target.checked)} />
         {COURSES_UI.study.markDone}
       </label>

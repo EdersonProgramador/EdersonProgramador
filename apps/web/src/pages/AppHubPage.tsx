@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { BookOpen, Briefcase } from "lucide-react";
 import { agencyHomePathForRole, COURSES_UI } from "@ederson-agencia/shared";
 import { useAuthStore } from "../stores/authStore";
+import "../styles/course-study.css";
 
 export function AppHubPage() {
   const user = useAuthStore((s) => s.user);
@@ -10,10 +11,10 @@ export function AppHubPage() {
   const agencyPath = agencyHomePathForRole(user.role);
 
   return (
-    <div className="space-y-8">
+    <div className="courses-academy space-y-8">
       <div>
         <h1 className="text-2xl font-bold">Portal Ederson Programador</h1>
-        <p className="mt-2 text-sm text-white/60">
+        <p className="course-text-muted mt-2 text-sm leading-relaxed">
           Desenvolvimento de sistemas sob contrato e formação interna — áreas separadas, mesmo acesso.
         </p>
       </div>
@@ -25,7 +26,7 @@ export function AppHubPage() {
         >
           <BookOpen className="h-8 w-8 text-brand-primary" />
           <h2 className="text-lg font-semibold">{COURSES_UI.hub.cardTitle}</h2>
-          <p className="text-sm text-white/60">{COURSES_UI.hub.cardBody}</p>
+          <p className="course-text-muted text-sm leading-relaxed">{COURSES_UI.hub.cardBody}</p>
           <span className="text-sm text-brand-primary group-hover:underline">Ver cursos →</span>
         </Link>
 
