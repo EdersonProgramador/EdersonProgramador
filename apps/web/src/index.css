@@ -71,6 +71,11 @@
 }
 
 @layer components {
+  .app-shell-header {
+    @apply border-b border-white/10 bg-brand-surface/95 backdrop-blur-xl;
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
   .cinema-grid {
     transition: background-image 1s ease;
     background-image: linear-gradient(var(--page-grid, rgba(61, 106, 140, 0.06)) 1px, transparent 1px),
@@ -538,6 +543,7 @@
 
   .site-nav {
     overflow: visible;
+    padding-top: env(safe-area-inset-top, 0px);
   }
 
   /* Logo +50px no header; slot/anchor mantêm altura da barra, logo centrada no eixo vertical */

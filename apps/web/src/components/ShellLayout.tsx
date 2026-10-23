@@ -12,25 +12,29 @@ export function ShellLayout({ title }: { title: string }) {
 
   return (
     <div className="min-h-screen bg-black">
-      <header className="border-b border-white/10 bg-brand-surface/95 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4">
-          <div>
+      <header className="app-shell-header sticky top-0 z-50">
+        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:py-4">
+          <div className="min-w-0">
             <Link to="/" className="group inline-block">
               <BrandLogo size="sm" />
             </Link>
-            <p className="mt-1.5 pl-11 text-xs text-white/50">{title}</p>
+            <p className="mt-1.5 truncate pl-11 text-xs text-white/50 sm:max-w-xs">{title}</p>
           </div>
-          <div className="flex flex-wrap items-center justify-end gap-3">
+          <div className="flex min-w-0 shrink-0 items-center justify-end gap-2 sm:gap-3">
             {user ? (
               <>
                 <PortalNav user={user} />
-                <Link to={portalHomePath()} className="hidden text-sm text-white/80 hover:text-white sm:inline">
+                <Link
+                  to={portalHomePath()}
+                  className="hidden min-h-11 items-center text-sm text-white/80 hover:text-white md:inline-flex"
+                >
                   Portal
                 </Link>
-                <span className="hidden text-sm text-white/60 sm:inline">{user.name}</span>
+                <span className="hidden max-w-[8rem] truncate text-sm text-white/60 lg:inline">{user.name}</span>
                 <button
                   type="button"
-                  className="btn-secondary px-3 py-2"
+                  className="btn-secondary inline-flex min-h-11 min-w-11 items-center justify-center p-2"
+                  aria-label="Sair"
                   onClick={() => {
                     clearSession();
                     navigate("/");
@@ -40,14 +44,14 @@ export function ShellLayout({ title }: { title: string }) {
                 </button>
               </>
             ) : (
-              <Link to="/" className="btn-ghost text-sm">
+              <Link to="/" className="btn-ghost inline-flex min-h-11 items-center text-sm">
                 Voltar ao site
               </Link>
             )}
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-4 py-8">
+      <main className="mx-auto max-w-6xl px-4 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:py-8">
         <Outlet />
       </main>
     </div>

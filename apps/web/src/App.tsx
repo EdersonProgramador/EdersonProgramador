@@ -29,7 +29,9 @@ export default function App() {
       </Route>
 
       <Route path="/app" element={<ProtectedRoute />}>
-        <Route index element={<AppHubPage />} />
+        <Route element={<ShellLayout title="Portal" />}>
+          <Route index element={<AppHubPage />} />
+        </Route>
         <Route path="cursos/:courseSlug/*" element={<CourseStudyPage />} />
       </Route>
 

@@ -138,27 +138,35 @@ export function CourseStudyPage() {
 
   return (
     <div className="course-study min-h-screen bg-black">
-      <header className="border-b border-white/10 bg-brand-surface/95 backdrop-blur-xl">
-        <div className="flex items-center justify-between gap-3 px-4 py-3">
-          <div className="flex items-center gap-3">
-            <button type="button" className="btn-secondary p-2 lg:hidden" onClick={() => setSidebarOpen(true)}>
+      <header className="course-study__header app-shell-header">
+        <div className="flex items-center justify-between gap-2 px-3 py-2 sm:gap-3 sm:px-4 sm:py-3">
+          <div className="flex min-w-0 flex-1 items-center gap-2">
+            <button
+              type="button"
+              className="btn-secondary inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center p-2 lg:hidden"
+              aria-label="Abrir sumário do curso"
+              onClick={() => setSidebarOpen(true)}
+            >
               <Menu className="h-5 w-5" />
             </button>
-            <Link to="/">
+            <Link to="/app/cursos" className="min-w-0 shrink">
               <BrandLogo size="sm" />
             </Link>
           </div>
-          {user ? <PortalNav user={user} /> : null}
-          <button
-            type="button"
-            className="btn-secondary p-2"
-            onClick={() => {
-              clearSession();
-              navigate("/");
-            }}
-          >
-            <LogOut className="h-4 w-4" />
-          </button>
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+            {user ? <PortalNav user={user} /> : null}
+            <button
+              type="button"
+              className="btn-secondary inline-flex min-h-11 min-w-11 items-center justify-center p-2"
+              aria-label="Sair"
+              onClick={() => {
+                clearSession();
+                navigate("/");
+              }}
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </header>
 
@@ -222,7 +230,7 @@ export function CourseStudyPage() {
 
         <main className="course-study__main">
           {!activeItem && !activeBonus ? (
-            <div className="course-study__welcome panel p-8">
+            <div className="course-study__welcome panel p-5 sm:p-8">
               <h2 className="text-2xl font-bold">{payload.course.title}</h2>
               {payload.course.summary ? <p className="course-text-muted mt-3 text-sm leading-relaxed">{payload.course.summary}</p> : null}
               <p className="course-text-subtle mt-4 text-sm leading-relaxed">{COURSES_UI.study.welcomeHint}</p>
@@ -253,16 +261,24 @@ export function CourseStudyPage() {
           ) : null}
 
           {activeItem ? (
-            <nav className="mt-6 flex flex-wrap justify-between gap-3 border-t border-white/10 pt-4">
+            <nav className="mt-6 flex flex-col-reverse gap-3 border-t border-white/10 pt-4 sm:flex-row sm:flex-wrap sm:justify-between">
               {activeItem.prev ? (
-                <button type="button" className="btn-secondary inline-flex items-center gap-1" onClick={() => goLesson(activeItem.prev!)}>
+                <button
+                  type="button"
+                  className="btn-secondary inline-flex w-full min-h-11 items-center justify-center gap-1 sm:w-auto"
+                  onClick={() => goLesson(activeItem.prev!)}
+                >
                   <ChevronLeft className="h-4 w-4" /> Anterior
                 </button>
               ) : (
-                <span />
+                <span className="hidden sm:block" />
               )}
               {activeItem.next ? (
-                <button type="button" className="btn-primary inline-flex items-center gap-1" onClick={() => goLesson(activeItem.next!)}>
+                <button
+                  type="button"
+                  className="btn-primary inline-flex w-full min-h-11 items-center justify-center gap-1 sm:w-auto"
+                  onClick={() => goLesson(activeItem.next!)}
+                >
                   Próxima <ChevronRight className="h-4 w-4" />
                 </button>
               ) : null}
@@ -392,12 +408,22 @@ function TelegramPanel({
       aria-label="Aula no Telegram"
     >
       <p className="text-sm">{primary ? COURSES_UI.study.telegramPrimary : COURSES_UI.study.telegramBackup}</p>
-      <div className="mt-3 flex flex-wrap gap-2">
-        <a className="btn-primary" href={url} target="_blank" rel="noopener noreferrer">
+      <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+        <a
+          className="btn-primary inline-flex min-h-11 w-full items-center justify-center sm:w-auto"
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           {COURSES_UI.study.telegramOpen}
         </a>
         {sumario ? (
-          <a className="btn-secondary" href={sumario} target="_blank" rel="noopener noreferrer">
+          <a
+            className="btn-secondary inline-flex min-h-11 w-full items-center justify-center sm:w-auto"
+            href={sumario}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             {COURSES_UI.study.telegramIndex}
           </a>
         ) : null}
@@ -433,7 +459,7 @@ function LessonPanel({
   const useTelegramPrimary = !videoSrc && telegram.enabled;
 
   return (
-    <article className="panel p-6 md:p-8">
+    <article className="panel p-4 sm:p-6 md:p-8">
       <p className="course-text-subtle text-xs">{item.breadcrumb.join(" › ")}</p>
       <h2 className="mt-2 text-xl font-bold text-white">{title}</h2>
       <p className="mt-1 font-mono text-sm text-brand-primary">{item.id}</p>

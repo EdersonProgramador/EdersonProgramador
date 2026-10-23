@@ -97,10 +97,16 @@ function SalesNav({ scrolled }: { scrolled: boolean }) {
             </a>
           </nav>
           <div className="relative z-20 flex shrink-0 items-center justify-end gap-1.5 sm:gap-2 md:col-start-3 md:justify-self-end xl:gap-3">
-            <Link to="/login" className="btn-ghost hidden max-w-[9rem] truncate text-xs lg:inline lg:max-w-none lg:text-sm">
+            <Link
+              to="/login"
+              className="btn-ghost inline-flex min-h-11 max-w-[7.5rem] items-center truncate px-2 text-xs sm:max-w-none sm:px-3 sm:text-sm"
+            >
               {copy.loginCta}
             </Link>
-            <a href="#reuniao" className="btn-primary whitespace-nowrap px-3 py-2 text-xs sm:px-4 sm:py-2.5 lg:text-sm">
+            <a
+              href="#reuniao"
+              className="btn-primary inline-flex min-h-11 items-center whitespace-nowrap px-3 py-2 text-xs sm:px-4 sm:py-2.5 lg:text-sm"
+            >
               Agendar
             </a>
           </div>
@@ -113,7 +119,7 @@ function SalesNav({ scrolled }: { scrolled: boolean }) {
             <a
               key={item.href}
               href={item.href}
-              className="shrink-0 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-white/75 transition hover:border-white/20 hover:text-white"
+              className="inline-flex min-h-11 shrink-0 items-center rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-2 text-xs font-medium text-white/75 transition hover:border-white/20 hover:text-white"
             >
               {item.label}
             </a>
@@ -122,10 +128,16 @@ function SalesNav({ scrolled }: { scrolled: boolean }) {
             href={AGENCY_META.resumePath}
             target="_blank"
             rel="noopener noreferrer"
-            className="shrink-0 rounded-full border border-sky-400/25 bg-sky-500/10 px-3 py-1.5 text-xs font-medium text-sky-200/90 transition hover:border-sky-400/40"
+            className="inline-flex min-h-11 shrink-0 items-center rounded-full border border-sky-400/25 bg-sky-500/10 px-3.5 py-2 text-xs font-medium text-sky-200/90 transition hover:border-sky-400/40"
           >
             Currículo
           </a>
+          <Link
+            to="/login"
+            className="inline-flex min-h-11 shrink-0 items-center rounded-full border border-white/15 bg-white/[0.06] px-3.5 py-2 text-xs font-medium text-white/90 transition hover:border-white/25"
+          >
+            {copy.loginCta}
+          </Link>
         </nav>
       </div>
     </header>

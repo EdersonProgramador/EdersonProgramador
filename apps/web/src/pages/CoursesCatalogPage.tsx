@@ -53,7 +53,7 @@ export function CoursesCatalogPage() {
       <ul className="grid gap-4 md:grid-cols-2">
         {courses.map((course) => (
           <li key={course.id}>
-            <div className="panel flex h-full flex-col p-6">
+            <div className="panel flex h-full flex-col p-4 sm:p-6">
               <p className="text-xs uppercase tracking-wider text-brand-primary">
                 {course.visibility === "INTERNAL" ? COURSES_UI.catalog.badgeInternal : COURSES_UI.catalog.badgeSale}
                 {course.locked ? " · aguardando compra" : ""}
@@ -69,21 +69,18 @@ export function CoursesCatalogPage() {
                 </p>
               ) : null}
               {course.hasAccess ? (
-                <Link
-                  to={`/app/cursos/${course.slug}`}
-                  className="mt-4 inline-block text-sm text-brand-primary hover:underline"
-                >
+                <Link to={`/app/cursos/${course.slug}`} className="btn-primary mt-4 inline-flex w-full min-h-11 items-center justify-center sm:w-auto">
                   {COURSES_UI.catalog.enter} →
                 </Link>
               ) : course.locked ? (
-                <div className="mt-4 space-y-2">
-                  <p className="course-text-subtle text-xs">{COURSES_UI.catalog.lockedHint}</p>
-                  <div className="flex flex-wrap gap-2">
+                <div className="mt-4 space-y-3">
+                  <p className="course-text-subtle text-xs leading-relaxed">{COURSES_UI.catalog.lockedHint}</p>
+                  <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                     {(["PIX", "CARD", "BOLETO"] as const).map((method) => (
                       <button
                         key={method}
                         type="button"
-                        className="btn-secondary text-xs"
+                        className="btn-secondary min-h-11 w-full text-sm sm:w-auto"
                         onClick={() =>
                           void (async () => {
                             try {

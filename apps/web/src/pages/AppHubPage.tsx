@@ -13,7 +13,7 @@ export function AppHubPage() {
   return (
     <div className="courses-academy space-y-8">
       <div>
-        <h1 className="text-2xl font-bold">Portal Ederson Programador</h1>
+        <h1 className="text-xl font-bold sm:text-2xl">Portal Ederson Programador</h1>
         <p className="course-text-muted mt-2 text-sm leading-relaxed">
           Desenvolvimento de sistemas sob contrato e formação interna — áreas separadas, mesmo acesso.
         </p>
