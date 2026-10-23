@@ -24,7 +24,12 @@ const envSchema = z
   .object({
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
     API_PORT: z.preprocess((value) => value ?? process.env.PORT, z.coerce.number().default(3333)),
-    DATABASE_URL: z.string().default("file:./prisma/dev.db"),
+    DATABASE_URL: z.preprocess(
+      (value) => (typeof value === "string" && value.trim() ? value.trim() : undefined),
+      nodeEnv === "production"
+        ? z.string().min(1, "DATABASE_URL é obrigatória em produção.")
+        : z.string().default("postgresql://postgres:postgres@localhost:5432/ederson_agencia?schema=public")
+    ),
     WEB_ORIGIN: z.string().default("http://localhost:5174"),
     JWT_SECRET: z.preprocess((value) => {
       if (typeof value === "string" && value.trim()) return value.trim();

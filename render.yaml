@@ -17,9 +17,12 @@ services:
     region: virginia
     branch: main
     buildCommand: npm ci && npm run build:api:render
+    preDeployCommand: npm run prisma:deploy --workspace=@ederson-agencia/api
     startCommand: npm run start --workspace=@ederson-agencia/api
     healthCheckPath: /health
     envVars:
+      - key: NODE_VERSION
+        value: "20"
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
