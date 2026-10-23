@@ -35,6 +35,13 @@ export const COURSES_UI = {
     startButton: "Iniciar pela primeira aula",
     bonusModule: "Bônus",
     markDone: "Marcar aula como concluída",
+    markUndone: "Desmarcar conclusão",
+    lessonCompleted: "Aula concluída",
+    lessonPending: "Ainda não concluída",
+    statusDone: "Concluída",
+    statusPending: "Pendente",
+    statusActive: "Em andamento",
+    moduleProgress: (done: number, total: number) => `${done}/${total} aulas`,
     pdfFallback: "PDF ainda não está no servidor — abra a aula no Telegram ou veja os materiais abaixo.",
     telegramPrimary:
       "Assista no Telegram: canal privado de estudos. Entre com a conta que tem acesso ao grupo.",

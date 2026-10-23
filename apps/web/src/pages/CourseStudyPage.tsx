@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ChevronLeft, ChevronRight, LogOut, Menu } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Circle, LogOut, Menu } from "lucide-react";
 import { PortalNav } from "../components/portal/PortalNav";
 import { BrandLogo } from "../components/brand/BrandLogo";
 import { COURSES_UI } from "@ederson-agencia/shared";
@@ -117,7 +117,14 @@ export function CourseStudyPage() {
     );
   }, [items, search]);
 
-  const progressPct = items.length ? Math.round((completed.size / items.length) * 100) : 0;
+  const trackableSlugs = useMemo(() => items.map((i) => i.slug), [items]);
+  const completedTrackable = useMemo(
+    () => trackableSlugs.filter((slug) => completed.has(slug)).length,
+    [trackableSlugs, completed]
+  );
+  const progressPct = trackableSlugs.length
+    ? Math.round((completedTrackable / trackableSlugs.length) * 100)
+    : 0;
 
   if (error) {
     return (
@@ -184,7 +191,8 @@ export function CourseStudyPage() {
               onChange={(e) => setSearch(e.target.value)}
             />
             <div className="course-text-muted mt-3 text-xs">
-              {COURSES_UI.study.progressLabel}: {completed.size} / {items.length} ({progressPct}%)
+              {COURSES_UI.study.progressLabel}: {completedTrackable} / {trackableSlugs.length} ({progressPct}
+              %)
             </div>
             <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/10">
               <div className="h-full bg-brand-primary transition-all" style={{ width: `${progressPct}%` }} />
@@ -195,13 +203,14 @@ export function CourseStudyPage() {
               <ul className="space-y-1">
                 {filteredItems.map((item) => (
                   <li key={item.slug}>
-                    <button
-                      type="button"
-                      className={`course-study__toc-link w-full text-left ${lessonSlug === item.slug ? "is-active" : ""}`}
-                      onClick={() => goLesson(item.slug)}
-                    >
-                      <span className="font-mono text-xs text-brand-primary">{item.id}</span> {item.title}
-                    </button>
+                    <TocLessonLink
+                      item={item}
+                      isActive={lessonSlug === item.slug}
+                      isDone={completed.has(item.slug)}
+                      hasVideo={Boolean(videoFile(item.id))}
+                      onOpen={() => goLesson(item.slug)}
+                      onToggleDone={(done) => void toggleDone(item.slug, done)}
+                    />
                   </li>
                 ))}
               </ul>
@@ -214,6 +223,7 @@ export function CourseStudyPage() {
                 hasVideo={(id) => Boolean(videoFile(id))}
                 onSelect={goLesson}
                 onSelectBonus={(slug) => goLesson(`bonus/${slug}`)}
+                onToggleDone={(slug, done) => void toggleDone(slug, done)}
               />
             )}
           </nav>
@@ -290,6 +300,102 @@ export function CourseStudyPage() {
   );
 }
 
+function lessonStatusClass(isActive: boolean, isDone: boolean) {
+  if (isActive) return "is-active";
+  if (isDone) return "is-done";
+  return "is-pending";
+}
+
+function TocLessonLink({
+  item,
+  isActive,
+  isDone,
+  hasVideo,
+  compact,
+  onOpen,
+  onToggleDone
+}: {
+  item: Pick<CurriculumItem, "slug" | "id" | "title" | "type">;
+  isActive: boolean;
+  isDone: boolean;
+  hasVideo?: boolean;
+  compact?: boolean;
+  onOpen: () => void;
+  onToggleDone: (done: boolean) => void;
+}) {
+  const status = lessonStatusClass(isActive, isDone);
+  const badgeLabel = isActive
+    ? COURSES_UI.study.statusActive
+    : isDone
+      ? COURSES_UI.study.statusDone
+      : COURSES_UI.study.statusPending;
+
+  return (
+    <button
+      type="button"
+      className={`course-study__toc-link w-full ${status}`}
+      onClick={onOpen}
+    >
+      <span className="course-study__toc-row">
+        <span
+          role="checkbox"
+          aria-checked={isDone}
+          aria-label={isDone ? COURSES_UI.study.lessonCompleted : COURSES_UI.study.lessonPending}
+          tabIndex={0}
+          className="course-study__toc-status"
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleDone(!isDone);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              e.stopPropagation();
+              onToggleDone(!isDone);
+            }
+          }}
+        >
+          {isDone ? <Check className="h-3 w-3 stroke-[3]" aria-hidden /> : null}
+          {!isDone && !isActive ? <Circle className="h-2 w-2 fill-white/15 stroke-none" aria-hidden /> : null}
+        </span>
+        <span className="course-study__toc-body">
+          {!compact ? (
+            <span className="course-study__toc-title">
+              <span className="font-mono text-brand-primary">{item.id}</span>
+              {item.type === "document" ? " · Material" : hasVideo ? " · Vídeo local" : " · Telegram"}
+            </span>
+          ) : null}
+          <span className={`${compact ? "course-study__toc-title" : "mt-0.5 block text-xs leading-snug"} ${compact ? "" : "course-text-muted"}`}>
+            {compact ? (
+              <>
+                <span className="font-mono text-brand-primary">{item.id}</span>
+                <span className="course-text-muted"> · {item.title}</span>
+              </>
+            ) : (
+              item.title
+            )}
+          </span>
+          {!compact ? (
+            <span className="course-study__toc-meta">
+              <span
+                className={`course-study__toc-badge ${
+                  isActive ? "course-study__toc-badge--active" : isDone ? "course-study__toc-badge--done" : "course-study__toc-badge--pending"
+                }`}
+              >
+                {badgeLabel}
+              </span>
+            </span>
+          ) : null}
+        </span>
+      </span>
+    </button>
+  );
+}
+
+function countDone(lessons: CurriculumItem[], completed: Set<string>) {
+  return lessons.filter((l) => completed.has(l.slug)).length;
+}
+
 function TocTree({
   items,
   bonus,
@@ -297,7 +403,8 @@ function TocTree({
   completed,
   hasVideo,
   onSelect,
-  onSelectBonus
+  onSelectBonus,
+  onToggleDone
 }: {
   items: CurriculumItem[];
   bonus: { slug: string; title: string }[];
@@ -306,6 +413,7 @@ function TocTree({
   hasVideo: (id: string) => boolean;
   onSelect: (slug: string) => void;
   onSelectBonus: (slug: string) => void;
+  onToggleDone: (slug: string, done: boolean) => void;
 }) {
   let currentModule: number | null = null;
   const groups: { module: number; title: string; sections: Map<number, CurriculumItem[]> }[] = [];
@@ -328,42 +436,63 @@ function TocTree({
   return (
     <div className="space-y-2">
       {doc ? (
-        <button
-          type="button"
-          className={`course-study__toc-link w-full text-left ${activeSlug === doc.slug ? "is-active" : ""}`}
-          onClick={() => onSelect(doc.slug)}
-        >
-          {doc.id} — {doc.title}
-        </button>
+        <TocLessonLink
+          item={doc}
+          isActive={activeSlug === doc.slug}
+          isDone={completed.has(doc.slug)}
+          onOpen={() => onSelect(doc.slug)}
+          onToggleDone={(done) => onToggleDone(doc.slug, done)}
+        />
       ) : null}
-      {groups.map((g) => (
-        <details key={g.module} className="course-study__module" open={g.module <= 3}>
-          <summary className="cursor-pointer text-sm font-medium">
-            Módulo {g.module} — {g.title}
-          </summary>
-          {[...g.sections.entries()].map(([sec, lessons]) => (
-            <details key={sec} className="ml-2 mt-1">
-              <summary className="course-text-muted cursor-pointer text-xs">
-                {lessons[0]?.sectionTitle ?? `Seção ${sec}`}
-              </summary>
-              <ul className="ml-2 mt-1 space-y-0.5">
-                {lessons.map((item) => (
-                  <li key={item.slug}>
-                    <button
-                      type="button"
-                      className={`course-study__toc-link w-full text-left text-xs ${activeSlug === item.slug ? "is-active" : ""} ${completed.has(item.slug) ? "is-done" : ""}`}
-                      onClick={() => onSelect(item.slug)}
-                    >
-                      <span className="font-mono text-brand-primary">{item.id}</span>
-                      {hasVideo(item.id) ? " ▶" : " 📱"}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </details>
-          ))}
-        </details>
-      ))}
+      {groups.map((g) => {
+        const moduleLessons = [...g.sections.values()].flat();
+        const moduleDone = countDone(moduleLessons, completed);
+        const moduleTotal = moduleLessons.length;
+        const moduleComplete = moduleTotal > 0 && moduleDone === moduleTotal;
+
+        return (
+          <details key={g.module} className="course-study__module" open={g.module <= 3}>
+            <summary className="cursor-pointer text-sm font-medium">
+              <span className="course-study__module-head">
+                <span>
+                  Módulo {g.module} — {g.title}
+                </span>
+                <span className={`course-study__module-count ${moduleComplete ? "is-complete" : ""}`}>
+                  {COURSES_UI.study.moduleProgress(moduleDone, moduleTotal)}
+                </span>
+              </span>
+            </summary>
+            {[...g.sections.entries()].map(([sec, lessons]) => {
+              const secDone = countDone(lessons, completed);
+              return (
+                <details key={sec} className="ml-2 mt-1" open={lessons.some((l) => l.slug === activeSlug)}>
+                  <summary className="course-text-muted cursor-pointer text-xs">
+                    <span className="course-study__module-head">
+                      <span>{lessons[0]?.sectionTitle ?? `Seção ${sec}`}</span>
+                      <span className="course-study__module-count">{COURSES_UI.study.moduleProgress(secDone, lessons.length)}</span>
+                    </span>
+                  </summary>
+                  <ul className="ml-1 mt-1 space-y-0.5 border-l border-white/10 pl-2">
+                    {lessons.map((item) => (
+                      <li key={item.slug}>
+                        <TocLessonLink
+                          item={item}
+                          compact
+                          isActive={activeSlug === item.slug}
+                          isDone={completed.has(item.slug)}
+                          hasVideo={hasVideo(item.id)}
+                          onOpen={() => onSelect(item.slug)}
+                          onToggleDone={(done) => onToggleDone(item.slug, done)}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              );
+            })}
+          </details>
+        );
+      })}
       {bonus.length ? (
         <details className="course-study__module">
           <summary className="cursor-pointer text-sm font-medium">Módulo 12 — {COURSES_UI.study.bonusModule}</summary>
@@ -490,10 +619,27 @@ function LessonPanel({
         <div className="course-lesson-prose mt-6 border-t border-white/10 pt-6 text-sm" dangerouslySetInnerHTML={{ __html: note.html }} />
       ) : null}
 
-      <label className="course-text-muted mt-6 flex cursor-pointer items-center gap-2 text-sm">
-        <input type="checkbox" checked={done} onChange={(e) => onToggleDone(e.target.checked)} />
-        {COURSES_UI.study.markDone}
-      </label>
+      <div className={`course-study__lesson-complete ${done ? "is-done" : ""}`}>
+        <div className="course-study__lesson-complete-head">
+          <div>
+            <p className="text-sm font-semibold text-white">
+              {done ? COURSES_UI.study.lessonCompleted : COURSES_UI.study.lessonPending}
+            </p>
+            <p className="course-text-subtle mt-1 text-xs leading-relaxed">
+              {done
+                ? "Progresso salvo na sua conta. Você pode desmarcar se quiser rever a aula depois."
+                : "Ao terminar de assistir, marque a aula para atualizar a trilha na barra lateral."}
+            </p>
+          </div>
+          <button
+            type="button"
+            className={done ? "btn-secondary min-h-11 text-sm" : "btn-primary min-h-11 text-sm"}
+            onClick={() => onToggleDone(!done)}
+          >
+            {done ? COURSES_UI.study.markUndone : COURSES_UI.study.markDone}
+          </button>
+        </div>
+      </div>
     </article>
   );
 }
