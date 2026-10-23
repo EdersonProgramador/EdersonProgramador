@@ -55,6 +55,8 @@ O repositório inclui [`render.yaml`](render.yaml) (API + Postgres na região **
 
 `JWT_SECRET` e `DATABASE_URL` vêm do Blueprint. Depois do primeiro admin criado, pode setar `ADMIN_BOOTSTRAP=false` no Render.
 
+No **plano free**, as migrations rodam no **start** do serviço (não há `preDeployCommand`).
+
 **Local:** a API usa **PostgreSQL** (não SQLite). Suba um Postgres local ou use a URL do Render só em dev se preferir.
 
 ## Segurança

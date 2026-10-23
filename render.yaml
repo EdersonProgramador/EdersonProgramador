@@ -17,8 +17,8 @@ services:
     region: virginia
     branch: main
     buildCommand: npm ci && npm run build:api:render
-    preDeployCommand: npm run prisma:deploy --workspace=@ederson-agencia/api
-    startCommand: npm run start --workspace=@ederson-agencia/api
+    # Free tier: sem preDeployCommand — migrate roda no start (idempotente)
+    startCommand: sh -c "npm run prisma:deploy --workspace=@ederson-agencia/api && npm run start --workspace=@ederson-agencia/api"
     healthCheckPath: /health
     envVars:
       - key: NODE_VERSION
