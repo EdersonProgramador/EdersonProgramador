@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { formatBRL } from "@ederson-agencia/shared";
 import { apiGet, apiPatch, apiPost } from "../api";
 
@@ -172,6 +173,11 @@ export function AdminDashboard() {
         <p className="text-white/60">Leads, projetos e operação da agência.</p>
       </div>
       <StatGrid stats={stats} />
+      <p className="text-sm">
+        <Link to="/app/admin/cursos" className="text-brand-primary hover:underline">
+          Gerenciar cursos online →
+        </Link>
+      </p>
       <section className="space-y-4">
         <h2 className="text-xl font-semibold">Leads da landing</h2>
         <div className="space-y-3">

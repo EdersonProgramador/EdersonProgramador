@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { apiGet } from "../api";
+import { apiGet, apiPost } from "../api";
 
 type CourseCard = {
   id: string;
@@ -10,12 +10,15 @@ type CourseCard = {
   visibility: string;
   priceCents: number | null;
   purchasable: boolean;
+  hasAccess: boolean;
+  locked: boolean;
 };
 
 export function CoursesCatalogPage() {
   const [courses, setCourses] = useState<CourseCard[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [checkoutMsg, setCheckoutMsg] = useState<string | null>(null);
 
   useEffect(() => {
     void (async () => {
@@ -50,29 +53,59 @@ export function CoursesCatalogPage() {
       <ul className="grid gap-4 md:grid-cols-2">
         {courses.map((course) => (
           <li key={course.id}>
-            <Link
-              to={`/app/cursos/${course.slug}`}
-              className="panel block h-full p-6 transition hover:border-brand-primary/40"
-            >
+            <div className="panel flex h-full flex-col p-6">
               <p className="text-xs uppercase tracking-wider text-brand-primary">
                 {course.visibility === "INTERNAL" ? "Interno" : "À venda"}
+                {course.locked ? " · bloqueado" : ""}
               </p>
               <h2 className="mt-2 text-lg font-semibold">{course.title}</h2>
-              {course.summary ? <p className="mt-2 text-sm text-white/60">{course.summary}</p> : null}
+              {course.summary ? <p className="mt-2 flex-1 text-sm text-white/60">{course.summary}</p> : null}
               {course.purchasable && course.priceCents != null ? (
                 <p className="mt-3 text-sm text-white/80">
                   {(course.priceCents / 100).toLocaleString("pt-BR", {
                     style: "currency",
                     currency: "BRL"
-                  })}{" "}
-                  — checkout em breve
+                  })}
                 </p>
               ) : null}
-              <span className="mt-4 inline-block text-sm text-brand-primary">Entrar na trilha →</span>
-            </Link>
+              {course.hasAccess ? (
+                <Link
+                  to={`/app/cursos/${course.slug}`}
+                  className="mt-4 inline-block text-sm text-brand-primary hover:underline"
+                >
+                  Entrar na trilha →
+                </Link>
+              ) : course.locked ? (
+                <div className="mt-4 space-y-2">
+                  <p className="text-xs text-white/50">Compre para liberar o acesso (gateway em integração).</p>
+                  <div className="flex flex-wrap gap-2">
+                    {(["PIX", "CARD", "BOLETO"] as const).map((method) => (
+                      <button
+                        key={method}
+                        type="button"
+                        className="btn-secondary text-xs"
+                        onClick={() =>
+                          void (async () => {
+                            try {
+                              await apiPost(`/courses/${course.slug}/checkout`, { paymentMethod: method });
+                            } catch (err) {
+                              setCheckoutMsg(err instanceof Error ? err.message : "Checkout indisponível.");
+                            }
+                          })()
+                        }
+                      >
+                        {method}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+            </div>
           </li>
         ))}
       </ul>
+
+      {checkoutMsg ? <p className="text-sm text-amber-200">{checkoutMsg}</p> : null}
 
       {courses.length === 0 ? (
         <p className="text-sm text-white/50">Nenhum curso publicado no momento.</p>

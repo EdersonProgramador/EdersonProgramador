@@ -8,6 +8,7 @@ import { LoginPage } from "./pages/LoginPage";
 import { AppHubPage } from "./pages/AppHubPage";
 import { CourseStudyPage } from "./pages/CourseStudyPage";
 import { CoursesCatalogPage } from "./pages/CoursesCatalogPage";
+import { AdminCoursesPage } from "./pages/AdminCoursesPage";
 import { AdminDashboard, ClientDashboard, FreelancerDashboard } from "./pages/DashboardPages";
 import { useAuthStore } from "./stores/authStore";
 
@@ -41,6 +42,7 @@ export default function App() {
       <Route element={<ProtectedRoute roles={["ADMIN"]} />}>
         <Route element={<ShellLayout title="Administração" />}>
           <Route path="/app/admin" element={<AdminDashboard />} />
+          <Route path="/app/admin/cursos" element={<AdminCoursesPage />} />
         </Route>
       </Route>
 

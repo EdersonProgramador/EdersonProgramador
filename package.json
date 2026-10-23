@@ -19,7 +19,8 @@
     "typecheck": "npm run build --workspace @ederson-agencia/shared && npm run typecheck --workspaces --if-present",
     "prisma:generate": "npm run prisma:generate --workspace @ederson-agencia/api",
     "prisma:migrate": "npm run prisma:migrate --workspace @ederson-agencia/api",
-    "prisma:seed": "npm run prisma:seed --workspace @ederson-agencia/api"
+    "prisma:seed": "npm run prisma:seed --workspace @ederson-agencia/api",
+    "sync:fl-data": "node scripts/sync-fl-data.mjs"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"

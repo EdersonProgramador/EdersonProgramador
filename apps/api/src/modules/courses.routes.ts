@@ -31,22 +31,26 @@ export async function registerCoursesRoutes(app: FastifyInstance) {
       orderBy: [{ sortOrder: "asc" }, { title: "asc" }]
     });
 
-    const accessible = [];
+    const cards = [];
     for (const course of courses) {
-      if (await userCanAccessCourse(user.id, user.role, course)) {
-        accessible.push({
-          id: course.id,
-          slug: course.slug,
-          title: course.title,
-          summary: course.summary,
-          visibility: course.visibility,
-          priceCents: course.priceCents,
-          currency: course.currency,
-          purchasable: course.visibility === "PUBLIC_SALE" && course.priceCents != null
-        });
-      }
+      const hasAccess = await userCanAccessCourse(user.id, user.role, course);
+      const purchasable = course.visibility === "PUBLIC_SALE" && course.priceCents != null && course.priceCents > 0;
+      if (!hasAccess && !purchasable) continue;
+
+      cards.push({
+        id: course.id,
+        slug: course.slug,
+        title: course.title,
+        summary: course.summary,
+        visibility: course.visibility,
+        priceCents: course.priceCents,
+        currency: course.currency,
+        purchasable,
+        hasAccess,
+        locked: !hasAccess && purchasable
+      });
     }
-    return { courses: accessible };
+    return { courses: cards };
   });
 
   app.get("/courses/:slug", async (request, reply) => {

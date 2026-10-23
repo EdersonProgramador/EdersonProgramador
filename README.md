@@ -76,6 +76,10 @@ FL_MEDIA_ROOT=C:\Users\EDERSON\Desktop\FL\media
 
 Compras futuras (PIX/cartão/boleto): modelo `CourseOrder` + `POST /courses/:slug/checkout` (stub 501 até integrar gateway).
 
+**Admin:** `/app/admin/cursos` — criar/editar cursos, liberar matrícula por e-mail, marcar pedido pago (`POST /admin/courses/orders/:id/mark-paid`).
+
+Sincronizar JSON do FL: `npm run sync:fl-data` (copia de `Desktop/FL/data`).
+
 ## Segurança
 
 - Não publique senhas, tokens ou dumps de banco no repositório.

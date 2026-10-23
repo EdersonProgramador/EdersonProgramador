@@ -24,6 +24,11 @@ export function PortalNav({ user }: { user: AuthUser }) {
       <Link to={agencyPath} className={linkClass(agencyPath)}>
         Agência
       </Link>
+      {user.role === "ADMIN" ? (
+        <Link to="/app/admin/cursos" className={linkClass("/app/admin/cursos")}>
+          Cursos (admin)
+        </Link>
+      ) : null}
     </nav>
   );
 }
