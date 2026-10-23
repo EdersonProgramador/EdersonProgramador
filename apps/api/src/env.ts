@@ -48,9 +48,9 @@ const envSchema = z
     ADMIN_PASSWORD: z.preprocess((value) => {
       if (typeof value !== "string") return undefined;
       const trimmed = value.trim();
-      if (trimmed.length < 12) return undefined;
+      if (trimmed.length < 6) return undefined;
       return trimmed;
-    }, z.string().min(12).optional()),
+    }, z.string().min(6).optional()),
     ADMIN_NAME: z.string().default("Ederson Programador"),
     ADMIN_BOOTSTRAP: z
       .preprocess((value) => value === "true" || value === "1", z.boolean())

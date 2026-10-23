@@ -46,7 +46,7 @@ O repositório inclui [`render.yaml`](render.yaml) (projeto **edersonprogramador
 1. [Render Dashboard](https://dashboard.render.com/) → **New** → **Blueprint** → conecte `EdersonProgramador/EdersonProgramador`.
 2. Antes do primeiro deploy, defina no serviço **ederson-agencia-api** (secrets, não commitar):
    - `ADMIN_EMAIL` — e-mail do admin
-   - `ADMIN_PASSWORD` — senha forte (mín. 12 caracteres)
+   - `ADMIN_PASSWORD` — mesma senha do login (mín. 6; recomendado 12+)
 3. Aguarde o deploy; copie a URL pública (ex.: `https://ederson-agencia-api.onrender.com`).
 4. Teste: `GET https://…/health` → `{ "status": "ok" }`.
 5. **Vercel** → Settings → Environment Variables:

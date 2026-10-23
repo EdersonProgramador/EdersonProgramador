@@ -11,7 +11,7 @@ export async function ensureSeedAdmin(log: FastifyBaseLogger) {
 
   if (!env.ADMIN_EMAIL || !env.ADMIN_PASSWORD) {
     log.warn(
-      "ADMIN_BOOTSTRAP ativo, mas ADMIN_EMAIL/ADMIN_PASSWORD ausentes ou inválidos (senha ≥ 12 no Render) — nenhum admin criado."
+      "ADMIN_BOOTSTRAP ativo, mas ADMIN_EMAIL/ADMIN_PASSWORD ausentes ou inválidos (e-mail válido, senha ≥ 6) — nenhum admin criado."
     );
     return;
   }
@@ -21,13 +21,16 @@ export async function ensureSeedAdmin(log: FastifyBaseLogger) {
   const existing = await prisma.user.findUnique({ where: { email } });
 
   if (existing) {
-    if (existing.role === "ADMIN") {
-      await prisma.user.update({
-        where: { email },
-        data: { passwordHash, name: env.ADMIN_NAME }
-      });
-      log.info({ email }, "Admin existente: senha sincronizada com ADMIN_PASSWORD do ambiente.");
-    }
+    await prisma.user.update({
+      where: { email },
+      data: {
+        passwordHash,
+        name: env.ADMIN_NAME,
+        role: "ADMIN",
+        status: "ACTIVE"
+      }
+    });
+    log.info({ email }, "Admin existente: role/senha sincronizados com o ambiente.");
     return;
   }
 

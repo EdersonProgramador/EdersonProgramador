@@ -54,18 +54,26 @@ app.get("/health", async () => {
   } catch {
     /* banco indisponível no health check */
   }
-  return { status: "ok", service: "ederson-agencia-api", adminUsers };
+  return {
+    status: "ok",
+    service: "ederson-agencia-api",
+    adminUsers,
+    adminBootstrap: env.ADMIN_BOOTSTRAP,
+    adminEnvReady: Boolean(env.ADMIN_EMAIL && env.ADMIN_PASSWORD)
+  };
 });
 
 await registerPublicRoutes(app);
 await registerAuthRoutes(app);
 await registerAgencyRoutes(app);
 
+try {
+  await ensureSeedAdmin(app.log);
+} catch (err) {
+  app.log.warn({ err }, "Bootstrap do admin não concluído (verifique ADMIN_EMAIL, ADMIN_PASSWORD e o banco)");
+}
+
 const port = env.API_PORT;
 const host = "0.0.0.0";
 await app.listen({ port, host });
 app.log.info(`API em http://${host}:${port}`);
-
-void ensureSeedAdmin(app.log).catch((err) => {
-  app.log.warn({ err }, "Bootstrap do admin não concluído (verifique ADMIN_EMAIL, ADMIN_PASSWORD e o banco)");
-});
