@@ -52,9 +52,11 @@ await registerPublicRoutes(app);
 await registerAuthRoutes(app);
 await registerAgencyRoutes(app);
 
-await ensureSeedAdmin();
-
 const port = env.API_PORT;
 const host = "0.0.0.0";
 await app.listen({ port, host });
 app.log.info(`API em http://${host}:${port}`);
+
+void ensureSeedAdmin().catch((err) => {
+  app.log.warn({ err }, "Bootstrap do admin não concluído (verifique ADMIN_EMAIL, ADMIN_PASSWORD e o banco)");
+});

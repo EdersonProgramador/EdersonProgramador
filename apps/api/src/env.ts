@@ -4,21 +4,24 @@ import { fileURLToPath } from "node:url";
 import { config } from "dotenv";
 import { z } from "zod";
 
-const moduleDir = dirname(fileURLToPath(import.meta.url));
-const envCandidates = [
-  resolve(moduleDir, "../../../../.env"),
-  resolve(moduleDir, "../../../.env"),
-  resolve(process.cwd(), "../../.env"),
-  resolve(process.cwd(), ".env")
-];
+const nodeEnv = (process.env.NODE_ENV ?? "development") as "development" | "test" | "production";
 
-for (const envPath of [...new Set(envCandidates)]) {
-  if (existsSync(envPath)) {
-    config({ path: envPath, override: true });
+// Em produção (Render), use só variáveis do painel — não sobrescreva com .env local do build.
+if (nodeEnv !== "production") {
+  const moduleDir = dirname(fileURLToPath(import.meta.url));
+  const envCandidates = [
+    resolve(moduleDir, "../../../../.env"),
+    resolve(moduleDir, "../../../.env"),
+    resolve(process.cwd(), "../../.env"),
+    resolve(process.cwd(), ".env")
+  ];
+
+  for (const envPath of [...new Set(envCandidates)]) {
+    if (existsSync(envPath)) {
+      config({ path: envPath, override: true });
+    }
   }
 }
-
-const nodeEnv = (process.env.NODE_ENV ?? "development") as "development" | "test" | "production";
 
 const envSchema = z
   .object({
@@ -36,14 +39,18 @@ const envSchema = z
       if (nodeEnv === "production") return undefined;
       return "dev-only-jwt-secret-min-16-chars";
     }, z.string().min(16)),
-    ADMIN_EMAIL: z.preprocess(
-      (value) => (typeof value === "string" && value.trim() ? value.trim().toLowerCase() : undefined),
-      z.string().email().optional()
-    ),
-    ADMIN_PASSWORD: z.preprocess(
-      (value) => (typeof value === "string" && value.trim() ? value.trim() : undefined),
-      z.string().min(12).optional()
-    ),
+    ADMIN_EMAIL: z.preprocess((value) => {
+      if (typeof value !== "string") return undefined;
+      const trimmed = value.trim().toLowerCase();
+      if (!trimmed) return undefined;
+      return z.string().email().safeParse(trimmed).success ? trimmed : undefined;
+    }, z.string().email().optional()),
+    ADMIN_PASSWORD: z.preprocess((value) => {
+      if (typeof value !== "string") return undefined;
+      const trimmed = value.trim();
+      if (trimmed.length < 12) return undefined;
+      return trimmed;
+    }, z.string().min(12).optional()),
     ADMIN_NAME: z.string().default("Ederson Programador"),
     ADMIN_BOOTSTRAP: z
       .preprocess((value) => value === "true" || value === "1", z.boolean())
@@ -72,4 +79,13 @@ const envSchema = z
     }
   });
 
-export const env = envSchema.parse(process.env);
+const parsed = envSchema.safeParse(process.env);
+if (!parsed.success) {
+  console.error("Configuração de ambiente inválida:");
+  for (const issue of parsed.error.issues) {
+    console.error(`  - ${issue.path.join(".") || "(root)"}: ${issue.message}`);
+  }
+  process.exit(1);
+}
+
+export const env = parsed.data;
