@@ -1,6 +1,6 @@
 # Ederson Programador — Site & Portal
 
-Monorepo com landing comercial e portal autenticado (web + API).
+Monorepo com landing comercial, **portal da agência** (projetos/contrato) e **área de cursos** internos (FL + futuros), web + API.
 
 ## Requisitos
 
@@ -58,6 +58,23 @@ O repositório inclui [`render.yaml`](render.yaml) (projeto **edersonprogramador
 No **plano free**, as migrations rodam no **start** do serviço (não há `preDeployCommand`).
 
 **Local:** a API usa **PostgreSQL** (não SQLite). Suba um Postgres local ou use a URL do Render só em dev se preferir.
+
+## Portal logado (Agência + Cursos)
+
+Após login → **`/app`** (hub):
+
+| Área | Rotas | Função |
+|------|--------|--------|
+| **Cursos** | `/app/cursos`, `/app/cursos/fl-formula-de-lancamento/…` | Trilha FL (341 aulas), progresso na conta |
+| **Agência** | `/app/admin`, `/app/cliente`, `/app/freelancer` | Leads, projetos, fases do contrato |
+
+Conteúdo FL: `packages/courses-fl/data/` (importado do portal `Desktop/FL`). Vídeos/PDFs **não** vão para o Git — configure na API:
+
+```env
+FL_MEDIA_ROOT=C:\Users\EDERSON\Desktop\FL\media
+```
+
+Compras futuras (PIX/cartão/boleto): modelo `CourseOrder` + `POST /courses/:slug/checkout` (stub 501 até integrar gateway).
 
 ## Segurança
 

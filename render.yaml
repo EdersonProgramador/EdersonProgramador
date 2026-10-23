@@ -43,5 +43,8 @@ projects:
                 sync: false
               - key: ADMIN_PASSWORD
                 sync: false
-              - key: ADMIN_NAME
-                value: Ederson Programador
+      - key: ADMIN_NAME
+        value: Ederson Programador
+      # Opcional: disco persistente montado em /var/data/fl-media (vídeos/PDFs do curso FL)
+      # - key: FL_MEDIA_ROOT
+      #   value: /var/data/fl-media

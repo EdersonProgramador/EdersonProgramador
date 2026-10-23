@@ -23,6 +23,70 @@ model User {
   clientProjects     Project[] @relation("ClientProjects")
   freelancerProjects Project[] @relation("FreelancerProjects")
   leadsAssigned      Lead[]
+  courseEnrollments  CourseEnrollment[]
+  lessonProgress     LessonProgress[]
+  courseOrders       CourseOrder[]
+}
+
+model Course {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  summary     String?
+  status      String   @default("DRAFT")
+  visibility  String   @default("INTERNAL")
+  priceCents  Int?
+  currency    String   @default("BRL")
+  contentKey  String?
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  enrollments CourseEnrollment[]
+  progress    LessonProgress[]
+  orders      CourseOrder[]
+}
+
+model CourseEnrollment {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId  String
+  course    Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  source    String    @default("INTERNAL")
+  status    String    @default("ACTIVE")
+  orderId   String?
+  createdAt DateTime  @default(now())
+  expiresAt DateTime?
+
+  @@unique([userId, courseId])
+}
+
+model LessonProgress {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId    String
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessonSlug  String
+  completedAt DateTime @default(now())
+
+  @@unique([userId, courseId, lessonSlug])
+}
+
+model CourseOrder {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId      String
+  course        Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  amountCents   Int
+  status        String    @default("PENDING")
+  paymentMethod String?
+  provider      String?
+  providerRef   String?
+  createdAt     DateTime  @default(now())
+  paidAt        DateTime?
 }
 
 model Lead {

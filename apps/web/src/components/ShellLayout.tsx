@@ -1,6 +1,7 @@
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { LogOut } from "lucide-react";
-import { homePathForRole } from "@ederson-agencia/shared";
+import { portalHomePath } from "@ederson-agencia/shared";
+import { PortalNav } from "./portal/PortalNav";
 import { BrandLogo } from "./brand/BrandLogo";
 import { useAuthStore } from "../stores/authStore";
 
@@ -19,11 +20,12 @@ export function ShellLayout({ title }: { title: string }) {
             </Link>
             <p className="mt-1.5 pl-11 text-xs text-white/50">{title}</p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center justify-end gap-3">
             {user ? (
               <>
-                <Link to={homePathForRole(user.role)} className="text-sm text-white/80 hover:text-white">
-                  Painel
+                <PortalNav user={user} />
+                <Link to={portalHomePath()} className="hidden text-sm text-white/80 hover:text-white sm:inline">
+                  Portal
                 </Link>
                 <span className="hidden text-sm text-white/60 sm:inline">{user.name}</span>
                 <button

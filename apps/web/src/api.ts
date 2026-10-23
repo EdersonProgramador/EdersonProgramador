@@ -56,4 +56,17 @@ export async function apiPatch<T>(url: string, body?: unknown): Promise<T> {
   return data;
 }
 
+export async function apiPut<T>(url: string, body?: unknown): Promise<T> {
+  const { data } = await client.put<T>(url, body);
+  return data;
+}
+
+/** URL absoluta para mídia servida pela API (vídeos/PDFs dos cursos). */
+export function apiAssetUrl(path: string): string {
+  if (path.startsWith("http://") || path.startsWith("https://")) return path;
+  const base = (import.meta.env.VITE_API_URL ?? "").replace(/\/$/, "");
+  const normalized = path.startsWith("/") ? path : `/${path}`;
+  return base ? `${base}${normalized}` : normalized;
+}
+
 export type LoginResponse = { token: string; user: AuthUser; homePath: string };

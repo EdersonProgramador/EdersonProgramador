@@ -9,7 +9,12 @@ export type AuthUser = {
   github?: string | null;
 };
 
-export function homePathForRole(role: AgencyRole): string {
+/** Hub após login (Agência + Cursos). */
+export function portalHomePath(): string {
+  return "/app";
+}
+
+export function agencyHomePathForRole(role: AgencyRole): string {
   switch (role) {
     case "ADMIN":
       return "/app/admin";
@@ -19,6 +24,11 @@ export function homePathForRole(role: AgencyRole): string {
     default:
       return "/app/cliente";
   }
+}
+
+/** @deprecated Prefer portalHomePath — mantido para compatibilidade. */
+export function homePathForRole(role: AgencyRole): string {
+  return portalHomePath();
 }
 
 export const CONTRACT_DEFAULTS = {

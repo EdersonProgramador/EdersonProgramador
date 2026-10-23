@@ -6,7 +6,9 @@ import { ZodError } from "zod";
 import { env } from "./env.js";
 import { registerAgencyRoutes } from "./modules/agency.routes.js";
 import { registerAuthRoutes } from "./modules/auth.routes.js";
+import { registerCoursesRoutes } from "./modules/courses.routes.js";
 import { registerPublicRoutes } from "./modules/public.routes.js";
+import { ensureSeedCourses } from "./seed-courses.js";
 import { prisma } from "./prisma.js";
 import { ensureSeedAdmin } from "./seed-admin.js";
 
@@ -66,11 +68,18 @@ app.get("/health", async () => {
 await registerPublicRoutes(app);
 await registerAuthRoutes(app);
 await registerAgencyRoutes(app);
+await registerCoursesRoutes(app);
 
 try {
   await ensureSeedAdmin(app.log);
 } catch (err) {
   app.log.warn({ err }, "Bootstrap do admin não concluído (verifique ADMIN_EMAIL, ADMIN_PASSWORD e o banco)");
+}
+
+try {
+  await ensureSeedCourses(app.log);
+} catch (err) {
+  app.log.warn({ err }, "Seed de cursos não concluído");
 }
 
 const port = env.API_PORT;

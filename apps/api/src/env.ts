@@ -57,7 +57,11 @@ const envSchema = z
       .default(false),
     SEED_DEMO_USERS: z
       .preprocess((value) => value === "true" || value === "1", z.boolean())
-      .default(false)
+      .default(false),
+    FL_MEDIA_ROOT: z.preprocess(
+      (value) => (typeof value === "string" && value.trim() ? value.trim() : undefined),
+      z.string().optional()
+    )
   })
   .superRefine((data, ctx) => {
     if (data.NODE_ENV !== "production") return;

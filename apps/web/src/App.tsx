@@ -1,19 +1,15 @@
 import { useEffect } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
-import { homePathForRole } from "@ederson-agencia/shared";
 import { setUnauthorizedHandler } from "./api";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { ShellLayout } from "./components/ShellLayout";
 import { LandingPage } from "./pages/LandingPage";
 import { LoginPage } from "./pages/LoginPage";
+import { AppHubPage } from "./pages/AppHubPage";
+import { CourseStudyPage } from "./pages/CourseStudyPage";
+import { CoursesCatalogPage } from "./pages/CoursesCatalogPage";
 import { AdminDashboard, ClientDashboard, FreelancerDashboard } from "./pages/DashboardPages";
 import { useAuthStore } from "./stores/authStore";
-
-function AppHomeRedirect() {
-  const user = useAuthStore((s) => s.user);
-  if (!user) return <Navigate to="/login" replace />;
-  return <Navigate to={homePathForRole(user.role)} replace />;
-}
 
 export default function App() {
   const bootstrap = useAuthStore((s) => s.bootstrap);
@@ -32,7 +28,14 @@ export default function App() {
       </Route>
 
       <Route path="/app" element={<ProtectedRoute />}>
-        <Route index element={<AppHomeRedirect />} />
+        <Route index element={<AppHubPage />} />
+        <Route path="cursos/:courseSlug/*" element={<CourseStudyPage />} />
+      </Route>
+
+      <Route element={<ProtectedRoute />}>
+        <Route element={<ShellLayout title="Cursos" />}>
+          <Route path="/app/cursos" element={<CoursesCatalogPage />} />
+        </Route>
       </Route>
 
       <Route element={<ProtectedRoute roles={["ADMIN"]} />}>
