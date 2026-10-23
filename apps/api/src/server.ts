@@ -7,6 +7,7 @@ import { env } from "./env.js";
 import { registerAgencyRoutes } from "./modules/agency.routes.js";
 import { registerAuthRoutes } from "./modules/auth.routes.js";
 import { registerPublicRoutes } from "./modules/public.routes.js";
+import { prisma } from "./prisma.js";
 import { ensureSeedAdmin } from "./seed-admin.js";
 
 const app = Fastify({
@@ -46,7 +47,15 @@ app.setErrorHandler((error, _request, reply) => {
   return reply.code(statusCode).send({ message: error.message || "Erro interno." });
 });
 
-app.get("/health", async () => ({ status: "ok", service: "ederson-agencia-api" }));
+app.get("/health", async () => {
+  let adminUsers = 0;
+  try {
+    adminUsers = await prisma.user.count({ where: { role: "ADMIN" } });
+  } catch {
+    /* banco indisponível no health check */
+  }
+  return { status: "ok", service: "ederson-agencia-api", adminUsers };
+});
 
 await registerPublicRoutes(app);
 await registerAuthRoutes(app);
@@ -57,6 +66,6 @@ const host = "0.0.0.0";
 await app.listen({ port, host });
 app.log.info(`API em http://${host}:${port}`);
 
-void ensureSeedAdmin().catch((err) => {
+void ensureSeedAdmin(app.log).catch((err) => {
   app.log.warn({ err }, "Bootstrap do admin não concluído (verifique ADMIN_EMAIL, ADMIN_PASSWORD e o banco)");
 });
