@@ -16,7 +16,16 @@ if (!source) {
 }
 
 mkdirSync(target, { recursive: true });
-for (const name of readdirSync(source).filter((f) => f.endsWith(".json"))) {
+const preferred = [
+  "curriculum.json",
+  "lesson-notes.json",
+  "bonus-content.json",
+  "video-manifest.json",
+  "telegram-config.json",
+  "telegram-message-map.json"
+];
+const files = readdirSync(source).filter((f) => f.endsWith(".json"));
+for (const name of [...new Set([...preferred, ...files])].filter((f) => files.includes(f))) {
   copyFileSync(join(source, name), join(target, name));
   console.log("copied", name);
 }

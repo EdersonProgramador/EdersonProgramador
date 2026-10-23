@@ -1,0 +1,9 @@
+{
+  "enabled": true,
+  "baseUrl": "https://t.me/c/2196552504",
+  "startMessageId": 355,
+  "sumarioMessageId": 355,
+  "mapping": "sequential",
+  "note": "O site carrega data/telegram-message-map.json (IDs reais por #Fxxx). Ordem: overrides → mapa → startMessageId + order.",
+  "overrides": {}
+}

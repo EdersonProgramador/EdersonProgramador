@@ -100,6 +100,8 @@ export async function registerCoursesRoutes(app: FastifyInstance) {
       lessonNotes: bundle.lessonNotes,
       bonusContent: bundle.bonusContent,
       videoManifest: { ...videoManifest, files },
+      telegram: bundle.telegram,
+      telegramMessageMap: bundle.telegramMessageMap,
       completedSlugs: progress.map((p) => p.lessonSlug)
     };
   });

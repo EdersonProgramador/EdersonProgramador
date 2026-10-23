@@ -4,6 +4,12 @@ import { ChevronLeft, ChevronRight, LogOut, Menu } from "lucide-react";
 import { PortalNav } from "../components/portal/PortalNav";
 import { BrandLogo } from "../components/brand/BrandLogo";
 import { apiAssetUrl, apiGet, apiPut } from "../api";
+import {
+  telegramLessonUrl,
+  telegramMessageId,
+  telegramSumarioUrl,
+  type TelegramConfig
+} from "../courses/telegram";
 import { useAuthStore } from "../stores/authStore";
 import "../styles/course-study.css";
 
@@ -36,6 +42,8 @@ type CoursePayload = {
   lessonNotes: Record<string, { html?: string; displayTitle?: string }>;
   bonusContent: { slug: string; title: string; html?: string }[];
   videoManifest: { total: number; present: number; files: Record<string, string> };
+  telegram: TelegramConfig;
+  telegramMessageMap: Record<string, number>;
   completedSlugs: string[];
 };
 
@@ -216,8 +224,9 @@ export function CourseStudyPage() {
               <h2 className="text-2xl font-bold">{payload.course.title}</h2>
               {payload.course.summary ? <p className="mt-3 text-white/70">{payload.course.summary}</p> : null}
               <p className="mt-4 text-sm text-white/50">
-                Vídeos no servidor: {payload.videoManifest.present} / {payload.videoManifest.total}. Configure{" "}
-                <code className="text-brand-primary">FL_MEDIA_ROOT</code> na API para streaming local.
+                Vídeos locais: {payload.videoManifest.present} / {payload.videoManifest.total}. Enquanto não baixar os
+                arquivos, use <strong className="text-white/70">Abrir no Telegram</strong> em cada aula (canal com
+                acesso).
               </p>
               {items[0] ? (
                 <button type="button" className="btn-primary mt-6" onClick={() => goLesson(items[0].slug)}>
@@ -238,8 +247,8 @@ export function CourseStudyPage() {
               note={payload.lessonNotes[activeItem.slug]}
               documentBase={payload.curriculum.documentBase}
               videoSrc={videoFile(activeItem.id) ? apiAssetUrl(videoFile(activeItem.id)!) : null}
-              videoFallbackBase={apiAssetUrl(payload.curriculum.mediaBase)}
-              videoExtensions={payload.curriculum.videoExtensions}
+              telegram={payload.telegram}
+              telegramMessageMap={payload.telegramMessageMap}
               done={completed.has(activeItem.slug)}
               onToggleDone={(d) => void toggleDone(activeItem.slug, d)}
             />
@@ -332,7 +341,7 @@ function TocTree({
                       onClick={() => onSelect(item.slug)}
                     >
                       <span className="font-mono text-brand-primary">{item.id}</span>
-                      {hasVideo(item.id) ? " ▶" : ""}
+                      {hasVideo(item.id) ? " ▶" : " 📱"}
                     </button>
                   </li>
                 ))}
@@ -363,13 +372,56 @@ function TocTree({
   );
 }
 
+function TelegramPanel({
+  item,
+  telegram,
+  messageMap,
+  primary
+}: {
+  item: CurriculumItem;
+  telegram: TelegramConfig;
+  messageMap: Record<string, number>;
+  primary?: boolean;
+}) {
+  const url = telegramLessonUrl(item, telegram, messageMap);
+  const sumario = telegramSumarioUrl(telegram);
+  if (!url) return null;
+  const msgId = telegramMessageId(item, telegram, messageMap);
+
+  return (
+    <section
+      className={`course-study__telegram ${primary ? "course-study__telegram--primary" : ""}`}
+      aria-label="Aula no Telegram"
+    >
+      <p className="text-sm text-white/75">
+        {primary
+          ? "Assista esta aula no canal privado do Telegram (conta logada e com acesso ao grupo)."
+          : "Backup: mesma aula no Telegram."}
+      </p>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <a className="btn-primary" href={url} target="_blank" rel="noopener noreferrer">
+          Abrir no Telegram
+        </a>
+        {sumario ? (
+          <a className="btn-secondary" href={sumario} target="_blank" rel="noopener noreferrer">
+            Sumário
+          </a>
+        ) : null}
+      </div>
+      <p className="mt-2 text-xs text-white/45">
+        Mensagem <code className="text-brand-primary">{msgId}</code> · {item.id}
+      </p>
+    </section>
+  );
+}
+
 function LessonPanel({
   item,
   note,
   documentBase,
   videoSrc,
-  videoFallbackBase,
-  videoExtensions,
+  telegram,
+  telegramMessageMap,
   done,
   onToggleDone
 }: {
@@ -377,13 +429,14 @@ function LessonPanel({
   note?: { html?: string; displayTitle?: string };
   documentBase: string;
   videoSrc: string | null;
-  videoFallbackBase: string;
-  videoExtensions: string[];
+  telegram: TelegramConfig;
+  telegramMessageMap: Record<string, number>;
   done: boolean;
   onToggleDone: (done: boolean) => void;
 }) {
   const title = note?.displayTitle ?? item.title;
   const pdfUrl = `${documentBase}/${item.id}.pdf`;
+  const useTelegramPrimary = !videoSrc && telegram.enabled;
 
   return (
     <article className="panel p-6 md:p-8">
@@ -392,35 +445,24 @@ function LessonPanel({
       <p className="mt-1 font-mono text-sm text-brand-primary">{item.id}</p>
 
       {item.type === "document" ? (
-        <div className="mt-6">
-          <object data={pdfUrl} type="application/pdf" className="h-[70vh] w-full rounded-lg bg-white/5">
-            <p className="text-sm text-white/60">
-              PDF não disponível no servidor. Configure mídia ou use material em{" "}
-              <a className="text-brand-primary underline" href={pdfUrl} target="_blank" rel="noreferrer">
-                abrir link
-              </a>
-              .
-            </p>
+        <div className="mt-6 space-y-4">
+          <object data={pdfUrl} type="application/pdf" className="h-[50vh] w-full rounded-lg bg-white/5">
+            <p className="text-sm text-white/60">PDF local indisponível — use o Telegram abaixo.</p>
           </object>
+          <TelegramPanel item={item} telegram={telegram} messageMap={telegramMessageMap} primary />
         </div>
       ) : (
-        <div className="mt-6">
+        <div className="mt-6 space-y-4">
           {videoSrc ? (
             <video controls playsInline preload="metadata" className="w-full rounded-lg bg-black">
               <source src={videoSrc} type="video/mp4" />
             </video>
-          ) : (
-            <div className="rounded-lg border border-dashed border-white/20 p-6 text-sm text-white/60">
-              Vídeo ainda não hospedado na API. Coloque arquivos em{" "}
-              <code className="text-brand-primary">FL_MEDIA_ROOT</code> ou importe do Telegram (projeto Desktop/FL).
-              {videoExtensions.map((ext) => (
-                <span key={ext} className="ml-1 font-mono text-xs">
-                  {videoFallbackBase}/{item.id}
-                  {ext}
-                </span>
-              ))}
-            </div>
-          )}
+          ) : null}
+          {useTelegramPrimary ? (
+            <TelegramPanel item={item} telegram={telegram} messageMap={telegramMessageMap} primary />
+          ) : videoSrc ? (
+            <TelegramPanel item={item} telegram={telegram} messageMap={telegramMessageMap} />
+          ) : null}
         </div>
       )}
 

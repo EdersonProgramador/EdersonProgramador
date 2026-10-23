@@ -69,11 +69,27 @@ export type FlVideoManifest = {
   files: Record<string, string>;
 };
 
+export type FlTelegramConfig = {
+  enabled: boolean;
+  baseUrl: string;
+  startMessageId: number;
+  sumarioMessageId?: number;
+  overrides?: Record<string, number>;
+};
+
+function readJsonOptional<T>(name: string, fallback: T): T {
+  const path = resolve(dataDir(), name);
+  if (!existsSync(path)) return fallback;
+  return readJson<T>(name);
+}
+
 let cache: {
   curriculum: FlCurriculum;
   lessonNotes: Record<string, FlLessonNote>;
   bonusContent: FlBonusItem[];
   videoManifest: FlVideoManifest;
+  telegram: FlTelegramConfig;
+  telegramMessageMap: Record<string, number>;
 } | null = null;
 
 export function loadFlBundle() {
@@ -82,7 +98,15 @@ export function loadFlBundle() {
     curriculum: readJson("curriculum.json"),
     lessonNotes: readJson("lesson-notes.json"),
     bonusContent: readJson("bonus-content.json"),
-    videoManifest: readJson("video-manifest.json")
+    videoManifest: readJson("video-manifest.json"),
+    telegram: readJsonOptional("telegram-config.json", {
+      enabled: true,
+      baseUrl: "https://t.me/c/2196552504",
+      startMessageId: 355,
+      sumarioMessageId: 355,
+      overrides: {}
+    }),
+    telegramMessageMap: readJsonOptional("telegram-message-map.json", {})
   };
   return cache;
 }
