@@ -1,4 +1,4 @@
-import { useMemo, useSyncExternalStore } from "react";
+import { useMemo, useSyncExternalStore, type Ref } from "react";
 import { MARKETING_COPY } from "@ederson-agencia/shared";
 import { useInView } from "../../hooks/useInView";
 import { parseStatValue, useCountUp } from "../../hooks/useCountUp";
@@ -43,7 +43,8 @@ type HeroStatItemProps = {
 };
 
 function HeroStatItem({ stat, index, tone }: HeroStatItemProps) {
-  const { ref, inView } = useInView<HTMLElement>({ threshold: 0.35, rootMargin: "0px 0px -5% 0px" });
+  const { ref, inView } = useInView({ threshold: 0.35, rootMargin: "0px 0px -5% 0px" });
+  const attachRef = ref as Ref<HTMLAnchorElement & HTMLDivElement>;
   const className = `hero-stat glass-metric group ${tone}`;
   const style = { animationDelay: `${index * 100}ms` };
   const ariaLabel = `${stat.value} — ${stat.label}. ${stat.emphasis ?? ""}`;
@@ -63,7 +64,7 @@ function HeroStatItem({ stat, index, tone }: HeroStatItemProps) {
   if (stat.href) {
     return (
       <a
-        ref={ref}
+        ref={attachRef}
         href={stat.href}
         role="listitem"
         aria-label={ariaLabel}
@@ -76,7 +77,7 @@ function HeroStatItem({ stat, index, tone }: HeroStatItemProps) {
   }
 
   return (
-    <div ref={ref} role="listitem" aria-label={ariaLabel} className={className} style={style}>
+    <div ref={attachRef} role="listitem" aria-label={ariaLabel} className={className} style={style}>
       {content}
     </div>
   );

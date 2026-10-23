@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { apiGet, apiPatch, apiPost } from "../api";
+import "../styles/course-study.css";
 
 type AdminCourse = {
   id: string;
@@ -15,12 +16,26 @@ type AdminCourse = {
   enrollments: number;
 };
 
-const emptyForm = {
+type CourseStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
+type CourseVisibility = "INTERNAL" | "PUBLIC_SALE";
+
+type CourseForm = {
+  slug: string;
+  title: string;
+  summary: string;
+  status: CourseStatus;
+  visibility: CourseVisibility;
+  priceCents: string;
+  contentKey: string;
+  sortOrder: string;
+};
+
+const emptyForm: CourseForm = {
   slug: "",
   title: "",
   summary: "",
-  status: "DRAFT" as const,
-  visibility: "INTERNAL" as const,
+  status: "DRAFT",
+  visibility: "INTERNAL",
   priceCents: "",
   contentKey: "",
   sortOrder: "0"
@@ -105,13 +120,13 @@ export function AdminCoursesPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="courses-academy space-y-8">
       <div>
         <Link to="/app/admin" className="text-sm text-brand-primary hover:underline">
           ← Administração
         </Link>
-        <h1 className="mt-2 text-3xl font-bold">Gestão da academia</h1>
-        <p className="text-white/60">
+        <h1 className="mt-2 text-3xl font-bold text-white">Gestão da academia</h1>
+        <p className="course-text-muted text-sm leading-relaxed">
           Publique trilhas para o time ou prepare cursos para venda (pagamento online será ligado depois dos testes).
         </p>
       </div>
@@ -144,7 +159,11 @@ export function AdminCoursesPage() {
             value={form.summary}
             onChange={(e) => setForm((f) => ({ ...f, summary: e.target.value }))}
           />
-          <select className="input" value={form.status} onChange={(e) => setForm((f) => ({ ...f, status: e.target.value as typeof f.status }))}>
+          <select
+            className="input"
+            value={form.status}
+            onChange={(e) => setForm((f) => ({ ...f, status: e.target.value as CourseStatus }))}
+          >
             <option value="DRAFT">Rascunho</option>
             <option value="PUBLISHED">Publicado</option>
             <option value="ARCHIVED">Arquivado</option>
@@ -152,7 +171,7 @@ export function AdminCoursesPage() {
           <select
             className="input"
             value={form.visibility}
-            onChange={(e) => setForm((f) => ({ ...f, visibility: e.target.value as typeof f.visibility }))}
+            onChange={(e) => setForm((f) => ({ ...f, visibility: e.target.value as CourseVisibility }))}
           >
             <option value="INTERNAL">Interno (time logado)</option>
             <option value="PUBLIC_SALE">Venda pública</option>
@@ -208,13 +227,13 @@ export function AdminCoursesPage() {
               <div>
                 <p className="font-medium">
                   {course.title}{" "}
-                  <span className="text-xs text-white/50">
+                  <span className="course-text-subtle text-xs">
                     · {course.status} · {course.visibility}
                   </span>
                 </p>
                 <p className="font-mono text-xs text-brand-primary">{course.slug}</p>
-                {course.summary ? <p className="mt-1 text-sm text-white/60">{course.summary}</p> : null}
-                <p className="mt-1 text-xs text-white/40">
+                {course.summary ? <p className="course-text-muted mt-1 text-sm">{course.summary}</p> : null}
+                <p className="course-text-faint mt-1 text-xs">
                   Matrículas: {course.enrollments} · contentKey: {course.contentKey ?? "—"}
                 </p>
               </div>
