@@ -366,18 +366,6 @@ html[data-theme="day"] .text-sky-200\/70 {
   color: #0284c7;
 }
 
-html[data-theme="day"] .section-ambient-bg .text-white,
-html[data-theme="day"] .section-ambient-bg .pro-headline,
-html[data-theme="day"] .cta-band .text-white,
-html[data-theme="day"] .pro-spotlight .text-white,
-html[data-theme="day"] .mesh-hero .text-white {
-  color: #f8fafc;
-}
-
-html[data-theme="day"] .section-ambient-bg [class*="text-white/"] {
-  color: rgb(248 250 252 / 0.88);
-}
-
 html[data-theme="day"] .site-nav nav[aria-label="Seções da página (mobile)"] {
   border-color: var(--app-border);
   background: rgb(255 255 255 / 0.85);
