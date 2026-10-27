@@ -382,19 +382,84 @@
   padding: 0.35rem 0.5rem 0.5rem;
 }
 
-.course-study__section + .course-study__section {
-  margin-top: 0.5rem;
-  padding-top: 0.5rem;
-  border-top: 1px dashed rgb(255 255 255 / 0.06);
+.course-study__section-block {
+  margin-top: 0.375rem;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  border: 1px solid var(--app-border);
+  background: var(--app-hover);
 }
 
-.course-study__section-label {
-  margin: 0.25rem 0.5rem 0.35rem;
+.course-study__section-block.is-section-complete {
+  border-color: rgb(52 211 153 / 0.2);
+}
+
+.course-study__section-block[open] {
+  background: rgb(255 255 255 / 0.04);
+}
+
+html[data-theme="day"] .course-study__section-block[open] {
+  background: rgb(241 245 249 / 0.95);
+}
+
+.course-study__section-summary {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  cursor: pointer;
+  list-style: none;
+  padding: 0.5rem 0.625rem;
+  user-select: none;
+}
+
+.course-study__section-summary::-webkit-details-marker {
+  display: none;
+}
+
+.course-study__section-summary-main {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: flex-start;
+  gap: 0.375rem;
+}
+
+.course-study__section-chevron {
+  margin-top: 0.1rem;
+  color: var(--course-faint);
+  transition: transform 0.2s ease;
+}
+
+.course-study__section-block[open] .course-study__section-chevron {
+  transform: rotate(180deg);
+  color: var(--course-muted);
+}
+
+.course-study__section-title {
   font-size: 0.6875rem;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  line-height: 1.35;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
+  color: var(--course-subtle);
+}
+
+.course-study__section-count {
+  flex-shrink: 0;
+  font-size: 0.625rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
   color: var(--course-faint);
+}
+
+.course-study__section-count.is-complete {
+  color: rgb(52 211 153 / 0.95);
+}
+
+.course-study__section-body {
+  border-top: 1px solid var(--app-border);
+  padding: 0.25rem 0.35rem 0.35rem;
 }
 
 .course-study__lesson-list {

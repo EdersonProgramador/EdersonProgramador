@@ -710,12 +710,18 @@ function TocTree({
               ) : (
                 sectionEntries.map(([sec, sectionLessons]) => {
                   const label = sectionLessons[0]?.sectionTitle ?? `Seção ${sec}`;
-                  const showLabel = sectionLabelDiffers(g, label);
+                  const sectionActive = sectionLessons.some((l) => l.slug === activeSlug);
+                  const sectionDone = countDone(sectionLessons, completed);
+                  const sectionTotal = sectionLessons.length;
                   return (
-                    <div key={sec} className="course-study__section">
-                      {showLabel ? <p className="course-study__section-label">{label}</p> : null}
-                      {renderLessonList(sectionLessons)}
-                    </div>
+                    <details
+                      key={sec}
+                      className={`course-study__section-block ${sectionDone === sectionTotal && sectionTotal > 0 ? "is-section-complete" : ""}`}
+                      open={sectionActive}
+                    >
+                      <SectionSummary title={label} done={sectionDone} total={sectionTotal} />
+                      <div className="course-study__section-body">{renderLessonList(sectionLessons)}</div>
+                    </details>
                   );
                 })
               )}
@@ -771,6 +777,22 @@ function TocTree({
         </details>
       ) : null}
     </div>
+  );
+}
+
+function SectionSummary({ title, done, total }: { title: string; done: number; total: number }) {
+  const complete = total > 0 && done === total;
+
+  return (
+    <summary className="course-study__section-summary">
+      <span className="course-study__section-summary-main">
+        <ChevronDown className="course-study__section-chevron h-3.5 w-3.5 shrink-0" aria-hidden />
+        <span className="course-study__section-title line-clamp-2">{title}</span>
+      </span>
+      <span className={`course-study__section-count ${complete ? "is-complete" : ""}`}>
+        {COURSES_UI.study.moduleProgress(done, total)}
+      </span>
+    </summary>
   );
 }
 
