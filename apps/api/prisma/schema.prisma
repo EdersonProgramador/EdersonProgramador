@@ -30,6 +30,7 @@ model User {
   lessonNotes        StudyLessonNote[]
   moduleFichamentos  StudyModuleFichamento[]
   courseFichamentos  StudyCourseFichamento[]
+  libraryReading     CourseLibraryReading[]
 }
 
 model Course {
@@ -55,6 +56,7 @@ model Course {
   studyLessonNotes  StudyLessonNote[]
   studyModuleFich   StudyModuleFichamento[]
   studyCourseFich   StudyCourseFichamento[]
+  libraryBooks      CourseLibraryBook[]
 }
 
 model CourseModule {
@@ -162,6 +164,43 @@ model StudyModuleFichamento {
   updatedAt    DateTime  @updatedAt
 
   @@unique([userId, courseId, moduleNumber])
+}
+
+model CourseLibraryBook {
+  id        String   @id @default(cuid())
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  slug      String
+  title     String
+  subtitle  String?
+  author    String?
+  summary   String?
+  coverUrl  String?
+  pdfUrl    String
+  pageCount Int?
+  sortOrder Int      @default(0)
+  status    String   @default("DRAFT")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  readings CourseLibraryReading[]
+
+  @@unique([courseId, slug])
+  @@index([courseId, sortOrder])
+}
+
+model CourseLibraryReading {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId  String
+  bookId    String
+  book      CourseLibraryBook @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  lastPage  Int      @default(1)
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, bookId])
+  @@index([userId, courseId])
 }
 
 model StudyCourseFichamento {

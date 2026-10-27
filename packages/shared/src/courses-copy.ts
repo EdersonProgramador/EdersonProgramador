@@ -98,6 +98,34 @@ export const COURSES_UI = {
     fichamentoSaving: "Salvando…",
     fichamentoOpenModule: "Fichamento do módulo",
     fichamentoOpenCourse: "Fichamento do curso",
-    fichamentoBackLesson: "Voltar às aulas"
+    fichamentoBackLesson: "Voltar às aulas",
+    libraryTitle: "Biblioteca digital",
+    librarySubtitle: "Livros e materiais em PDF deste curso",
+    libraryEmpty: "Nenhum livro publicado na biblioteca ainda.",
+    libraryOpen: "Abrir biblioteca",
+    libraryBack: "Voltar à biblioteca",
+    libraryBackCourse: "Voltar às aulas",
+    libraryAuthor: "Autor",
+    libraryContinue: "Continuar leitura",
+    libraryStart: "Começar leitura",
+    libraryPage: (current: number, total: number) => `Página ${current} de ${total}`,
+    libraryZoomIn: "Aumentar zoom",
+    libraryZoomOut: "Diminuir zoom",
+    libraryFitWidth: "Ajustar à largura",
+    libraryPrev: "Página anterior",
+    libraryNext: "Próxima página",
+    libraryLoading: "Carregando PDF…",
+    libraryLoadError: "Não foi possível carregar o PDF."
+  },
+  adminLibrary: {
+    heading: "Biblioteca digital",
+    hint: "Cadastre PDFs por URL pública (HTTPS). Cada curso tem sua própria biblioteca.",
+    addBook: "Adicionar livro",
+    slug: "Slug",
+    title: "Título",
+    author: "Autor",
+    pdfUrl: "URL do PDF",
+    publish: "Publicado",
+    draft: "Rascunho"
   }
 } as const;

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { AdminCourseLibraryPanel } from "../components/admin/AdminCourseLibraryPanel";
 import { apiDelete, apiGet, apiPatch, apiPost } from "../api";
 import "../styles/course-study.css";
 
@@ -305,6 +306,8 @@ export function AdminCourseContentPage() {
           </section>
         ))}
       </div>
+
+      <AdminCourseLibraryPanel courseId={courseId} />
     </div>
   );
 }

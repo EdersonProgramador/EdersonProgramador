@@ -9,6 +9,7 @@ import { registerAuthRoutes } from "./modules/auth.routes.js";
 import { registerCoursesAdminContentRoutes } from "./modules/courses-admin-content.routes.js";
 import { registerCoursesAdminRoutes } from "./modules/courses-admin.routes.js";
 import { registerCoursesRoutes } from "./modules/courses.routes.js";
+import { registerCourseLibraryRoutes } from "./modules/course-library.routes.js";
 import { registerFichamentoRoutes } from "./modules/fichamento.routes.js";
 import { registerPublicRoutes } from "./modules/public.routes.js";
 import { ensureSeedCourses } from "./seed-courses.js";
@@ -73,6 +74,7 @@ await registerAuthRoutes(app);
 await registerAgencyRoutes(app);
 await registerCoursesRoutes(app);
 await registerFichamentoRoutes(app);
+await registerCourseLibraryRoutes(app);
 await registerCoursesAdminRoutes(app);
 await registerCoursesAdminContentRoutes(app);
 

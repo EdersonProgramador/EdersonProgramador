@@ -31,7 +31,9 @@ import { ThemeToggle } from "../components/theme/ThemeToggle";
 import { useAuthStore } from "../stores/authStore";
 import { FichamentoWorkspace } from "../components/fichamento/FichamentoWorkspace";
 import { LessonFichamentoBlock } from "../components/fichamento/LessonFichamentoBlock";
+import { CourseLibraryView } from "../components/library/CourseLibraryView";
 import "../styles/course-certificate.css";
+import "../styles/course-library.css";
 import "../styles/course-study.css";
 import "../styles/fichamento-editor.css";
 
@@ -86,8 +88,18 @@ export function CourseStudyPage() {
   const isCourseFichamento = subPath === "fichamento/curso";
   const isCertificateView = subPath === "certificado";
   const isBonusPath = subPath.startsWith("bonus/");
+  const libraryBookMatch = subPath.match(/^biblioteca\/([^/]+)$/);
+  const libraryBookSlug = libraryBookMatch?.[1];
+  const isLibraryList = subPath === "biblioteca";
   const lessonSlug =
-    !isCertificateView && !moduleFichamentoMatch && !isCourseFichamento && !isBonusPath ? subPath : "";
+    !isCertificateView &&
+    !moduleFichamentoMatch &&
+    !isCourseFichamento &&
+    !isBonusPath &&
+    !isLibraryList &&
+    !libraryBookMatch
+      ? subPath
+      : "";
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const clearSession = useAuthStore((s) => s.clearSession);
@@ -292,6 +304,9 @@ export function CourseStudyPage() {
             <button type="button" className="btn-secondary mt-3 w-full text-sm" onClick={() => goLesson("fichamento/curso")}>
               {COURSES_UI.study.fichamentoOpenCourse}
             </button>
+            <button type="button" className="btn-secondary mt-2 w-full text-sm" onClick={() => goLesson("biblioteca")}>
+              {COURSES_UI.study.libraryOpen}
+            </button>
           </div>
           <nav className="course-study__toc" aria-label={COURSES_UI.study.curriculumHeading}>
             <p className="course-study__toc-heading">{COURSES_UI.study.curriculumHeading}</p>
@@ -339,7 +354,15 @@ export function CourseStudyPage() {
         ) : null}
 
         <main className="course-study__main">
-          {moduleFichamentoNum != null && courseSlug && payload ? (
+          {(isLibraryList || libraryBookSlug) && courseSlug ? (
+            <CourseLibraryView
+              courseSlug={courseSlug}
+              bookSlug={libraryBookSlug}
+              onOpenBook={(slug) => goLesson(`biblioteca/${slug}`)}
+              onBackToCourse={() => goLesson("")}
+              onBackToLibrary={() => goLesson("biblioteca")}
+            />
+          ) : moduleFichamentoNum != null && courseSlug && payload ? (
             <FichamentoWorkspace
               courseSlug={courseSlug}
               courseTitle={payload.course.title}
