@@ -1,0 +1,274 @@
+{
+  "slug": "praticas-leitura-escrita-academicas-usp",
+  "title": "Práticas de Leitura e Escrita Acadêmicas | Aulas USP",
+  "summary": "Disciplina da USP (FLF0506) sobre leitura e escrita acadêmicas nas humanidades. Aulas gravadas no 2º semestre de 2017 (Canal USP).",
+  "playlistUrl": "https://www.youtube.com/playlist?list=PLAudUnJeNg4vWJhEJ_da26C-QW5qiS7uZ",
+  "channel": "Canal USP",
+  "sortOrder": 2,
+  "introModule": {
+    "title": "Apresentação",
+    "lessons": [
+      {
+        "slug": "sobre-o-curso",
+        "title": "Sobre a disciplina e a playlist",
+        "lessonType": "article",
+        "bodyHtml": "<p>Trilha organizada a partir da playlist oficial do <strong>Canal USP</strong>. Os vídeos são reproduzidos via YouTube embutido.</p><p><a href=\"https://uspdigital.usp.br/jupiterweb/obterDisciplina?sgldis=FLF0506\" target=\"_blank\" rel=\"noopener noreferrer\">Programa FLF0506 na USP</a></p><p><a href=\"https://www.youtube.com/playlist?list=PLAudUnJeNg4vWJhEJ_da26C-QW5qiS7uZ\" target=\"_blank\" rel=\"noopener noreferrer\">Abrir playlist no YouTube</a></p><p>Esta disciplina é uma novidade na USP e pretende desenvolver nos estudantes, principalmente nos de Ciências Humanas, as competências e habilidades relacionadas às necessidades da leitura e da escrita tal como devem ser praticadas na vida acadêmica. Os professores vêm das áreas de História, Ciência Política, Letras e Filosofia.</p><p>Aulas gravadas durante o segundo semestre de 2017, no campus da Cidade Universitária.</p><p>Programa Resumido:</p><p>O curso almeja oferecer de modo sistemático e progressivo técnicas de leitura  e escrita voltadas para a formação na área de humanidades.</p><p>Mais informações - https://uspdigital.usp.br/jupiterweb/obterDisciplina?sgldis=FLF0506</p>"
+      }
+    ]
+  },
+  "modules": [
+    {
+      "title": "Aula 1: Objetivos e métodos",
+      "lessons": [
+        {
+          "slug": "aula-01-parte-1",
+          "title": "Objetivos e métodos (Aula 1, parte 1)",
+          "videoId": "IjfRa5t2W7Y",
+          "durationSeconds": 890
+        },
+        {
+          "slug": "aula-01-parte-2",
+          "title": "Objetivos e métodos (Aula 1, parte 2)",
+          "videoId": "LkGRTYHk0w0",
+          "durationSeconds": 1150
+        },
+        {
+          "slug": "aula-01-parte-3",
+          "title": "Objetivos e métodos (Aula 1, parte 3)",
+          "videoId": "yueICYG05Lc",
+          "durationSeconds": 1157
+        }
+      ]
+    },
+    {
+      "title": "Aula 2: Métodos de leitura",
+      "lessons": [
+        {
+          "slug": "aula-02-parte-1",
+          "title": "Métodos de leitura (Aula 2, parte 1)",
+          "videoId": "joRJ1PhqZiU",
+          "durationSeconds": 1584
+        },
+        {
+          "slug": "aula-02-parte-2",
+          "title": "Métodos de leitura (Aula 2, parte 2)",
+          "videoId": "TUkmM2R6Lfs",
+          "durationSeconds": 1674
+        },
+        {
+          "slug": "aula-02-parte-3",
+          "title": "Métodos de leitura (Aula 2, parte 3)",
+          "videoId": "2iHJpvWkfbU",
+          "durationSeconds": 1769
+        }
+      ]
+    },
+    {
+      "title": "Aula 3: Interpretação do texto Tempo e Espaço na Cultura Japonesa",
+      "lessons": [
+        {
+          "slug": "aula-03-parte-1",
+          "title": "Interpretação do texto Tempo e Espaço na Cultura Japonesa (Aula 3, parte 1)",
+          "videoId": "VP_YJBu1_cY",
+          "durationSeconds": 1702
+        },
+        {
+          "slug": "aula-03-parte-2",
+          "title": "Interpretação do texto Tempo e Espaço na Cultura Japonesa (Aula 3, parte 2)",
+          "videoId": "XxKg3YuA65w",
+          "durationSeconds": 2206
+        },
+        {
+          "slug": "aula-03-parte-3",
+          "title": "Interpretação do texto Tempo e Espaço na Cultura Japonesa (Aula 3, parte 3)",
+          "videoId": "OPTIrUnuh0Q",
+          "durationSeconds": 2530
+        }
+      ]
+    },
+    {
+      "title": "Aula 4: Projetos de pesquisa",
+      "lessons": [
+        {
+          "slug": "aula-04-parte-1",
+          "title": "Projetos de pesquisa (Aula 4, parte 1)",
+          "videoId": "QjJHLW4_--E",
+          "durationSeconds": 2087
+        },
+        {
+          "slug": "aula-04-parte-2",
+          "title": "Projetos de pesquisa (Aula 4, parte 2)",
+          "videoId": "qTVtFE72t2Q",
+          "durationSeconds": 1726
+        },
+        {
+          "slug": "aula-04-parte-3",
+          "title": "Projetos de pesquisa (Aula 4, parte 3)",
+          "videoId": "4c8WZpxhj7M",
+          "durationSeconds": 3078
+        }
+      ]
+    },
+    {
+      "title": "Aula 5: Introdução ao livro A Grande Transformação, de Karl Polanyi",
+      "lessons": [
+        {
+          "slug": "aula-05-parte-1",
+          "title": "Introdução ao livro A Grande Transformação, de Karl Polanyi (Aula 5, parte 1)",
+          "videoId": "KZoaUuHdshQ",
+          "durationSeconds": 1538
+        },
+        {
+          "slug": "aula-05-parte-2",
+          "title": "Introdução ao livro A Grande Transformação, de Karl Polanyi (Aula 5, parte 2)",
+          "videoId": "2Vu8E6_jUxU",
+          "durationSeconds": 1732
+        },
+        {
+          "slug": "aula-05-parte-3",
+          "title": "Introdução ao livro A Grande Transformação, de Karl Polanyi (Aula 5, parte 3)",
+          "videoId": "0vkxxmf23HU",
+          "durationSeconds": 1740
+        }
+      ]
+    },
+    {
+      "title": "Aula 6: Debate sobre o livro A Grande Transformação, de Karl Polanyi",
+      "lessons": [
+        {
+          "slug": "aula-06-parte-1",
+          "title": "Debate sobre o livro A Grande Transformação, de Karl Polanyi (Aula 6, parte 1)",
+          "videoId": "j9q0GPO91XI",
+          "durationSeconds": 1601
+        },
+        {
+          "slug": "aula-06-parte-2",
+          "title": "Debate sobre o livro A Grande Transformação, de Karl Polanyi (Aula 6, parte 2)",
+          "videoId": "rbXLJkQU-6o",
+          "durationSeconds": 1356
+        },
+        {
+          "slug": "aula-06-parte-3",
+          "title": "Debate sobre o livro A Grande Transformação, de Karl Polanyi (Aula 6, parte 3)",
+          "videoId": "FFemONxPgok",
+          "durationSeconds": 1401
+        }
+      ]
+    },
+    {
+      "title": "Aula 7: Análise de texto",
+      "lessons": [
+        {
+          "slug": "aula-07-parte-1",
+          "title": "Análise de texto (Aula 7, parte 1)",
+          "videoId": "5M_KBpZi-gY",
+          "durationSeconds": 1867
+        },
+        {
+          "slug": "aula-07-parte-2",
+          "title": "Análise de texto  (Aula 7, parte 2)",
+          "videoId": "Y2DAtgzPjUE",
+          "durationSeconds": 1851
+        },
+        {
+          "slug": "aula-07-parte-3",
+          "title": "Análise de texto  (Aula 7, parte 3)",
+          "videoId": "xsaLhS0Zb68",
+          "durationSeconds": 1648
+        }
+      ]
+    },
+    {
+      "title": "Aula 8: Fichamento de texto",
+      "lessons": [
+        {
+          "slug": "aula-08-parte-1",
+          "title": "Fichamento de texto (Aula 8, parte 1)",
+          "videoId": "R4Sag80pQ5Y",
+          "durationSeconds": 2008
+        },
+        {
+          "slug": "aula-08-parte-2",
+          "title": "Fichamento de texto (Aula 8, parte 2)",
+          "videoId": "O1kgtuh_9DM",
+          "durationSeconds": 2097
+        },
+        {
+          "slug": "aula-08-parte-3",
+          "title": "Fichamento de texto (Aula 8, parte 3)",
+          "videoId": "9OZq9j9gHHs",
+          "durationSeconds": 2480
+        }
+      ]
+    },
+    {
+      "title": "Aula 9: Teoria da Argumentação",
+      "lessons": [
+        {
+          "slug": "aula-09-parte-1",
+          "title": "Teoria da Argumentação (Aula 9, parte 1)",
+          "videoId": "MO8XWCsjNjY",
+          "durationSeconds": 2024
+        },
+        {
+          "slug": "aula-09-parte-2",
+          "title": "Teoria da Argumentação (Aula 9, parte 2)",
+          "videoId": "qWof1u74Fh4",
+          "durationSeconds": 2298
+        },
+        {
+          "slug": "aula-09-parte-3",
+          "title": "Teoria da Argumentação (Aula 9, parte 3)",
+          "videoId": "pgrsuB9jhWo",
+          "durationSeconds": 1987
+        }
+      ]
+    },
+    {
+      "title": "Aula 10: Introdução à escrita acadêmica",
+      "lessons": [
+        {
+          "slug": "aula-10-parte-1",
+          "title": "Introdução à escrita acadêmica (Aula 10, parte 1)",
+          "videoId": "Dyb8bOwZkXI",
+          "durationSeconds": 1210
+        },
+        {
+          "slug": "aula-10-parte-2",
+          "title": "Introdução à escrita acadêmica (Aula 10, parte 2)",
+          "videoId": "fYoGkpYhcVE",
+          "durationSeconds": 1136
+        },
+        {
+          "slug": "aula-10-parte-3",
+          "title": "Introdução à escrita acadêmica (Aula 10, parte 3)",
+          "videoId": "5Nq1_7pYdEc",
+          "durationSeconds": 1325
+        }
+      ]
+    },
+    {
+      "title": "Aula 11: Zygmunt Bauman",
+      "lessons": [
+        {
+          "slug": "aula-11-parte-1",
+          "title": "Zygmunt Bauman (Aula 11, parte 1)",
+          "videoId": "fP3qmA3Cdxo",
+          "durationSeconds": 1846
+        },
+        {
+          "slug": "aula-11-parte-2",
+          "title": "Zygmunt Bauman (Aula 11, parte 2)",
+          "videoId": "kB9-eGvvn9o",
+          "durationSeconds": 1635
+        },
+        {
+          "slug": "aula-11-parte-3",
+          "title": "Zygmunt Bauman (Aula 11, parte 3)",
+          "videoId": "nDLY1i0Hw5s",
+          "durationSeconds": 1656
+        }
+      ]
+    }
+  ]
+}

@@ -5,6 +5,7 @@ import { PortalNav } from "../components/portal/PortalNav";
 import { BrandLogo } from "../components/brand/BrandLogo";
 import { COURSES_UI, FL_COURSE } from "@ederson-agencia/shared";
 import { ApiError, apiAssetUrl, apiGet, apiPut } from "../api";
+import { isYoutubeUrl, parseYoutubeVideoId, youtubeEmbedUrl } from "../lib/youtube";
 import {
   telegramLessonUrl,
   telegramMessageId,
@@ -220,6 +221,7 @@ export function CourseStudyPage() {
                       isActive={lessonSlug === item.slug}
                       isDone={completed.has(item.slug)}
                       hasVideo={Boolean(videoFile(item.id))}
+                      isYoutube={isYoutubeUrl(videoFile(item.id))}
                       onOpen={() => goLesson(item.slug)}
                       onToggleDone={(done) => void toggleDone(item.slug, done)}
                     />
@@ -233,6 +235,7 @@ export function CourseStudyPage() {
                 activeSlug={lessonSlug}
                 completed={completed}
                 hasVideo={(id) => Boolean(videoFile(id))}
+                isYoutube={(id) => isYoutubeUrl(videoFile(id))}
                 onSelect={goLesson}
                 onSelectBonus={(slug) => goLesson(`bonus/${slug}`)}
                 onToggleDone={(slug, done) => void toggleDone(slug, done)}
@@ -323,6 +326,7 @@ function TocLessonLink({
   isActive,
   isDone,
   hasVideo,
+  isYoutube,
   compact,
   onOpen,
   onToggleDone
@@ -331,10 +335,12 @@ function TocLessonLink({
   isActive: boolean;
   isDone: boolean;
   hasVideo?: boolean;
+  isYoutube?: boolean;
   compact?: boolean;
   onOpen: () => void;
   onToggleDone: (done: boolean) => void;
 }) {
+  const videoLabel = isYoutube ? " · YouTube" : hasVideo ? " · Vídeo local" : " · Telegram";
   const status = lessonStatusClass(isActive, isDone);
   const badgeLabel = isActive
     ? COURSES_UI.study.statusActive
@@ -374,7 +380,7 @@ function TocLessonLink({
           {!compact ? (
             <span className="course-study__toc-title">
               <span className="font-mono text-brand-primary">{item.id}</span>
-              {item.type === "document" ? " · Material" : hasVideo ? " · Vídeo local" : " · Telegram"}
+              {item.type === "document" ? " · Material" : videoLabel}
             </span>
           ) : null}
           <span className={`${compact ? "course-study__toc-title" : "mt-0.5 block text-xs leading-snug"} ${compact ? "" : "course-text-muted"}`}>
@@ -414,6 +420,7 @@ function TocTree({
   activeSlug,
   completed,
   hasVideo,
+  isYoutube,
   onSelect,
   onSelectBonus,
   onToggleDone
@@ -423,6 +430,7 @@ function TocTree({
   activeSlug: string;
   completed: Set<string>;
   hasVideo: (id: string) => boolean;
+  isYoutube: (id: string) => boolean;
   onSelect: (slug: string) => void;
   onSelectBonus: (slug: string) => void;
   onToggleDone: (slug: string, done: boolean) => void;
@@ -493,6 +501,7 @@ function TocTree({
                           isActive={activeSlug === item.slug}
                           isDone={completed.has(item.slug)}
                           hasVideo={hasVideo(item.id)}
+                          isYoutube={isYoutube(item.id)}
                           onOpen={() => onSelect(item.slug)}
                           onToggleDone={(done) => onToggleDone(item.slug, done)}
                         />
@@ -597,6 +606,7 @@ function LessonPanel({
 }) {
   const title = note?.displayTitle ?? item.title;
   const pdfUrl = `${documentBase}/${item.id}.pdf`;
+  const youtubeId = videoSrc ? parseYoutubeVideoId(videoSrc) : null;
   const useTelegramPrimary = !videoSrc && telegram.enabled;
 
   return (
@@ -614,7 +624,18 @@ function LessonPanel({
         </div>
       ) : (
         <div className="mt-6 space-y-4">
-          {videoSrc ? (
+          {youtubeId ? (
+            <div className="aspect-video w-full overflow-hidden rounded-lg bg-black">
+              <iframe
+                title={title}
+                className="h-full w-full border-0"
+                src={youtubeEmbedUrl(youtubeId)}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                referrerPolicy="strict-origin-when-cross-origin"
+              />
+            </div>
+          ) : videoSrc ? (
             <video controls playsInline preload="metadata" className="w-full rounded-lg bg-black">
               <source src={videoSrc} type="video/mp4" />
             </video>

@@ -1,8 +1,11 @@
 import { FL_COURSE } from "@ederson-agencia/shared";
 import type { FastifyBaseLogger } from "fastify";
 import { FL_CONTENT_KEY, PORTAL_CONTENT_KEY } from "./courses/content-key.js";
+import { ensureUspLeituraEscritaCourse } from "./courses/import-catalog-course.js";
 import { ensurePortalStarterContent } from "./courses/portal-starter.js";
 import { prisma } from "./prisma.js";
+
+const USP_LEITURA_SLUG = "praticas-leitura-escrita-academicas-usp";
 
 export async function ensureSeedCourses(log: FastifyBaseLogger) {
   const course = await prisma.course.upsert({
@@ -26,6 +29,8 @@ export async function ensureSeedCourses(log: FastifyBaseLogger) {
 
   log.info({ slug: course.slug }, "Curso FL disponível na área Cursos.");
 
+  await ensureUspLeituraEscritaCourse(prisma, log);
+
   const portalCourses = await prisma.course.findMany({
     where: {
       status: "PUBLISHED",
@@ -34,6 +39,7 @@ export async function ensureSeedCourses(log: FastifyBaseLogger) {
   });
 
   for (const c of portalCourses) {
+    if (c.slug === USP_LEITURA_SLUG) continue;
     const key = c.contentKey?.trim().toLowerCase();
     if (key === FL_CONTENT_KEY) continue;
     await prisma.course.update({
