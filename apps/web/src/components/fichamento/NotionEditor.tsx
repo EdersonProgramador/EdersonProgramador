@@ -76,7 +76,15 @@ export function NotionEditor({ contentJson, contentHtml, placeholder, onSave, ed
   const editor = useEditor(
     {
       extensions: [
-        StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
+        StarterKit.configure({
+          heading: { levels: [1, 2, 3] },
+          bulletList: {
+            HTMLAttributes: { class: "fichamento-list fichamento-list--bullet" }
+          },
+          orderedList: {
+            HTMLAttributes: { class: "fichamento-list fichamento-list--ordered" }
+          }
+        }),
         Underline,
         TextStyle,
         FontFamily,
@@ -86,8 +94,13 @@ export function NotionEditor({ contentJson, contentHtml, placeholder, onSave, ed
         Link.configure({ openOnClick: false, autolink: true, linkOnPaste: true }),
         Image.configure({ inline: false, allowBase64: true }),
         TextAlign.configure({ types: ["heading", "paragraph"] }),
-        TaskList,
-        TaskItem.configure({ nested: true }),
+        TaskList.configure({
+          HTMLAttributes: { class: "fichamento-list fichamento-list--check" }
+        }),
+        TaskItem.configure({
+          nested: true,
+          HTMLAttributes: { class: "fichamento-task-item" }
+        }),
         LineHeight,
         Placeholder.configure({ placeholder: placeholder ?? "Escreva seu fichamento…" })
       ],
@@ -142,6 +155,11 @@ export function NotionEditor({ contentJson, contentHtml, placeholder, onSave, ed
     (editor.getAttributes("textStyle").fontFamily as string | undefined)?.split(",")[0]?.replace(/'/g, "") ??
     "Inter";
   const currentSize = (editor.getAttributes("textStyle").fontSize as string | undefined) ?? "14px";
+  const blockContext = getBlockContext(editor);
+  const currentLineHeight =
+    (editor.getAttributes("paragraph").lineHeight as string | undefined) ||
+    (editor.getAttributes("heading").lineHeight as string | undefined) ||
+    "";
 
   function setLink() {
     const prev = editor!.getAttributes("link").href as string | undefined;
@@ -165,7 +183,7 @@ export function NotionEditor({ contentJson, contentHtml, placeholder, onSave, ed
   }
 
   return (
-    <div className="fichamento-editor">
+    <div className="fichamento-editor" data-block={blockContext.kind}>
       <div className="fichamento-editor__toolbar fichamento-no-print">
         <div className="fichamento-editor__row">
           <ToolbarButton
@@ -293,108 +311,118 @@ export function NotionEditor({ contentJson, contentHtml, placeholder, onSave, ed
           </ToolbarButton>
         </div>
 
-        <div className="fichamento-editor__row">
-          <ToolbarButton
-            active={editor.isActive({ textAlign: "left" })}
-            onClick={() => editor.chain().focus().setTextAlign("left").run()}
-            label="Alinhar à esquerda"
-          >
-            <AlignLeft size={16} strokeWidth={2} />
-          </ToolbarButton>
-          <ToolbarButton
-            active={editor.isActive({ textAlign: "center" })}
-            onClick={() => editor.chain().focus().setTextAlign("center").run()}
-            label="Centralizar"
-          >
-            <AlignCenter size={16} strokeWidth={2} />
-          </ToolbarButton>
-          <ToolbarButton
-            active={editor.isActive({ textAlign: "right" })}
-            onClick={() => editor.chain().focus().setTextAlign("right").run()}
-            label="Alinhar à direita"
-          >
-            <AlignRight size={16} strokeWidth={2} />
-          </ToolbarButton>
-          <ToolbarButton
-            active={editor.isActive({ textAlign: "justify" })}
-            onClick={() => editor.chain().focus().setTextAlign("justify").run()}
-            label="Justificar"
-          >
-            <AlignJustify size={16} strokeWidth={2} />
-          </ToolbarButton>
-
-          <label className="fichamento-editor__select-wrap">
-            <span className="sr-only">Entrelinhas</span>
-            <select
-              className="fichamento-editor__select fichamento-editor__select--line"
-              defaultValue=""
-              onChange={(e) => {
-                const v = e.target.value;
-                if (!v) editor.chain().focus().unsetLineHeight().run();
-                else editor.chain().focus().setLineHeight(v).run();
-              }}
+        <div className="fichamento-editor__row fichamento-editor__row--blocks">
+          <span className="fichamento-editor__row-label">Parágrafo e listas</span>
+          <div className="fichamento-editor__row-actions">
+            <ToolbarButton
+              tone="align"
+              active={isTextAlignActive(editor, "left")}
+              onClick={() => editor.chain().focus().setTextAlign("left").run()}
+              label="Alinhar à esquerda"
             >
-              <option value="" disabled>
-                Entrelinhas
-              </option>
-              {LINE_HEIGHTS.map((lh) => (
-                <option key={lh.value} value={lh.value}>
-                  {lh.label}
-                </option>
-              ))}
-            </select>
-          </label>
+              <AlignLeft size={16} strokeWidth={2} />
+            </ToolbarButton>
+            <ToolbarButton
+              tone="align"
+              active={isTextAlignActive(editor, "center")}
+              onClick={() => editor.chain().focus().setTextAlign("center").run()}
+              label="Centralizar"
+            >
+              <AlignCenter size={16} strokeWidth={2} />
+            </ToolbarButton>
+            <ToolbarButton
+              tone="align"
+              active={isTextAlignActive(editor, "right")}
+              onClick={() => editor.chain().focus().setTextAlign("right").run()}
+              label="Alinhar à direita"
+            >
+              <AlignRight size={16} strokeWidth={2} />
+            </ToolbarButton>
+            <ToolbarButton
+              tone="align"
+              active={isTextAlignActive(editor, "justify")}
+              onClick={() => editor.chain().focus().setTextAlign("justify").run()}
+              label="Justificar"
+            >
+              <AlignJustify size={16} strokeWidth={2} />
+            </ToolbarButton>
 
-          <span className="fichamento-editor__sep" />
+            <label className="fichamento-editor__select-wrap">
+              <span className="sr-only">Entrelinhas</span>
+              <select
+                className={`fichamento-editor__select fichamento-editor__select--line ${currentLineHeight ? "is-active" : ""}`}
+                value={currentLineHeight}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (!v) editor.chain().focus().unsetLineHeight().run();
+                  else editor.chain().focus().setLineHeight(v).run();
+                }}
+              >
+                <option value="">Entrelinhas</option>
+                {LINE_HEIGHTS.map((lh) => (
+                  <option key={lh.value} value={lh.value}>
+                    {lh.label}
+                  </option>
+                ))}
+              </select>
+            </label>
 
-          <ToolbarButton
-            active={editor.isActive("taskList")}
-            onClick={() => editor.chain().focus().toggleTaskList().run()}
-            label="Lista de tarefas"
-          >
-            <ListChecks size={16} strokeWidth={2} />
-          </ToolbarButton>
-          <ToolbarButton
-            active={editor.isActive("bulletList")}
-            onClick={() => editor.chain().focus().toggleBulletList().run()}
-            label="Lista com marcadores"
-          >
-            <List size={16} strokeWidth={2} />
-          </ToolbarButton>
-          <ToolbarButton
-            active={editor.isActive("orderedList")}
-            onClick={() => editor.chain().focus().toggleOrderedList().run()}
-            label="Lista numerada"
-          >
-            <ListOrdered size={16} strokeWidth={2} />
-          </ToolbarButton>
+            <span className="fichamento-editor__sep" />
 
-          <ToolbarButton
-            disabled={!canAdjustListIndent(editor, "sink")}
-            onClick={() => runListIndent(editor, "sink")}
-            label="Aumentar recuo"
-          >
-            <IndentIncrease size={16} strokeWidth={2} />
-          </ToolbarButton>
-          <ToolbarButton
-            disabled={!canAdjustListIndent(editor, "lift")}
-            onClick={() => runListIndent(editor, "lift")}
-            label="Diminuir recuo"
-          >
-            <IndentDecrease size={16} strokeWidth={2} />
-          </ToolbarButton>
+            <ToolbarButton
+              tone="task"
+              active={editor.isActive("taskList")}
+              onClick={() => toggleListType(editor, "taskList")}
+              label="Lista de tarefas"
+            >
+              <ListChecks size={16} strokeWidth={2} />
+            </ToolbarButton>
+            <ToolbarButton
+              tone="bullet"
+              active={editor.isActive("bulletList")}
+              onClick={() => toggleListType(editor, "bulletList")}
+              label="Lista com marcadores"
+            >
+              <List size={16} strokeWidth={2} />
+            </ToolbarButton>
+            <ToolbarButton
+              tone="ordered"
+              active={editor.isActive("orderedList")}
+              onClick={() => toggleListType(editor, "orderedList")}
+              label="Lista numerada"
+            >
+              <ListOrdered size={16} strokeWidth={2} />
+            </ToolbarButton>
 
-          <ToolbarButton onClick={clearFormatting} label="Limpar formatação">
-            <Eraser size={16} strokeWidth={2} />
-          </ToolbarButton>
+            <ToolbarButton
+              disabled={!canAdjustListIndent(editor, "sink")}
+              onClick={() => runListIndent(editor, "sink")}
+              label="Aumentar recuo"
+            >
+              <IndentIncrease size={16} strokeWidth={2} />
+            </ToolbarButton>
+            <ToolbarButton
+              disabled={!canAdjustListIndent(editor, "lift")}
+              onClick={() => runListIndent(editor, "lift")}
+              label="Diminuir recuo"
+            >
+              <IndentDecrease size={16} strokeWidth={2} />
+            </ToolbarButton>
 
-          <span className="fichamento-editor__status">
-            {saveState === "saving"
-              ? COURSES_UI.study.fichamentoSaving
-              : saveState === "saved"
-                ? COURSES_UI.study.fichamentoSaved
-                : ""}
-          </span>
+            <ToolbarButton onClick={clearFormatting} label="Limpar formatação">
+              <Eraser size={16} strokeWidth={2} />
+            </ToolbarButton>
+
+            <BlockModeBadge context={blockContext} />
+
+            <span className="fichamento-editor__status">
+              {saveState === "saving"
+                ? COURSES_UI.study.fichamentoSaving
+                : saveState === "saved"
+                  ? COURSES_UI.study.fichamentoSaved
+                  : ""}
+            </span>
+          </div>
         </div>
       </div>
       <EditorContent editor={editor} />
@@ -402,7 +430,77 @@ export function NotionEditor({ contentJson, contentHtml, placeholder, onSave, ed
   );
 }
 
+type ListKind = "taskList" | "bulletList" | "orderedList";
+type BlockContext =
+  | { kind: "paragraph" }
+  | { kind: "heading"; level: number }
+  | { kind: "task" }
+  | { kind: "bullet" }
+  | { kind: "ordered" };
+
 const LIST_ITEM_TYPES = ["listItem", "taskItem"] as const;
+
+function getBlockContext(editor: NonNullable<ReturnType<typeof useEditor>>): BlockContext {
+  if (editor.isActive("taskList")) return { kind: "task" };
+  if (editor.isActive("orderedList")) return { kind: "ordered" };
+  if (editor.isActive("bulletList")) return { kind: "bullet" };
+  if (editor.isActive("heading", { level: 1 })) return { kind: "heading", level: 1 };
+  if (editor.isActive("heading", { level: 2 })) return { kind: "heading", level: 2 };
+  if (editor.isActive("heading", { level: 3 })) return { kind: "heading", level: 3 };
+  return { kind: "paragraph" };
+}
+
+function isTextAlignActive(
+  editor: NonNullable<ReturnType<typeof useEditor>>,
+  align: "left" | "center" | "right" | "justify"
+) {
+  if (align === "left") {
+    return !editor.isActive({ textAlign: "center" }) && !editor.isActive({ textAlign: "right" }) && !editor.isActive({ textAlign: "justify" });
+  }
+  return editor.isActive({ textAlign: align });
+}
+
+function toggleListType(editor: NonNullable<ReturnType<typeof useEditor>>, target: ListKind) {
+  if (editor.isActive(target)) {
+    if (target === "taskList") editor.chain().focus().toggleTaskList().run();
+    else if (target === "bulletList") editor.chain().focus().toggleBulletList().run();
+    else editor.chain().focus().toggleOrderedList().run();
+    return;
+  }
+
+  let chain = editor.chain().focus();
+  if (editor.isActive("taskList")) chain = chain.toggleTaskList();
+  if (editor.isActive("bulletList")) chain = chain.toggleBulletList();
+  if (editor.isActive("orderedList")) chain = chain.toggleOrderedList();
+
+  if (target === "taskList") chain.toggleTaskList().run();
+  else if (target === "bulletList") chain.toggleBulletList().run();
+  else chain.toggleOrderedList().run();
+}
+
+function BlockModeBadge({ context }: { context: BlockContext }) {
+  const meta = blockBadgeMeta(context);
+  return (
+    <span className={`fichamento-editor__block-badge is-${meta.tone}`} title="Tipo de bloco no cursor">
+      {meta.label}
+    </span>
+  );
+}
+
+function blockBadgeMeta(context: BlockContext): { label: string; tone: string } {
+  switch (context.kind) {
+    case "task":
+      return { label: "Checklist", tone: "task" };
+    case "bullet":
+      return { label: "Lista · marcadores", tone: "bullet" };
+    case "ordered":
+      return { label: "Lista · numerada", tone: "ordered" };
+    case "heading":
+      return { label: `Título ${context.level}`, tone: "heading" };
+    default:
+      return { label: "Parágrafo", tone: "paragraph" };
+  }
+}
 
 function canAdjustListIndent(editor: NonNullable<ReturnType<typeof useEditor>>, dir: "sink" | "lift") {
   const can = dir === "sink" ? editor.can().sinkListItem : editor.can().liftListItem;
@@ -502,24 +600,29 @@ function ColorMenu({
   );
 }
 
+type ToolbarTone = "default" | "align" | "bullet" | "ordered" | "task";
+
 function ToolbarButton({
   children,
   active,
   disabled,
   onClick,
-  label
+  label,
+  tone = "default"
 }: {
   children: ReactNode;
   active?: boolean;
   disabled?: boolean;
   onClick: () => void;
   label: string;
+  tone?: ToolbarTone;
 }) {
   return (
     <button
       type="button"
-      className={`fichamento-editor__btn ${active ? "is-active" : ""}`}
+      className={`fichamento-editor__btn ${active ? `is-active is-tone-${tone}` : ""}`}
       aria-label={label}
+      aria-pressed={active}
       disabled={disabled}
       onClick={onClick}
     >

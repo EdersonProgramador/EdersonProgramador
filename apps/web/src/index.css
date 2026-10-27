@@ -1,26 +1,15 @@
+@import "./styles/theme.css";
+@import "./styles/theme-tailwind-bridge.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    color-scheme: dark;
-    --brand-primary: #38bdf8;
-    --brand-primary-soft: #7dd3fc;
-    --brand-primary-deep: #0ea5e9;
-    --brand-indigo: #818cf8;
-    --brand-surface: #020617;
-    --app-bg: #000000;
-    --app-panel: #0a0f14;
-    --app-text: #f0f4f8;
-    --app-text-muted: #8fa3b8;
     --blue-matte: #2a4a6b;
     --blue-accent: #3d6a8c;
     --blue-glow: var(--brand-primary-soft);
-    --cinema-bg: radial-gradient(ellipse 120% 80% at 50% -30%, rgba(42, 74, 107, 0.35), transparent 55%),
-      radial-gradient(circle at 85% 20%, rgba(61, 106, 140, 0.12), transparent 40%),
-      radial-gradient(circle at 10% 80%, rgba(26, 51, 72, 0.5), transparent 45%),
-      linear-gradient(180deg, #000000 0%, #030508 40%, #000000 100%);
   }
 
   html {

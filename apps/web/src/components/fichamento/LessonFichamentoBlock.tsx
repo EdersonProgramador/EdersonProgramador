@@ -15,7 +15,7 @@ export function LessonFichamentoBlock({
 }) {
   return (
     <section className="fichamento-lesson-block">
-      <h3 className="text-sm font-semibold text-white">{COURSES_UI.study.fichamentoLessonTitle}</h3>
+      <h3 className="text-sm font-semibold text-[var(--course-fg)]">{COURSES_UI.study.fichamentoLessonTitle}</h3>
       <p className="course-text-faint mt-1 text-xs">{COURSES_UI.study.fichamentoLessonHint}</p>
       <div className="mt-4">
         <NotionEditor

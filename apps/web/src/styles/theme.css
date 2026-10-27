@@ -1,0 +1,235 @@
+/* Tokens globais — noite (padrão) e dia */
+
+html[data-theme="night"],
+html:not([data-theme]) {
+  color-scheme: dark;
+  --brand-primary: #38bdf8;
+  --brand-primary-soft: #7dd3fc;
+  --brand-primary-deep: #0ea5e9;
+  --brand-indigo: #818cf8;
+  --brand-surface: #020617;
+  --app-bg: #000000;
+  --app-bg-solid: #000000;
+  --app-bg-rgb: 0 0 0;
+  --app-panel: #0a0f14;
+  --app-text: #f0f4f8;
+  --app-text-muted: #8fa3b8;
+  --app-text-subtle: #b8c5d4;
+  --app-border: rgb(255 255 255 / 0.1);
+  --app-border-strong: rgb(255 255 255 / 0.16);
+  --app-surface-elevated: rgb(10 10 12);
+  --app-overlay: rgb(0 0 0 / 0.6);
+  --app-hover: rgb(255 255 255 / 0.06);
+  --app-input-bg: rgb(0 0 0 / 0.5);
+  --cinema-bg: radial-gradient(ellipse 120% 80% at 50% -30%, rgba(42, 74, 107, 0.35), transparent 55%),
+    radial-gradient(circle at 85% 20%, rgba(61, 106, 140, 0.12), transparent 40%),
+    radial-gradient(circle at 10% 80%, rgba(26, 51, 72, 0.5), transparent 45%),
+    linear-gradient(180deg, #000000 0%, #030508 40%, #000000 100%);
+  --course-fg: #eef2f6;
+  --course-muted: #b8c5d4;
+  --course-subtle: #9aadc0;
+  --course-faint: #7d92a8;
+  --course-surface-sidebar: rgb(10 10 12);
+  --course-surface-main: #000000;
+  --fichamento-surface: rgb(255 255 255 / 0.03);
+  --fichamento-toolbar: rgb(0 0 0 / 0.2);
+  --fichamento-popover: #1a2332;
+}
+
+html[data-theme="day"] {
+  color-scheme: light;
+  --brand-surface: #f8fafc;
+  --app-bg: #f1f5f9;
+  --app-bg-solid: #f1f5f9;
+  --app-bg-rgb: 241 245 249;
+  --app-panel: #ffffff;
+  --app-text: #0f172a;
+  --app-text-muted: #475569;
+  --app-text-subtle: #64748b;
+  --app-border: rgb(15 23 42 / 0.12);
+  --app-border-strong: rgb(15 23 42 / 0.18);
+  --app-surface-elevated: #ffffff;
+  --app-overlay: rgb(15 23 42 / 0.35);
+  --app-hover: rgb(15 23 42 / 0.05);
+  --app-input-bg: #ffffff;
+  --cinema-bg: linear-gradient(180deg, #f8fafc 0%, #eef2f7 45%, #f1f5f9 100%);
+  --course-fg: #0f172a;
+  --course-muted: #475569;
+  --course-subtle: #64748b;
+  --course-faint: #94a3b8;
+  --course-surface-sidebar: #ffffff;
+  --course-surface-main: #f1f5f9;
+  --fichamento-surface: #ffffff;
+  --fichamento-toolbar: rgb(241 245 249);
+  --fichamento-popover: #ffffff;
+}
+
+html[data-theme="day"] body {
+  color: var(--app-text);
+  background: var(--cinema-bg);
+}
+
+html[data-theme="day"] body.landing-active {
+  background: #f8fafc;
+}
+
+html[data-theme="day"] .app-shell-header {
+  border-color: var(--app-border);
+  background: rgb(255 255 255 / 0.92);
+}
+
+html[data-theme="day"] .site-nav {
+  border-bottom-color: var(--app-border) !important;
+}
+
+html[data-theme="day"] .site-nav.is-scrolled,
+html[data-theme="day"] .site-nav:not(.is-scrolled) {
+  background: rgb(255 255 255 / 0.92) !important;
+}
+
+html[data-theme="day"] .btn-secondary {
+  border-color: rgb(15 23 42 / 0.15);
+  background: rgb(255 255 255 / 0.85);
+  color: var(--app-text);
+}
+
+html[data-theme="day"] .btn-secondary:hover {
+  border-color: rgb(14 165 233 / 0.45);
+  background: rgb(224 242 254 / 0.85);
+  color: #0c4a6e;
+}
+
+html[data-theme="day"] .btn-ghost {
+  color: #0369a1;
+}
+
+html[data-theme="day"] .btn-ghost:hover {
+  color: #0c4a6e;
+}
+
+html[data-theme="day"] .input {
+  border-color: rgb(15 23 42 / 0.15);
+  background: var(--app-input-bg);
+  color: var(--app-text);
+}
+
+html[data-theme="day"] .input::placeholder {
+  color: rgb(100 116 139 / 0.75);
+}
+
+html[data-theme="day"] .panel,
+html[data-theme="day"] .panel-glow {
+  border-color: rgb(15 23 42 / 0.1);
+  background: rgb(255 255 255 / 0.94);
+  box-shadow: 0 16px 48px rgb(15 23 42 / 0.08);
+}
+
+html[data-theme="day"] .panel-glow {
+  background: linear-gradient(145deg, rgb(255 255 255 / 0.98) 0%, rgb(248 250 252 / 0.96) 100%);
+}
+
+html[data-theme="day"] .glass-card,
+html[data-theme="day"] .glass-metric,
+html[data-theme="day"] .stat-card {
+  border-color: rgb(15 23 42 / 0.1);
+  background: rgb(255 255 255 / 0.82);
+  color: var(--app-text);
+}
+
+html[data-theme="day"] .glass-card:hover,
+html[data-theme="day"] .glass-metric:hover,
+html[data-theme="day"] .stat-card:hover {
+  background: rgb(255 255 255 / 0.96);
+}
+
+html[data-theme="day"] .pro-headline {
+  color: var(--app-text);
+}
+
+html[data-theme="day"] .hero-title-gradient {
+  background: linear-gradient(135deg, #0f172a 0%, #0369a1 55%, #0ea5e9 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+html[data-theme="day"] .legal-doc {
+  border-color: var(--app-border);
+  background: rgb(255 255 255 / 0.92);
+  color: var(--app-text-muted);
+}
+
+html[data-theme="day"] .chip {
+  border-color: rgb(15 23 42 / 0.12);
+  background: rgb(241 245 249);
+  color: var(--app-text-muted);
+}
+
+html[data-theme="day"] .course-study,
+html[data-theme="day"] .courses-academy {
+  color: var(--course-fg);
+}
+
+html[data-theme="day"] .course-study__sidebar {
+  border-color: var(--app-border);
+  background: var(--course-surface-sidebar);
+}
+
+html[data-theme="day"] .course-study__sidebar-head {
+  border-color: var(--app-border);
+}
+
+html[data-theme="day"] .course-study__toc-link:hover {
+  background: var(--app-hover);
+}
+
+html[data-theme="day"] .course-study__toc-link.is-active {
+  background: rgb(14 165 233 / 0.12);
+  box-shadow: inset 0 0 0 1px rgb(14 165 233 / 0.28);
+}
+
+html[data-theme="day"] .fichamento-editor {
+  border-color: var(--app-border);
+  background: var(--fichamento-surface);
+}
+
+html[data-theme="day"] .fichamento-editor__toolbar {
+  border-color: var(--app-border);
+  background: var(--fichamento-toolbar);
+}
+
+html[data-theme="day"] .fichamento-editor__content {
+  color: var(--course-fg);
+}
+
+html[data-theme="day"] .fichamento-editor__content :where(h1, h2, h3) {
+  color: #0f172a;
+}
+
+html[data-theme="day"] .fichamento-editor__btn {
+  color: var(--course-muted);
+}
+
+html[data-theme="day"] .fichamento-editor__btn:hover {
+  background: var(--app-hover);
+  color: var(--course-fg);
+}
+
+html[data-theme="day"] .fichamento-editor__select {
+  border-color: var(--app-border);
+  background: #fff;
+  color: var(--course-fg);
+}
+
+html[data-theme="day"] .fichamento-editor__color-popover {
+  border-color: var(--app-border);
+  background: var(--fichamento-popover);
+  box-shadow: 0 12px 32px rgb(15 23 42 / 0.12);
+}
+
+html[data-theme="day"] .fichamento-lesson-block {
+  border-color: var(--app-border);
+}
+
+html[data-theme="day"] .theme-toggle {
+  border-color: rgb(14 165 233 / 0.35);
+}

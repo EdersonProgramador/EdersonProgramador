@@ -12,6 +12,7 @@ import { CoursesCatalogPage } from "./pages/CoursesCatalogPage";
 import { AdminCourseContentPage } from "./pages/AdminCourseContentPage";
 import { AdminCoursesPage } from "./pages/AdminCoursesPage";
 import { AdminDashboard, ClientDashboard, FreelancerDashboard } from "./pages/DashboardPages";
+import { ThemeSync } from "./components/theme/ThemeSync";
 import { useAuthStore } from "./stores/authStore";
 
 export default function App() {
@@ -24,7 +25,9 @@ export default function App() {
   }, [bootstrap, clearSession]);
 
   return (
-    <Routes>
+    <>
+      <ThemeSync />
+      <Routes>
       <Route index element={<LandingPage />} />
       <Route path="/certificado/:code" element={<CertificateVerifyPage />} />
       <Route element={<ShellLayout title="Acesso" />}>
@@ -66,5 +69,6 @@ export default function App() {
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </>
   );
 }

@@ -1,10 +1,6 @@
 /* Tipografia da Academia — contraste legível no fundo escuro */
 .course-study,
 .courses-academy {
-  --course-fg: #eef2f6;
-  --course-muted: #b8c5d4;
-  --course-subtle: #9aadc0;
-  --course-faint: #7d92a8;
   --course-header-h: 3.25rem;
   color: var(--course-fg);
 }
@@ -52,8 +48,8 @@
   max-width: 22rem;
   transform: translateX(-100%);
   overflow-y: auto;
-  border-right: 1px solid rgb(255 255 255 / 0.1);
-  background: rgb(10 10 12);
+  border-right: 1px solid var(--app-border);
+  background: var(--course-surface-sidebar);
   transition: transform 0.2s ease;
 }
 
@@ -74,7 +70,7 @@
   position: fixed;
   inset: 0;
   z-index: 30;
-  background: rgb(0 0 0 / 0.6);
+  background: var(--app-overlay);
 }
 
 .course-study__sidebar-head {

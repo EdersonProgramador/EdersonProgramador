@@ -90,7 +90,7 @@ export function FichamentoWorkspace({
       <div className="fichamento-workspace__head fichamento-no-print">
         <div>
           <p className="course-text-subtle text-xs">{courseTitle}</p>
-          <h2 className="mt-1 text-xl font-bold text-white">{title}</h2>
+          <h2 className="mt-1 text-xl font-bold text-[var(--course-fg)]">{title}</h2>
         </div>
         <div className="flex flex-wrap gap-2">
           <button type="button" className="btn-secondary text-sm" onClick={() => void compileFromSources()}>

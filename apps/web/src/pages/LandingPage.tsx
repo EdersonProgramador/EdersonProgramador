@@ -33,6 +33,7 @@ import { SectionHeader } from "../components/landing/SectionHeader";
 import { SpotlightBand } from "../components/landing/SpotlightBand";
 import { usePageMood } from "../hooks/usePageMood";
 import { apiGet, apiPost } from "../api";
+import { ThemeToggle } from "../components/theme/ThemeToggle";
 import { scrollToLandingTop } from "../lib/landing-scroll";
 
 const copy = MARKETING_COPY;
@@ -97,6 +98,7 @@ function SalesNav({ scrolled }: { scrolled: boolean }) {
             </a>
           </nav>
           <div className="relative z-20 flex shrink-0 items-center justify-end gap-1.5 sm:gap-2 md:col-start-3 md:justify-self-end xl:gap-3">
+            <ThemeToggle compact />
             <Link
               to="/login"
               className="btn-ghost inline-flex min-h-11 max-w-[7.5rem] items-center truncate px-2 text-xs sm:max-w-none sm:px-3 sm:text-sm"
