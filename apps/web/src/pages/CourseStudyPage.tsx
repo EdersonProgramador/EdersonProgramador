@@ -1,6 +1,16 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { Check, ChevronLeft, ChevronRight, Circle, LogOut, Menu } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Circle,
+  FileText,
+  LogOut,
+  Menu,
+  PlayCircle
+} from "lucide-react";
 import { CourseCover } from "../components/courses/CourseCover";
 import { PortalNav } from "../components/portal/PortalNav";
 import { BrandLogo } from "../components/brand/BrandLogo";
@@ -212,13 +222,15 @@ export function CourseStudyPage() {
               <div className="h-full bg-brand-primary transition-all" style={{ width: `${progressPct}%` }} />
             </div>
           </div>
-          <nav className="course-study__toc">
+          <nav className="course-study__toc" aria-label={COURSES_UI.study.curriculumHeading}>
+            <p className="course-study__toc-heading">{COURSES_UI.study.curriculumHeading}</p>
             {search ? (
               <ul className="space-y-1">
                 {filteredItems.map((item) => (
                   <li key={item.slug}>
                     <TocLessonLink
                       item={item}
+                      lessonNumber={item.indexInSection ?? item.order + 1}
                       isActive={lessonSlug === item.slug}
                       isDone={completed.has(item.slug)}
                       hasVideo={Boolean(videoFile(item.id))}
@@ -327,39 +339,43 @@ function lessonStatusClass(isActive: boolean, isDone: boolean) {
   return "is-pending";
 }
 
+function lessonKindLabel(
+  item: Pick<CurriculumItem, "type">,
+  hasVideo: boolean | undefined,
+  isYoutube: boolean | undefined
+) {
+  if (item.type === "document") return COURSES_UI.study.lessonDocument;
+  if (isYoutube) return COURSES_UI.study.lessonYoutube;
+  if (hasVideo) return COURSES_UI.study.lessonVideo;
+  return COURSES_UI.study.lessonTelegram;
+}
+
 function TocLessonLink({
   item,
+  lessonNumber,
   isActive,
   isDone,
   hasVideo,
   isYoutube,
-  compact,
   onOpen,
   onToggleDone
 }: {
   item: Pick<CurriculumItem, "slug" | "id" | "title" | "type">;
+  lessonNumber?: number;
   isActive: boolean;
   isDone: boolean;
   hasVideo?: boolean;
   isYoutube?: boolean;
-  compact?: boolean;
   onOpen: () => void;
   onToggleDone: (done: boolean) => void;
 }) {
-  const videoLabel = isYoutube ? " · YouTube" : hasVideo ? " · Vídeo local" : " · Telegram";
   const status = lessonStatusClass(isActive, isDone);
-  const badgeLabel = isActive
-    ? COURSES_UI.study.statusActive
-    : isDone
-      ? COURSES_UI.study.statusDone
-      : COURSES_UI.study.statusPending;
+  const kind = lessonKindLabel(item, hasVideo, isYoutube);
+  const showCode = /^F\d/i.test(item.id);
+  const TypeIcon = item.type === "document" ? FileText : PlayCircle;
 
   return (
-    <button
-      type="button"
-      className={`course-study__toc-link w-full ${status}`}
-      onClick={onOpen}
-    >
+    <button type="button" className={`course-study__toc-link w-full ${status}`} onClick={onOpen}>
       <span className="course-study__toc-row">
         <span
           role="checkbox"
@@ -382,34 +398,19 @@ function TocLessonLink({
           {isDone ? <Check className="h-3 w-3 stroke-[3]" aria-hidden /> : null}
           {!isDone && !isActive ? <Circle className="h-2 w-2 fill-white/15 stroke-none" aria-hidden /> : null}
         </span>
+        <span className="course-study__lesson-type" aria-hidden>
+          <TypeIcon className="h-4 w-4" strokeWidth={1.75} />
+        </span>
         <span className="course-study__toc-body">
-          {!compact ? (
-            <span className="course-study__toc-title">
-              <span className="font-mono text-brand-primary">{item.id}</span>
-              {item.type === "document" ? " · Material" : videoLabel}
-            </span>
-          ) : null}
-          <span className={`${compact ? "course-study__toc-title" : "mt-0.5 block text-xs leading-snug"} ${compact ? "" : "course-text-muted"}`}>
-            {compact ? (
-              <>
-                <span className="font-mono text-brand-primary">{item.id}</span>
-                <span className="course-text-muted"> · {item.title}</span>
-              </>
-            ) : (
-              item.title
-            )}
+          <span className="course-study__toc-title line-clamp-2">{item.title}</span>
+          <span className="course-study__toc-meta">
+            {lessonNumber != null ? (
+              <span className="course-study__lesson-index">{String(lessonNumber).padStart(2, "0")}</span>
+            ) : null}
+            <span className="course-study__lesson-kind">{kind}</span>
+            {showCode ? <span className="course-study__lesson-code">{item.id}</span> : null}
+            {isActive ? <span className="course-study__toc-badge course-study__toc-badge--active">{COURSES_UI.study.statusActive}</span> : null}
           </span>
-          {!compact ? (
-            <span className="course-study__toc-meta">
-              <span
-                className={`course-study__toc-badge ${
-                  isActive ? "course-study__toc-badge--active" : isDone ? "course-study__toc-badge--done" : "course-study__toc-badge--pending"
-                }`}
-              >
-                {badgeLabel}
-              </span>
-            </span>
-          ) : null}
         </span>
       </span>
     </button>
@@ -418,6 +419,43 @@ function TocLessonLink({
 
 function countDone(lessons: CurriculumItem[], completed: Set<string>) {
   return lessons.filter((l) => completed.has(l.slug)).length;
+}
+
+type ModuleGroup = {
+  module: number;
+  title: string;
+  sections: Map<number, CurriculumItem[]>;
+};
+
+function buildModuleGroups(items: CurriculumItem[]) {
+  let currentModule: number | null = null;
+  const groups: ModuleGroup[] = [];
+
+  for (const item of items) {
+    if (item.type === "document") continue;
+    const mod = item.module ?? 0;
+    if (mod !== currentModule) {
+      groups.push({ module: mod, title: item.moduleTitle ?? COURSES_UI.study.moduleLabel(mod), sections: new Map() });
+      currentModule = mod;
+    }
+    const g = groups[groups.length - 1];
+    const sec = item.section ?? 0;
+    if (!g.sections.has(sec)) g.sections.set(sec, []);
+    g.sections.get(sec)!.push(item);
+  }
+
+  return groups;
+}
+
+function moduleLessonsFlat(group: ModuleGroup) {
+  return [...group.sections.values()].flat();
+}
+
+function sectionLabelDiffers(group: ModuleGroup, sectionTitle: string | undefined) {
+  const t = sectionTitle?.trim();
+  if (!t) return false;
+  const mt = group.title.trim();
+  return t !== mt && !mt.endsWith(t) && !t.startsWith("Aula ");
 }
 
 function TocTree({
@@ -441,104 +479,179 @@ function TocTree({
   onSelectBonus: (slug: string) => void;
   onToggleDone: (slug: string, done: boolean) => void;
 }) {
-  let currentModule: number | null = null;
-  const groups: { module: number; title: string; sections: Map<number, CurriculumItem[]> }[] = [];
+  const groups = buildModuleGroups(items);
+  const docs = items.filter((i) => i.type === "document");
 
-  for (const item of items) {
-    if (item.type === "document") continue;
-    const mod = item.module ?? 0;
-    if (mod !== currentModule) {
-      groups.push({ module: mod, title: item.moduleTitle ?? `Módulo ${mod}`, sections: new Map() });
-      currentModule = mod;
-    }
-    const g = groups[groups.length - 1];
-    const sec = item.section ?? 0;
-    if (!g.sections.has(sec)) g.sections.set(sec, []);
-    g.sections.get(sec)!.push(item);
+  function renderLessonList(lessons: CurriculumItem[]) {
+    return (
+      <ul className="course-study__lesson-list">
+        {lessons.map((item, i) => (
+            <li key={item.slug}>
+              <TocLessonLink
+                item={item}
+                lessonNumber={i + 1}
+                isActive={activeSlug === item.slug}
+                isDone={completed.has(item.slug)}
+                hasVideo={hasVideo(item.id)}
+                isYoutube={isYoutube(item.id)}
+                onOpen={() => onSelect(item.slug)}
+                onToggleDone={(done) => onToggleDone(item.slug, done)}
+              />
+            </li>
+        ))}
+      </ul>
+    );
   }
 
-  const doc = items.find((i) => i.type === "document");
-
   return (
-    <div className="space-y-2">
-      {doc ? (
-        <TocLessonLink
-          item={doc}
-          isActive={activeSlug === doc.slug}
-          isDone={completed.has(doc.slug)}
-          onOpen={() => onSelect(doc.slug)}
-          onToggleDone={(done) => onToggleDone(doc.slug, done)}
-        />
+    <div className="course-study__module-stack">
+      {docs.length ? (
+        <details className="course-study__module-block" open={docs.some((d) => d.slug === activeSlug)}>
+          <ModuleSummary
+            showIndex={false}
+            title={COURSES_UI.study.lessonDocument}
+            done={countDone(docs, completed)}
+            total={docs.length}
+          />
+          <div className="course-study__module-body">
+            <ul className="course-study__lesson-list">
+              {docs.map((item, i) => (
+                <li key={item.slug}>
+                  <TocLessonLink
+                    item={item}
+                    lessonNumber={i + 1}
+                    isActive={activeSlug === item.slug}
+                    isDone={completed.has(item.slug)}
+                    onOpen={() => onSelect(item.slug)}
+                    onToggleDone={(done) => onToggleDone(item.slug, done)}
+                  />
+                </li>
+              ))}
+            </ul>
+          </div>
+        </details>
       ) : null}
-      {groups.map((g) => {
-        const moduleLessons = [...g.sections.values()].flat();
-        const moduleDone = countDone(moduleLessons, completed);
-        const moduleTotal = moduleLessons.length;
+
+      {groups.map((g, gi) => {
+        const lessons = moduleLessonsFlat(g);
+        const moduleDone = countDone(lessons, completed);
+        const moduleTotal = lessons.length;
         const moduleComplete = moduleTotal > 0 && moduleDone === moduleTotal;
+        const containsActive = lessons.some((l) => l.slug === activeSlug);
+        const sectionEntries = [...g.sections.entries()];
+        const singleSection =
+          sectionEntries.length === 1 ||
+          sectionEntries.every(([, ls]) => !sectionLabelDiffers(g, ls[0]?.sectionTitle));
 
         return (
-          <details key={g.module} className="course-study__module" open={g.module <= 3}>
-            <summary className="cursor-pointer text-sm font-medium">
-              <span className="course-study__module-head">
-                <span>
-                  Módulo {g.module} — {g.title}
-                </span>
-                <span className={`course-study__module-count ${moduleComplete ? "is-complete" : ""}`}>
-                  {COURSES_UI.study.moduleProgress(moduleDone, moduleTotal)}
-                </span>
-              </span>
-            </summary>
-            {[...g.sections.entries()].map(([sec, lessons]) => {
-              const secDone = countDone(lessons, completed);
-              return (
-                <details key={sec} className="ml-2 mt-1" open={lessons.some((l) => l.slug === activeSlug)}>
-                  <summary className="course-text-muted cursor-pointer text-xs">
-                    <span className="course-study__module-head">
-                      <span>{lessons[0]?.sectionTitle ?? `Seção ${sec}`}</span>
-                      <span className="course-study__module-count">{COURSES_UI.study.moduleProgress(secDone, lessons.length)}</span>
-                    </span>
-                  </summary>
-                  <ul className="ml-1 mt-1 space-y-0.5 border-l border-white/10 pl-2">
-                    {lessons.map((item) => (
-                      <li key={item.slug}>
-                        <TocLessonLink
-                          item={item}
-                          compact
-                          isActive={activeSlug === item.slug}
-                          isDone={completed.has(item.slug)}
-                          hasVideo={hasVideo(item.id)}
-                          isYoutube={isYoutube(item.id)}
-                          onOpen={() => onSelect(item.slug)}
-                          onToggleDone={(done) => onToggleDone(item.slug, done)}
-                        />
-                      </li>
-                    ))}
-                  </ul>
-                </details>
-              );
-            })}
+          <details
+            key={g.module}
+            className={`course-study__module-block ${moduleComplete ? "is-module-complete" : ""}`}
+            open={containsActive || gi < 2}
+          >
+            <ModuleSummary
+              moduleIndex={g.module}
+              title={g.title}
+              done={moduleDone}
+              total={moduleTotal}
+            />
+            <div className="course-study__module-body">
+              {singleSection ? (
+                renderLessonList(lessons)
+              ) : (
+                sectionEntries.map(([sec, sectionLessons]) => {
+                  const label = sectionLessons[0]?.sectionTitle ?? `Seção ${sec}`;
+                  const showLabel = sectionLabelDiffers(g, label);
+                  return (
+                    <div key={sec} className="course-study__section">
+                      {showLabel ? <p className="course-study__section-label">{label}</p> : null}
+                      {renderLessonList(sectionLessons)}
+                    </div>
+                  );
+                })
+              )}
+            </div>
           </details>
         );
       })}
+
       {bonus.length ? (
-        <details className="course-study__module">
-          <summary className="cursor-pointer text-sm font-medium">Módulo 12 — {COURSES_UI.study.bonusModule}</summary>
-          <ul className="ml-2 mt-1 space-y-0.5">
-            {bonus.map((b) => (
-              <li key={b.slug}>
-                <button
-                  type="button"
-                  className="course-study__toc-link w-full text-left text-xs"
-                  onClick={() => onSelectBonus(b.slug)}
-                >
-                  {b.title}
-                </button>
-              </li>
-            ))}
-          </ul>
+        <details
+          className="course-study__module-block"
+          open={bonus.some((b) => activeSlug === `bonus/${b.slug}`)}
+        >
+          <ModuleSummary
+            moduleIndex={groups.length + 1}
+            title={COURSES_UI.study.bonusModule}
+            done={0}
+            total={bonus.length}
+          />
+          <div className="course-study__module-body">
+            <ul className="course-study__lesson-list">
+              {bonus.map((b, i) => (
+                <li key={b.slug}>
+                  <button
+                    type="button"
+                    className={`course-study__toc-link w-full text-left ${activeSlug === `bonus/${b.slug}` ? "is-active" : ""}`}
+                    onClick={() => onSelectBonus(b.slug)}
+                  >
+                    <span className="course-study__toc-row">
+                      <span className="course-study__lesson-type" aria-hidden>
+                        <FileText className="h-4 w-4" strokeWidth={1.75} />
+                      </span>
+                      <span className="course-study__toc-body">
+                        <span className="course-study__toc-title line-clamp-2">{b.title}</span>
+                        <span className="course-study__toc-meta">
+                          <span className="course-study__lesson-index">{String(i + 1).padStart(2, "0")}</span>
+                          <span className="course-study__lesson-kind">{COURSES_UI.study.bonusModule}</span>
+                        </span>
+                      </span>
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
         </details>
       ) : null}
     </div>
+  );
+}
+
+function ModuleSummary({
+  moduleIndex = 1,
+  showIndex = true,
+  title,
+  done,
+  total
+}: {
+  moduleIndex?: number;
+  showIndex?: boolean;
+  title: string;
+  done: number;
+  total: number;
+}) {
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+  const complete = total > 0 && done === total;
+
+  return (
+    <summary className="course-study__module-summary">
+      <span className="course-study__module-summary-main">
+        <ChevronDown className="course-study__module-chevron h-4 w-4 shrink-0" aria-hidden />
+        {showIndex ? (
+          <span className="course-study__module-index">{String(moduleIndex).padStart(2, "0")}</span>
+        ) : null}
+        <span className="course-study__module-title line-clamp-2">{title}</span>
+      </span>
+      <span className="course-study__module-stats">
+        <span className={`course-study__module-count ${complete ? "is-complete" : ""}`}>
+          {COURSES_UI.study.moduleProgress(done, total)} {COURSES_UI.study.moduleLessonsWord(total)}
+        </span>
+        <span className="course-study__module-progress" aria-hidden>
+          <span className="course-study__module-progress-fill" style={{ width: `${pct}%` }} />
+        </span>
+      </span>
+    </summary>
   );
 }
 

@@ -40,7 +40,8 @@ export const COURSES_UI = {
   study: {
     loading: "Carregando trilha…",
     sidebarEyebrow: "Trilha de estudos",
-    sidebarSubtitle: "Siga a ordem das aulas",
+    sidebarSubtitle: "Módulos e aulas na ordem recomendada",
+    curriculumHeading: "Conteúdo do curso",
     searchPlaceholder: "Buscar por código (F042) ou palavra-chave…",
     progressLabel: "Aulas concluídas",
     welcomeHint:
@@ -54,7 +55,14 @@ export const COURSES_UI = {
     statusDone: "Concluída",
     statusPending: "Pendente",
     statusActive: "Em andamento",
-    moduleProgress: (done: number, total: number) => `${done}/${total} aulas`,
+    moduleProgress: (done: number, total: number) => `${done}/${total}`,
+    moduleLessonsWord: (total: number) => (total === 1 ? "aula" : "aulas"),
+    lessonVideo: "Vídeo",
+    lessonYoutube: "YouTube",
+    lessonDocument: "Material",
+    lessonTelegram: "Telegram",
+    lessonReading: "Texto",
+    moduleLabel: (n: number) => `Módulo ${String(n).padStart(2, "0")}`,
     pdfFallback: "PDF ainda não está no servidor — abra a aula no Telegram ou veja os materiais abaixo.",
     telegramPrimary:
       "Assista no Telegram: canal privado de estudos. Entre com a conta que tem acesso ao grupo.",
