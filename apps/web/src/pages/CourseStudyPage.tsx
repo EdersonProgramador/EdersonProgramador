@@ -3,8 +3,8 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { Check, ChevronLeft, ChevronRight, Circle, LogOut, Menu } from "lucide-react";
 import { PortalNav } from "../components/portal/PortalNav";
 import { BrandLogo } from "../components/brand/BrandLogo";
-import { COURSES_UI } from "@ederson-agencia/shared";
-import { apiAssetUrl, apiGet, apiPut } from "../api";
+import { COURSES_UI, FL_COURSE } from "@ederson-agencia/shared";
+import { ApiError, apiAssetUrl, apiGet, apiPut } from "../api";
 import {
   telegramLessonUrl,
   telegramMessageId,
@@ -69,6 +69,10 @@ export function CourseStudyPage() {
         setPayload(data);
         setCompleted(new Set(data.completedSlugs));
       } catch (err) {
+        if (err instanceof ApiError && err.status === 501) {
+          setError("content-not-configured");
+          return;
+        }
         setError(err instanceof Error ? err.message : "Erro ao carregar curso.");
       }
     })();
@@ -127,10 +131,18 @@ export function CourseStudyPage() {
     : 0;
 
   if (error) {
+    const notConfigured = error === "content-not-configured";
     return (
       <div className="mx-auto max-w-lg px-4 py-16 text-center">
-        <p className="text-red-300">{error}</p>
-        <Link to="/app/cursos" className="btn-primary mt-6 inline-block">
+        <p className="text-red-300">
+          {notConfigured ? COURSES_UI.catalog.contentNotReady : error}
+        </p>
+        {notConfigured && courseSlug !== FL_COURSE.slug ? (
+          <Link to={`/app/cursos/${FL_COURSE.slug}`} className="btn-primary mt-4 inline-flex min-h-11 items-center">
+            {COURSES_UI.catalog.openFlTrail}
+          </Link>
+        ) : null}
+        <Link to="/app/cursos" className="btn-secondary mt-4 inline-flex min-h-11 items-center">
           Voltar à academia
         </Link>
       </div>

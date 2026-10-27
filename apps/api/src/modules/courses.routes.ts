@@ -3,6 +3,7 @@ import { extname, resolve } from "node:path";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { getAuthUser } from "../auth.js";
+import { FL_CONTENT_KEY, resolveCourseContentKey } from "../courses/content-key.js";
 import { loadFlBundle } from "../courses/fl-content.js";
 import { userCanAccessCourse } from "../courses/access.js";
 import { env } from "../env.js";
@@ -37,6 +38,7 @@ export async function registerCoursesRoutes(app: FastifyInstance) {
       const purchasable = course.visibility === "PUBLIC_SALE" && course.priceCents != null && course.priceCents > 0;
       if (!hasAccess && !purchasable) continue;
 
+      const contentKey = resolveCourseContentKey(course.contentKey);
       cards.push({
         id: course.id,
         slug: course.slug,
@@ -47,7 +49,8 @@ export async function registerCoursesRoutes(app: FastifyInstance) {
         currency: course.currency,
         purchasable,
         hasAccess,
-        locked: !hasAccess && purchasable
+        locked: !hasAccess && purchasable,
+        contentReady: contentKey === FL_CONTENT_KEY
       });
     }
     return { courses: cards };
@@ -64,8 +67,12 @@ export async function registerCoursesRoutes(app: FastifyInstance) {
       return reply.code(403).send({ message: "Você não tem acesso a este curso." });
     }
 
-    if (course.contentKey !== "fl") {
-      return reply.code(501).send({ message: "Conteúdo do curso ainda não configurado." });
+    const contentKey = resolveCourseContentKey(course.contentKey);
+    if (contentKey !== FL_CONTENT_KEY) {
+      return reply.code(501).send({
+        message: "Conteúdo do curso ainda não configurado.",
+        hint: "No admin, defina contentKey como fl ou acesse a trilha publicada da Fórmula de Lançamento."
+      });
     }
 
     const bundle = loadFlBundle();

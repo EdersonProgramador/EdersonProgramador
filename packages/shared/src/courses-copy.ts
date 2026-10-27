@@ -21,6 +21,8 @@ export const COURSES_UI = {
     badgeSale: "Em breve — venda online",
     lockedHint: "Este curso será liberado após a compra (pagamento ainda em preparação).",
     enter: "Acessar trilha",
+    contentNotReady: "Trilha ainda sem conteúdo vinculado (contentKey fl no admin).",
+    openFlTrail: "Abrir trilha FL",
     empty: "Nenhum curso publicado ainda.",
     loading: "Carregando cursos…"
   },

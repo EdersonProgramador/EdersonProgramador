@@ -14,6 +14,7 @@ type CourseCard = {
   purchasable: boolean;
   hasAccess: boolean;
   locked: boolean;
+  contentReady?: boolean;
 };
 
 export function CoursesCatalogPage() {
@@ -68,7 +69,10 @@ export function CoursesCatalogPage() {
                   })}
                 </p>
               ) : null}
-              {course.hasAccess ? (
+              {course.hasAccess && course.contentReady === false ? (
+                <p className="course-text-subtle mt-4 text-xs leading-relaxed">{COURSES_UI.catalog.contentNotReady}</p>
+              ) : null}
+              {course.hasAccess && course.contentReady !== false ? (
                 <Link to={`/app/cursos/${course.slug}`} className="btn-primary mt-4 inline-flex w-full min-h-11 items-center justify-center sm:w-auto">
                   {COURSES_UI.catalog.enter} →
                 </Link>

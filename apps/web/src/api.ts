@@ -36,7 +36,9 @@ client.interceptors.response.use(
   (error) => {
     const status = error.response?.status ?? 500;
     const message = error.response?.data?.message ?? "Erro de comunicação com a API.";
-    if (status === 401 && onUnauthorized) onUnauthorized();
+    const path = String(error.config?.url ?? "");
+    const isLoginAttempt = path.includes("/auth/login");
+    if (status === 401 && onUnauthorized && !isLoginAttempt) onUnauthorized();
     return Promise.reject(new ApiError(message, status));
   }
 );

@@ -23,4 +23,16 @@ export async function ensureSeedCourses(log: FastifyBaseLogger) {
   });
 
   log.info({ slug: course.slug }, "Curso FL disponível na área Cursos.");
+
+  const patched = await prisma.course.updateMany({
+    where: {
+      status: "PUBLISHED",
+      visibility: "INTERNAL",
+      OR: [{ contentKey: null }, { contentKey: "" }, { NOT: { contentKey: "fl" } }]
+    },
+    data: { contentKey: "fl" }
+  });
+  if (patched.count > 0) {
+    log.info({ count: patched.count }, "Cursos internos publicados alinhados ao contentKey fl.");
+  }
 }
