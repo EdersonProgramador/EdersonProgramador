@@ -11,6 +11,11 @@
   },
   "dependencies": {
     "@ederson-agencia/shared": "*",
+    "@tiptap/extension-placeholder": "^3.32.0",
+    "@tiptap/extension-underline": "^3.32.0",
+    "@tiptap/pm": "^3.32.0",
+    "@tiptap/react": "^3.32.0",
+    "@tiptap/starter-kit": "^3.32.0",
     "@vitejs/plugin-react": "^4.3.1",
     "axios": "^1.19.0",
     "lucide-react": "^0.468.0",

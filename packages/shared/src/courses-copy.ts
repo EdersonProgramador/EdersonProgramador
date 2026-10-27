@@ -86,6 +86,18 @@ export const COURSES_UI = {
     certificateLessons: (n: number) => `${n} aulas concluídas`,
     certificateVerifyTitle: "Verificação de certificado",
     certificateVerifyValid: "Certificado autêntico",
-    certificateVerifyInvalid: "Código não encontrado"
+    certificateVerifyInvalid: "Código não encontrado",
+    fichamentoLessonTitle: "Fichamento da aula",
+    fichamentoLessonHint: "Suas anotações são salvas automaticamente na conta.",
+    fichamentoModuleTitle: "Fichamento do módulo",
+    fichamentoCourseTitle: "Fichamento completo do curso",
+    fichamentoCompileModule: "Montar a partir das aulas",
+    fichamentoCompileCourse: "Montar todos os módulos",
+    fichamentoDownload: "Baixar HTML",
+    fichamentoSaved: "Salvo",
+    fichamentoSaving: "Salvando…",
+    fichamentoOpenModule: "Fichamento do módulo",
+    fichamentoOpenCourse: "Fichamento do curso",
+    fichamentoBackLesson: "Voltar às aulas"
   }
 } as const;

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   Check,
@@ -28,8 +28,11 @@ import {
   type TelegramConfig
 } from "../courses/telegram";
 import { useAuthStore } from "../stores/authStore";
+import { FichamentoWorkspace } from "../components/fichamento/FichamentoWorkspace";
+import { LessonFichamentoBlock } from "../components/fichamento/LessonFichamentoBlock";
 import "../styles/course-certificate.css";
 import "../styles/course-study.css";
+import "../styles/fichamento-editor.css";
 
 type CurriculumItem = {
   order: number;
@@ -67,9 +70,23 @@ type CoursePayload = {
   certificate?: CertificateData | null;
 };
 
+type FichamentoBundle = {
+  lessons: Record<string, { docJson: string | null; docHtml: string | null }>;
+  modules: Record<number, { moduleTitle: string | null; docJson: string | null; docHtml: string | null }>;
+  course: { docJson: string | null; docHtml: string | null } | null;
+  outline: { moduleNumber: number; title: string }[];
+};
+
 export function CourseStudyPage() {
   const { courseSlug, "*": rest } = useParams<{ courseSlug: string; "*": string }>();
-  const lessonSlug = rest?.replace(/^\//, "").split("/")[0] || "";
+  const subPath = rest?.replace(/^\//, "") ?? "";
+  const moduleFichamentoMatch = subPath.match(/^fichamento\/modulo\/(\d+)$/);
+  const moduleFichamentoNum = moduleFichamentoMatch ? Number(moduleFichamentoMatch[1]) : null;
+  const isCourseFichamento = subPath === "fichamento/curso";
+  const isCertificateView = subPath === "certificado";
+  const isBonusPath = subPath.startsWith("bonus/");
+  const lessonSlug =
+    !isCertificateView && !moduleFichamentoMatch && !isCourseFichamento && !isBonusPath ? subPath : "";
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const clearSession = useAuthStore((s) => s.clearSession);
@@ -80,6 +97,7 @@ export function CourseStudyPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [certificate, setCertificate] = useState<CertificateData | null>(null);
+  const [fichamento, setFichamento] = useState<FichamentoBundle | null>(null);
 
   useEffect(() => {
     if (!courseSlug) return;
@@ -99,13 +117,23 @@ export function CourseStudyPage() {
     })();
   }, [courseSlug]);
 
+  useEffect(() => {
+    if (!courseSlug) return;
+    void apiGet<FichamentoBundle>(`/courses/${courseSlug}/fichamento`)
+      .then(setFichamento)
+      .catch(() => setFichamento(null));
+  }, [courseSlug]);
+
   const items = payload?.curriculum.items ?? [];
   const bySlug = useMemo(() => new Map(items.map((i) => [i.slug, i])), [items]);
-  const isCertificateView = lessonSlug === "certificado";
-  const activeItem = lessonSlug && !isCertificateView ? bySlug.get(lessonSlug) : undefined;
-  const activeBonus =
-    !isCertificateView && lessonSlug.startsWith("bonus/")
-      ? payload?.bonusContent.find((b) => b.slug === lessonSlug.replace(/^bonus\//, ""))
+  const activeItem = lessonSlug ? bySlug.get(lessonSlug) : undefined;
+  const activeBonus = isBonusPath
+    ? payload?.bonusContent.find((b) => b.slug === subPath.replace(/^bonus\//, ""))
+    : undefined;
+  const moduleFichamentoTitle =
+    moduleFichamentoNum != null
+      ? items.find((i) => i.module === moduleFichamentoNum)?.moduleTitle ??
+        fichamento?.outline.find((m) => m.moduleNumber === moduleFichamentoNum)?.title
       : undefined;
 
   useEffect(() => {
@@ -259,6 +287,9 @@ export function CourseStudyPage() {
                 </button>
               </div>
             ) : null}
+            <button type="button" className="btn-secondary mt-3 w-full text-sm" onClick={() => goLesson("fichamento/curso")}>
+              {COURSES_UI.study.fichamentoOpenCourse}
+            </button>
           </div>
           <nav className="course-study__toc" aria-label={COURSES_UI.study.curriculumHeading}>
             <p className="course-study__toc-heading">{COURSES_UI.study.curriculumHeading}</p>
@@ -283,12 +314,13 @@ export function CourseStudyPage() {
               <TocTree
                 items={items}
                 bonus={payload.bonusContent}
-                activeSlug={lessonSlug}
+                activeSlug={subPath}
                 completed={completed}
                 hasVideo={(id) => Boolean(videoFile(id))}
                 isYoutube={(id) => isYoutubeUrl(videoFile(id))}
                 onSelect={goLesson}
                 onSelectBonus={(slug) => goLesson(`bonus/${slug}`)}
+                onModuleFichamento={(moduleNum) => goLesson(`fichamento/modulo/${moduleNum}`)}
                 onToggleDone={(slug, done) => void toggleDone(slug, done)}
               />
             )}
@@ -305,7 +337,53 @@ export function CourseStudyPage() {
         ) : null}
 
         <main className="course-study__main">
-          {isCertificateView ? (
+          {moduleFichamentoNum != null && courseSlug && payload ? (
+            <FichamentoWorkspace
+              courseSlug={courseSlug}
+              courseTitle={payload.course.title}
+              mode="module"
+              moduleNumber={moduleFichamentoNum}
+              moduleTitle={moduleFichamentoTitle ?? undefined}
+              initialHtml={fichamento?.modules[moduleFichamentoNum]?.docHtml}
+              initialJson={fichamento?.modules[moduleFichamentoNum]?.docJson}
+              onBack={() => goLesson("")}
+              onCompiled={(html, json) =>
+                setFichamento((prev) =>
+                  prev
+                    ? {
+                        ...prev,
+                        modules: {
+                          ...prev.modules,
+                          [moduleFichamentoNum]: {
+                            ...(prev.modules[moduleFichamentoNum] ?? {
+                              moduleTitle: moduleFichamentoTitle ?? null,
+                              docJson: null,
+                              docHtml: null
+                            }),
+                            docHtml: html,
+                            docJson: json ?? prev.modules[moduleFichamentoNum]?.docJson ?? null
+                          }
+                        }
+                      }
+                    : prev
+                )
+              }
+            />
+          ) : isCourseFichamento && courseSlug && payload ? (
+            <FichamentoWorkspace
+              courseSlug={courseSlug}
+              courseTitle={payload.course.title}
+              mode="course"
+              initialHtml={fichamento?.course?.docHtml}
+              initialJson={fichamento?.course?.docJson}
+              onBack={() => goLesson("")}
+              onCompiled={(html, json) =>
+                setFichamento((prev) =>
+                  prev ? { ...prev, course: { docHtml: html, docJson: json ?? prev.course?.docJson ?? null } } : prev
+                )
+              }
+            />
+          ) : isCertificateView ? (
             certificate ? (
               <div className="course-certificate-print-root">
                 <CourseCertificateDocument data={certificate} />
@@ -349,7 +427,7 @@ export function CourseStudyPage() {
                 <div className="course-lesson-prose mt-4 text-sm" dangerouslySetInnerHTML={{ __html: activeBonus.html }} />
               ) : null}
             </article>
-          ) : activeItem ? (
+          ) : activeItem && courseSlug ? (
             <LessonPanel
               item={activeItem}
               note={payload.lessonNotes[activeItem.slug]}
@@ -359,6 +437,14 @@ export function CourseStudyPage() {
               telegramMessageMap={payload.telegramMessageMap}
               done={completed.has(activeItem.slug)}
               onToggleDone={(d) => void toggleDone(activeItem.slug, d)}
+              fichamentoSlot={
+                <LessonFichamentoBlock
+                  courseSlug={courseSlug}
+                  lessonSlug={activeItem.slug}
+                  initialJson={fichamento?.lessons[activeItem.slug]?.docJson}
+                  initialHtml={fichamento?.lessons[activeItem.slug]?.docHtml}
+                />
+              }
             />
           ) : null}
 
@@ -526,6 +612,7 @@ function TocTree({
   isYoutube,
   onSelect,
   onSelectBonus,
+  onModuleFichamento,
   onToggleDone
 }: {
   items: CurriculumItem[];
@@ -536,6 +623,7 @@ function TocTree({
   isYoutube: (id: string) => boolean;
   onSelect: (slug: string) => void;
   onSelectBonus: (slug: string) => void;
+  onModuleFichamento: (moduleNumber: number) => void;
   onToggleDone: (slug: string, done: boolean) => void;
 }) {
   const groups = buildModuleGroups(items);
@@ -629,6 +717,13 @@ function TocTree({
                   );
                 })
               )}
+              <button
+                type="button"
+                className="fichamento-module-link fichamento-no-print"
+                onClick={() => onModuleFichamento(g.module)}
+              >
+                {COURSES_UI.study.fichamentoOpenModule} →
+              </button>
             </div>
           </details>
         );
@@ -771,7 +866,8 @@ function LessonPanel({
   telegram,
   telegramMessageMap,
   done,
-  onToggleDone
+  onToggleDone,
+  fichamentoSlot
 }: {
   item: CurriculumItem;
   note?: { html?: string; displayTitle?: string };
@@ -781,6 +877,7 @@ function LessonPanel({
   telegramMessageMap: Record<string, number>;
   done: boolean;
   onToggleDone: (done: boolean) => void;
+  fichamentoSlot?: ReactNode;
 }) {
   const title = note?.displayTitle ?? item.title;
   const pdfUrl = `${documentBase}/${item.id}.pdf`;
@@ -829,6 +926,8 @@ function LessonPanel({
       {note?.html ? (
         <div className="course-lesson-prose mt-6 border-t border-white/10 pt-6 text-sm" dangerouslySetInnerHTML={{ __html: note.html }} />
       ) : null}
+
+      {fichamentoSlot}
 
       <div className={`course-study__lesson-complete ${done ? "is-done" : ""}`}>
         <div className="course-study__lesson-complete-head">
