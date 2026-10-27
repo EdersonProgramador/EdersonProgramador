@@ -38,6 +38,7 @@ model Course {
   priceCents  Int?
   currency    String   @default("BRL")
   contentKey  String?
+  coverUrl    String?
   sortOrder   Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

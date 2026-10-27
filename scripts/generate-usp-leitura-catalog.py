@@ -46,6 +46,8 @@ def main() -> None:
         ),
         "playlistUrl": playlist_url,
         "channel": d.get("channel"),
+        "coverUrl": (d.get("thumbnails") or [{}])[-1].get("url")
+        or "https://i.ytimg.com/vi/KZoaUuHdshQ/maxresdefault.jpg",
         "sortOrder": 2,
         "introModule": {
             "title": "Apresentação",

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Check, ChevronLeft, ChevronRight, Circle, LogOut, Menu } from "lucide-react";
+import { CourseCover } from "../components/courses/CourseCover";
 import { PortalNav } from "../components/portal/PortalNav";
 import { BrandLogo } from "../components/brand/BrandLogo";
 import { COURSES_UI, FL_COURSE } from "@ederson-agencia/shared";
@@ -33,7 +34,7 @@ type CurriculumItem = {
 };
 
 type CoursePayload = {
-  course: { slug: string; title: string; summary: string | null };
+  course: { slug: string; title: string; summary: string | null; coverUrl?: string | null };
   curriculum: {
     items: CurriculumItem[];
     modules: { module: number; title: string }[];
@@ -256,6 +257,11 @@ export function CourseStudyPage() {
         <main className="course-study__main">
           {!activeItem && !activeBonus ? (
             <div className="course-study__welcome panel p-5 sm:p-8">
+              <CourseCover
+                title={payload.course.title}
+                coverUrl={payload.course.coverUrl}
+                className="course-cover--welcome"
+              />
               <h2 className="text-2xl font-bold">{payload.course.title}</h2>
               {payload.course.summary ? <p className="course-text-muted mt-3 text-sm leading-relaxed">{payload.course.summary}</p> : null}
               <p className="course-text-subtle mt-4 text-sm leading-relaxed">{COURSES_UI.study.welcomeHint}</p>

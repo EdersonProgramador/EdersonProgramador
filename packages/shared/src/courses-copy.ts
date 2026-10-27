@@ -1,10 +1,21 @@
 /** Textos da área de cursos (portal + catálogo + player). */
 
+/** Padrão de mercado (Udemy, Hotmart, Kiwify): capa 16:9 em 1280×720 px. */
+export const COURSE_COVER = {
+  aspectRatio: "16:9",
+  width: 1280,
+  height: 720,
+  adminHint:
+    "URL da capa em 1280×720 px (16:9), JPG/PNG/WebP. Use CDN, Vercel Blob ou link público estável."
+} as const;
+
 export const FL_COURSE = {
   slug: "fl-formula-de-lancamento",
   title: "Academia interna — Fórmula de Lançamento (6 em 7)",
   summary:
-    "Trilha completa na ordem oficial do método: alicerce, audiência, lançamentos e execução. Assista às aulas pelo Telegram (canal de estudos) e acompanhe seu progresso aqui no portal."
+    "Trilha completa na ordem oficial do método: alicerce, audiência, lançamentos e execução. Assista às aulas pelo Telegram (canal de estudos) e acompanhe seu progresso aqui no portal.",
+  coverUrl:
+    "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1280&h=720&q=80"
 } as const;
 
 export const COURSES_UI = {

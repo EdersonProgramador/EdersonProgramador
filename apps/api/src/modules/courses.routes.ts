@@ -48,7 +48,8 @@ export async function registerCoursesRoutes(app: FastifyInstance) {
         purchasable,
         hasAccess,
         locked: !hasAccess && purchasable,
-        contentReady: await courseContentReady(course)
+        contentReady: await courseContentReady(course),
+        coverUrl: course.coverUrl
       });
     }
     return { courses: cards };
@@ -82,7 +83,8 @@ export async function registerCoursesRoutes(app: FastifyInstance) {
         summary: course.summary,
         visibility: course.visibility,
         priceCents: course.priceCents,
-        purchasable: course.visibility === "PUBLIC_SALE" && course.priceCents != null
+        purchasable: course.visibility === "PUBLIC_SALE" && course.priceCents != null,
+        coverUrl: course.coverUrl
       },
       ...study
     };

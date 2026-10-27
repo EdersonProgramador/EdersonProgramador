@@ -1,4 +1,4 @@
-export { COURSES_UI, FL_COURSE } from "./courses-copy.js";
+export { COURSE_COVER, COURSES_UI, FL_COURSE } from "./courses-copy.js";
 
 export type AgencyRole = "ADMIN" | "CLIENT" | "FREELANCER";
 

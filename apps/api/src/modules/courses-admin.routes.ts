@@ -17,6 +17,7 @@ const courseBodySchema = z.object({
   visibility: z.enum(["INTERNAL", "PUBLIC_SALE"]).default("INTERNAL"),
   priceCents: z.number().int().min(0).optional().nullable(),
   contentKey: z.enum(["fl", "portal"]).optional().nullable(),
+  coverUrl: z.string().url().max(2000).optional().nullable().or(z.literal("")),
   sortOrder: z.number().int().default(0)
 });
 
@@ -52,6 +53,7 @@ export async function registerCoursesAdminRoutes(app: FastifyInstance) {
         priceCents: c.priceCents,
         currency: c.currency,
         contentKey: c.contentKey,
+        coverUrl: c.coverUrl,
         sortOrder: c.sortOrder,
         enrollments: c._count.enrollments,
         progressRows: c._count.progress
@@ -78,6 +80,7 @@ export async function registerCoursesAdminRoutes(app: FastifyInstance) {
         visibility: body.visibility,
         priceCents: body.visibility === "PUBLIC_SALE" ? body.priceCents : null,
         contentKey,
+        coverUrl: body.coverUrl?.trim() || null,
         sortOrder: body.sortOrder
       }
     });
@@ -100,11 +103,13 @@ export async function registerCoursesAdminRoutes(app: FastifyInstance) {
       return reply.code(400).send({ message: "Curso à venda exige priceCents > 0." });
     }
 
+    const { coverUrl: coverUrlPatch, summary: summaryPatch, ...rest } = body;
     const course = await prisma.course.update({
       where: { id: params.id },
       data: {
-        ...body,
-        summary: body.summary === undefined ? undefined : body.summary,
+        ...rest,
+        summary: summaryPatch === undefined ? undefined : summaryPatch,
+        coverUrl: coverUrlPatch === undefined ? undefined : coverUrlPatch?.trim() || null,
         priceCents: visibility === "PUBLIC_SALE" ? priceCents : null
       }
     });

@@ -17,13 +17,15 @@ export async function ensureSeedCourses(log: FastifyBaseLogger) {
       status: "PUBLISHED",
       visibility: "INTERNAL",
       contentKey: FL_CONTENT_KEY,
+      coverUrl: FL_COURSE.coverUrl,
       sortOrder: 0
     },
     update: {
       title: FL_COURSE.title,
       summary: FL_COURSE.summary,
       status: "PUBLISHED",
-      contentKey: FL_CONTENT_KEY
+      contentKey: FL_CONTENT_KEY,
+      coverUrl: FL_COURSE.coverUrl
     }
   });
 

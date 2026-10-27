@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { COURSES_UI } from "@ederson-agencia/shared";
 import { apiGet, apiPost } from "../api";
+import { CourseCover } from "../components/courses/CourseCover";
 import "../styles/course-study.css";
 
 type CourseCard = {
@@ -15,6 +16,7 @@ type CourseCard = {
   hasAccess: boolean;
   locked: boolean;
   contentReady?: boolean;
+  coverUrl?: string | null;
 };
 
 export function CoursesCatalogPage() {
@@ -51,10 +53,12 @@ export function CoursesCatalogPage() {
         <p className="course-text-muted mt-2 text-sm">{COURSES_UI.catalog.subtitle}</p>
       </div>
 
-      <ul className="grid gap-4 md:grid-cols-2">
+      <ul className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
         {courses.map((course) => (
           <li key={course.id}>
-            <div className="panel flex h-full flex-col p-4 sm:p-6">
+            <div className="course-card panel flex h-full flex-col p-0">
+              <CourseCover title={course.title} coverUrl={course.coverUrl} className="course-cover--card" />
+              <div className="flex flex-1 flex-col p-4 sm:p-6">
               <p className="text-xs uppercase tracking-wider text-brand-primary">
                 {course.visibility === "INTERNAL" ? COURSES_UI.catalog.badgeInternal : COURSES_UI.catalog.badgeSale}
                 {course.locked ? " · aguardando compra" : ""}
@@ -101,6 +105,7 @@ export function CoursesCatalogPage() {
                   </div>
                 </div>
               ) : null}
+              </div>
             </div>
           </li>
         ))}

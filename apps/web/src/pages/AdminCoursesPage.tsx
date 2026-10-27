@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { COURSE_COVER } from "@ederson-agencia/shared";
 import { apiGet, apiPatch, apiPost } from "../api";
+import { CourseCover } from "../components/courses/CourseCover";
 import "../styles/course-study.css";
 
 type AdminCourse = {
@@ -12,6 +14,7 @@ type AdminCourse = {
   visibility: string;
   priceCents: number | null;
   contentKey: string | null;
+  coverUrl: string | null;
   sortOrder: number;
   enrollments: number;
 };
@@ -27,6 +30,7 @@ type CourseForm = {
   visibility: CourseVisibility;
   priceCents: string;
   contentKey: string;
+  coverUrl: string;
   sortOrder: string;
 };
 
@@ -38,6 +42,7 @@ const emptyForm: CourseForm = {
   visibility: "INTERNAL",
   priceCents: "",
   contentKey: "portal",
+  coverUrl: "",
   sortOrder: "0"
 };
 
@@ -70,6 +75,7 @@ export function AdminCoursesPage() {
       visibility: form.visibility,
       sortOrder: Number(form.sortOrder) || 0,
       contentKey: form.contentKey.trim() || null,
+      coverUrl: form.coverUrl.trim() || null,
       priceCents:
         form.visibility === "PUBLIC_SALE" ? Math.round(Number(form.priceCents.replace(",", ".")) * 100) : null
     };
@@ -101,6 +107,7 @@ export function AdminCoursesPage() {
       visibility: course.visibility as "INTERNAL" | "PUBLIC_SALE",
       priceCents: course.priceCents != null ? String(course.priceCents / 100) : "",
       contentKey: course.contentKey === "fl" ? "fl" : "portal",
+      coverUrl: course.coverUrl ?? "",
       sortOrder: String(course.sortOrder)
     });
   }
@@ -159,6 +166,19 @@ export function AdminCoursesPage() {
             value={form.summary}
             onChange={(e) => setForm((f) => ({ ...f, summary: e.target.value }))}
           />
+          <div className="md:col-span-2 space-y-2">
+            <input
+              className="input w-full"
+              type="url"
+              placeholder="URL da capa (1280×720, 16:9)"
+              value={form.coverUrl}
+              onChange={(e) => setForm((f) => ({ ...f, coverUrl: e.target.value }))}
+            />
+            <p className="course-text-faint text-xs leading-relaxed">{COURSE_COVER.adminHint}</p>
+            {form.coverUrl.trim() || form.title.trim() ? (
+              <CourseCover title={form.title || "Curso"} coverUrl={form.coverUrl.trim() || null} className="course-cover--welcome max-w-md" />
+            ) : null}
+          </div>
           <select
             className="input"
             value={form.status}
@@ -226,7 +246,8 @@ export function AdminCoursesPage() {
         {courses.map((course) => (
           <article key={course.id} className="panel space-y-3 p-4">
             <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
+              <CourseCover title={course.title} coverUrl={course.coverUrl} className="course-cover--admin-thumb" />
+              <div className="min-w-[12rem] flex-1">
                 <p className="font-medium">
                   {course.title}{" "}
                   <span className="course-text-subtle text-xs">

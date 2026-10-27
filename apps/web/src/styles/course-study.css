@@ -328,3 +328,55 @@
 .course-study__telegram--primary p {
   color: #e0f2fe;
 }
+
+/* Capa de curso — vitrine 16:9 (1280×720) */
+.course-cover {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: linear-gradient(145deg, rgb(15 23 42) 0%, rgb(30 58 95) 55%, rgb(15 23 42) 100%);
+}
+
+.course-cover--card {
+  border-radius: 0;
+  flex-shrink: 0;
+}
+
+.course-cover--welcome {
+  border-radius: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.course-cover--admin-thumb {
+  width: 10rem;
+  max-width: 40%;
+  border-radius: 0.5rem;
+  flex-shrink: 0;
+}
+
+.course-cover__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.course-cover__placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.course-cover__initials {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: rgb(255 255 255 / 0.35);
+}
+
+.course-card {
+  overflow: hidden;
+}

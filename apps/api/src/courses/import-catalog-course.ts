@@ -22,6 +22,7 @@ type UspCatalog = {
   slug: string;
   title: string;
   summary: string;
+  coverUrl?: string;
   sortOrder?: number;
   introModule?: { title: string; lessons: CatalogLesson[] };
   modules: { title: string; lessons: CatalogLesson[] }[];
@@ -39,6 +40,7 @@ export async function ensureUspLeituraEscritaCourse(prisma: PrismaClient, log: F
       status: "PUBLISHED",
       visibility: "INTERNAL",
       contentKey: PORTAL_CONTENT_KEY,
+      coverUrl: catalog.coverUrl ?? null,
       sortOrder: catalog.sortOrder ?? 2
     },
     update: {
@@ -46,6 +48,7 @@ export async function ensureUspLeituraEscritaCourse(prisma: PrismaClient, log: F
       summary: catalog.summary,
       status: "PUBLISHED",
       contentKey: PORTAL_CONTENT_KEY,
+      coverUrl: catalog.coverUrl ?? null,
       sortOrder: catalog.sortOrder ?? 2
     }
   });
