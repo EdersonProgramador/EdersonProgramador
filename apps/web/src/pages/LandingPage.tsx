@@ -121,7 +121,7 @@ function SalesNav({ scrolled }: { scrolled: boolean }) {
             <a
               key={item.href}
               href={item.href}
-              className="inline-flex min-h-11 shrink-0 items-center rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-2 text-xs font-medium text-white/75 transition hover:border-white/20 hover:text-white"
+              className="landing-mobile-pill inline-flex min-h-11 shrink-0 items-center rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-2 text-xs font-medium text-white/75 transition hover:border-white/20 hover:text-white"
             >
               {item.label}
             </a>
@@ -148,7 +148,7 @@ function SalesNav({ scrolled }: { scrolled: boolean }) {
 
 function SalesFooter() {
   return (
-    <footer className="border-t border-white/10 bg-[#07090c] py-14">
+    <footer className="landing-footer border-t border-white/10 py-14">
       <div className="landing-container space-y-8">
         <p className="text-center text-xs leading-relaxed text-white/40 md:text-left">{legal.shortDisclaimer}</p>
         <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
@@ -386,7 +386,7 @@ export function LandingPage() {
   }
 
   return (
-    <div className="landing-shell relative bg-[#020617] text-white">
+    <div className="landing-shell relative bg-[var(--app-bg-solid)] text-[var(--app-text)]">
       <div className="pointer-events-none fixed inset-0 cinema-grid opacity-[0.14]" aria-hidden />
 
       <SalesNav scrolled={scrolled} />

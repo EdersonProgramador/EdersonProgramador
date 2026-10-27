@@ -277,7 +277,7 @@ export function CourseStudyPage() {
               {COURSES_UI.study.progressLabel}: {completedTrackable} / {trackableSlugs.length} ({progressPct}
               %)
             </div>
-            <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/10">
+            <div className="course-study__progress-track mt-1 h-1.5 overflow-hidden rounded-full">
               <div className="h-full bg-brand-primary transition-all" style={{ width: `${progressPct}%` }} />
             </div>
             {courseComplete && certificate ? (
@@ -911,7 +911,7 @@ function LessonPanel({
   return (
     <article className="panel p-4 sm:p-6 md:p-8">
       <p className="course-text-subtle text-xs">{item.breadcrumb.join(" › ")}</p>
-      <h2 className="mt-2 text-xl font-bold text-white">{title}</h2>
+      <h2 className="mt-2 text-xl font-bold text-[var(--course-fg)]">{title}</h2>
       <p className="mt-1 font-mono text-sm text-brand-primary">{item.id}</p>
 
       {item.type === "document" ? (
@@ -948,7 +948,7 @@ function LessonPanel({
       )}
 
       {note?.html ? (
-        <div className="course-lesson-prose mt-6 border-t border-white/10 pt-6 text-sm" dangerouslySetInnerHTML={{ __html: note.html }} />
+        <div className="course-lesson-prose mt-6 border-t border-[var(--app-border)] pt-6 text-sm" dangerouslySetInnerHTML={{ __html: note.html }} />
       ) : null}
 
       {fichamentoSlot}
@@ -956,7 +956,7 @@ function LessonPanel({
       <div className={`course-study__lesson-complete ${done ? "is-done" : ""}`}>
         <div className="course-study__lesson-complete-head">
           <div>
-            <p className="text-sm font-semibold text-white">
+            <p className="text-sm font-semibold text-[var(--course-fg)]">
               {done ? COURSES_UI.study.lessonCompleted : COURSES_UI.study.lessonPending}
             </p>
             <p className="course-text-subtle mt-1 text-xs leading-relaxed">

@@ -31,6 +31,8 @@ html:not([data-theme]) {
   --course-faint: #7d92a8;
   --course-surface-sidebar: rgb(10 10 12);
   --course-surface-main: #000000;
+  --course-module-surface: rgb(255 255 255 / 0.02);
+  --course-module-surface-open: rgb(255 255 255 / 0.035);
   --fichamento-surface: rgb(255 255 255 / 0.03);
   --fichamento-toolbar: rgb(0 0 0 / 0.2);
   --fichamento-popover: #1a2332;
@@ -59,6 +61,8 @@ html[data-theme="day"] {
   --course-faint: #94a3b8;
   --course-surface-sidebar: #ffffff;
   --course-surface-main: #f1f5f9;
+  --course-module-surface: #ffffff;
+  --course-module-surface-open: rgb(248 250 252);
   --fichamento-surface: #ffffff;
   --fichamento-toolbar: rgb(241 245 249);
   --fichamento-popover: #ffffff;
@@ -232,4 +236,123 @@ html[data-theme="day"] .fichamento-lesson-block {
 
 html[data-theme="day"] .theme-toggle {
   border-color: rgb(14 165 233 / 0.35);
+}
+
+/* Portal — menu mobile e links */
+html[data-theme="night"] .portal-nav-link {
+  color: rgb(255 255 255 / 0.78);
+}
+
+html[data-theme="night"] .portal-nav-link:hover {
+  background: rgb(255 255 255 / 0.06);
+  color: #fff;
+}
+
+html[data-theme="night"] .portal-nav-link.is-active {
+  background: rgb(255 255 255 / 0.1);
+  color: #fff;
+}
+
+html[data-theme="night"] .portal-nav-menu {
+  border-color: rgb(255 255 255 / 0.12);
+  background: #0a0f14;
+}
+
+html[data-theme="night"] .portal-nav-backdrop {
+  background: rgb(0 0 0 / 0.55);
+}
+
+html[data-theme="day"] .portal-nav-link {
+  color: var(--app-text-muted);
+}
+
+html[data-theme="day"] .portal-nav-link:hover {
+  background: var(--app-hover);
+  color: var(--app-text);
+}
+
+html[data-theme="day"] .portal-nav-link.is-active {
+  background: rgb(14 165 233 / 0.14);
+  color: #0c4a6e;
+}
+
+html[data-theme="day"] .portal-nav-menu {
+  border-color: var(--app-border);
+  background: #ffffff;
+  box-shadow: 0 16px 40px rgb(15 23 42 / 0.14);
+}
+
+html[data-theme="day"] .portal-nav-backdrop {
+  background: rgb(15 23 42 / 0.35);
+}
+
+html[data-theme="day"] .landing-footer {
+  background: rgb(248 250 252);
+  color: var(--app-text);
+}
+
+html[data-theme="night"] .landing-footer {
+  background: #07090c;
+}
+
+html[data-theme="day"] .course-study__section-block[open] {
+  background: rgb(248 250 252);
+}
+
+html[data-theme="day"] .text-green-300 {
+  color: #15803d;
+}
+
+html[data-theme="day"] .text-red-300 {
+  color: #b91c1c;
+}
+
+html[data-theme="day"] .text-blue-glow {
+  color: #0369a1;
+}
+
+html[data-theme="day"] .text-blue-glow\/70 {
+  color: rgb(3 105 161 / 0.85);
+}
+
+html[data-theme="day"] .text-blue-glow\/80 {
+  color: rgb(3 105 161 / 0.92);
+}
+
+html[data-theme="day"] .text-sky-200\/90,
+html[data-theme="day"] .text-sky-300,
+html[data-theme="day"] .text-sky-300\/70,
+html[data-theme="day"] .text-sky-300\/80 {
+  color: #0369a1;
+}
+
+html[data-theme="day"] .text-sky-200\/70 {
+  color: #0284c7;
+}
+
+html[data-theme="day"] .section-ambient-bg .text-white,
+html[data-theme="day"] .section-ambient-bg .pro-headline,
+html[data-theme="day"] .cta-band .text-white,
+html[data-theme="day"] .pro-spotlight .text-white,
+html[data-theme="day"] .mesh-hero .text-white {
+  color: #f8fafc;
+}
+
+html[data-theme="day"] .section-ambient-bg [class*="text-white/"] {
+  color: rgb(248 250 252 / 0.88);
+}
+
+html[data-theme="day"] .site-nav nav[aria-label="Seções da página (mobile)"] {
+  border-color: var(--app-border);
+  background: rgb(255 255 255 / 0.85);
+}
+
+html[data-theme="day"] .course-certificate-banner {
+  border-color: rgb(14 165 233 / 0.25);
+  background: rgb(224 242 254 / 0.65);
+  color: var(--app-text);
+}
+
+html[data-theme="day"] .course-study__main {
+  color: var(--course-fg);
 }
