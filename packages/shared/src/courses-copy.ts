@@ -69,6 +69,23 @@ export const COURSES_UI = {
     telegramBackup: "Também disponível no Telegram, caso prefira assistir por lá.",
     telegramOpen: "Abrir no Telegram",
     telegramIndex: "Índice no Telegram",
-    telegramRef: "Ref. da aula"
+    telegramRef: "Ref. da aula",
+    certificateReadyTitle: "Parabéns — trilha concluída",
+    certificateReadyBody: "Você completou 100% das aulas. Seu certificado digital já está disponível.",
+    certificateOpen: "Ver certificado",
+    certificatePrint: "Imprimir / salvar PDF",
+    certificateBack: "Voltar à trilha",
+    certificateHeading: "Certificado de conclusão",
+    certificateSubtitle: "Academia Ederson Programador",
+    certificateAwardedTo: "Certificamos que",
+    certificateCompleted: "concluiu com êxito a trilha",
+    certificateOnDate: "Conclusão em",
+    certificateIssued: "Emitido em",
+    certificateCode: "Código de verificação",
+    certificateVerifyHint: "Autenticidade verificável em",
+    certificateLessons: (n: number) => `${n} aulas concluídas`,
+    certificateVerifyTitle: "Verificação de certificado",
+    certificateVerifyValid: "Certificado autêntico",
+    certificateVerifyInvalid: "Código não encontrado"
   }
 } as const;

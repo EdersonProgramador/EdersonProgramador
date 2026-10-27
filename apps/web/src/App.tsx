@@ -6,6 +6,7 @@ import { ShellLayout } from "./components/ShellLayout";
 import { LandingPage } from "./pages/LandingPage";
 import { LoginPage } from "./pages/LoginPage";
 import { AppHubPage } from "./pages/AppHubPage";
+import { CertificateVerifyPage } from "./pages/CertificateVerifyPage";
 import { CourseStudyPage } from "./pages/CourseStudyPage";
 import { CoursesCatalogPage } from "./pages/CoursesCatalogPage";
 import { AdminCourseContentPage } from "./pages/AdminCourseContentPage";
@@ -25,6 +26,7 @@ export default function App() {
   return (
     <Routes>
       <Route index element={<LandingPage />} />
+      <Route path="/certificado/:code" element={<CertificateVerifyPage />} />
       <Route element={<ShellLayout title="Acesso" />}>
         <Route path="login" element={<LoginPage />} />
       </Route>

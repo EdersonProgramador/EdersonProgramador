@@ -26,6 +26,7 @@ model User {
   courseEnrollments  CourseEnrollment[]
   lessonProgress     LessonProgress[]
   courseOrders       CourseOrder[]
+  courseCertificates CourseCertificate[]
 }
 
 model Course {
@@ -46,7 +47,8 @@ model Course {
   enrollments CourseEnrollment[]
   progress    LessonProgress[]
   orders      CourseOrder[]
-  modules     CourseModule[]
+  modules       CourseModule[]
+  certificates  CourseCertificate[]
 }
 
 model CourseModule {
@@ -108,6 +110,20 @@ model LessonProgress {
   completedAt DateTime @default(now())
 
   @@unique([userId, courseId, lessonSlug])
+}
+
+model CourseCertificate {
+  id               String   @id @default(cuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId         String
+  course           Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  verificationCode String   @unique
+  issuedAt         DateTime @default(now())
+  completedAt      DateTime
+  lessonCount      Int
+
+  @@unique([userId, courseId])
 }
 
 model CourseOrder {

@@ -11,6 +11,10 @@ import {
   Menu,
   PlayCircle
 } from "lucide-react";
+import {
+  CourseCertificateDocument,
+  type CertificateData
+} from "../components/courses/CourseCertificateDocument";
 import { CourseCover } from "../components/courses/CourseCover";
 import { PortalNav } from "../components/portal/PortalNav";
 import { BrandLogo } from "../components/brand/BrandLogo";
@@ -24,6 +28,7 @@ import {
   type TelegramConfig
 } from "../courses/telegram";
 import { useAuthStore } from "../stores/authStore";
+import "../styles/course-certificate.css";
 import "../styles/course-study.css";
 
 type CurriculumItem = {
@@ -58,6 +63,8 @@ type CoursePayload = {
   telegram: TelegramConfig;
   telegramMessageMap: Record<string, number>;
   completedSlugs: string[];
+  progress?: { completed: number; total: number; percent: number; isComplete: boolean };
+  certificate?: CertificateData | null;
 };
 
 export function CourseStudyPage() {
@@ -72,6 +79,7 @@ export function CourseStudyPage() {
   const [search, setSearch] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [certificate, setCertificate] = useState<CertificateData | null>(null);
 
   useEffect(() => {
     if (!courseSlug) return;
@@ -80,6 +88,7 @@ export function CourseStudyPage() {
         const data = await apiGet<CoursePayload>(`/courses/${courseSlug}`);
         setPayload(data);
         setCompleted(new Set(data.completedSlugs));
+        setCertificate(data.certificate ?? null);
       } catch (err) {
         if (err instanceof ApiError && err.status === 501) {
           setError("content-not-configured");
@@ -92,10 +101,24 @@ export function CourseStudyPage() {
 
   const items = payload?.curriculum.items ?? [];
   const bySlug = useMemo(() => new Map(items.map((i) => [i.slug, i])), [items]);
-  const activeItem = lessonSlug ? bySlug.get(lessonSlug) : undefined;
-  const activeBonus = lessonSlug.startsWith("bonus/")
-    ? payload?.bonusContent.find((b) => b.slug === lessonSlug.replace(/^bonus\//, ""))
-    : undefined;
+  const isCertificateView = lessonSlug === "certificado";
+  const activeItem = lessonSlug && !isCertificateView ? bySlug.get(lessonSlug) : undefined;
+  const activeBonus =
+    !isCertificateView && lessonSlug.startsWith("bonus/")
+      ? payload?.bonusContent.find((b) => b.slug === lessonSlug.replace(/^bonus\//, ""))
+      : undefined;
+
+  useEffect(() => {
+    if (!isCertificateView || !courseSlug || certificate) return;
+    void (async () => {
+      try {
+        const res = await apiGet<{ certificate: CertificateData }>(`/courses/${courseSlug}/certificate`);
+        setCertificate(res.certificate);
+      } catch {
+        /* progress gate — handled in UI */
+      }
+    })();
+  }, [isCertificateView, courseSlug, certificate]);
 
   const goLesson = useCallback(
     (slug: string) => {
@@ -112,7 +135,12 @@ export function CourseStudyPage() {
     if (done) next.add(slug);
     else next.delete(slug);
     setCompleted(next);
-    await apiPut(`/courses/${courseSlug}/progress`, { lessonSlug: slug, completed: done });
+    const res = await apiPut<{
+      certificate?: CertificateData | null;
+      progress?: { isComplete: boolean };
+    }>(`/courses/${courseSlug}/progress`, { lessonSlug: slug, completed: done });
+    if (res.certificate) setCertificate(res.certificate);
+    else if (res.progress && !res.progress.isComplete) setCertificate(null);
   };
 
   useEffect(() => {
@@ -141,6 +169,7 @@ export function CourseStudyPage() {
   const progressPct = trackableSlugs.length
     ? Math.round((completedTrackable / trackableSlugs.length) * 100)
     : 0;
+  const courseComplete = progressPct >= 100 && trackableSlugs.length > 0;
 
   if (error) {
     const notConfigured = error === "content-not-configured";
@@ -221,6 +250,15 @@ export function CourseStudyPage() {
             <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/10">
               <div className="h-full bg-brand-primary transition-all" style={{ width: `${progressPct}%` }} />
             </div>
+            {courseComplete && certificate ? (
+              <div className="course-certificate-banner">
+                <p>{COURSES_UI.study.certificateReadyTitle}</p>
+                <p>{COURSES_UI.study.certificateReadyBody}</p>
+                <button type="button" className="btn-primary mt-3 w-full text-sm" onClick={() => goLesson("certificado")}>
+                  {COURSES_UI.study.certificateOpen}
+                </button>
+              </div>
+            ) : null}
           </div>
           <nav className="course-study__toc" aria-label={COURSES_UI.study.curriculumHeading}>
             <p className="course-study__toc-heading">{COURSES_UI.study.curriculumHeading}</p>
@@ -267,7 +305,23 @@ export function CourseStudyPage() {
         ) : null}
 
         <main className="course-study__main">
-          {!activeItem && !activeBonus ? (
+          {isCertificateView ? (
+            certificate ? (
+              <div className="course-certificate-print-root">
+                <CourseCertificateDocument data={certificate} />
+                <div className="course-certificate-actions course-certificate-no-print">
+                  <button type="button" className="btn-primary" onClick={() => window.print()}>
+                    {COURSES_UI.study.certificatePrint}
+                  </button>
+                  <button type="button" className="btn-secondary" onClick={() => goLesson("")}>
+                    {COURSES_UI.study.certificateBack}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <p className="course-text-muted text-sm">{COURSES_UI.study.certificateReadyBody}</p>
+            )
+          ) : !activeItem && !activeBonus ? (
             <div className="course-study__welcome panel p-5 sm:p-8">
               <CourseCover
                 title={payload.course.title}
@@ -280,6 +334,11 @@ export function CourseStudyPage() {
               {items[0] ? (
                 <button type="button" className="btn-primary mt-6" onClick={() => goLesson(items[0].slug)}>
                   {COURSES_UI.study.startButton}
+                </button>
+              ) : null}
+              {courseComplete && certificate ? (
+                <button type="button" className="btn-secondary mt-3" onClick={() => goLesson("certificado")}>
+                  {COURSES_UI.study.certificateOpen}
                 </button>
               ) : null}
             </div>

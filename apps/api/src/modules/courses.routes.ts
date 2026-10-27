@@ -3,6 +3,11 @@ import { extname, resolve } from "node:path";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { getAuthUser } from "../auth.js";
+import {
+  certificateToDto,
+  ensureCourseCertificate,
+  getCourseProgressSummary
+} from "../courses/certificate.js";
 import { courseContentReady, resolveStudyPayload } from "../courses/resolve-study-payload.js";
 import { userCanAccessCourse } from "../courses/access.js";
 import { env } from "../env.js";
@@ -75,6 +80,15 @@ export async function registerCoursesRoutes(app: FastifyInstance) {
     }
 
     const { source: _source, ...study } = payload;
+    const progressSummary = await getCourseProgressSummary(course, user.id);
+    let certificate: ReturnType<typeof certificateToDto> | null = null;
+    if (progressSummary.isComplete) {
+      const ensured = await ensureCourseCertificate(course, user.id);
+      if (ensured.issued && ensured.certificate) {
+        certificate = certificateToDto(ensured.certificate, course, { name: user.name }, env.WEB_ORIGIN);
+      }
+    }
+
     return {
       course: {
         id: course.id,
@@ -86,7 +100,42 @@ export async function registerCoursesRoutes(app: FastifyInstance) {
         purchasable: course.visibility === "PUBLIC_SALE" && course.priceCents != null,
         coverUrl: course.coverUrl
       },
+      progress: {
+        completed: progressSummary.completed,
+        total: progressSummary.total,
+        percent: progressSummary.percent,
+        isComplete: progressSummary.isComplete
+      },
+      certificate,
       ...study
+    };
+  });
+
+  app.get("/courses/:slug/certificate", async (request, reply) => {
+    const user = await getAuthUser(request);
+    if (!user) return reply.code(401).send({ message: "Não autenticado." });
+
+    const params = z.object({ slug: z.string().min(1) }).parse(request.params);
+    const course = await prisma.course.findUnique({ where: { slug: params.slug } });
+    if (!course) return reply.code(404).send({ message: "Curso não encontrado." });
+    if (!(await userCanAccessCourse(user.id, user.role, course))) {
+      return reply.code(403).send({ message: "Sem acesso." });
+    }
+
+    const ensured = await ensureCourseCertificate(course, user.id);
+    if (!ensured.issued || !ensured.certificate) {
+      return reply.code(403).send({
+        message: "Conclua 100% das aulas para emitir o certificado.",
+        progress: {
+          completed: ensured.summary.completed,
+          total: ensured.summary.total,
+          percent: ensured.summary.percent
+        }
+      });
+    }
+
+    return {
+      certificate: certificateToDto(ensured.certificate, course, { name: user.name }, env.WEB_ORIGIN)
     };
   });
 
@@ -147,7 +196,25 @@ export async function registerCoursesRoutes(app: FastifyInstance) {
       });
     }
 
-    return { ok: true };
+    const progressSummary = await getCourseProgressSummary(course, user.id);
+    let certificate: ReturnType<typeof certificateToDto> | null = null;
+    if (progressSummary.isComplete) {
+      const ensured = await ensureCourseCertificate(course, user.id);
+      if (ensured.issued && ensured.certificate) {
+        certificate = certificateToDto(ensured.certificate, course, { name: user.name }, env.WEB_ORIGIN);
+      }
+    }
+
+    return {
+      ok: true,
+      progress: {
+        completed: progressSummary.completed,
+        total: progressSummary.total,
+        percent: progressSummary.percent,
+        isComplete: progressSummary.isComplete
+      },
+      certificate
+    };
   });
 
   app.post("/courses/:slug/checkout", async (request, reply) => {

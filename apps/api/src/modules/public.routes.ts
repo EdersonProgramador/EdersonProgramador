@@ -25,6 +25,29 @@ export async function registerPublicRoutes(app: FastifyInstance) {
     agency: AGENCY_META
   }));
 
+  app.get("/public/certificates/:code", async (request, reply) => {
+    const { code } = z.object({ code: z.string().min(8).max(32) }).parse(request.params);
+    const row = await prisma.courseCertificate.findUnique({
+      where: { verificationCode: code.toUpperCase() },
+      include: {
+        user: { select: { name: true } },
+        course: { select: { title: true, slug: true } }
+      }
+    });
+    if (!row) return reply.code(404).send({ valid: false, message: "Certificado não encontrado." });
+
+    return {
+      valid: true,
+      studentName: row.user.name,
+      courseTitle: row.course.title,
+      courseSlug: row.course.slug,
+      verificationCode: row.verificationCode,
+      issuedAt: row.issuedAt.toISOString(),
+      completedAt: row.completedAt.toISOString(),
+      lessonCount: row.lessonCount
+    };
+  });
+
   app.post("/public/leads", async (request, reply) => {
     const body = leadSchema.parse(request.body);
     const lead = await prisma.lead.create({
