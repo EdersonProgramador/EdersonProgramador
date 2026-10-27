@@ -14,6 +14,7 @@ export const FL_COURSE = {
   title: "Academia interna — Fórmula de Lançamento (6 em 7)",
   summary:
     "Trilha completa na ordem oficial do método: alicerce, audiência, lançamentos e execução. Assista às aulas pelo Telegram (canal de estudos) e acompanhe seu progresso aqui no portal.",
+  /** Servida em apps/web/public — 1280×720 (16:9) */
   coverUrl: "/course-covers/fl-formula-de-lancamento.png"
 } as const;
 
