@@ -45,6 +45,41 @@ model Course {
   enrollments CourseEnrollment[]
   progress    LessonProgress[]
   orders      CourseOrder[]
+  modules     CourseModule[]
+}
+
+model CourseModule {
+  id        String         @id @default(cuid())
+  courseId  String
+  course    Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  sortOrder Int            @default(0)
+  title     String
+  lessons   CourseLesson[]
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@index([courseId, sortOrder])
+}
+
+model CourseLesson {
+  id          String       @id @default(cuid())
+  moduleId    String
+  module      CourseModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  slug        String
+  lessonKey   String?
+  sortOrder   Int          @default(0)
+  title       String
+  lessonType  String       @default("article")
+  status      String       @default("DRAFT")
+  bodyHtml    String?
+  videoUrl    String?
+  documentUrl String?
+  telegramRef String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@unique([moduleId, slug])
+  @@index([moduleId, sortOrder])
 }
 
 model CourseEnrollment {

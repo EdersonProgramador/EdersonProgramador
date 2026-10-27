@@ -37,7 +37,7 @@ const emptyForm: CourseForm = {
   status: "DRAFT",
   visibility: "INTERNAL",
   priceCents: "",
-  contentKey: "",
+  contentKey: "portal",
   sortOrder: "0"
 };
 
@@ -100,7 +100,7 @@ export function AdminCoursesPage() {
       status: course.status as "DRAFT" | "PUBLISHED" | "ARCHIVED",
       visibility: course.visibility as "INTERNAL" | "PUBLIC_SALE",
       priceCents: course.priceCents != null ? String(course.priceCents / 100) : "",
-      contentKey: course.contentKey ?? "",
+      contentKey: course.contentKey === "fl" ? "fl" : "portal",
       sortOrder: String(course.sortOrder)
     });
   }
@@ -186,12 +186,14 @@ export function AdminCoursesPage() {
               required
             />
           ) : null}
-          <input
+          <select
             className="input"
-            placeholder="contentKey (ex: fl)"
             value={form.contentKey}
             onChange={(e) => setForm((f) => ({ ...f, contentKey: e.target.value }))}
-          />
+          >
+            <option value="portal">Portal (módulos e aulas no admin)</option>
+            <option value="fl">Pacote FL (fórmula de lançamento)</option>
+          </select>
           <input
             className="input"
             type="number"
@@ -240,6 +242,9 @@ export function AdminCoursesPage() {
               <div className="flex flex-wrap gap-2">
                 <Link to={`/app/cursos/${course.slug}`} className="btn-secondary text-sm">
                   Abrir trilha
+                </Link>
+                <Link to={`/app/admin/cursos/${course.id}/conteudo`} className="btn-primary text-sm">
+                  Conteúdo
                 </Link>
                 <button type="button" className="btn-secondary text-sm" onClick={() => startEdit(course)}>
                   Editar

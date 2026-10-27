@@ -1,6 +1,8 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { getAuthUser, requireRole } from "../auth.js";
+import { PORTAL_CONTENT_KEY } from "../courses/content-key.js";
+import { ensurePortalStarterContent } from "../courses/portal-starter.js";
 import { prisma } from "../prisma.js";
 
 const courseBodySchema = z.object({
@@ -14,7 +16,7 @@ const courseBodySchema = z.object({
   status: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]).default("DRAFT"),
   visibility: z.enum(["INTERNAL", "PUBLIC_SALE"]).default("INTERNAL"),
   priceCents: z.number().int().min(0).optional().nullable(),
-  contentKey: z.string().max(40).optional().nullable(),
+  contentKey: z.enum(["fl", "portal"]).optional().nullable(),
   sortOrder: z.number().int().default(0)
 });
 
@@ -66,6 +68,7 @@ export async function registerCoursesAdminRoutes(app: FastifyInstance) {
     const existing = await prisma.course.findUnique({ where: { slug: body.slug } });
     if (existing) return reply.code(409).send({ message: "Slug já em uso." });
 
+    const contentKey = body.contentKey ?? PORTAL_CONTENT_KEY;
     const course = await prisma.course.create({
       data: {
         slug: body.slug,
@@ -74,10 +77,13 @@ export async function registerCoursesAdminRoutes(app: FastifyInstance) {
         status: body.status,
         visibility: body.visibility,
         priceCents: body.visibility === "PUBLIC_SALE" ? body.priceCents : null,
-        contentKey: body.contentKey ?? null,
+        contentKey,
         sortOrder: body.sortOrder
       }
     });
+    if (contentKey === PORTAL_CONTENT_KEY) {
+      await ensurePortalStarterContent(prisma, course.id, course.title);
+    }
     return reply.code(201).send({ course });
   });
 

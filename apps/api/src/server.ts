@@ -6,6 +6,7 @@ import { ZodError } from "zod";
 import { env } from "./env.js";
 import { registerAgencyRoutes } from "./modules/agency.routes.js";
 import { registerAuthRoutes } from "./modules/auth.routes.js";
+import { registerCoursesAdminContentRoutes } from "./modules/courses-admin-content.routes.js";
 import { registerCoursesAdminRoutes } from "./modules/courses-admin.routes.js";
 import { registerCoursesRoutes } from "./modules/courses.routes.js";
 import { registerPublicRoutes } from "./modules/public.routes.js";
@@ -71,6 +72,7 @@ await registerAuthRoutes(app);
 await registerAgencyRoutes(app);
 await registerCoursesRoutes(app);
 await registerCoursesAdminRoutes(app);
+await registerCoursesAdminContentRoutes(app);
 
 try {
   await ensureSeedAdmin(app.log);

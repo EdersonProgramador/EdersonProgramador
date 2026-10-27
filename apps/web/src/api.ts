@@ -63,6 +63,11 @@ export async function apiPut<T>(url: string, body?: unknown): Promise<T> {
   return data;
 }
 
+export async function apiDelete<T>(url: string): Promise<T> {
+  const { data } = await client.delete<T>(url);
+  return data;
+}
+
 /** URL absoluta para mídia servida pela API (vídeos/PDFs dos cursos). */
 export function apiAssetUrl(path: string): string {
   if (path.startsWith("http://") || path.startsWith("https://")) return path;

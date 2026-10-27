@@ -1,5 +1,7 @@
 import { FL_COURSE } from "@ederson-agencia/shared";
 import type { FastifyBaseLogger } from "fastify";
+import { FL_CONTENT_KEY, PORTAL_CONTENT_KEY } from "./courses/content-key.js";
+import { ensurePortalStarterContent } from "./courses/portal-starter.js";
 import { prisma } from "./prisma.js";
 
 export async function ensureSeedCourses(log: FastifyBaseLogger) {
@@ -11,28 +13,36 @@ export async function ensureSeedCourses(log: FastifyBaseLogger) {
       summary: FL_COURSE.summary,
       status: "PUBLISHED",
       visibility: "INTERNAL",
-      contentKey: "fl",
+      contentKey: FL_CONTENT_KEY,
       sortOrder: 0
     },
     update: {
       title: FL_COURSE.title,
       summary: FL_COURSE.summary,
       status: "PUBLISHED",
-      contentKey: "fl"
+      contentKey: FL_CONTENT_KEY
     }
   });
 
   log.info({ slug: course.slug }, "Curso FL disponível na área Cursos.");
 
-  const patched = await prisma.course.updateMany({
+  const portalCourses = await prisma.course.findMany({
     where: {
       status: "PUBLISHED",
-      visibility: "INTERNAL",
-      OR: [{ contentKey: null }, { contentKey: "" }, { NOT: { contentKey: "fl" } }]
-    },
-    data: { contentKey: "fl" }
+      slug: { not: FL_COURSE.slug }
+    }
   });
-  if (patched.count > 0) {
-    log.info({ count: patched.count }, "Cursos internos publicados alinhados ao contentKey fl.");
+
+  for (const c of portalCourses) {
+    const key = c.contentKey?.trim().toLowerCase();
+    if (key === FL_CONTENT_KEY) continue;
+    await prisma.course.update({
+      where: { id: c.id },
+      data: { contentKey: PORTAL_CONTENT_KEY }
+    });
+    const created = await ensurePortalStarterContent(prisma, c.id, c.title);
+    if (created) {
+      log.info({ slug: c.slug }, "Trilha portal inicial criada (módulo boas-vindas).");
+    }
   }
 }
