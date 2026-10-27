@@ -22,9 +22,9 @@ function portalLinks(user: AuthUser): NavLink[] {
 function linkClass(pathname: string, path: string, block?: boolean) {
   const active = pathname === path || pathname.startsWith(`${path}/`);
   return [
-    "rounded-lg text-sm font-medium transition",
+    "portal-nav-link rounded-lg text-sm font-medium transition",
     block ? "flex w-full min-h-11 items-center px-3 py-2.5" : "inline-flex min-h-11 items-center justify-center px-3 py-2",
-    active ? "bg-white/10 text-white" : "text-white/75 hover:bg-white/[0.06] hover:text-white"
+    active ? "is-active" : ""
   ].join(" ");
 }
 
@@ -35,7 +35,7 @@ export function PortalNav({ user }: { user: AuthUser }) {
 
   return (
     <>
-      <nav className="hidden min-w-0 flex-wrap items-center gap-1 md:flex" aria-label="Áreas do portal">
+      <nav className="portal-nav-bar hidden min-w-0 flex-wrap items-center gap-1 md:flex" aria-label="Áreas do portal">
         {links.map((item) => (
           <Link key={item.to} to={item.to} className={linkClass(pathname, item.to)}>
             {item.label}
@@ -58,13 +58,13 @@ export function PortalNav({ user }: { user: AuthUser }) {
           <>
             <button
               type="button"
-              className="fixed inset-0 z-40 bg-black/55"
+              className="portal-nav-backdrop fixed inset-0 z-40"
               aria-label="Fechar menu"
               onClick={() => setOpen(false)}
             />
             <nav
               id="portal-nav-mobile"
-              className="absolute right-0 top-[calc(100%+0.35rem)] z-50 w-[min(18rem,calc(100vw-1.5rem))] rounded-xl border border-white/10 bg-[#0a0f14] p-2 shadow-2xl"
+              className="portal-nav-menu absolute right-0 top-[calc(100%+0.35rem)] z-50 w-[min(18rem,calc(100vw-1.5rem))] rounded-xl border p-2 shadow-2xl"
               aria-label="Áreas do portal"
             >
               {links.map((item) => (

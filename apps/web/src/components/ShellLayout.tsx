@@ -28,11 +28,11 @@ export function ShellLayout({ title }: { title: string }) {
                 <PortalNav user={user} />
                 <Link
                   to={portalHomePath()}
-                  className="hidden min-h-11 items-center text-sm text-white/80 hover:text-white md:inline-flex"
+                  className="hidden min-h-11 items-center text-sm text-[var(--app-text-muted)] hover:text-[var(--app-text)] md:inline-flex"
                 >
                   Portal
                 </Link>
-                <span className="hidden max-w-[8rem] truncate text-sm text-white/60 lg:inline">{user.name}</span>
+                <span className="hidden max-w-[8rem] truncate text-sm text-[var(--app-text-muted)] lg:inline">{user.name}</span>
                 <button
                   type="button"
                   className="btn-secondary inline-flex min-h-11 min-w-11 items-center justify-center p-2"
