@@ -1,6 +1,7 @@
 import type { FastifyBaseLogger } from "fastify";
 import type { PrismaClient } from "@prisma/client";
 import { PORTAL_CONTENT_KEY } from "./content-key.js";
+import { env } from "../env.js";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
@@ -52,10 +53,8 @@ export async function ensureUspLeituraEscritaCourse(prisma: PrismaClient, log: F
   const videoLessons = await prisma.courseLesson.count({
     where: { module: { courseId: course.id }, lessonType: "video" }
   });
-  if (videoLessons >= EXPECTED_VIDEO_LESSONS) {
-    return;
-  }
 
+  if (videoLessons < EXPECTED_VIDEO_LESSONS) {
   await prisma.courseModule.deleteMany({ where: { courseId: course.id } });
 
   let sortOrder = 0;
@@ -106,6 +105,46 @@ export async function ensureUspLeituraEscritaCourse(prisma: PrismaClient, log: F
   }
 
   log.info({ slug: catalog.slug, modules: catalog.modules.length + (intro ? 1 : 0) }, "Curso USP leitura/escrita sincronizado.");
+  }
+
+  await ensureAdminEnrollmentsForCourse(prisma, course.id, log);
+}
+
+async function ensureAdminEnrollmentsForCourse(
+  prisma: PrismaClient,
+  courseId: string,
+  log: FastifyBaseLogger
+) {
+  const adminIds = new Set<string>();
+  const admins = await prisma.user.findMany({
+    where: { role: "ADMIN", status: "ACTIVE" },
+    select: { id: true, email: true }
+  });
+  for (const u of admins) adminIds.add(u.id);
+
+  const bootstrapEmail = env.ADMIN_EMAIL?.trim().toLowerCase();
+  if (bootstrapEmail) {
+    const bootstrap = await prisma.user.findUnique({
+      where: { email: bootstrapEmail },
+      select: { id: true, email: true, role: true }
+    });
+    if (bootstrap) adminIds.add(bootstrap.id);
+  }
+
+  if (adminIds.size === 0) {
+    log.warn("Nenhum usuário admin encontrado para matricular no curso USP leitura/escrita.");
+    return;
+  }
+
+  for (const userId of adminIds) {
+    await prisma.courseEnrollment.upsert({
+      where: { userId_courseId: { userId, courseId } },
+      create: { userId, courseId, source: "ADMIN_GRANT", status: "ACTIVE" },
+      update: { status: "ACTIVE", source: "ADMIN_GRANT" }
+    });
+  }
+
+  log.info({ courseId, admins: adminIds.size }, "Admins matriculados no curso USP leitura/escrita.");
 }
 
 function formatDuration(totalSeconds: number) {
