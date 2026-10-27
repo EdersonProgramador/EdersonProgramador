@@ -7,23 +7,161 @@
 
 .fichamento-editor__toolbar {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.25rem;
+  flex-direction: column;
+  gap: 0.35rem;
   padding: 0.5rem 0.625rem;
   border-bottom: 1px solid rgb(255 255 255 / 0.08);
   background: rgb(0 0 0 / 0.2);
 }
 
+.fichamento-editor__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.2rem;
+}
+
 .fichamento-editor__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-width: 2rem;
   height: 2rem;
-  padding: 0 0.5rem;
+  padding: 0 0.4rem;
   border-radius: 0.375rem;
   font-size: 0.8125rem;
   font-weight: 600;
   color: var(--course-muted, #b8c5d4);
   background: transparent;
+}
+
+.fichamento-editor__btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.fichamento-editor__select-wrap {
+  display: inline-flex;
+  align-items: center;
+}
+
+.fichamento-editor__select {
+  max-width: 7.5rem;
+  height: 2rem;
+  padding: 0 0.5rem;
+  border-radius: 0.375rem;
+  border: 1px solid rgb(255 255 255 / 0.12);
+  background: rgb(0 0 0 / 0.25);
+  color: var(--course-fg, #eef2f6);
+  font-size: 0.75rem;
+}
+
+.fichamento-editor__select--style {
+  max-width: 8.5rem;
+}
+
+.fichamento-editor__select--size {
+  max-width: 3.25rem;
+}
+
+.fichamento-editor__select--line {
+  max-width: 6.5rem;
+}
+
+.fichamento-editor__btn--color {
+  position: relative;
+  gap: 0.15rem;
+  padding: 0 0.35rem;
+}
+
+.fichamento-editor__color-a {
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.fichamento-editor__color-swatch {
+  width: 0.875rem;
+  height: 0.875rem;
+  border-radius: 2px;
+  border: 1px solid rgb(255 255 255 / 0.25);
+}
+
+.fichamento-editor__color-swatch.is-highlight {
+  border-radius: 0 0 2px 2px;
+  border-top: none;
+}
+
+.fichamento-editor__color {
+  position: relative;
+}
+
+.fichamento-editor__color-popover {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 40;
+  min-width: 10rem;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgb(255 255 255 / 0.12);
+  background: #1a2332;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.45);
+}
+
+.fichamento-editor__color-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1.25rem);
+  gap: 0.35rem;
+}
+
+.fichamento-editor__color-chip {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 999px;
+  border: 2px solid transparent;
+}
+
+.fichamento-editor__color-chip.is-selected {
+  border-color: #38bdf8;
+}
+
+.fichamento-editor__color-custom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+  font-size: 0.6875rem;
+  color: var(--course-muted);
+}
+
+.fichamento-editor__color-custom input {
+  width: 2rem;
+  height: 1.5rem;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.fichamento-editor__color-clear {
+  margin-top: 0.35rem;
+  width: 100%;
+  font-size: 0.6875rem;
+  color: #7dd3fc;
+  text-align: left;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .fichamento-editor__btn:hover {
@@ -99,6 +237,46 @@
   border: none;
   border-top: 1px solid rgb(255 255 255 / 0.12);
   margin: 1.25rem 0;
+}
+
+.fichamento-editor__content a {
+  color: #7dd3fc;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.fichamento-editor__content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 0.75rem 0;
+}
+
+.fichamento-editor__content ul[data-type="taskList"] {
+  list-style: none;
+  margin-left: 0;
+  padding-left: 0;
+}
+
+.fichamento-editor__content ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0.35rem 0;
+}
+
+.fichamento-editor__content ul[data-type="taskList"] li label {
+  flex: 1;
+}
+
+.fichamento-editor__content ul[data-type="taskList"] input[type="checkbox"] {
+  margin-top: 0.35rem;
+  accent-color: #38bdf8;
+}
+
+.fichamento-editor__content mark {
+  border-radius: 0.15rem;
+  padding: 0 0.1em;
 }
 
 .fichamento-lesson-block {
