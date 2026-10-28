@@ -15,8 +15,9 @@ export function CtaBand() {
           <p className="section-label">{copy.aida.action.label}</p>
           <h2 className="pro-headline mt-3 text-[1.65rem] leading-tight sm:text-3xl md:text-4xl">{copy.aida.action.title}</h2>
           <p className="mt-3 text-sm text-white/65 sm:text-base">{copy.aida.action.subtitle}</p>
+          <p className="mt-3 text-sm font-medium text-sky-200/90 sm:text-base">{copy.aida.action.urgencyNote}</p>
         </div>
-        <a href="#reuniao" className="btn-primary btn-glow w-full shrink-0 sm:w-auto">
+        <a href="#contato" className="btn-primary btn-glow w-full shrink-0 sm:w-auto">
           {copy.aida.attention.ctaPrimary}
           <ArrowRight className="ml-2 h-4 w-4" />
         </a>

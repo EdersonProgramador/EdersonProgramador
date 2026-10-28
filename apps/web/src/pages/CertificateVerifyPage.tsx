@@ -37,7 +37,7 @@ export function CertificateVerifyPage() {
   }, [code]);
 
   return (
-    <div className="courses-academy mx-auto min-h-dvh max-w-lg bg-[var(--app-bg-solid)] px-4 py-10">
+    <div className="courses-academy surface-light mx-auto min-h-dvh max-w-lg bg-[var(--app-bg-solid)] px-4 py-10">
       <div className="mb-8 flex items-center justify-between gap-3">
         <BrandLogo size="md" />
         <ThemeToggle compact />

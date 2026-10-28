@@ -4,6 +4,8 @@ export type PortfolioProductionItem = {
   description: string;
   url: string;
   tags: string[];
+  /** Logo servida pelo front (ex.: /portfolio/atlly.ico) */
+  logoUrl?: string;
 };
 
 export type PortfolioGithubItem = {
@@ -33,7 +35,8 @@ export const PORTFOLIO_PRODUCTION: PortfolioProductionItem[] = [
     description:
       "Plataforma completa para coaches e alunos: treinos, assinaturas, pagamentos (Pix/cartão), app mobile e painel administrativo.",
     url: "https://atlly.com.br",
-    tags: ["Site em produção", "Sistema web"]
+    tags: ["Site em produção", "Sistema web"],
+    logoUrl: "/portfolio/atlly-mark.png"
   },
   {
     kind: "production",
@@ -41,7 +44,8 @@ export const PORTFOLIO_PRODUCTION: PortfolioProductionItem[] = [
     description:
       "Portal de divulgação e gestão com foco em visibilidade de negócios, catálogo e operação web em escala.",
     url: "https://nacionaldivulga.com.br",
-    tags: ["Site em produção", "Portal"]
+    tags: ["Site em produção", "Portal"],
+    logoUrl: "/portfolio/nacionaldivulga.svg"
   }
 ];
 

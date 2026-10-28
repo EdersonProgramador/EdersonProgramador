@@ -12,7 +12,7 @@ export function ShellLayout({ title }: { title: string }) {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-[var(--app-bg-solid)] text-[var(--app-text)]">
+    <div className="surface-light min-h-screen bg-[var(--app-bg-solid)] text-[var(--app-text)]">
       <header className="app-shell-header sticky top-0 z-50">
         <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:py-4">
           <div className="min-w-0">

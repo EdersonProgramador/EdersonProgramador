@@ -7,10 +7,10 @@ import {
   Code2,
   ExternalLink,
   Github,
-  Globe,
   Layers,
   MessageSquare,
   Rocket,
+  Gift,
   Shield,
   Sparkles
 } from "lucide-react";
@@ -18,18 +18,18 @@ import {
   AGENCY_META,
   LEGAL_NOTICES,
   MARKETING_COPY,
-  PORTFOLIO_GITHUB,
   PORTFOLIO_PRODUCTION,
-  type PortfolioGithubItem,
   type PortfolioProductionItem
 } from "@ederson-agencia/shared";
 import { BrandLogo } from "../components/brand/BrandLogo";
-import { BentoServices } from "../components/landing/BentoServices";
+import { OfferComparison } from "../components/landing/OfferComparison";
+import { OfferPackages } from "../components/landing/OfferPackages";
 import { CtaBand } from "../components/landing/CtaBand";
 import { MoodSection } from "../components/landing/MoodSection";
 import { ProHero } from "../components/landing/ProHero";
 import { Reveal } from "../components/landing/Reveal";
 import { SectionHeader } from "../components/landing/SectionHeader";
+import { ProductionProjectLogo } from "../components/landing/ProductionProjectLogo";
 import { SpotlightBand } from "../components/landing/SpotlightBand";
 import { usePageMood } from "../hooks/usePageMood";
 import { apiGet, apiPost } from "../api";
@@ -41,15 +41,16 @@ const legal = LEGAL_NOTICES;
 
 const MEETING_URL = import.meta.env.VITE_MEETING_URL as string | undefined;
 
-const processIcons = [Sparkles, Layers, Code2, Rocket];
+const processIcons = [Sparkles, Layers, Code2, Shield, Rocket];
 
 const LANDING_NAV = [
-  { href: "#servicos", label: "Serviços" },
-  { href: "#processo", label: "Método" },
+  { href: "#ideia", label: "Oferta" },
+  { href: "#processo", label: "Como funciona" },
+  { href: "#entregas", label: "Entregáveis" },
+  { href: "#pacotes", label: "Pacotes" },
   { href: "#producao", label: "Projetos" },
   { href: "#investimento", label: "Investimento" },
-  { href: "#reuniao", label: "Reunião" },
-  { href: "#orcamento", label: "Orçamento" }
+  { href: "#contato", label: "Contato" }
 ] as const;
 
 function SalesNav({ scrolled }: { scrolled: boolean }) {
@@ -106,10 +107,10 @@ function SalesNav({ scrolled }: { scrolled: boolean }) {
               {copy.loginCta}
             </Link>
             <a
-              href="#reuniao"
+              href="#contato"
               className="btn-primary inline-flex min-h-11 items-center whitespace-nowrap px-3 py-2 text-xs sm:px-4 sm:py-2.5 lg:text-sm"
             >
-              Agendar
+              Contato
             </a>
           </div>
         </div>
@@ -210,7 +211,7 @@ function ProcessTimeline() {
   }, []);
 
   return (
-    <div className="mt-14 grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:items-start">
+    <div className="mt-12 grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:items-start">
       <div className="process-rail space-y-3">
         {copy.process.steps.map((step, index) => {
           const Icon = processIcons[index] ?? Sparkles;
@@ -252,7 +253,7 @@ function ProcessTimeline() {
           active === index ? (
             <div key={step.title} className="relative animate-fade-up">
               <span className="chip border-[var(--mood-accent)]/30 text-[var(--mood-accent)]">
-                Entregáveis desta fase
+                Entregas desta fase
               </span>
               <h3 className="mt-6 font-display text-2xl font-bold">{step.title}</h3>
               <ul className="mt-6 space-y-3">
@@ -263,8 +264,8 @@ function ProcessTimeline() {
                   </li>
                 ))}
               </ul>
-              <a href="#reuniao" className="btn-secondary mt-8 w-full sm:w-auto">
-                Quero começar por aqui
+              <a href="#contato" className="btn-secondary mt-8 w-full sm:w-auto">
+                {copy.aida.attention.ctaPrimary}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </a>
             </div>
@@ -325,7 +326,6 @@ function LegalSection() {
 
 export function LandingPage() {
   const [production, setProduction] = useState(PORTFOLIO_PRODUCTION);
-  const [github, setGithub] = useState(PORTFOLIO_GITHUB);
   const [leadStatus, setLeadStatus] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [consent, setConsent] = useState(false);
@@ -345,10 +345,9 @@ export function LandingPage() {
   }, []);
 
   useEffect(() => {
-    void apiGet<{ production?: PortfolioProductionItem[]; github?: PortfolioGithubItem[] }>("/public/landing")
+    void apiGet<{ production?: PortfolioProductionItem[] }>("/public/landing")
       .then((payload) => {
         if (payload.production?.length) setProduction(payload.production);
-        if (payload.github?.length) setGithub(payload.github);
       })
       .catch(() => undefined);
   }, []);
@@ -386,32 +385,54 @@ export function LandingPage() {
   }
 
   return (
-    <div className="landing-shell relative bg-[var(--app-bg-solid)] text-[var(--app-text)]">
+    <div className="landing-shell surface-light relative bg-[var(--app-bg-solid)] text-[var(--app-text)]">
       <div className="pointer-events-none fixed inset-0 cinema-grid opacity-[0.14]" aria-hidden />
 
       <SalesNav scrolled={scrolled} />
 
       <ProHero production={production} />
 
-      {/* I — Interest */}
-      <MoodSection mood="energy" id="interesse" className="landing-section-y">
+      <MoodSection mood="energy" id="ideia" className="landing-section-y">
         <div className="landing-container">
-          <SectionHeader label={copy.aida.interest.label} title={copy.aida.interest.title} description={copy.aida.interest.subtitle} />
-          <ul className="mt-12 grid gap-4 md:grid-cols-3">
-            {copy.aida.interest.pains.map((pain, i) => (
-              <li key={pain} className="pain-card h-full">
-                <div className="relative z-[1]">
-                  <span className="font-mono text-xs text-[var(--mood-label)]">Desafio 0{i + 1}</span>
-                  <p className="mt-3 text-sm leading-relaxed text-white/80">{pain}</p>
-                </div>
+          <SectionHeader
+            label={copy.offer.productName}
+            title={copy.offer.productSubtitle}
+            description={copy.offer.promise}
+          />
+          <SectionHeader
+            className="mt-12"
+            label={copy.aida.interest.label}
+            title={copy.aida.interest.title}
+            description={copy.aida.interest.subtitle}
+          />
+          <ul className="mt-8 grid gap-3 sm:grid-cols-1 lg:grid-cols-3">
+            {copy.aida.interest.highlights.map((item) => (
+              <li
+                key={item}
+                className="flex gap-3 rounded-2xl border border-[var(--app-border)] bg-[var(--app-panel)] p-4 shadow-sm sm:p-5"
+              >
+                <Check className="mt-0.5 h-5 w-5 shrink-0 text-[var(--mood-accent)]" aria-hidden />
+                <span className="text-sm leading-relaxed text-[var(--app-text)]">{item}</span>
               </li>
             ))}
           </ul>
-          <p className="mt-10 max-w-3xl text-base leading-relaxed text-white/75 md:text-lg">{copy.aida.interest.pivot}</p>
+          <p className="mt-10 max-w-3xl text-base leading-relaxed text-[var(--app-text-muted)] md:text-lg">{copy.aida.interest.pivot}</p>
         </div>
       </MoodSection>
 
-      {/* Desire — production */}
+      <MoodSection mood="logic" id="processo" className="landing-section-y">
+        <div className="landing-container">
+          <SectionHeader
+            label={copy.process.label}
+            title={copy.process.title}
+            description={copy.process.subtitle}
+          />
+          <p className="mt-6 max-w-3xl text-[var(--app-text-muted)]">{copy.process.body}</p>
+          <p className="mt-4 font-display text-lg font-semibold text-[var(--app-text)]">{copy.process.punchline}</p>
+          <ProcessTimeline />
+        </div>
+      </MoodSection>
+
       <SpotlightBand id="producao" moodTrack="desire">
           <SectionHeader label={copy.aida.desire.label} title={copy.trust.title} description={copy.trust.subtitle} />
           <div className="mt-14 grid gap-6 md:grid-cols-2">
@@ -426,9 +447,7 @@ export function LandingPage() {
                   <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-blue-matte/20 blur-2xl transition group-hover:bg-blue-glow/25" />
                   <div className="relative flex items-start justify-between gap-4">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-deep/80 text-blue-glow">
-                        <Globe className="h-6 w-6" />
-                      </div>
+                      <ProductionProjectLogo site={site} />
                       <div>
                         <h3 className="text-xl font-semibold group-hover:text-blue-glow">{site.name}</h3>
                         <p className="text-sm text-blue-glow/70">{site.url.replace("https://", "")}</p>
@@ -449,88 +468,127 @@ export function LandingPage() {
           </div>
       </SpotlightBand>
 
-      <MoodSection mood="spectrum" id="servicos" className="landing-section-y">
+      <MoodSection mood="spectrum" id="entregas" className="landing-section-y">
         <div className="landing-container">
-          <SectionHeader label={copy.services.title} title={copy.services.subtitle} />
-          <BentoServices />
+          <SectionHeader
+            label={copy.deliverables.label}
+            title={copy.deliverables.title}
+            description={copy.deliverables.subtitle}
+          />
+          <ul className="mt-10 grid gap-2 sm:grid-cols-2">
+            {copy.deliverables.items.map((item) => (
+              <li
+                key={item}
+                className="flex gap-2 rounded-xl border border-[var(--app-border)] bg-[var(--app-panel)] px-4 py-3 text-sm text-[var(--app-text)]"
+              >
+                <Check className="mt-0.5 h-4 w-4 shrink-0 text-sky-500" aria-hidden />
+                {item}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-8 text-sm leading-relaxed text-[var(--app-text-muted)]">{copy.deliverables.note}</p>
         </div>
       </MoodSection>
 
-      {/* Process — step by step */}
-      <MoodSection mood="logic" id="processo" className="landing-section-y">
+      <MoodSection mood="vault" id="bonus" className="landing-section-y">
         <div className="landing-container">
-          <SectionHeader label={copy.process.title} title={copy.process.subtitle} />
-          <ProcessTimeline />
-        </div>
-      </MoodSection>
-
-      {/* GitHub */}
-      <MoodSection mood="vault" className="landing-section-y">
-        <div className="landing-container">
-          <Reveal>
-            <div className="flex flex-wrap items-end justify-between gap-4">
-              <div>
-                <p className="section-label">Código aberto & estudos</p>
-                <h2 className="mt-4 font-display text-3xl font-bold md:text-4xl">{github.length}+ repositórios no GitHub</h2>
-              </div>
-              <a href={AGENCY_META.github} target="_blank" rel="noreferrer" className="btn-secondary">
-                <Github className="mr-2 h-4 w-4" />
-                Ver perfil
-              </a>
-            </div>
-          </Reveal>
-          <div className="mt-10 flex gap-4 overflow-x-auto pb-4 [scrollbar-width:thin]">
-            {github.map((repo, i) => (
-              <Reveal key={repo.url} delayMs={Math.min(i * 40, 200)}>
-                <a
-                  href={repo.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="panel block min-w-[260px] shrink-0 p-5 transition hover:border-blue-glow/35"
-                >
-                  <p className="font-medium text-white">{repo.name}</p>
-                  <p className="mt-1 font-mono text-xs text-blue-glow/80">{repo.language}</p>
-                  <p className="mt-3 line-clamp-2 text-xs text-white/50">{repo.description}</p>
-                </a>
-              </Reveal>
+          <SectionHeader label={copy.bonuses.label} title={copy.bonuses.title} />
+          <div className="mt-10 grid gap-6 md:grid-cols-3">
+            {copy.bonuses.items.map((bonus) => (
+              <article key={bonus.title} className="panel p-6">
+                <Gift className="h-6 w-6 text-sky-400" aria-hidden />
+                <h3 className="mt-4 font-display text-lg font-semibold text-[var(--app-text)]">{bonus.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-[var(--app-text-muted)]">{bonus.text}</p>
+              </article>
             ))}
           </div>
         </div>
       </MoodSection>
 
-      {/* Pricing */}
-      <MoodSection mood="value" id="investimento" className="landing-section-y">
+      <MoodSection mood="value" id="pacotes" className="landing-section-y">
         <div className="landing-container">
-          <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
-            <Reveal>
-              <p className="section-label">{copy.pricing.title}</p>
-              <h2 className="mt-4 font-display text-3xl font-bold md:text-4xl">{copy.pricing.subtitle}</h2>
-              <p className="mt-8 font-display text-4xl font-bold text-blue-glow md:text-5xl">{copy.pricing.highlight}</p>
-              <p className="mt-4 text-sm text-white/55">{copy.pricing.note}</p>
-              <p className="mt-3 text-xs text-white/40">{legal.shortDisclaimer}</p>
-            </Reveal>
-            <Reveal delayMs={120}>
-              <ul className="panel-glow space-y-4 p-8">
-                {copy.pricing.bullets.map((line) => (
-                  <li key={line} className="flex gap-3 text-sm text-white/75">
-                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-glow" />
-                    {line}
-                  </li>
+          <SectionHeader label={copy.packages.label} title={copy.packages.title} description={copy.packages.subtitle} />
+          <OfferPackages />
+          <OfferComparison />
+        </div>
+      </MoodSection>
+
+      <MoodSection mood="calm" id="investimento" className="landing-section-y">
+        <div className="landing-container grid gap-12 lg:grid-cols-2 lg:items-start">
+          <div>
+            <SectionHeader label={copy.pricing.label} title={copy.pricing.title} description={copy.pricing.subtitle} />
+            <div className="mt-8 overflow-hidden rounded-2xl border border-[var(--app-border)]">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-[var(--app-hover)] text-[var(--app-text-muted)]">
+                  <tr>
+                    <th className="px-4 py-3 font-medium">Oferta</th>
+                    <th className="px-4 py-3 font-medium">Faixa ilustrativa</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {copy.pricing.rows.map((row) => (
+                    <tr key={row.offer} className="border-t border-[var(--app-border)]">
+                      <td className="px-4 py-3 text-[var(--app-text)]">{row.offer}</td>
+                      <td className="px-4 py-3 font-medium text-blue-glow">{row.range}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p className="mt-4 text-sm leading-relaxed text-[var(--app-text-muted)]">{copy.pricing.disclaimer}</p>
+            <ul className="mt-6 space-y-2">
+              {copy.pricing.bullets.map((b) => (
+                <li key={b} className="flex gap-2 text-sm text-[var(--app-text-muted)]">
+                  <Check className="h-4 w-4 shrink-0 text-sky-500" />
+                  {b}
+                </li>
+              ))}
+            </ul>
+            <div className="mt-10">
+              <SectionHeader label={copy.commercialTerms.label} title={copy.commercialTerms.title} />
+              <div className="mt-6 space-y-5">
+                {copy.commercialTerms.items.map((term) => (
+                  <div key={term.title}>
+                    <h4 className="font-display text-base font-semibold text-[var(--app-text)]">{term.title}</h4>
+                    <p className="mt-2 text-sm leading-relaxed text-[var(--app-text-muted)]">{term.body}</p>
+                  </div>
                 ))}
-              </ul>
-            </Reveal>
+              </div>
+            </div>
+            <div className="mt-8 space-y-4 text-sm text-[var(--app-text-muted)]">
+              {copy.motivation.paragraphs.map((p) => (
+                <p key={p}>{p}</p>
+              ))}
+            </div>
+          </div>
+          <div id="garantia" className="panel-glow scroll-mt-28 p-8">
+            <div className="flex items-center gap-2">
+              <Shield className="h-5 w-5 text-blue-glow" />
+              <p className="section-label">{copy.guarantee.label}</p>
+            </div>
+            <h3 className="mt-4 font-display text-2xl font-bold text-[var(--app-text)]">{copy.guarantee.title}</h3>
+            <p className="mt-2 text-sm font-medium text-sky-600 dark:text-sky-300">{copy.guarantee.period}</p>
+            <p className="mt-4 text-sm leading-relaxed text-[var(--app-text-muted)]">{copy.guarantee.body}</p>
+            <p className="mt-6 text-xs font-semibold uppercase tracking-wide text-[var(--app-text-subtle)]">Não inclui automaticamente</p>
+            <ul className="mt-3 space-y-2">
+              {copy.guarantee.excludes.map((line) => (
+                <li key={line} className="text-sm text-[var(--app-text-muted)]">
+                  · {line}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-6 text-xs leading-relaxed text-[var(--app-text-subtle)]">{copy.guarantee.legalNote}</p>
           </div>
         </div>
       </MoodSection>
 
-      {/* Meeting — Action */}
-      <MoodSection mood="launch" id="reuniao" className="landing-section-y">
+      <MoodSection mood="launch" id="contato" className="landing-section-y">
         <div className="landing-container">
           <Reveal>
             <p className="section-label">{copy.aida.action.label}</p>
-            <h2 className="mt-4 max-w-3xl font-display text-3xl font-bold md:text-4xl">{copy.meeting.title}</h2>
+            <h2 className="mt-4 max-w-3xl font-display text-3xl font-bold md:text-4xl">{copy.aida.action.title}</h2>
             <p className="mt-4 max-w-2xl text-white/60">{copy.meeting.subtitle}</p>
-            <p className="mt-2 text-sm text-white/45">{copy.aida.action.urgencyNote}</p>
+            <p className="mt-3 text-sm font-medium text-sky-200/90">{copy.aida.action.urgencyNote}</p>
           </Reveal>
 
           <div className="mt-12 grid gap-6 md:grid-cols-2">
@@ -549,7 +607,7 @@ export function LandingPage() {
                       <ExternalLink className="ml-2 h-4 w-4" />
                     </a>
                   ) : (
-                    <a href="#orcamento" className="btn-primary mt-6">
+                    <a href="#formulario" className="btn-primary mt-6">
                       {opt.cta}
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </a>
@@ -572,6 +630,35 @@ export function LandingPage() {
               </ol>
             </div>
           </Reveal>
+        </div>
+      </MoodSection>
+
+      <MoodSection mood="commit" id="resumo" className="landing-section-y !py-12 md:!py-16">
+        <div className="landing-container max-w-3xl">
+          <p className="section-label">{copy.offer.productName}</p>
+          <h2 className="pro-headline mt-2 text-2xl md:text-3xl">{copy.brand}</h2>
+          <dl className="mt-8 space-y-4 text-sm leading-relaxed text-[var(--app-text-muted)] md:text-base">
+            <div>
+              <dt className="font-semibold text-[var(--app-text)]">Objetivo</dt>
+              <dd className="mt-1">{copy.offer.salesSummary.promise}</dd>
+            </div>
+            <div>
+              <dt className="font-semibold text-[var(--app-text)]">Inclui</dt>
+              <dd className="mt-1">{copy.offer.salesSummary.includes}</dd>
+            </div>
+            <div>
+              <dt className="font-semibold text-[var(--app-text)]">Bônus</dt>
+              <dd className="mt-1">{copy.offer.salesSummary.bonuses}</dd>
+            </div>
+            <div>
+              <dt className="font-semibold text-[var(--app-text)]">Investimento</dt>
+              <dd className="mt-1">{copy.offer.salesSummary.investment}</dd>
+            </div>
+            <div>
+              <dt className="font-semibold text-[var(--app-text)]">Garantia</dt>
+              <dd className="mt-1">{copy.offer.salesSummary.guarantee}</dd>
+            </div>
+          </dl>
         </div>
       </MoodSection>
 
@@ -598,8 +685,7 @@ export function LandingPage() {
         </div>
       </MoodSection>
 
-      {/* Form */}
-      <MoodSection mood="commit" id="orcamento" className="landing-section-y">
+      <MoodSection mood="commit" id="formulario" className="landing-section-y scroll-mt-28">
         <div className="landing-container">
           <div className="panel-glow overflow-hidden">
             <div className="grid lg:grid-cols-2">
@@ -612,9 +698,10 @@ export function LandingPage() {
                 </Reveal>
               </div>
               <form className="space-y-4 p-6 sm:p-8 md:p-12 lg:p-14" onSubmit={onLeadSubmit}>
-                <select className="input" name="intent" defaultValue="reuniao" aria-label="Intenção do contato">
-                  <option value="reuniao">Quero agendar reunião de diagnóstico</option>
-                  <option value="orcamento">Quero orçamento por mensagem</option>
+                <select className="input" name="intent" defaultValue="app" aria-label="Intenção do contato">
+                  <option value="app">Quero desenvolver meu aplicativo</option>
+                  <option value="reuniao">Quero agendar uma conversa</option>
+                  <option value="orcamento">Quero proposta por mensagem</option>
                 </select>
                 <input className="input" name="name" placeholder="Nome" required autoComplete="name" />
                 <input className="input" type="email" name="email" placeholder="E-mail" required autoComplete="email" />
@@ -624,7 +711,7 @@ export function LandingPage() {
                 <textarea
                   className="input min-h-32"
                   name="message"
-                  placeholder="Conte sobre o sistema: objetivo, usuários, prazo desejado…"
+                  placeholder="Descreva sua ideia de aplicativo: problema, público, funcionalidades essenciais e prazo…"
                   required
                 />
                 <label className="flex cursor-pointer gap-3 text-left text-xs leading-relaxed text-white/55">
@@ -641,7 +728,7 @@ export function LandingPage() {
                   </a>
                 </label>
                 <button type="submit" className="btn-primary w-full" disabled={submitting}>
-                  {submitting ? "Enviando…" : "Enviar briefing"}
+                  {submitting ? "Enviando…" : "Enviar minha ideia"}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </button>
                 {leadStatus ? <p className="text-sm text-blue-glow">{leadStatus}</p> : null}

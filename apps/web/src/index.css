@@ -1,4 +1,5 @@
 @import "./styles/theme.css";
+@import "./styles/theme-surfaces.css";
 @import "./styles/theme-tailwind-bridge.css";
 @import "./styles/landing-day.css";
 

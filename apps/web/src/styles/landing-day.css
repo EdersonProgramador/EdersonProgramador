@@ -27,6 +27,17 @@ html[data-theme="day"] .landing-shell .hero-title {
   text-shadow: none;
 }
 
+html[data-theme="day"] .landing-shell #topo .inline-flex.rounded-full.border {
+  border-color: var(--app-border) !important;
+  background: rgb(255 255 255 / 0.94) !important;
+}
+
+html[data-theme="day"] .landing-shell .pro-mockup--chrome .bg-gradient-to-b {
+  --tw-gradient-from: #0f172a var(--tw-gradient-from-position);
+  --tw-gradient-to: #070b14 var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
 html[data-theme="day"] .landing-shell .pro-mockup-ring {
   box-shadow:
     0 24px 60px rgb(15 23 42 / 0.12),
@@ -163,7 +174,11 @@ html[data-theme="day"] .landing-shell .hero-stat__value-inner {
 }
 
 html[data-theme="day"] .landing-shell .hero-stat__emphasis {
-  color: color-mix(in srgb, var(--stat-accent) 55%, #475569);
+  color: var(--app-text-subtle);
+}
+
+html[data-theme="day"] .landing-shell .hero-stat:hover .hero-stat__emphasis {
+  color: var(--app-text-muted);
 }
 
 html[data-theme="day"] .landing-shell .brand-pillar {

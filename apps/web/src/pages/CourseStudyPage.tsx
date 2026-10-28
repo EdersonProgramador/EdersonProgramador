@@ -238,7 +238,7 @@ export function CourseStudyPage() {
   const videoFile = (id: string) => payload.videoManifest.files[id];
 
   return (
-    <div className="course-study min-h-screen bg-[var(--course-surface-main)]">
+    <div className="course-study surface-light min-h-screen bg-[var(--course-surface-main)]">
       <header className="course-study__header app-shell-header">
         <div className="flex items-center justify-between gap-2 px-3 py-2 sm:gap-3 sm:px-4 sm:py-3">
           <div className="flex min-w-0 flex-1 items-center gap-2">

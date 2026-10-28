@@ -1,0 +1,107 @@
+/**
+ * Superfícies semânticas — contraste estável dia/noite.
+ * - surface-light: fundo claro (dia) ou conteúdo principal escuro (noite) com tokens --app-text*
+ * - surface-dark: ilhas escuras (mockups, mídia) — texto sempre claro, mesmo no tema dia
+ */
+
+.surface-light {
+  color: var(--app-text);
+}
+
+.surface-dark {
+  color: #f0f4f8;
+}
+
+/* —— Noite: reforço de textos “apagados” (utilitários Tailwind legacy) —— */
+html[data-theme="night"] .surface-light .text-white\/80,
+html[data-theme="night"] .surface-light .text-white\/82,
+html[data-theme="night"] .surface-light .text-white\/85,
+html[data-theme="night"] .surface-light .text-white\/90 {
+  color: var(--app-text);
+}
+
+html[data-theme="night"] .surface-light .text-white\/70,
+html[data-theme="night"] .surface-light .text-white\/75 {
+  color: var(--app-text-subtle);
+}
+
+html[data-theme="night"] .surface-light .text-white\/60,
+html[data-theme="night"] .surface-light .text-white\/65 {
+  color: var(--app-text-muted);
+}
+
+html[data-theme="night"] .surface-light .text-white\/45,
+html[data-theme="night"] .surface-light .text-white\/50,
+html[data-theme="night"] .surface-light .text-white\/55 {
+  color: var(--app-text-muted);
+}
+
+html[data-theme="night"] .surface-light .text-white\/35,
+html[data-theme="night"] .surface-light .text-white\/40 {
+  color: var(--course-faint, var(--app-text-muted));
+}
+
+html[data-theme="night"] .surface-light .pro-headline {
+  color: var(--app-text);
+}
+
+/* Faixas escuras dentro da landing (ex.: CTA noite) */
+html[data-theme="night"] .surface-light .cta-band .text-white\/65,
+html[data-theme="night"] .surface-light .cta-band .text-white\/60 {
+  color: rgb(248 250 252 / 0.88);
+}
+
+html[data-theme="night"] .surface-light .cta-band .pro-headline,
+html[data-theme="night"] .surface-light .cta-band .section-label {
+  color: #f8fafc;
+}
+
+/* —— Dia: ilhas escuras —— */
+html[data-theme="day"] .surface-dark {
+  color: #f8fafc;
+}
+
+html[data-theme="day"] .surface-dark .text-white,
+html[data-theme="day"] .surface-dark .pro-headline {
+  color: #f8fafc !important;
+}
+
+html[data-theme="day"] .surface-dark .text-white\/80,
+html[data-theme="day"] .surface-dark .text-white\/90 {
+  color: rgb(248 250 252 / 0.95) !important;
+}
+
+html[data-theme="day"] .surface-dark .text-white\/70,
+html[data-theme="day"] .surface-dark .text-white\/75 {
+  color: rgb(248 250 252 / 0.88) !important;
+}
+
+html[data-theme="day"] .surface-dark .text-white\/60,
+html[data-theme="day"] .surface-dark .text-white\/65 {
+  color: rgb(248 250 252 / 0.78) !important;
+}
+
+html[data-theme="day"] .surface-dark .text-white\/45,
+html[data-theme="day"] .surface-dark .text-white\/50,
+html[data-theme="day"] .surface-dark .text-white\/55,
+html[data-theme="day"] .surface-dark .text-white\/40 {
+  color: rgb(248 250 252 / 0.62) !important;
+}
+
+html[data-theme="day"] .surface-dark :is(.text-sky-200\/90, .text-sky-200\/70, .text-sky-300, .text-sky-300\/70, .text-sky-300\/80) {
+  color: rgb(186 230 253 / 0.92) !important;
+}
+
+html[data-theme="day"] .surface-dark .border-white\/10,
+html[data-theme="day"] .surface-dark .border-white\/15,
+html[data-theme="day"] .surface-dark .border-white\/20 {
+  border-color: rgb(255 255 255 / 0.14) !important;
+}
+
+html[data-theme="day"] .surface-dark .bg-black\/40 {
+  background-color: rgb(15 23 42 / 0.88) !important;
+}
+
+html[data-theme="day"] .surface-dark .bg-black\/50 {
+  background-color: rgb(15 23 42 / 0.92) !important;
+}

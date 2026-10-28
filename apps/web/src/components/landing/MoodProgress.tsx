@@ -2,11 +2,12 @@ import type { PageMood } from "../../hooks/usePageMood";
 
 const STEPS: { mood: PageMood; label: string; href: string }[] = [
   { mood: "trust", label: "Início", href: "#topo" },
-  { mood: "energy", label: "Por quê", href: "#interesse" },
+  { mood: "energy", label: "Oferta", href: "#ideia" },
   { mood: "desire", label: "Projetos", href: "#producao" },
-  { mood: "logic", label: "Método", href: "#processo" },
-  { mood: "launch", label: "Reunião", href: "#reuniao" },
-  { mood: "commit", label: "Briefing", href: "#orcamento" }
+  { mood: "logic", label: "Etapas", href: "#processo" },
+  { mood: "value", label: "Pacotes", href: "#pacotes" },
+  { mood: "launch", label: "Contato", href: "#contato" },
+  { mood: "commit", label: "Resumo", href: "#resumo" }
 ];
 
 type MoodProgressProps = {

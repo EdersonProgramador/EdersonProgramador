@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="pt-BR" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <link rel="icon" type="image/png" href="assets/atlly-mark.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Oxanium:wght@500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <title>ATLLY — Human Performance System</title>
+    <!-- Google tag (gtag.js) — conta ATLLY 244-230-6941 / AW-18513371658 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-18513371658"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "AW-18513371658", { allow_enhanced_conversions: true });
+    </script>
+    <script>
+      (function () {
+        try {
+          var theme = localStorage.getItem("app-treino-theme") === "light" ? "light" : "dark";
+          var root = document.documentElement;
+          root.classList.toggle("dark", theme === "dark");
+          root.classList.toggle("light", theme === "light");
+          root.dataset.theme = theme;
+          root.style.colorScheme = theme;
+        } catch (e) {}
+      })();
+    </script>
+    <script type="module" crossorigin src="/assets/index-Bal_4nJD.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/react-vendor-IGNyAfYs.js">
+    <link rel="modulepreload" crossorigin href="/assets/icons-DSZAeonG.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-hWzG8xn_.css">
+  </head>
+  <body class="antialiased">
+    <div id="root"></div>
+  </body>
+</html>

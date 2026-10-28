@@ -1,235 +1,446 @@
-/** Copy comercial — AIDA + gatilhos mentais (prova social, escassez, autoridade, reciprocidade, aversão à perda). */
+/**
+ * Copy comercial — App do Zero ao Lançamento (Ederson Programador).
+ *
+ * Estrutura de jornada (`process.steps`, seções da landing): alinhada ao framework ROMA
+ * (ideia → projeto → planejamento → desenvolvimento → testes → lançamento).
+ * Uso interno apenas — nenhum texto exibido ao cliente deve nomear ROMA ou a técnica.
+ */
 
 export const MARKETING_COPY = {
   brand: "Ederson Programador",
   domainLabel: "edersonprogramador.com.br",
 
-  /** AIDA — arco emocional → racional → decisão */
+  offer: {
+    productName: "App do Zero ao Lançamento",
+    productByline: "Ederson Programador · Desenvolvimento de Sistemas e Soluções Tecnológicas",
+    productSubtitle:
+      "Desenvolvimento de aplicativos e sistemas sob medida, da concepção à implantação, com escopo definido e entrega profissional.",
+    promise:
+      "Apoiamos empreendedores e empresas a colocar projetos digitais em operação com planejamento técnico, desenvolvimento estruturado e preparação para o mercado.",
+    salesSummary: {
+      promise:
+        "Transformar sua ideia em um aplicativo funcional, com percurso técnico claro do planejamento à implantação.",
+      includes:
+        "Pacote Essencial, Profissional ou Avançado — cada um com diagnóstico, escopo, desenvolvimento, testes e implantação conforme contrato.",
+      bonuses: "Benefícios complementares por pacote (validação, lançamento, evolução e transferência técnica).",
+      investment:
+        "Referências iniciais: R$ 5.900 (Essencial), R$ 12.900 (Profissional) e a partir de R$ 24.900 (Avançado), sujeitas à avaliação de escopo.",
+      guarantee:
+        "Garantia de conformidade técnica: 30 dias após entrega e aceite para correção de defeitos previstos no contrato, respeitada a legislação aplicável."
+    }
+  },
+
   aida: {
     attention: {
-      eyebrow: "Soluções digitais que geram resultados",
-      title: "Pare de remendar. Construa o sistema que a operação já pediu há meses.",
+      eyebrow: "App do Zero ao Lançamento",
+      title: "Desenvolvimento sob medida, da ideia à implantação.",
       subtitle:
-        "Sites e plataformas feitos para converter, escalar e não te deixar refém de template. Um engenheiro no comando — escopo fechado, entregas que você vê, código que aguenta a próxima fase do negócio.",
-      ctaPrimary: "Reservar diagnóstico gratuito",
-      ctaSecondary: "Ver as 4 fases do método"
+        "Aplicativos e sistemas para empreendedores e empresas — com escopo definido, pacotes claros e acompanhamento técnico em todas as fases.",
+      ctaPrimary: "Solicitar proposta",
+      ctaSecondary: "Ver como funciona"
     },
     interest: {
-      label: "Custo de esperar",
-      title: "Cada semana sem sistema certo é receita, foco e credibilidade indo embora.",
+      label: "Para quem é",
+      title: "Projetos digitais com escopo claro e investimento previsível",
       subtitle:
-        "Não é falta de vontade — é acúmulo de atalhos: planilha que virou “sistema”, site que não gera lead, dev que sumiu no meio do caminho. O mercado não pausa enquanto você organiza o caos.",
-      pains: [
-        "Visitante entra, não entende a oferta em 5 segundos e some — você paga tráfego para aquecer concorrente",
-        "Time repete o mesmo cadastro em três lugares; erro humano vira retrabalho e cliente irritado na fila",
-        "Deploy feito, documentação zero: qualquer mudança vira negociação cara ou dependência de quem não responde"
+        "Indicado para quem precisa de execução técnica confiável, sem abrir mão de transparência sobre entregas, prazos e condições comerciais.",
+      highlights: [
+        "Empreendedores que desejam testar uma solução com um MVP junto a usuários reais",
+        "Empresas que necessitam de aplicativo, portal ou sistema com fluxos e integrações definidos",
+        "Organizações com regras de negócio, módulos ou integrações que exigem projeto personalizado"
       ],
       pivot:
-        "Trocamos improviso por roteiro: escopo aprovado por fase, homologação antes do go-live e stack moderna (React, APIs, cloud). Você decide com dados — não com promessa bonita no slide."
+        "Não é necessário dominar programação. Basta apresentar o contexto do negócio; a proposta formal indicará pacote, escopo, investimento e cronograma."
     },
     desire: {
-      label: "Prova + processo",
-      title: "Não é portfólio de mockup. É produto rodando e método que você acompanha.",
-      subtitle:
-        "Cases publicados, código no GitHub e um pipeline de quatro etapas: nada avança sem o seu “ok”. Autoridade técnica com transparência — o oposto do escuro “confia em mim”."
+      label: "Referências",
+      title: "Projetos em produção",
+      subtitle: "Soluções publicadas e em uso — demonstração de capacidade de entrega ponta a ponta."
     },
     action: {
-      label: "Decisão simples",
-      title: "30 minutos. Você sai sabendo se vale a pena, quanto custa e por onde começar.",
+      label: "Próximo passo",
+      title: "Solicite uma proposta para o seu projeto",
       subtitle:
-        "Diagnóstico sem cartão e sem contrato automático. Se fizer sentido para os dois lados, proposta formal — assinatura e pagamento só depois do alinhamento por escrito.",
-      urgencyNote: "Abro poucas vagas de projeto por mês para manter acompanhamento próximo e prazo cumprido."
+        "Análise inicial, indicação de pacote e condições por escrito — sem compromisso de contratação na primeira conversa.",
+      urgencyNote: "Ideia · escopo · desenvolvimento · testes · implantação"
     }
   },
 
-  stats: [
-    {
-      value: "2+",
-      label: "Produtos reais em produção hoje",
-      emphasis: "Abra no navegador — entrega real, não mockup",
-      href: "#producao"
-    },
-    {
-      value: "~40d",
-      label: "Referência para MVP enxuto aprovado",
-      emphasis: "Cronograma combinado antes do primeiro commit",
-      href: "#processo"
-    },
-    {
-      value: "4",
-      label: "Etapas do método — entrega e ok seu em cada uma",
-      emphasis: "Briefing → UI → dev → deploy; nada avança no escuro",
-      href: "#processo"
-    },
-    {
-      value: "0",
-      label: "Surpresa de escopo após proposta assinada*",
-      emphasis: "O que está no paper é o que você paga",
-      href: "#investimento"
-    }
-  ],
-
-  hero: {
-    eyebrow: "Desenvolvimento de sistemas & software sob medida",
-    title: "Transforme sua ideia em um sistema profissional, rápido e pronto para crescer.",
-    subtitle:
-      "Projeto, desenvolvimento e publicação de sites e sistemas web com foco em performance, experiência do usuário e código sustentável — do MVP ao produto em produção.",
-    ctaPrimary: "Quero um orçamento",
-    ctaSecondary: "Ver projetos publicados"
-  },
-
-  trust: {
-    title: "Quem já confia no ar não precisa de discurso",
-    subtitle:
-      "Estes produtos estão publicados, recebendo tráfego e evoluindo — prova social concreta de entrega fim a fim, não só layout exportado do Figma."
-  },
-
-  services: {
-    title: "Serviços",
-    subtitle: "Transformando ideias em soluções digitais — cinco frentes alinhadas à identidade Ederson Programador.",
-    items: [
-      {
-        title: "Desenvolvimento de sistemas",
-        text: "Painéis, fluxos, permissões e regras de negócio sob medida — arquitetura pensada para evoluir com a operação.",
-        mood: "trust" as const
-      },
-      {
-        title: "Inteligência artificial",
-        text: "Recursos inteligentes integrados ao produto: automação de decisões, assistentes e pipelines com IA aplicada ao negócio.",
-        mood: "desire" as const
-      },
-      {
-        title: "Automações e integrações",
-        text: "APIs, pagamentos, WhatsApp, e-mail e sistemas legados conectados — menos retrabalho manual, mais evento no lugar certo.",
-        mood: "logic" as const
-      },
-      {
-        title: "Sites e plataformas",
-        text: "Presença digital rápida, responsiva e orientada a conversão — da landing ao portal completo em produção.",
-        mood: "spectrum" as const
-      },
-      {
-        title: "Projetos digitais",
-        text: "Do diagnóstico ao deploy: MVPs, evolução contínua e entregas com foco em resultado mensurável.",
-        mood: "launch" as const
-      }
+  motivation: {
+    label: "Transparência",
+    title: "Investimento alinhado ao escopo contratado",
+    paragraphs: [
+      "Os valores publicados são referências para projetos de escopo controlado. Orçamento definitivo depende de complexidade, integrações, design, plataformas e prazo.",
+      "Aplicativos nativos em múltiplas plataformas, sistemas financeiros, plataformas de grande porte e integrações críticas podem demandar investimento superior ao indicado nos pacotes."
     ]
   },
 
+  stats: [
+    { value: "5", label: "Etapas", emphasis: "Da ideia ao lançamento", href: "#processo" },
+    { value: "3", label: "Pacotes", emphasis: "Essencial · Profissional · Avançado", href: "#pacotes" },
+    { value: "2+", label: "Em produção", emphasis: "Cases publicados", href: "#producao" },
+    { value: "30d", label: "Conformidade", emphasis: "Garantia contratual", href: "#garantia" }
+  ],
+
+  hero: {
+    mockupLabel: "Seu aplicativo",
+    mockupHint: "Pacotes com escopo fechado · pagamento por marcos · MVP ou produto completo"
+  },
+
+  trust: {
+    title: "Experiência comprovada em produção",
+    subtitle: "Plataformas publicadas, em operação e em evolução contínua."
+  },
+
   process: {
-    title: "Método em 4 etapas",
+    label: "Como funciona",
+    title: "Cinco etapas até o lançamento do seu aplicativo",
     subtitle:
-      "Compromisso progressivo: você aprova cada marco antes do próximo. Reduz medo de investir no escuro e ativa consistência — o projeto anda porque você valida, não porque eu sumi.",
+      "Do diagnóstico à implantação, com entregas combinadas e critérios de aceite formalizados no contrato.",
+    body:
+      "Cada fase avança após alinhamento: requisitos de negócio viram especificação, arquitetura e software testado no escopo acordado.",
+    punchline:
+      "Você concentra-se no negócio e nas prioridades; a execução técnica conduz o projeto até o ambiente de produção definido.",
     steps: [
       {
         phase: "01",
-        title: "Briefing & escopo fechado",
-        days: "1–3 dias",
-        text: "Mapeamos objetivo, usuários, must-have e prazo. Você recebe proposta com investimento, marcos e o que fica explicitamente fora — clareza antes do código.",
-        deliverables: ["Mapa de escopo e prioridades", "Proposta comercial detalhada", "Cronograma com marcos de pagamento"],
+        title: "Da ideia ao projeto",
+        days: "Diagnóstico",
+        text: "Compreensão do problema, do público-alvo e da proposta de valor do aplicativo.",
+        deliverables: ["Diagnóstico do projeto", "Mapa do problema e personas", "Proposta de valor do produto"],
         mood: "trust" as const
       },
       {
         phase: "02",
-        title: "Interface & experiência",
-        days: "~10 dias",
-        text: "Direção visual e fluxos principais alinhados à marca. Só depois do seu ok formal entra desenvolvimento — evita refazer tela inteira na reta final.",
-        deliverables: ["Layout / wireframe navegável", "Fluxos críticos validados", "Registro de aprovação da UI"],
+        title: "Do projeto ao planejamento",
+        days: "Especificação",
+        text: "Definição de funcionalidades, requisitos, escopo, prioridades e arquitetura técnica.",
+        deliverables: ["Documento de escopo e prioridades", "Planejamento técnico", "Interfaces das telas principais"],
         mood: "desire" as const
       },
       {
         phase: "03",
-        title: "Desenvolvimento & homologação",
-        days: "~15 dias",
-        text: "Código limpo, performance e regras de negócio testadas em ambiente de homologação. Você vê funcionando antes do domínio oficial.",
-        deliverables: ["URL de homologação", "Integrações acordadas ativas", "Checklist dos fluxos críticos"],
+        title: "Do planejamento ao desenvolvimento",
+        days: "Implementação",
+        text: "Construção da solução, implementação das funcionalidades e validação da experiência de uso.",
+        deliverables: ["Desenvolvimento conforme escopo", "Integrações previstas", "Ambiente de homologação"],
         mood: "logic" as const
       },
       {
         phase: "04",
-        title: "Deploy, domínio & handoff",
-        days: "~15 dias",
-        text: "Conteúdo ajustado, publicação, testes finais e orientação de operação. Sistema no ar, domínio configurado — handoff para você não ficar refém.",
-        deliverables: ["Produção no ar", "DNS / SSL configurados", "Handoff + orientação de uso"],
+        title: "Do desenvolvimento aos testes",
+        days: "Qualidade",
+        text: "Verificação de fluxos, correção de falhas e validação dos requisitos acordados.",
+        deliverables: ["Testes funcionais no escopo", "Correções de conformidade", "Registro de aceite por marco"],
+        mood: "vault" as const
+      },
+      {
+        phase: "05",
+        title: "Dos testes ao lançamento",
+        days: "Implantação",
+        text: "Preparação do ambiente de produção e, quando contratado, publicação nas plataformas definidas.",
+        deliverables: ["Implantação acordada", "Documentação de uso", "Entrega técnica e transferência"],
         mood: "launch" as const
       }
     ]
   },
 
+  deliverables: {
+    label: "Base comum",
+    title: "O que todos os pacotes observam",
+    subtitle:
+      "Conteúdo específico de cada tier está descrito nos cartões Essencial, Profissional e Avançado. Itens não listados no contrato não fazem parte do escopo.",
+    note:
+      "Publicação em lojas, infraestrutura dedicada, integrações com custo de terceiros e manutenção contínua são tratados expressamente na proposta e no contrato.",
+    items: [
+      "Escopo e entregas definidos antes da assinatura",
+      "Desenvolvimento alinhado aos requisitos acordados",
+      "Testes e implantação conforme o pacote escolhido",
+      "Documentação compatível com a complexidade do projeto",
+      "Suporte pós-entrega disponível mediante contrato separado"
+    ]
+  },
+
+  bonuses: {
+    label: "Benefícios complementares",
+    title: "Inclusos conforme o pacote contratado",
+    items: [
+      {
+        title: "Validação e evolução",
+        text: "Checklist de validação da ideia e mapa de evolução do produto (Essencial e superiores, conforme escopo)."
+      },
+      {
+        title: "Lançamento",
+        text: "Checklist de preparação, testes e etapas para disponibilização (Profissional e superiores, conforme escopo)."
+      },
+      {
+        title: "Transferência técnica",
+        text: "Demonstração, treinamento de entrega, orientação técnica ou reunião de transferência (conforme pacote)."
+      }
+    ]
+  },
+
+  packages: {
+    label: "Pacotes",
+    title: "Essencial, Profissional e Avançado",
+    subtitle:
+      "Preços iniciais sugeridos por projeto, sujeitos à avaliação de escopo. Escolha o pacote mais adequado ao momento do seu negócio.",
+    comparison: {
+      title: "Comparativo dos pacotes",
+      columns: ["Essencial", "Profissional", "Avançado"] as const,
+      rows: [
+        {
+          feature: "Diagnóstico e planejamento",
+          essential: "Básico",
+          professional: "Completo",
+          advanced: "Aprofundado"
+        },
+        {
+          feature: "Desenvolvimento",
+          essential: "MVP",
+          professional: "Produto mais completo",
+          advanced: "Solução personalizada"
+        },
+        {
+          feature: "Integrações",
+          essential: "Simples, se previstas",
+          professional: "Conforme escopo",
+          advanced: "Complexas, se contratadas"
+        },
+        {
+          feature: "Testes e implantação",
+          essential: "Básicos",
+          professional: "Estruturados",
+          advanced: "Definidos por projeto"
+        },
+        {
+          feature: "Documentação",
+          essential: "Básica",
+          professional: "Técnica básica",
+          advanced: "Conforme arquitetura"
+        },
+        {
+          feature: "Suporte após entrega",
+          essential: "Contratável à parte",
+          professional: "Contratável à parte",
+          advanced: "Contratável à parte"
+        },
+        {
+          feature: "Investimento inicial",
+          essential: "R$ 5.900",
+          professional: "R$ 12.900",
+          advanced: "R$ 24.900+"
+        }
+      ]
+    },
+    tiers: [
+      {
+        id: "essential",
+        name: "Essencial",
+        badge: "Entrada",
+        tagline: "Para validar uma ideia",
+        audience:
+          "Indicado para empreendedores que precisam transformar uma ideia em um MVP — produto mínimo viável — para testar a solução com usuários reais.",
+        price: "R$ 5.900",
+        priceNote: "Preço inicial sugerido por projeto, sujeito à avaliação de escopo.",
+        deliverables: [
+          "Diagnóstico inicial do projeto",
+          "Definição das funcionalidades essenciais",
+          "Planejamento técnico básico",
+          "Interface das telas principais",
+          "Desenvolvimento de um MVP com escopo limitado",
+          "Testes funcionais e correções",
+          "Implantação em um ambiente acordado",
+          "Orientação básica de utilização"
+        ],
+        bonus: "Checklist de validação da ideia e mapa de evolução do produto.",
+        timeline: "Prazo ilustrativo: 4–6 semanas, após definição dos requisitos e disponibilidade dos materiais."
+      },
+      {
+        id: "professional",
+        name: "Profissional",
+        badge: "Recomendado",
+        recommended: true,
+        tagline: "Para construir um produto mais completo",
+        audience:
+          "Indicado para empresas e empreendedores que necessitam de aplicativo ou sistema com fluxos mais completos e funcionalidades integradas.",
+        price: "R$ 12.900",
+        priceNote: "Preço inicial sugerido por projeto, sujeito à avaliação de escopo.",
+        deliverables: [
+          "Diagnóstico e levantamento de requisitos",
+          "Especificação funcional do projeto",
+          "Arquitetura técnica da solução",
+          "Design das principais interfaces",
+          "Desenvolvimento do aplicativo ou sistema acordado",
+          "Banco de dados e autenticação, quando necessários",
+          "Integrações previamente especificadas",
+          "Testes e correções de conformidade",
+          "Implantação e documentação técnica básica",
+          "Demonstração e treinamento de entrega"
+        ],
+        bonus: "Checklist de lançamento, mapa de evolução e uma sessão de orientação técnica.",
+        timeline: "Prazo ilustrativo: 6–10 semanas, dependendo do escopo."
+      },
+      {
+        id: "advanced",
+        name: "Avançado",
+        badge: "Personalizado",
+        tagline: "Para projetos de maior complexidade",
+        audience:
+          "Indicado para empresas que necessitam de solução personalizada, com múltiplos módulos, regras de negócio específicas ou integrações mais complexas.",
+        price: "A partir de R$ 24.900",
+        priceNote: "Investimento definido após análise técnica.",
+        deliverables: [
+          "Descoberta e análise aprofundada do negócio",
+          "Especificação detalhada de requisitos",
+          "Arquitetura de software e planejamento de dados",
+          "Desenvolvimento de módulos personalizados",
+          "Integrações com APIs e serviços externos previstos",
+          "Painel administrativo, conforme escopo",
+          "Testes, validações e correções",
+          "Preparação de implantação e documentação",
+          "Planejamento de escalabilidade e evolução"
+        ],
+        bonus: "Roadmap de evolução, reunião de transferência técnica e plano inicial de melhorias.",
+        timeline: "Prazo e investimento definidos após análise de complexidade, riscos e requisitos."
+      }
+    ]
+  },
+
+  pricing: {
+    label: "Investimento",
+    title: "Valores de referência",
+    subtitle:
+      "Os valores não garantem que qualquer aplicativo possa ser entregue por esses preços. São referências para projetos de escopo controlado.",
+    rows: [
+      { offer: "Pacote Essencial", range: "R$ 5.900" },
+      { offer: "Pacote Profissional", range: "R$ 12.900" },
+      { offer: "Pacote Avançado", range: "A partir de R$ 24.900" },
+      { offer: "Manutenção e evolução contínua", range: "Proposta mensal" }
+    ],
+    disclaimer:
+      "Aplicativos nativos para múltiplas plataformas, sistemas financeiros, plataformas de grande porte e integrações críticas podem exigir orçamento superior.",
+    bullets: [
+      "Proposta formal antes da contratação",
+      "Escopo fechado por pacote ou aditivo contratual",
+      "Critérios de aceite por marco de entrega"
+    ]
+  },
+
+  commercialTerms: {
+    label: "Condições comerciais",
+    title: "Como formalizamos a parceria",
+    items: [
+      {
+        title: "Pagamento por marcos",
+        body:
+          "Exemplo: 40% na contratação, 30% na validação intermediária e 30% na entrega final. Percentuais e marcos são formalizados em contrato, vinculados a entregas e aceite."
+      },
+      {
+        title: "Garantia de conformidade",
+        body:
+          "30 dias após entrega e aceite para correção de defeitos reproduzíveis que contrariem os requisitos contratados, sem prejuízo dos direitos legais aplicáveis."
+      },
+      {
+        title: "Manutenção recorrente",
+        body:
+          "Contrato separado para suporte, atualizações e melhorias, com horas, limites de atendimento e serviços incluídos definidos por escrito."
+      },
+      {
+        title: "Custos externos",
+        body:
+          "Responsabilidade por hospedagem, domínio, APIs, serviços de IA, contas de publicação em lojas e licenças de terceiros definida expressamente na proposta e no contrato."
+      }
+    ]
+  },
+
+  guarantee: {
+    label: "Garantia",
+    title: "Garantia de conformidade técnica",
+    period: "30 dias após entrega e aceite",
+    body:
+      "Correção, sem custo adicional, de defeitos reproduzíveis que representem descumprimento dos requisitos acordados no contrato.",
+    excludes: [
+      "Novas funcionalidades ou alteração de escopo",
+      "Problemas causados por modificações de terceiros",
+      "Indisponibilidade de serviços externos (APIs, lojas, hospedagem)",
+      "Custos de hospedagem, APIs, lojas ou licenças de terceiros"
+    ],
+    legalNote:
+      "Início, cobertura e procedimento de atendimento constam do contrato. Quando aplicável, o Código de Defesa do Consumidor prevalece sobre prazos comerciais."
+  },
+
+  services: {
+    title: "Pilares da entrega",
+    subtitle: "Quatro frentes presentes em todos os pacotes, em níveis distintos de profundidade.",
+    items: [
+      { title: "Diagnóstico e escopo", text: "Clareza antes da implementação.", mood: "trust" as const },
+      { title: "Produto e interfaces", text: "Fluxos alinhados ao usuário final.", mood: "desire" as const },
+      { title: "Engenharia", text: "Software sustentável e testável.", mood: "logic" as const },
+      { title: "Implantação", text: "Testes, deploy e transferência.", mood: "launch" as const }
+    ]
+  },
+
   meeting: {
-    title: "Agendar reunião de diagnóstico",
-    subtitle: "Reciprocidade na prática: você traz o contexto; eu trago viabilidade, ordem de prioridade e faixa de investimento. Confirmamos por e-mail ou WhatsApp.",
+    title: "Apresente seu projeto",
+    subtitle: "Primeira etapa: entender fit, complexidade e pacote recomendado.",
     options: [
       {
-        title: "Videoconferência",
+        title: "Videoconferência de diagnóstico",
         duration: "30 min",
-        text: "Melhor para alinhar tela compartilhada, referências e estimativa rápida — ideal se você já tem ideia do escopo.",
+        text: "Alinhamento de objetivos, referências e encaminhamento para proposta com pacote indicado.",
         cta: "Solicitar horário"
       },
       {
         title: "Briefing por mensagem",
         duration: "Assíncrono",
-        text: "Prefere escrever com calma? Formulário abaixo — respondo com perguntas objetivas ou proposta de call, no seu ritmo.",
-        cta: "Enviar briefing"
+        text: "Descrição do projeto no formulário — retorno com perguntas objetivas ou convite para reunião.",
+        cta: "Acessar formulário"
       }
     ],
     agenda: [
-      "O que o negócio precisa resolver nos próximos 90 dias",
-      "Must-have vs. “fase 2” (para não inflar orçamento)",
-      "Prazo realista e faixa de investimento que faz sentido",
-      "Próximo passo: proposta, POC ou “ainda não é hora” — sem pressão"
-    ]
-  },
-
-  pricing: {
-    title: "Investimento",
-    subtitle: "Ancoragem honesta: projetos sob medida a partir de um patamar claro; o valor final depende do que entra no escopo — nunca do “achismo”.",
-    highlight: "A partir de R$ 3.000",
-    note: "Entrada alinhada ao marco 1; saldo atrelado a entregas aprovadas. Integrações complexas, conteúdo e prazo apertado ajustam a proposta — tudo documentado antes de começar.",
-    bullets: [
-      "Proposta por escrito antes de qualquer cobrança",
-      "Pagamento amarrado a marcos — não tudo adiantado no escuro",
-      "Hora técnica para demandas fora do escopo (tabela na proposta)",
-      "Uma linha de produto principal; expansões orçadas com novo aceite"
+      "Problema, público e proposta de valor",
+      "Funcionalidades prioritárias da primeira versão",
+      "Pacote sugerido e referência de investimento",
+      "Próximo passo: proposta formal ou pausa, conforme sua decisão"
     ]
   },
 
   faq: [
     {
-      q: "Quanto tempo leva um sistema?",
-      a: "MVP enxuto e escopo travado: referência em torno de 40 dias. Projetos maiores ganham cronograma próprio na proposta — com datas, não “em breve”."
+      q: "O que é o App do Zero ao Lançamento?",
+      a: "Serviço de desenvolvimento sob medida da Ederson Programador: três pacotes (Essencial, Profissional e Avançado) que cobrem diagnóstico, desenvolvimento, testes e implantação conforme contrato."
     },
     {
-      q: "Preciso ter logo, textos e identidade prontos?",
-      a: "Quanto mais material, mais rápido. Se faltar algo, indico o que priorizar ou orço produção de conteúdo — sem te vender pacote que você não pediu."
+      q: "Preciso saber programar?",
+      a: "Não. São necessários o contexto de negócio e as decisões de produto; a execução técnica, especificação e entrega ficam a cargo do serviço contratado."
     },
     {
-      q: "Você publica e configura domínio?",
-      a: "Sim. Deploy, DNS e SSL entram na fase final. Objetivo: você clicar no link e ver seu produto no ar, não um zip na mão."
+      q: "Qual a diferença entre os pacotes?",
+      a: "Essencial entrega MVP para validação (referência R$ 5.900). Profissional cobre produto mais completo com integrações previstas (R$ 12.900). Avançado trata complexidade e personalização (a partir de R$ 24.900)."
     },
     {
-      q: "Atende empresa pequena e profissional solo?",
-      a: "Sim. De landing de alta conversão a plataforma com login, pagamentos e painel — o formato muda; o padrão de clareza e entrega, não."
+      q: "Publicação na App Store ou Play Store está incluída?",
+      a: "Somente se constar no escopo contratado. Muitos projetos iniciam em web ou MVP sem lojas na primeira versão."
     },
     {
-      q: "E se eu só quiser conversar e não fechar agora?",
-      a: "Perfeito. A reunião não gera contrato automático. Proposta só se houver fit dos dois lados — respeito seu tempo e o meu."
+      q: "Como funciona o pagamento?",
+      a: "Recomenda-se pagamento por marcos (ex.: 40% / 30% / 30%), com percentuais e entregas definidos em contrato e aceite por fase."
     },
     {
-      q: "O que significa o “0” nas estatísticas?",
-      a: "Compromisso de escopo: o que está na proposta assinada é o que será entregue nesse pacote. Mudança de rota = novo aceite e ajuste formal — sem cobrança surpresa escondida."
+      q: "Como funciona a garantia?",
+      a: "30 dias após aceite para correção de defeitos de conformidade com o contratado — não inclui escopo novo. Detalhes e legislação aplicável constam do contrato."
     }
   ],
 
   cta: {
-    title: "Seu próximo passo cabe em um formulário",
-    subtitle:
-      "Conte objetivo, prazo e quem usa o sistema. Retorno com leitura honesta do caminho — diagnóstico inicial, não spam de vendas.",
-    formTitle: "Briefing & orçamento"
+    title: "Solicitar proposta",
+    subtitle: "Informe seu projeto, pacote de interesse (se já definido) e prazo desejado. Resposta objetiva, sem envio indiscriminado de mensagens.",
+    formTitle: "Formulário de contato"
   },
 
   footer: {
-    tagline: "Soluções digitais que geram resultados",
+    tagline: "Desenvolvimento de Sistemas e Soluções Tecnológicas.",
     rights: "Todos os direitos reservados.",
     legalLinks: [
       { id: "privacidade", label: "Privacidade" },

@@ -19,6 +19,10 @@ export default defineConfig({
     port: 5174,
     strictPort: true,
     host: true,
+    // Windows: arquivos grandes em public/portfolio podem travar o watcher (EBUSY) e derrubar o Vite
+    watch: {
+      ignored: ["**/public/portfolio/**"]
+    },
     proxy: {
       "/auth": { target: "http://127.0.0.1:3333", changeOrigin: true },
       "/public": { target: "http://127.0.0.1:3333", changeOrigin: true },
