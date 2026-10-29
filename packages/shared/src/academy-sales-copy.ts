@@ -3,18 +3,26 @@
 export const ACADEMY_SALES = {
   brand: "Academia Ederson Programador",
   nav: [
-    { href: "#caminho", label: "Seu caminho" },
-    { href: "#cursos", label: "Cursos" },
-    { href: "#proposta", label: "Proposta" },
-    { href: "#bonus", label: "Bônus" },
-    { href: "#garantia", label: "Garantia" }
+    { href: "#instituicao", label: "A Academia" },
+    { href: "#programas", label: "Programas" },
+    { href: "#proposta", label: "Contato" }
   ] as const,
   hero: {
-    headline: "Formação prática para quem quer executar — não só assistir aula",
+    headline: "Formação em tecnologia e execução digital",
     subheadline:
-      "Programas publicados pela Academia Ederson Programador: trilhas organizadas, progresso na plataforma e suporte para aplicar o método no seu ritmo.",
-    trustLine: "Garantia de 7 dias · Acesso imediato · PIX e cartão",
-    primaryCta: "Ver cursos disponíveis"
+      "Ambiente de estudos com trilhas publicadas, corpo docente orientado à prática e matrícula digital — como uma faculdade online enxuta, focada em quem precisa aplicar.",
+    trustLine: "Matrícula online · Trilhas na plataforma · Acompanhamento de progresso",
+    primaryCta: "Conhecer os programas"
+  },
+  institute: {
+    title: "Ambiente de formação contínua",
+    body:
+      "Cada programa possui página própria com objetivo da formação, entregas, complementos, investimento e condições — tudo organizado para você decidir com clareza, sem ruído.",
+    pillars: [
+      { title: "Trilhas publicadas", body: "Conteúdo em módulos, ordem recomendada e evolução registrada na sua conta." },
+      { title: "Matrícula digital", body: "Inscrição e pagamento online; acesso liberado na Academia após confirmação." },
+      { title: "Certificação", body: "Emissão de certificado verificável quando a trilha exigir conclusão integral." }
+    ]
   },
   path: {
     title: "Transformação / Caminho",
@@ -39,8 +47,9 @@ export const ACADEMY_SALES = {
     ]
   },
   courses: {
-    title: "Cursos em destaque",
-    subtitle: "Programas da Academia — escolha um card para ver a oferta completa.",
+    title: "Programas abertos para matrícula",
+    subtitle: "Selecione um programa para ver a página completa da formação.",
+    openProgram: "Ver formação",
     instructor: "Academia Ederson Programador",
     badgeActive: "Conteúdo ativo",
     badgePreparing: "Em breve",

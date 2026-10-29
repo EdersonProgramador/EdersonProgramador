@@ -1,4 +1,5 @@
-import { ACADEMY_CART } from "@ederson-agencia/shared";
+import { Link } from "react-router-dom";
+import { ACADEMY_CART, ACADEMY_SALES } from "@ederson-agencia/shared";
 import { CourseCover } from "../courses/CourseCover";
 
 export type AcademyStoreCourseCardData = {
@@ -14,19 +15,17 @@ export type AcademyStoreCourseCardData = {
 
 type AcademyStoreCourseCardProps = {
   course: AcademyStoreCourseCardData;
-  selected: boolean;
   inCart: boolean;
   instructorLabel: string;
-  onSelect: () => void;
+  detailHref: string;
   onAddToCart: () => void;
 };
 
 export function AcademyStoreCourseCard({
   course,
-  selected,
   inCart,
   instructorLabel,
-  onSelect,
+  detailHref,
   onAddToCart
 }: AcademyStoreCourseCardProps) {
   const price = (course.priceCents / 100).toLocaleString("pt-BR", {
@@ -35,22 +34,26 @@ export function AcademyStoreCourseCard({
   });
 
   return (
-    <article className={`academy-udemy-card ${selected ? "is-selected" : ""}`}>
-      <button type="button" className="academy-udemy-card__link" onClick={onSelect} aria-pressed={selected}>
+    <article className="academy-udemy-card academy-inst-card">
+      <Link to={detailHref} className="academy-udemy-card__link">
         <div className="academy-udemy-card__media">
           <CourseCover title={course.title} coverUrl={course.coverUrl} className="academy-udemy-card__cover" />
         </div>
         <div className="academy-udemy-card__body">
           <h3 className="academy-udemy-card__title">{course.title}</h3>
           <p className="academy-udemy-card__instructor">{instructorLabel}</p>
-          {course.summary ? <p className="academy-udemy-card__meta">{course.summary}</p> : null}
+          {course.summary ? <p className="academy-udemy-card__meta line-clamp-3">{course.summary}</p> : null}
           <p className="academy-udemy-card__price">{price}</p>
+          <span className="academy-inst-card__cta mt-3 inline-block text-sm font-medium text-brand-primary">
+            {ACADEMY_SALES.courses.openProgram} →
+          </span>
         </div>
-      </button>
+      </Link>
       <button
         type="button"
         className={`academy-udemy-card__cart-btn academy-sales__cta-cart ${inCart ? "is-in-cart" : ""}`}
         onClick={(e) => {
+          e.preventDefault();
           e.stopPropagation();
           onAddToCart();
         }}

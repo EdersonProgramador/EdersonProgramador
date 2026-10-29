@@ -1,4 +1,11 @@
 export { ACADEMY_SALES } from "./academy-sales-copy.js";
+export type { CourseProgramBonus, CourseProgramContent, PublicCourseProgram } from "./academy-course-program.js";
+export {
+  ACADEMY_COURSE_PROGRAM_PRESETS,
+  academyCourseProgramPath,
+  buildDefaultCourseProgramContent,
+  normalizePublicCourseProgram
+} from "./academy-course-program.js";
 export {
   ACADEMY_CART,
   ACADEMY_DEMO_COUPONS,

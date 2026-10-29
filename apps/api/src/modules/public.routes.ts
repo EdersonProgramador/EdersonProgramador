@@ -9,6 +9,7 @@ import {
 import { isAcademyStoreCustomer } from "../auth-access.js";
 import { hashPassword, toAuthUser } from "../auth.js";
 import { fulfillAcademyPurchase, listPublicSaleCourses } from "../courses/academy-purchase.js";
+import { getPublicCourseProgram } from "../courses/course-program-public.js";
 import { prisma } from "../prisma.js";
 import { ensureAcademyTestUser } from "../seed-academy-test-user.js";
 import { env } from "../env.js";
@@ -63,10 +64,9 @@ export async function registerPublicRoutes(app: FastifyInstance) {
 
   app.get("/public/academy/courses/:slug", async (request, reply) => {
     const { slug } = z.object({ slug: z.string().min(1).max(120) }).parse(request.params);
-    const courses = await listPublicSaleCourses();
-    const course = courses.find((c) => c.slug === slug);
-    if (!course) return reply.code(404).send({ message: "Curso indisponível." });
-    return { course };
+    const program = await getPublicCourseProgram(slug);
+    if (!program) return reply.code(404).send({ message: "Curso indisponível." });
+    return { course: program };
   });
 
   app.post("/public/academy/sync-test-aluno", async (request, reply) => {

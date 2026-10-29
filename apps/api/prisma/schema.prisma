@@ -49,6 +49,7 @@ model Course {
   coverUrl    String?
   sortOrder           Int      @default(0)
   repetitionGoalMax   Int?
+  salesPage           Json?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

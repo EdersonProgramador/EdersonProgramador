@@ -574,3 +574,128 @@ html[data-theme="day"] .academy-sales .academy-udemy-card__meta {
     grid-template-columns: 1fr;
   }
 }
+
+/* ——— Vitrine institucional (faculdade) ——— */
+.academy-inst-hero {
+  background: linear-gradient(180deg, rgb(15 23 42 / 0.92) 0%, rgb(15 23 42 / 0.75) 100%);
+}
+
+.academy-inst-section {
+  background: var(--as-body-bg, #f8fafc);
+  color: var(--as-body-text, #0f172a);
+}
+
+html[data-theme="night"] .academy-inst-section,
+.academy-sales.surface-light .academy-inst-section {
+  background: rgb(2 6 23 / 0.35);
+  color: inherit;
+}
+
+.academy-inst-program-grid {
+  display: grid;
+  gap: 1.5rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+@media (min-width: 640px) {
+  .academy-inst-program-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .academy-inst-program-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.academy-inst-card.academy-udemy-card {
+  height: 100%;
+}
+
+.academy-inst-section .academy-udemy-card__cart-btn.academy-sales__cta-cart {
+  border: 1px solid rgb(255 255 255 / 0.22);
+  background: rgb(255 255 255 / 0.07);
+  color: rgb(255 255 255 / 0.92);
+}
+
+.academy-inst-section .academy-udemy-card__cart-btn.academy-sales__cta-cart:hover:not(:disabled) {
+  background: rgb(var(--brand-primary-rgb, 56 189 248) / 0.18);
+  border-color: rgb(var(--brand-primary-rgb, 56 189 248) / 0.45);
+}
+
+.academy-inst-section .academy-udemy-card__cart-btn.academy-sales__cta-cart.is-in-cart,
+.academy-inst-section .academy-udemy-card__cart-btn.academy-sales__cta-cart:disabled {
+  border-color: var(--as-success);
+  background: var(--as-success-soft);
+  color: var(--as-success);
+  opacity: 1;
+}
+
+.academy-inst-program-page {
+  --as-body-bg: #f8fafc;
+  --as-body-text: #0f172a;
+  --as-body-muted: #64748b;
+  --as-body-border: rgb(15 23 42 / 0.1);
+  --as-body-panel: #ffffff;
+  background: var(--as-body-bg);
+  color: var(--as-body-text);
+  min-height: 60vh;
+}
+
+.academy-inst-program-page .academy-inst-program h1 {
+  color: var(--as-body-text);
+}
+
+.academy-inst-program-page .academy-inst-program__invest .font-mono {
+  color: var(--as-price, #0f766e);
+}
+
+.academy-inst-program-page .btn-secondary {
+  border-color: rgb(15 23 42 / 0.18);
+  background: #fff;
+  color: var(--as-body-text);
+  backdrop-filter: none;
+}
+
+.academy-inst-program-page .btn-secondary:hover:not(:disabled) {
+  border-color: rgb(15 23 42 / 0.28);
+  background: rgb(15 23 42 / 0.04);
+}
+
+.academy-inst-program-page .btn-secondary:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.academy-inst-program-page .text-red-400 {
+  color: #dc2626;
+}
+
+.academy-inst-program__hero {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .academy-inst-program__hero {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .academy-inst-program__cover {
+    max-width: 280px;
+    flex-shrink: 0;
+  }
+}
+
+.academy-inst-program__promise {
+  color: var(--as-body-text, #0f172a);
+}
+
+.academy-inst-program__invest {
+  padding-bottom: 0.5rem;
+}
