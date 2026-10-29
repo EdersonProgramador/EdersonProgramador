@@ -9,6 +9,8 @@ import {
 import { hashPassword, toAuthUser } from "../auth.js";
 import { fulfillAcademyPurchase, listPublicSaleCourses } from "../courses/academy-purchase.js";
 import { prisma } from "../prisma.js";
+import { ensureAcademyTestUser } from "../seed-academy-test-user.js";
+import { env } from "../env.js";
 
 const ACADEMY_STORE_CUSTOMER_MARKER = "__academy_store__";
 
@@ -64,6 +66,14 @@ export async function registerPublicRoutes(app: FastifyInstance) {
     const course = courses.find((c) => c.slug === slug);
     if (!course) return reply.code(404).send({ message: "Curso indisponível." });
     return { course };
+  });
+
+  app.post("/public/academy/sync-test-aluno", async (request, reply) => {
+    if (!env.ACADEMY_SYNC_TEST_ALUNO) {
+      return reply.code(404).send({ message: "Not found" });
+    }
+    await ensureAcademyTestUser(request.log, env.ACADEMY_TEST_ALUNO_PASSWORD);
+    return { ok: true, email: "aluno@gmail.com", message: "Conta de teste sincronizada." };
   });
 
   app.post("/public/academy/signup", async (request, reply) => {

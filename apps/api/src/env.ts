@@ -80,8 +80,12 @@ const envSchema = z
       .preprocess((value) => value === "true" || value === "1", z.boolean())
       .default(false),
     ACADEMY_SYNC_TEST_ALUNO: z
-      .preprocess((value) => value === "true" || value === "1", z.boolean())
-      .default(false),
+      .preprocess((value) => {
+        if (value === "false" || value === "0") return false;
+        if (value === "true" || value === "1") return true;
+        return undefined;
+      }, z.boolean())
+      .default(true),
     ACADEMY_TEST_ALUNO_PASSWORD: z.preprocess(
       (value) => (typeof value === "string" && value.trim() ? value.trim() : undefined),
       z.string().min(6).optional()
