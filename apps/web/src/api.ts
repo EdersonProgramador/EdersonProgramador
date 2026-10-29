@@ -15,8 +15,20 @@ const TOKEN_KEYS: Record<AuthContext, string> = {
 };
 const LEGACY_TOKEN_KEY = "ea_token";
 
+/** Render/Vercel às vezes gravam só o host — sem https o browser não resolve a API. */
+export function normalizeApiBaseUrl(raw: string | undefined): string {
+  const trimmed = (raw ?? "").trim();
+  if (!trimmed) return "";
+  if (/^https?:\/\//i.test(trimmed) || trimmed.startsWith("//")) {
+    return trimmed.replace(/\/$/, "");
+  }
+  return `https://${trimmed.replace(/\/$/, "")}`;
+}
+
+const API_BASE_URL = normalizeApiBaseUrl(import.meta.env.VITE_API_URL);
+
 const client = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ?? ""
+  baseURL: API_BASE_URL
 });
 
 let agencyToken: string | null = localStorage.getItem(TOKEN_KEYS.agency);
@@ -136,9 +148,8 @@ export async function apiDelete<T>(url: string): Promise<T> {
 
 export function apiAssetUrl(path: string): string {
   if (path.startsWith("http://") || path.startsWith("https://")) return path;
-  const base = (import.meta.env.VITE_API_URL ?? "").replace(/\/$/, "");
   const normalized = path.startsWith("/") ? path : `/${path}`;
-  return base ? `${base}${normalized}` : normalized;
+  return API_BASE_URL ? `${API_BASE_URL}${normalized}` : normalized;
 }
 
 export type LoginResponse = {

@@ -27,6 +27,8 @@ export default defineConfig({
       "/auth": { target: "http://127.0.0.1:3333", changeOrigin: true },
       "/public": { target: "http://127.0.0.1:3333", changeOrigin: true },
       "/agency": { target: "http://127.0.0.1:3333", changeOrigin: true },
+      "/admin": { target: "http://127.0.0.1:3333", changeOrigin: true },
+      "/courses": { target: "http://127.0.0.1:3333", changeOrigin: true },
       "/health": { target: "http://127.0.0.1:3333", changeOrigin: true }
     }
   }
