@@ -1,7 +1,8 @@
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { loginPathForContext } from "@ederson-agencia/shared";
+import { AGENCY_PROFILE_PATH, loginPathForContext } from "@ederson-agencia/shared";
 import { LogOut } from "lucide-react";
 import { AgencyNav } from "./portal/AgencyNav";
+import { ProfileAvatarNavLink } from "./profile/ProfileAvatarCircle";
 import { BrandLogo } from "./brand/BrandLogo";
 import { ThemeToggle } from "./theme/ThemeToggle";
 import { useAgencySession, useAuthStore } from "../stores/authStore";
@@ -31,9 +32,7 @@ export function AgencyShellLayout({ title }: { title: string }) {
             {user ? (
               <>
                 <AgencyNav user={user} />
-                <span className="hidden max-w-[8rem] truncate text-sm text-[var(--app-text-muted)] lg:inline">
-                  {user.name}
-                </span>
+                <ProfileAvatarNavLink user={user} to={AGENCY_PROFILE_PATH} />
                 <button
                   type="button"
                   className="btn-secondary inline-flex min-h-11 min-w-11 items-center justify-center p-2"

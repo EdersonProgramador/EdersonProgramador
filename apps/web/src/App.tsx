@@ -26,6 +26,7 @@ import { AdminCourseContentPage } from "./pages/AdminCourseContentPage";
 import { AdminCoursesPage } from "./pages/AdminCoursesPage";
 import { AdminDashboard, ClientDashboard, FreelancerDashboard } from "./pages/DashboardPages";
 import { ProjectDetailPage } from "./pages/ProjectDetailPage";
+import { UserProfilePage } from "./pages/UserProfilePage";
 import { ThemeSync } from "./components/theme/ThemeSync";
 import { useAuthStore } from "./stores/authStore";
 
@@ -61,6 +62,7 @@ export default function App() {
             <Route path="cliente" element={<ClientDashboard />} />
             <Route path="freelancer" element={<FreelancerDashboard />} />
             <Route path="projetos/:projectId" element={<ProjectDetailPage />} />
+            <Route path="perfil" element={<UserProfilePage realm="agency" />} />
           </Route>
         </Route>
 
@@ -72,6 +74,7 @@ export default function App() {
               <Route path="admin/cursos" element={<AdminCoursesPage />} />
               <Route path="admin/cursos/:courseId/conteudo" element={<AdminCourseContentPage />} />
             </Route>
+            <Route path="perfil" element={<UserProfilePage realm="academy" />} />
           </Route>
           <Route path="cursos/:courseSlug/*" element={<CourseStudyPage />} />
         </Route>

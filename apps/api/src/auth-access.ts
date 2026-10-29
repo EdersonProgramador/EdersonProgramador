@@ -1,5 +1,10 @@
 import type { AgencyRole, AuthContext } from "@ederson-agencia/shared";
-import { canAccessAcademy, canAccessAgency, isAcademyInternalAdmin } from "@ederson-agencia/shared";
+import {
+  canAccessAcademy,
+  canAccessAgency,
+  isAcademyInternalAdmin,
+  isAcademyStoreCustomer
+} from "@ederson-agencia/shared";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import type { AuthTokenPayload } from "./auth.js";
 import { getAuthUser } from "./auth.js";
@@ -12,11 +17,7 @@ export async function userHasActiveEnrollment(userId: string): Promise<boolean> 
   return count > 0;
 }
 
-const ACADEMY_STORE_CUSTOMER_MARKER = "__academy_store__";
-
-export function isAcademyStoreCustomer(company: string | null | undefined): boolean {
-  return company === ACADEMY_STORE_CUSTOMER_MARKER;
-}
+export { isAcademyStoreCustomer };
 
 export async function assertEligibleForAcademyLogin(
   userId: string,

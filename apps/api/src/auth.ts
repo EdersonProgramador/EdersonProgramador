@@ -31,6 +31,8 @@ export function toAuthUser(
     role: string;
     company?: string | null;
     github?: string | null;
+    phone?: string | null;
+    avatarUrl?: string | null;
   },
   authContext: AuthContext
 ): AuthTokenPayload {
@@ -41,6 +43,8 @@ export function toAuthUser(
     role: user.role as AgencyRole,
     company: user.company,
     github: user.github,
+    phone: user.phone,
+    avatarUrl: user.avatarUrl,
     authContext: authContext
   };
 }

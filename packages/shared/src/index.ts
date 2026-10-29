@@ -14,7 +14,10 @@ export type { AuthContext, SessionUser } from "./auth-context.js";
 export {
   ACADEMY_ADMIN_COURSES_BASE,
   ACADEMY_APP_BASE,
+  ACADEMY_PROFILE_PATH,
   ACADEMY_STORE_BASE,
+  ACADEMY_STORE_CUSTOMER_MARKER,
+  AGENCY_PROFILE_PATH,
   academyCourseCheckoutPath,
   AGENCY_APP_BASE,
   agencyHomePathForRole,
@@ -22,6 +25,7 @@ export {
   canAccessAcademy,
   canAccessAgency,
   isAcademyInternalAdmin,
+  isAcademyStoreCustomer,
   homePathAfterLogin,
   inferAuthContextFromPath,
   loginPathForContext,
@@ -38,6 +42,8 @@ export type AuthUser = {
   role: AgencyRole;
   company?: string | null;
   github?: string | null;
+  phone?: string | null;
+  avatarUrl?: string | null;
   authContext?: import("./auth-context.js").AuthContext;
 };
 

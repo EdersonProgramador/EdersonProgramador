@@ -145,6 +145,13 @@ export async function apiPost<T>(url: string, body?: unknown): Promise<T> {
   return data;
 }
 
+export async function apiUploadForm<T>(url: string, form: FormData): Promise<T> {
+  const { data } = await client.post<T>(url, form, {
+    headers: { "Content-Type": "multipart/form-data" }
+  });
+  return data;
+}
+
 export async function apiPatch<T>(url: string, body?: unknown): Promise<T> {
   const { data } = await client.patch<T>(url, body);
   return data;

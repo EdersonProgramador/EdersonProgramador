@@ -14,6 +14,15 @@ export function academyCourseCheckoutPath(courseSlug: string): string {
 }
 /** Gestão de cursos (admin) — sempre dentro da Academia. */
 export const ACADEMY_ADMIN_COURSES_BASE = `${ACADEMY_APP_BASE}/admin/cursos`;
+export const AGENCY_PROFILE_PATH = `${AGENCY_APP_BASE}/perfil`;
+export const ACADEMY_PROFILE_PATH = `${ACADEMY_APP_BASE}/perfil`;
+
+/** Marcador em `User.company` para clientes criados pela vitrine (/cursos). */
+export const ACADEMY_STORE_CUSTOMER_MARKER = "__academy_store__";
+
+export function isAcademyStoreCustomer(company: string | null | undefined): boolean {
+  return company === ACADEMY_STORE_CUSTOMER_MARKER;
+}
 
 /** Único admin que pode ver e gerenciar cursos com visibilidade INTERNAL. */
 export const ACADEMY_INTERNAL_ADMIN_EMAIL = "edersonprogramador@gmail.com";
@@ -32,6 +41,7 @@ export type SessionUser = {
   role: AgencyRole;
   company?: string | null;
   github?: string | null;
+  phone?: string | null;
   authContext: AuthContext;
 };
 

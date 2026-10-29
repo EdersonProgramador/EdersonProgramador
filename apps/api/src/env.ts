@@ -88,6 +88,10 @@ const envSchema = z
       (value) => (typeof value === "string" && value.trim() ? value.trim() : undefined),
       z.string().min(6).optional()
     ),
+    UPLOAD_ROOT: z.preprocess(
+      (value) => (typeof value === "string" && value.trim() ? value.trim() : undefined),
+      z.string().optional()
+    ),
     FL_MEDIA_ROOT: z.preprocess(
       (value) => (typeof value === "string" && value.trim() ? value.trim() : undefined),
       z.string().optional()

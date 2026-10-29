@@ -1,5 +1,6 @@
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { loginPathForContext } from "@ederson-agencia/shared";
+import { ACADEMY_PROFILE_PATH, loginPathForContext } from "@ederson-agencia/shared";
+import { ProfileAvatarNavLink } from "./profile/ProfileAvatarCircle";
 import { LogOut } from "lucide-react";
 import { AcademyNav } from "./portal/AcademyNav";
 import { BrandLogo } from "./brand/BrandLogo";
@@ -31,9 +32,7 @@ export function AcademyShellLayout({ title }: { title: string }) {
             {user ? (
               <>
                 <AcademyNav user={user} />
-                <span className="hidden max-w-[8rem] truncate text-sm text-[var(--app-text-muted)] lg:inline">
-                  {user.name}
-                </span>
+                <ProfileAvatarNavLink user={user} to={ACADEMY_PROFILE_PATH} />
                 <button
                   type="button"
                   className="btn-secondary inline-flex min-h-11 min-w-11 items-center justify-center p-2"

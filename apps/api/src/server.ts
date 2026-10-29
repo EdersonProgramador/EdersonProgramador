@@ -1,5 +1,6 @@
 import cors from "@fastify/cors";
 import jwt from "@fastify/jwt";
+import multipart from "@fastify/multipart";
 import rateLimit from "@fastify/rate-limit";
 import Fastify from "fastify";
 import { ZodError } from "zod";
@@ -44,6 +45,12 @@ await app.register(cors, {
 
 await app.register(rateLimit, { max: 120, timeWindow: "1 minute" });
 await app.register(jwt, { secret: env.JWT_SECRET });
+await app.register(multipart, {
+  limits: {
+    fileSize: 2 * 1024 * 1024,
+    files: 1
+  }
+});
 
 app.setErrorHandler((error, _request, reply) => {
   if (error instanceof ZodError) {

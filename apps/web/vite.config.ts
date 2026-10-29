@@ -7,7 +7,7 @@ const webDir = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(webDir, "../..");
 const sharedEntry = resolve(repoRoot, "packages/shared/src/index.ts");
 
-const API_PROXY_PATHS = ["/auth", "/public", "/agency", "/admin", "/courses", "/health"] as const;
+const API_PROXY_PATHS = ["/auth", "/public", "/agency", "/admin", "/courses", "/health", "/uploads"] as const;
 const REMOTE_DEV_API = "https://ederson-agencia-api.onrender.com";
 /** Origin permitido no WEB_ORIGIN do Render (evita 500 por CORS no dev). */
 const REMOTE_DEV_PROXY_ORIGIN = "https://www.edersonprogramador.com.br";

@@ -14,7 +14,9 @@ type AuthState = {
   booting: boolean;
   agency: RealmSession | null;
   academy: RealmSession | null;
+  profileAvatarTick: number;
   setSession: (context: AuthContext, payload: LoginResponse) => void;
+  patchSession: (context: AuthContext, payload: LoginResponse) => void;
   clearSession: (context?: AuthContext) => void;
   bootstrap: () => Promise<void>;
 };
@@ -35,6 +37,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   booting: true,
   agency: null,
   academy: null,
+  profileAvatarTick: 0,
   setSession: (context, payload) => {
     setAuthToken(context, payload.token);
     const session = { user: payload.user, token: payload.token };
@@ -42,6 +45,15 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ agency: session, booting: false });
     } else {
       set({ academy: session, booting: false });
+    }
+  },
+  patchSession: (context, payload) => {
+    setAuthToken(context, payload.token);
+    const session = { user: payload.user, token: payload.token };
+    if (context === "agency") {
+      set({ agency: session, profileAvatarTick: Date.now() });
+    } else {
+      set({ academy: session, profileAvatarTick: Date.now() });
     }
   },
   clearSession: (context) => {
