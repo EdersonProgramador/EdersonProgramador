@@ -62,7 +62,12 @@ export function AcademyStoreCheckoutPage() {
       setSession("academy", data);
       setStep("payment");
     } catch (err) {
-      setAuthError(err instanceof ApiError ? err.message : "Não foi possível entrar.");
+      const msg = err instanceof ApiError ? err.message : "Não foi possível entrar.";
+      setAuthError(
+        err instanceof ApiError && err.status === 401
+          ? `${msg} Se comprou antes sem definir senha, use a aba Cadastrar com o mesmo e-mail para criar a senha.`
+          : msg
+      );
     } finally {
       setAuthLoading(false);
     }
@@ -80,9 +85,9 @@ export function AcademyStoreCheckoutPage() {
         return;
       }
       const data = await apiPost<LoginResponse>("/public/academy/signup", {
-        name: fd.get("name"),
-        email: fd.get("email"),
-        password: fd.get("password"),
+        name: String(fd.get("name") ?? "").trim(),
+        email: String(fd.get("email") ?? "").trim(),
+        password: String(fd.get("password") ?? ""),
         acceptTerms: true as const
       });
       setSession("academy", {

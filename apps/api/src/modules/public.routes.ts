@@ -6,6 +6,7 @@ import {
   PORTFOLIO_GITHUB,
   PORTFOLIO_PRODUCTION
 } from "@ederson-agencia/shared";
+import { isAcademyStoreCustomer } from "../auth-access.js";
 import { hashPassword, toAuthUser } from "../auth.js";
 import { fulfillAcademyPurchase, listPublicSaleCourses } from "../courses/academy-purchase.js";
 import { prisma } from "../prisma.js";
@@ -89,20 +90,39 @@ export async function registerPublicRoutes(app: FastifyInstance) {
       .parse(request.body);
 
     const email = body.email.trim().toLowerCase();
+    const passwordHash = await hashPassword(body.password);
     const existing = await prisma.user.findUnique({ where: { email } });
-    if (existing) {
-      return reply.code(409).send({ message: "Já existe uma conta com este e-mail. Faça login." });
-    }
 
-    const user = await prisma.user.create({
-      data: {
-        name: body.name.trim(),
-        email,
-        passwordHash: await hashPassword(body.password),
-        role: "CLIENT",
-        company: ACADEMY_STORE_CUSTOMER_MARKER
+    let user;
+    if (existing) {
+      const fromStoreOrPurchase =
+        isAcademyStoreCustomer(existing.company) ||
+        !existing.company ||
+        existing.company.startsWith("WhatsApp:");
+      if (existing.role !== "CLIENT" || !fromStoreOrPurchase) {
+        return reply.code(409).send({ message: "Já existe uma conta com este e-mail. Faça login." });
       }
-    });
+      user = await prisma.user.update({
+        where: { email },
+        data: {
+          name: body.name.trim(),
+          passwordHash,
+          status: "ACTIVE",
+          company: ACADEMY_STORE_CUSTOMER_MARKER
+        }
+      });
+    } else {
+      user = await prisma.user.create({
+        data: {
+          name: body.name.trim(),
+          email,
+          passwordHash,
+          role: "CLIENT",
+          status: "ACTIVE",
+          company: ACADEMY_STORE_CUSTOMER_MARKER
+        }
+      });
+    }
 
     const authUser = toAuthUser(user, "academy");
     const token = await reply.jwtSign(authUser);
