@@ -14,7 +14,8 @@ const leadSchema = z.object({
   phone: z.string().optional(),
   company: z.string().optional(),
   message: z.string().min(10),
-  budgetHint: z.string().optional()
+  budgetHint: z.string().optional(),
+  packageTier: z.enum(["essential", "professional", "advanced"]).optional()
 });
 
 export async function registerPublicRoutes(app: FastifyInstance) {
@@ -57,7 +58,8 @@ export async function registerPublicRoutes(app: FastifyInstance) {
         phone: body.phone?.trim(),
         company: body.company?.trim(),
         message: body.message.trim(),
-        budgetHint: body.budgetHint?.trim()
+        budgetHint: body.budgetHint?.trim(),
+        packageTier: body.packageTier
       }
     });
 

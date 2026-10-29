@@ -1,4 +1,4 @@
-import { CONTRACT_DEFAULTS } from "@ederson-agencia/shared";
+import { createProjectFromPackage } from "../src/modules/agency-project.js";
 import { hashPassword } from "../src/auth.js";
 import { prisma } from "../src/prisma.js";
 
@@ -65,26 +65,15 @@ async function main() {
 
   const projectCount = await prisma.project.count();
   if (projectCount === 0) {
-    await prisma.project.create({
-      data: {
-        title: "Projeto demonstração",
-        description: "Exemplo de acompanhamento por fases.",
-        status: "ACTIVE",
-        paymentStatus: "PARTIAL",
-        clientId: client.id,
-        freelancerId: freelancer.id,
-        totalValueCents: CONTRACT_DEFAULTS.totalValueCents,
-        entryValueCents: CONTRACT_DEFAULTS.entryValueCents,
-        phases: {
-          create: CONTRACT_DEFAULTS.phases.map((phase, index) => ({
-            phaseKey: phase.key,
-            label: phase.label,
-            sortOrder: index,
-            daysPlanned: phase.days,
-            status: index === 0 ? "IN_PROGRESS" : "PENDING"
-          }))
-        }
-      }
+    const demo = await createProjectFromPackage(
+      client.id,
+      "App do Zero ao Lançamento — demonstração",
+      "professional",
+      "Exemplo de jornada com cinco etapas e entregáveis por pacote."
+    );
+    await prisma.project.update({
+      where: { id: demo.id },
+      data: { freelancerId: freelancer.id, paymentStatus: "PARTIAL" }
     });
   }
 

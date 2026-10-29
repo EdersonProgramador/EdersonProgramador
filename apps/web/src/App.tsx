@@ -12,6 +12,7 @@ import { CoursesCatalogPage } from "./pages/CoursesCatalogPage";
 import { AdminCourseContentPage } from "./pages/AdminCourseContentPage";
 import { AdminCoursesPage } from "./pages/AdminCoursesPage";
 import { AdminDashboard, ClientDashboard, FreelancerDashboard } from "./pages/DashboardPages";
+import { ProjectDetailPage } from "./pages/ProjectDetailPage";
 import { ThemeSync } from "./components/theme/ThemeSync";
 import { useAuthStore } from "./stores/authStore";
 
@@ -39,6 +40,9 @@ export default function App() {
           <Route index element={<AppHubPage />} />
         </Route>
         <Route path="cursos/:courseSlug/*" element={<CourseStudyPage />} />
+        <Route element={<ShellLayout title="Projeto" />}>
+          <Route path="projetos/:projectId" element={<ProjectDetailPage />} />
+        </Route>
       </Route>
 
       <Route element={<ProtectedRoute />}>

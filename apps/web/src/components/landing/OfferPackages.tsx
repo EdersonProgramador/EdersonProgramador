@@ -46,7 +46,7 @@ export function OfferPackages() {
             <p className="mt-4 border-t border-[var(--app-border)] pt-4 text-xs leading-relaxed text-[var(--app-text-subtle)]">
               {tier.timeline}
             </p>
-            <a href="#formulario" className="btn-primary mt-6 w-full">
+            <a href={`#formulario?pacote=${tier.id}`} className="btn-primary mt-6 w-full">
               Solicitar proposta — {tier.name}
             </a>
           </article>

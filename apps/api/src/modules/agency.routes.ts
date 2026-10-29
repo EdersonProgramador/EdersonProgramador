@@ -1,31 +1,36 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { CONTRACT_DEFAULTS } from "@ederson-agencia/shared";
+import {
+  PACKAGE_TIER_CONFIG,
+  PACKAGE_TIER_IDS,
+  nextUpgradeTier,
+  parsePackageTier,
+  type PackageTierId
+} from "@ederson-agencia/shared";
 import { getAuthUser, requireRole } from "../auth.js";
 import { prisma } from "../prisma.js";
+import {
+  applyApprovedUpgrade,
+  createProjectFromPackage,
+  projectInclude,
+  resolvePackageTier
+} from "./agency-project.js";
 
 const leadStatusSchema = z.enum(["NEW", "CONTACTED", "QUALIFIED", "WON", "LOST"]);
 const phaseStatusSchema = z.enum(["PENDING", "IN_PROGRESS", "WAITING_APPROVAL", "APPROVED", "DONE"]);
+const deliverableStatusSchema = z.enum(["PENDING", "IN_PROGRESS", "DONE"]);
+const tierSchema = z.enum(PACKAGE_TIER_IDS);
 
-async function createProjectFromContract(clientId: string, title: string, description?: string) {
-  return prisma.project.create({
-    data: {
-      title,
-      description,
-      clientId,
-      totalValueCents: CONTRACT_DEFAULTS.totalValueCents,
-      entryValueCents: CONTRACT_DEFAULTS.entryValueCents,
-      phases: {
-        create: CONTRACT_DEFAULTS.phases.map((phase, index) => ({
-          phaseKey: phase.key,
-          label: phase.label,
-          sortOrder: index,
-          daysPlanned: phase.days
-        }))
-      }
-    },
-    include: { phases: { orderBy: { sortOrder: "asc" } }, client: true, freelancer: true }
-  });
+async function assertProjectAccess(
+  user: NonNullable<import("fastify").FastifyRequest["agencyUser"]>,
+  projectId: string
+) {
+  const project = await prisma.project.findUnique({ where: { id: projectId } });
+  if (!project) throw Object.assign(new Error("Projeto não encontrado."), { statusCode: 404 });
+  if (user.role === "ADMIN") return project;
+  if (user.role === "FREELANCER" && project.freelancerId === user.id) return project;
+  if (user.role === "CLIENT" && project.clientId === user.id) return project;
+  throw Object.assign(new Error("Acesso negado."), { statusCode: 403 });
 }
 
 export async function registerAgencyRoutes(app: FastifyInstance) {
@@ -37,6 +42,13 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
     }
     request.agencyUser = user;
   });
+
+  app.get("/agency/packages", async () => ({
+    tiers: PACKAGE_TIER_IDS.map((id) => ({
+      id,
+      ...PACKAGE_TIER_CONFIG[id]
+    }))
+  }));
 
   app.get("/agency/dashboard", async (request) => {
     const user = request.agencyUser!;
@@ -80,7 +92,8 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
     const body = z
       .object({
         status: leadStatusSchema.optional(),
-        assigneeId: z.string().nullable().optional()
+        assigneeId: z.string().nullable().optional(),
+        packageTier: tierSchema.optional()
       })
       .parse(request.body);
 
@@ -88,7 +101,8 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
       where: { id: params.id },
       data: {
         status: body.status,
-        assigneeId: body.assigneeId
+        assigneeId: body.assigneeId,
+        packageTier: body.packageTier
       }
     });
     return { lead };
@@ -100,7 +114,8 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
     const body = z
       .object({
         clientEmail: z.string().email(),
-        projectTitle: z.string().min(3).default("Projeto de desenvolvimento")
+        projectTitle: z.string().min(3).default("Projeto de desenvolvimento"),
+        packageTier: tierSchema.optional()
       })
       .parse(request.body ?? {});
 
@@ -108,17 +123,18 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
     if (!lead) return reply.code(404).send({ message: "Lead não encontrado." });
     if (lead.projectId) return reply.code(409).send({ message: "Lead já convertido em projeto." });
 
-    let client = await prisma.user.findUnique({ where: { email: body.clientEmail.toLowerCase() } });
+    const client = await prisma.user.findUnique({ where: { email: body.clientEmail.toLowerCase() } });
     if (!client) {
       return reply.code(400).send({
         message: "Cliente não encontrado. Peça para o cliente criar conta ou crie manualmente."
       });
     }
 
-    const project = await createProjectFromContract(client.id, body.projectTitle, lead.message);
+    const tier = resolvePackageTier(body.packageTier ?? lead.packageTier, "professional");
+    const project = await createProjectFromPackage(client.id, body.projectTitle, tier, lead.message);
     await prisma.lead.update({
       where: { id: lead.id },
-      data: { status: "WON", projectId: project.id }
+      data: { status: "WON", projectId: project.id, packageTier: tier }
     });
 
     return { project };
@@ -136,13 +152,21 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
     const projects = await prisma.project.findMany({
       where,
       orderBy: { updatedAt: "desc" },
-      include: {
-        phases: { orderBy: { sortOrder: "asc" } },
-        client: { select: { id: true, name: true, email: true, company: true } },
-        freelancer: { select: { id: true, name: true, email: true } }
-      }
+      include: projectInclude
     });
     return { projects };
+  });
+
+  app.get("/agency/projects/:id", async (request) => {
+    const user = request.agencyUser!;
+    const params = z.object({ id: z.string() }).parse(request.params);
+    await assertProjectAccess(user, params.id);
+    const project = await prisma.project.findUnique({
+      where: { id: params.id },
+      include: projectInclude
+    });
+    if (!project) throw Object.assign(new Error("Projeto não encontrado."), { statusCode: 404 });
+    return { project };
   });
 
   app.post("/agency/projects", async (request, reply) => {
@@ -152,15 +176,17 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
         clientId: z.string(),
         title: z.string().min(3),
         description: z.string().optional(),
-        freelancerId: z.string().optional()
+        freelancerId: z.string().optional(),
+        packageTier: tierSchema.default("professional")
       })
       .parse(request.body);
 
-    const project = await createProjectFromContract(body.clientId, body.title, body.description);
+    let project = await createProjectFromPackage(body.clientId, body.title, body.packageTier, body.description);
     if (body.freelancerId) {
-      await prisma.project.update({
+      project = await prisma.project.update({
         where: { id: project.id },
-        data: { freelancerId: body.freelancerId, status: "ACTIVE" }
+        data: { freelancerId: body.freelancerId },
+        include: projectInclude
       });
     }
     return reply.code(201).send({ project });
@@ -177,6 +203,7 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
       })
       .parse(request.body);
 
+    await assertProjectAccess(user, params.id);
     const project = await prisma.project.findUnique({ where: { id: params.id } });
     if (!project) throw Object.assign(new Error("Projeto não encontrado."), { statusCode: 404 });
 
@@ -193,9 +220,81 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
     const updated = await prisma.project.update({
       where: { id: params.id },
       data: body,
-      include: { phases: { orderBy: { sortOrder: "asc" } }, client: true, freelancer: true }
+      include: projectInclude
     });
     return { project: updated };
+  });
+
+  app.post("/agency/projects/:id/upgrade-requests", async (request, reply) => {
+    const user = request.agencyUser!;
+    const params = z.object({ id: z.string() }).parse(request.params);
+    const body = z
+      .object({
+        toTier: tierSchema,
+        clientMessage: z.string().max(2000).optional()
+      })
+      .parse(request.body);
+
+    const project = await assertProjectAccess(user, params.id);
+    if (user.role !== "CLIENT" || project.clientId !== user.id) {
+      return reply.code(403).send({ message: "Somente o cliente pode solicitar upgrade." });
+    }
+
+    const current = resolvePackageTier(project.packageTier, "professional");
+    const allowed = nextUpgradeTier(current);
+    if (!allowed || body.toTier !== allowed) {
+      return reply.code(400).send({
+        message: allowed
+          ? `Upgrade disponível apenas para o pacote ${PACKAGE_TIER_CONFIG[allowed].name}.`
+          : "Seu pacote já é o mais completo."
+      });
+    }
+
+    const pending = await prisma.projectUpgradeRequest.findFirst({
+      where: { projectId: project.id, status: "PENDING" }
+    });
+    if (pending) {
+      return reply.code(409).send({ message: "Já existe uma solicitação de upgrade em análise." });
+    }
+
+    const upgrade = await prisma.projectUpgradeRequest.create({
+      data: {
+        projectId: project.id,
+        fromTier: current,
+        toTier: body.toTier,
+        clientMessage: body.clientMessage?.trim()
+      }
+    });
+    return reply.code(201).send({ upgrade });
+  });
+
+  app.patch("/agency/upgrade-requests/:id", async (request, reply) => {
+    requireRole(request.agencyUser ?? null, ["ADMIN"]);
+    const params = z.object({ id: z.string() }).parse(request.params);
+    const body = z
+      .object({
+        status: z.enum(["APPROVED", "REJECTED"]),
+        adminNote: z.string().max(2000).optional()
+      })
+      .parse(request.body);
+
+    const row = await prisma.projectUpgradeRequest.findUnique({ where: { id: params.id } });
+    if (!row) return reply.code(404).send({ message: "Solicitação não encontrada." });
+    if (row.status !== "PENDING") return reply.code(409).send({ message: "Solicitação já foi analisada." });
+
+    if (body.status === "APPROVED") {
+      await applyApprovedUpgrade(row.projectId, row.toTier as PackageTierId);
+    }
+
+    const upgrade = await prisma.projectUpgradeRequest.update({
+      where: { id: params.id },
+      data: { status: body.status, adminNote: body.adminNote?.trim() }
+    });
+    const project = await prisma.project.findUnique({
+      where: { id: row.projectId },
+      include: projectInclude
+    });
+    return { upgrade, project };
   });
 
   app.patch("/agency/phases/:id", async (request) => {
@@ -224,7 +323,22 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
     }
 
     if (isClient && body.status && !["WAITING_APPROVAL", "APPROVED"].includes(body.status)) {
-      throw Object.assign(new Error("Cliente só pode solicitar aprovação ou aprovar fases."), { statusCode: 403 });
+      throw Object.assign(new Error("Cliente só pode aprovar fases em validação."), { statusCode: 403 });
+    }
+    if (isClient && body.status === "APPROVED") {
+      if (phase.status !== "WAITING_APPROVAL") {
+        throw Object.assign(new Error("Esta fase não está aguardando aprovação."), { statusCode: 400 });
+      }
+    }
+    if ((isFreelancer || isAdmin) && body.status === "WAITING_APPROVAL") {
+      const open = await prisma.projectPhaseDeliverable.count({
+        where: { phaseId: phase.id, status: { not: "DONE" } }
+      });
+      if (open > 0) {
+        throw Object.assign(new Error("Conclua os entregáveis antes de solicitar aprovação."), {
+          statusCode: 400
+        });
+      }
     }
 
     const updated = await prisma.projectPhase.update({
@@ -233,9 +347,58 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
         status: body.status,
         notes: body.notes,
         approvedAt: body.status === "APPROVED" ? new Date() : undefined
+      },
+      include: { deliverables: { orderBy: { sortOrder: "asc" } } }
+    });
+
+    if (body.status === "APPROVED") {
+      const next = await prisma.projectPhase.findFirst({
+        where: { projectId: project.id, sortOrder: phase.sortOrder + 1 }
+      });
+      if (next && next.status === "PENDING") {
+        await prisma.projectPhase.update({
+          where: { id: next.id },
+          data: { status: "IN_PROGRESS" }
+        });
+      }
+    }
+
+    return { phase: updated };
+  });
+
+  app.patch("/agency/deliverables/:id", async (request) => {
+    const user = request.agencyUser!;
+    const params = z.object({ id: z.string() }).parse(request.params);
+    const body = z
+      .object({
+        status: deliverableStatusSchema.optional(),
+        feedbackNote: z.string().max(2000).optional()
+      })
+      .parse(request.body);
+
+    const deliverable = await prisma.projectPhaseDeliverable.findUnique({
+      where: { id: params.id },
+      include: { phase: { include: { project: true } } }
+    });
+    if (!deliverable) throw Object.assign(new Error("Entregável não encontrado."), { statusCode: 404 });
+
+    const { project } = deliverable.phase;
+    const isAdmin = user.role === "ADMIN";
+    const isFreelancer = user.role === "FREELANCER" && project.freelancerId === user.id;
+
+    if (!isAdmin && !isFreelancer) {
+      throw Object.assign(new Error("Acesso negado."), { statusCode: 403 });
+    }
+
+    const updated = await prisma.projectPhaseDeliverable.update({
+      where: { id: params.id },
+      data: {
+        status: body.status,
+        feedbackNote: body.feedbackNote?.trim(),
+        completedAt: body.status === "DONE" ? new Date() : undefined
       }
     });
-    return { phase: updated };
+    return { deliverable: updated };
   });
 
   app.get("/agency/users", async (request) => {

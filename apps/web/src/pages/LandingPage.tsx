@@ -330,6 +330,7 @@ export function LandingPage() {
   const [submitting, setSubmitting] = useState(false);
   const [consent, setConsent] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [preferredPackage, setPreferredPackage] = useState("");
   usePageMood();
 
   useEffect(() => {
@@ -342,6 +343,20 @@ export function LandingPage() {
   useEffect(() => {
     document.body.classList.add("landing-active");
     return () => document.body.classList.remove("landing-active");
+  }, []);
+
+  useEffect(() => {
+    const syncPackageFromHash = () => {
+      const raw = window.location.hash;
+      const query = raw.includes("?") ? raw.slice(raw.indexOf("?") + 1) : "";
+      const pacote = new URLSearchParams(query).get("pacote");
+      if (pacote === "essential" || pacote === "professional" || pacote === "advanced") {
+        setPreferredPackage(pacote);
+      }
+    };
+    syncPackageFromHash();
+    window.addEventListener("hashchange", syncPackageFromHash);
+    return () => window.removeEventListener("hashchange", syncPackageFromHash);
   }, []);
 
   useEffect(() => {
@@ -372,7 +387,8 @@ export function LandingPage() {
         phone: form.get("phone"),
         company: form.get("company"),
         message,
-        budgetHint: form.get("budgetHint")
+        budgetHint: form.get("budgetHint"),
+        packageTier: form.get("packageTier") || undefined
       });
       setLeadStatus(res.message);
       event.currentTarget.reset();
@@ -702,6 +718,18 @@ export function LandingPage() {
                   <option value="app">Quero desenvolver meu aplicativo</option>
                   <option value="reuniao">Quero agendar uma conversa</option>
                   <option value="orcamento">Quero proposta por mensagem</option>
+                </select>
+                <select
+                  className="input"
+                  name="packageTier"
+                  value={preferredPackage}
+                  onChange={(e) => setPreferredPackage(e.target.value)}
+                  aria-label="Pacote de interesse"
+                >
+                  <option value="">Pacote de interesse (opcional)</option>
+                  <option value="essential">Essencial — validar ideia (ref. R$ 5.900)</option>
+                  <option value="professional">Profissional — produto completo (ref. R$ 12.900)</option>
+                  <option value="advanced">Avançado — maior complexidade (a partir de R$ 24.900)</option>
                 </select>
                 <input className="input" name="name" placeholder="Nome" required autoComplete="name" />
                 <input className="input" type="email" name="email" placeholder="E-mail" required autoComplete="email" />

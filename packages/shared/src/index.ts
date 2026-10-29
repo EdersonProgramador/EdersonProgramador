@@ -72,6 +72,25 @@ export type ContractPhaseKey = (typeof CONTRACT_DEFAULTS.phases)[number]["key"];
 export { BRAND_IDENTITY } from "./brand.js";
 export { CONTRACT_COPY } from "./contract-copy.js";
 export { MARKETING_COPY } from "./marketing-copy.js";
+export {
+  PACKAGE_TIER_CONFIG,
+  PACKAGE_TIER_IDS,
+  JOURNEY_PHASES,
+  JOURNEY_PHASE_KEYS,
+  PHASE_STATUS_LABELS,
+  DELIVERABLE_STATUS_LABELS,
+  UPGRADE_TIER_ORDER,
+  allDeliverablesForTier,
+  currentPhaseIndex,
+  deliverablesForTierPhase,
+  entryValueCentsForTier,
+  nextUpgradeTier,
+  packageTierLabel,
+  parsePackageTier,
+  projectProgressPercent,
+  type JourneyPhaseKey,
+  type PackageTierId
+} from "./project-journey.js";
 export { LEGAL_NOTICES } from "./legal-notices.js";
 
 export {

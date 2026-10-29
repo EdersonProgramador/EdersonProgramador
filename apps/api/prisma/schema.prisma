@@ -241,6 +241,7 @@ model Lead {
   company     String?
   message     String
   budgetHint  String?
+  packageTier String?
   status      String   @default("NEW")
   source      String?  @default("landing")
   assigneeId  String?
@@ -259,14 +260,31 @@ model Project {
   paymentStatus   String   @default("PENDING")
   totalValueCents Int      @default(300000)
   entryValueCents Int      @default(150000)
+  packageTier     String   @default("professional")
   clientId        String
   client          User     @relation("ClientProjects", fields: [clientId], references: [id])
   freelancerId    String?
   freelancer      User?    @relation("FreelancerProjects", fields: [freelancerId], references: [id])
   lead            Lead?
-  phases          ProjectPhase[]
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  phases           ProjectPhase[]
+  upgradeRequests  ProjectUpgradeRequest[]
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model ProjectUpgradeRequest {
+  id            String   @id @default(cuid())
+  projectId     String
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  fromTier      String
+  toTier        String
+  status        String   @default("PENDING")
+  clientMessage String?
+  adminNote     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([projectId, status])
 }
 
 model ProjectPhase {
@@ -279,9 +297,25 @@ model ProjectPhase {
   daysPlanned Int
   status      String    @default("PENDING")
   notes       String?
-  approvedAt  DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  approvedAt    DateTime?
+  deliverables  ProjectPhaseDeliverable[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   @@unique([projectId, phaseKey])
+}
+
+model ProjectPhaseDeliverable {
+  id          String       @id @default(cuid())
+  phaseId     String
+  phase       ProjectPhase @relation(fields: [phaseId], references: [id], onDelete: Cascade)
+  label       String
+  sortOrder   Int          @default(0)
+  status      String       @default("PENDING")
+  feedbackNote String?
+  completedAt DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([phaseId, sortOrder])
 }
