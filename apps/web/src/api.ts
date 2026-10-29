@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { AuthUser } from "@ederson-agencia/shared";
+import type { AuthContext, AuthUser } from "@ederson-agencia/shared";
 
 export class ApiError extends Error {
   status: number;
@@ -76,4 +76,9 @@ export function apiAssetUrl(path: string): string {
   return base ? `${base}${normalized}` : normalized;
 }
 
-export type LoginResponse = { token: string; user: AuthUser; homePath: string };
+export type LoginResponse = {
+  token: string;
+  user: AuthUser;
+  homePath: string;
+  authContext?: AuthContext;
+};

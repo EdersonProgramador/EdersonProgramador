@@ -1,12 +1,12 @@
 import { randomBytes, scrypt as scryptCallback, timingSafeEqual } from "node:crypto";
 import { promisify } from "node:util";
 import type { FastifyRequest } from "fastify";
-import type { AgencyRole, AuthUser } from "@ederson-agencia/shared";
+import type { AgencyRole, AuthContext, AuthUser } from "@ederson-agencia/shared";
 
 const scrypt = promisify(scryptCallback);
 const keyLength = 64;
 
-export type AuthTokenPayload = AuthUser;
+export type AuthTokenPayload = AuthUser & { authContext?: AuthContext };
 
 export async function hashPassword(password: string): Promise<string> {
   const salt = randomBytes(16).toString("hex");
@@ -23,21 +23,25 @@ export async function verifyPassword(password: string, passwordHash: string | nu
   return timingSafeEqual(storedBuffer, derivedKey);
 }
 
-export function toAuthUser(user: {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  company?: string | null;
-  github?: string | null;
-}): AuthTokenPayload {
+export function toAuthUser(
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+    company?: string | null;
+    github?: string | null;
+  },
+  authContext: AuthContext
+): AuthTokenPayload {
   return {
     id: user.id,
     name: user.name,
     email: user.email,
     role: user.role as AgencyRole,
     company: user.company,
-    github: user.github
+    github: user.github,
+    authContext: authContext
   };
 }
 

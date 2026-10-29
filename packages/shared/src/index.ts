@@ -2,6 +2,15 @@ export { COURSE_COVER, COURSES_UI, FL_COURSE } from "./courses-copy.js";
 
 export type AgencyRole = "ADMIN" | "CLIENT" | "FREELANCER";
 
+export type { AuthContext, SessionUser } from "./auth-context.js";
+export {
+  canAccessAcademy,
+  canAccessAgency,
+  homePathAfterLogin,
+  loginPathForContext
+} from "./auth-context.js";
+
+/** Usuário autenticado (JWT). `authContext` indica o login usado: Agência ou Academia. */
 export type AuthUser = {
   id: string;
   name: string;
@@ -9,6 +18,7 @@ export type AuthUser = {
   role: AgencyRole;
   company?: string | null;
   github?: string | null;
+  authContext?: import("./auth-context.js").AuthContext;
 };
 
 /** Hub após login (Agência + Cursos). */

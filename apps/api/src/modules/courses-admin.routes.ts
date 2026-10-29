@@ -1,5 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
+import { assertAgencySession } from "../auth-access.js";
 import { getAuthUser, requireRole } from "../auth.js";
 import { PORTAL_CONTENT_KEY } from "../courses/content-key.js";
 import { ensurePortalStarterContent } from "../courses/portal-starter.js";
@@ -27,11 +28,15 @@ export async function registerCoursesAdminRoutes(app: FastifyInstance) {
   app.addHook("preHandler", async (request, reply) => {
     if (!request.url.startsWith("/admin/courses")) return;
     const user = await getAuthUser(request);
-    if (!user) return reply.code(401).send({ message: "Faça login." });
+    if (!user) return reply.code(401).send({ message: "Faça login na Agência." });
     try {
+      assertAgencySession(user);
       requireRole(user, ["ADMIN"]);
-    } catch {
-      return reply.code(403).send({ message: "Acesso restrito ao administrador." });
+    } catch (error) {
+      const statusCode = (error as { statusCode?: number }).statusCode ?? 403;
+      return reply.code(statusCode).send({
+        message: (error as Error).message || "Acesso restrito ao administrador."
+      });
     }
   });
 

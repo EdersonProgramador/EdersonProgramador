@@ -7,6 +7,7 @@ import {
   parsePackageTier,
   type PackageTierId
 } from "@ederson-agencia/shared";
+import { assertAgencySession } from "../auth-access.js";
 import { getAuthUser, requireRole } from "../auth.js";
 import { prisma } from "../prisma.js";
 import {
@@ -39,6 +40,12 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
     const user = await getAuthUser(request);
     if (!user) {
       return reply.code(401).send({ message: "Faça login para continuar." });
+    }
+    try {
+      assertAgencySession(user);
+    } catch (error) {
+      const statusCode = (error as { statusCode?: number }).statusCode ?? 403;
+      return reply.code(statusCode).send({ message: (error as Error).message });
     }
     request.agencyUser = user;
   });

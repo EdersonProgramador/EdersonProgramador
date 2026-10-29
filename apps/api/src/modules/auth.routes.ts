@@ -1,12 +1,16 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { homePathForRole } from "@ederson-agencia/shared";
+import { homePathAfterLogin } from "@ederson-agencia/shared";
+import { assertEligibleForAcademyLogin } from "../auth-access.js";
 import { getAuthUser, hashPassword, toAuthUser, verifyPassword } from "../auth.js";
 import { prisma } from "../prisma.js";
 
+const authContextSchema = z.enum(["agency", "academy"]);
+
 const loginSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(6)
+  password: z.string().min(6),
+  context: authContextSchema.default("agency")
 });
 
 const registerSchema = z.object({
@@ -18,13 +22,15 @@ const registerSchema = z.object({
   github: z.string().url().optional().or(z.literal("")),
   acceptTerms: z.literal(true, {
     errorMap: () => ({ message: "Aceite os termos para continuar." })
-  })
+  }),
+  context: authContextSchema.default("agency")
 });
 
 export async function registerAuthRoutes(app: FastifyInstance) {
   app.post("/auth/login", async (request, reply) => {
     const body = loginSchema.parse(request.body);
     const email = body.email.trim().toLowerCase();
+    const context = body.context;
 
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user || user.status !== "ACTIVE") {
@@ -36,18 +42,34 @@ export async function registerAuthRoutes(app: FastifyInstance) {
       return reply.code(401).send({ message: "E-mail ou senha inválidos." });
     }
 
-    const authUser = toAuthUser(user);
+    if (context === "academy") {
+      try {
+        await assertEligibleForAcademyLogin(user.id, user.role as "ADMIN" | "CLIENT" | "FREELANCER");
+      } catch (error) {
+        const statusCode = (error as { statusCode?: number }).statusCode ?? 403;
+        return reply.code(statusCode).send({ message: (error as Error).message });
+      }
+    }
+
+    const authUser = toAuthUser(user, context);
     const token = await reply.jwtSign(authUser);
 
     return {
       token,
       user: authUser,
-      homePath: homePathForRole(authUser.role)
+      authContext: context,
+      homePath: homePathAfterLogin(authUser.role, context)
     };
   });
 
   app.post("/auth/register", async (request, reply) => {
     const body = registerSchema.parse(request.body);
+    if (body.context !== "agency") {
+      return reply.code(403).send({
+        message: "Cadastro aberto apenas pela Agência. Para cursos, solicite matrícula ao administrador."
+      });
+    }
+
     const email = body.email.trim().toLowerCase();
 
     const existing = await prisma.user.findUnique({ where: { email } });
@@ -66,13 +88,14 @@ export async function registerAuthRoutes(app: FastifyInstance) {
       }
     });
 
-    const authUser = toAuthUser(user);
+    const authUser = toAuthUser(user, "agency");
     const token = await reply.jwtSign(authUser);
 
     return reply.code(201).send({
       token,
       user: authUser,
-      homePath: homePathForRole(authUser.role)
+      authContext: "agency" as const,
+      homePath: homePathAfterLogin(authUser.role, "agency")
     });
   });
 
@@ -81,6 +104,10 @@ export async function registerAuthRoutes(app: FastifyInstance) {
     if (!user) {
       return reply.code(401).send({ message: "Sessão expirada." });
     }
-    return { user, homePath: homePathForRole(user.role) };
+    return {
+      user,
+      authContext: user.authContext,
+      homePath: homePathAfterLogin(user.role, user.authContext ?? "agency")
+    };
   });
 }

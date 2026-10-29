@@ -1,5 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
+import { assertAgencySession, requireAcademyUser } from "../auth-access.js";
 import { getAuthUser, requireRole } from "../auth.js";
 import { userCanAccessCourse } from "../courses/access.js";
 import { prisma } from "../prisma.js";
@@ -67,8 +68,8 @@ function bookDto(
 
 export async function registerCourseLibraryRoutes(app: FastifyInstance) {
   app.get("/courses/:slug/library", async (request, reply) => {
-    const user = await getAuthUser(request);
-    if (!user) return reply.code(401).send({ message: "Não autenticado." });
+    const user = await requireAcademyUser(request, reply);
+    if (!user) return;
     const { slug } = z.object({ slug: z.string().min(1) }).parse(request.params);
     const ctx = await courseForUser(slug, user);
     if (!ctx.ok) return reply.code(ctx.status).send({ message: ctx.message });
@@ -95,8 +96,8 @@ export async function registerCourseLibraryRoutes(app: FastifyInstance) {
   });
 
   app.get("/courses/:slug/library/:bookSlug", async (request, reply) => {
-    const user = await getAuthUser(request);
-    if (!user) return reply.code(401).send({ message: "Não autenticado." });
+    const user = await requireAcademyUser(request, reply);
+    if (!user) return;
     const params = z.object({ slug: z.string().min(1), bookSlug: z.string().min(1) }).parse(request.params);
     const ctx = await courseForUser(params.slug, user);
     if (!ctx.ok) return reply.code(ctx.status).send({ message: ctx.message });
@@ -120,8 +121,8 @@ export async function registerCourseLibraryRoutes(app: FastifyInstance) {
   });
 
   app.put("/courses/:slug/library/:bookSlug/progress", async (request, reply) => {
-    const user = await getAuthUser(request);
-    if (!user) return reply.code(401).send({ message: "Não autenticado." });
+    const user = await requireAcademyUser(request, reply);
+    if (!user) return;
     const params = z.object({ slug: z.string().min(1), bookSlug: z.string().min(1) }).parse(request.params);
     const body = z.object({ lastPage: z.number().int().min(1).max(20_000) }).parse(request.body);
     const ctx = await courseForUser(params.slug, user);
@@ -148,8 +149,8 @@ export async function registerCourseLibraryRoutes(app: FastifyInstance) {
   });
 
   app.get("/courses/:slug/library/:bookSlug/pdf", async (request, reply) => {
-    const user = await getAuthUser(request);
-    if (!user) return reply.code(401).send({ message: "Faça login para ler o PDF." });
+    const user = await requireAcademyUser(request, reply);
+    if (!user) return;
     const params = z.object({ slug: z.string().min(1), bookSlug: z.string().min(1) }).parse(request.params);
     const ctx = await courseForUser(params.slug, user);
     if (!ctx.ok) return reply.code(ctx.status).send({ message: ctx.message });
@@ -184,11 +185,15 @@ export async function registerCourseLibraryRoutes(app: FastifyInstance) {
   app.addHook("preHandler", async (request, reply) => {
     if (!request.url.startsWith("/admin/courses/") || !request.url.includes("/library")) return;
     const user = await getAuthUser(request);
-    if (!user) return reply.code(401).send({ message: "Faça login." });
+    if (!user) return reply.code(401).send({ message: "Faça login na Agência." });
     try {
+      assertAgencySession(user);
       requireRole(user, ["ADMIN"]);
-    } catch {
-      return reply.code(403).send({ message: "Acesso restrito ao administrador." });
+    } catch (error) {
+      const statusCode = (error as { statusCode?: number }).statusCode ?? 403;
+      return reply.code(statusCode).send({
+        message: (error as Error).message || "Acesso restrito ao administrador."
+      });
     }
   });
 

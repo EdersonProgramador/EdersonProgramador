@@ -4,7 +4,8 @@ import { setUnauthorizedHandler } from "./api";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { ShellLayout } from "./components/ShellLayout";
 import { LandingPage } from "./pages/LandingPage";
-import { LoginPage } from "./pages/LoginPage";
+import { AgencyLoginPage } from "./pages/LoginPage";
+import { AcademyLoginPage } from "./pages/AcademyLoginPage";
 import { AppHubPage } from "./pages/AppHubPage";
 import { CertificateVerifyPage } from "./pages/CertificateVerifyPage";
 import { CourseStudyPage } from "./pages/CourseStudyPage";
@@ -32,26 +33,24 @@ export default function App() {
       <Route index element={<LandingPage />} />
       <Route path="/certificado/:code" element={<CertificateVerifyPage />} />
       <Route element={<ShellLayout title="Acesso" />}>
-        <Route path="login" element={<LoginPage />} />
+        <Route path="login" element={<AgencyLoginPage />} />
+        <Route path="academia/entrar" element={<AcademyLoginPage />} />
       </Route>
 
       <Route path="/app" element={<ProtectedRoute />}>
         <Route element={<ShellLayout title="Portal" />}>
           <Route index element={<AppHubPage />} />
         </Route>
-        <Route path="cursos/:courseSlug/*" element={<CourseStudyPage />} />
-        <Route element={<ShellLayout title="Projeto" />}>
-          <Route path="projetos/:projectId" element={<ProjectDetailPage />} />
-        </Route>
       </Route>
 
-      <Route element={<ProtectedRoute />}>
+      <Route element={<ProtectedRoute realm="academy" />}>
         <Route element={<ShellLayout title="Academia" />}>
           <Route path="/app/cursos" element={<CoursesCatalogPage />} />
         </Route>
+        <Route path="/app/cursos/:courseSlug/*" element={<CourseStudyPage />} />
       </Route>
 
-      <Route element={<ProtectedRoute roles={["ADMIN"]} />}>
+      <Route element={<ProtectedRoute realm="agency" roles={["ADMIN"]} />}>
         <Route element={<ShellLayout title="Administração" />}>
           <Route path="/app/admin" element={<AdminDashboard />} />
           <Route path="/app/admin/cursos" element={<AdminCoursesPage />} />
@@ -59,15 +58,21 @@ export default function App() {
         </Route>
       </Route>
 
-      <Route element={<ProtectedRoute roles={["CLIENT"]} />}>
+      <Route element={<ProtectedRoute realm="agency" roles={["CLIENT"]} />}>
         <Route element={<ShellLayout title="Cliente" />}>
           <Route path="/app/cliente" element={<ClientDashboard />} />
         </Route>
       </Route>
 
-      <Route element={<ProtectedRoute roles={["FREELANCER"]} />}>
+      <Route element={<ProtectedRoute realm="agency" roles={["FREELANCER"]} />}>
         <Route element={<ShellLayout title="Freelancer" />}>
           <Route path="/app/freelancer" element={<FreelancerDashboard />} />
+        </Route>
+      </Route>
+
+      <Route element={<ProtectedRoute realm="agency" />}>
+        <Route element={<ShellLayout title="Projeto" />}>
+          <Route path="/app/projetos/:projectId" element={<ProjectDetailPage />} />
         </Route>
       </Route>
 

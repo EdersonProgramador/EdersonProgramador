@@ -1,6 +1,7 @@
 import type { Course } from "@prisma/client";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
+import { requireAcademyUser } from "../auth-access.js";
 import { getAuthUser } from "../auth.js";
 import { userCanAccessCourse } from "../courses/access.js";
 import {
@@ -34,8 +35,8 @@ export async function registerFichamentoRoutes(app: FastifyInstance) {
   }
 
   app.get("/courses/:slug/fichamento", async (request, reply) => {
-    const user = await getAuthUser(request);
-    if (!user) return reply.code(401).send({ message: "Não autenticado." });
+    const user = await requireAcademyUser(request, reply);
+    if (!user) return;
     const { slug } = z.object({ slug: z.string().min(1) }).parse(request.params);
     const ctx = await courseContext(slug, user);
     if (!ctx.ok) return reply.code(ctx.status).send({ message: ctx.message });
@@ -88,8 +89,8 @@ export async function registerFichamentoRoutes(app: FastifyInstance) {
   });
 
   app.put("/courses/:slug/fichamento/lessons/:lessonSlug", async (request, reply) => {
-    const user = await getAuthUser(request);
-    if (!user) return reply.code(401).send({ message: "Não autenticado." });
+    const user = await requireAcademyUser(request, reply);
+    if (!user) return;
     const params = z
       .object({ slug: z.string().min(1), lessonSlug: z.string().min(1).max(120) })
       .parse(request.params);
@@ -126,8 +127,8 @@ export async function registerFichamentoRoutes(app: FastifyInstance) {
   });
 
   app.post("/courses/:slug/fichamento/modules/:moduleNumber/compile", async (request, reply) => {
-    const user = await getAuthUser(request);
-    if (!user) return reply.code(401).send({ message: "Não autenticado." });
+    const user = await requireAcademyUser(request, reply);
+    if (!user) return;
     const params = z
       .object({ slug: z.string().min(1), moduleNumber: z.coerce.number().int().min(0) })
       .parse(request.params);
@@ -172,8 +173,8 @@ export async function registerFichamentoRoutes(app: FastifyInstance) {
   });
 
   app.put("/courses/:slug/fichamento/modules/:moduleNumber", async (request, reply) => {
-    const user = await getAuthUser(request);
-    if (!user) return reply.code(401).send({ message: "Não autenticado." });
+    const user = await requireAcademyUser(request, reply);
+    if (!user) return;
     const params = z
       .object({ slug: z.string().min(1), moduleNumber: z.coerce.number().int().min(0) })
       .parse(request.params);
@@ -207,8 +208,8 @@ export async function registerFichamentoRoutes(app: FastifyInstance) {
   });
 
   app.post("/courses/:slug/fichamento/course/compile", async (request, reply) => {
-    const user = await getAuthUser(request);
-    if (!user) return reply.code(401).send({ message: "Não autenticado." });
+    const user = await requireAcademyUser(request, reply);
+    if (!user) return;
     const { slug } = z.object({ slug: z.string().min(1) }).parse(request.params);
     const ctx = await courseContext(slug, user);
     if (!ctx.ok) return reply.code(ctx.status).send({ message: ctx.message });
@@ -239,8 +240,8 @@ export async function registerFichamentoRoutes(app: FastifyInstance) {
   });
 
   app.put("/courses/:slug/fichamento/course", async (request, reply) => {
-    const user = await getAuthUser(request);
-    if (!user) return reply.code(401).send({ message: "Não autenticado." });
+    const user = await requireAcademyUser(request, reply);
+    if (!user) return;
     const { slug } = z.object({ slug: z.string().min(1) }).parse(request.params);
     const body = docBody.parse(request.body);
     const ctx = await courseContext(slug, user);

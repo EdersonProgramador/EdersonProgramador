@@ -2,7 +2,7 @@ import { createReadStream, existsSync } from "node:fs";
 import { extname, resolve } from "node:path";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { getAuthUser } from "../auth.js";
+import { requireAcademyUser } from "../auth-access.js";
 import {
   certificateToDto,
   ensureCourseCertificate,
@@ -28,8 +28,8 @@ function resolveMediaPath(relative: string) {
 
 export async function registerCoursesRoutes(app: FastifyInstance) {
   app.get("/courses", async (request, reply) => {
-    const user = await getAuthUser(request);
-    if (!user) return reply.code(401).send({ message: "Faça login para acessar os cursos." });
+    const user = await requireAcademyUser(request, reply);
+    if (!user) return;
 
     const courses = await prisma.course.findMany({
       where: { status: "PUBLISHED" },
@@ -61,8 +61,8 @@ export async function registerCoursesRoutes(app: FastifyInstance) {
   });
 
   app.get("/courses/:slug", async (request, reply) => {
-    const user = await getAuthUser(request);
-    if (!user) return reply.code(401).send({ message: "Não autenticado." });
+    const user = await requireAcademyUser(request, reply);
+    if (!user) return;
 
     const params = z.object({ slug: z.string().min(1) }).parse(request.params);
     const course = await prisma.course.findUnique({ where: { slug: params.slug } });
@@ -112,8 +112,8 @@ export async function registerCoursesRoutes(app: FastifyInstance) {
   });
 
   app.get("/courses/:slug/certificate", async (request, reply) => {
-    const user = await getAuthUser(request);
-    if (!user) return reply.code(401).send({ message: "Não autenticado." });
+    const user = await requireAcademyUser(request, reply);
+    if (!user) return;
 
     const params = z.object({ slug: z.string().min(1) }).parse(request.params);
     const course = await prisma.course.findUnique({ where: { slug: params.slug } });
@@ -140,8 +140,8 @@ export async function registerCoursesRoutes(app: FastifyInstance) {
   });
 
   app.get("/courses/:slug/progress", async (request, reply) => {
-    const user = await getAuthUser(request);
-    if (!user) return reply.code(401).send({ message: "Não autenticado." });
+    const user = await requireAcademyUser(request, reply);
+    if (!user) return;
 
     const params = z.object({ slug: z.string().min(1) }).parse(request.params);
     const course = await prisma.course.findUnique({ where: { slug: params.slug } });
@@ -163,8 +163,8 @@ export async function registerCoursesRoutes(app: FastifyInstance) {
   });
 
   app.put("/courses/:slug/progress", async (request, reply) => {
-    const user = await getAuthUser(request);
-    if (!user) return reply.code(401).send({ message: "Não autenticado." });
+    const user = await requireAcademyUser(request, reply);
+    if (!user) return;
 
     const params = z.object({ slug: z.string().min(1) }).parse(request.params);
     const body = progressBody.parse(request.body);
@@ -218,8 +218,8 @@ export async function registerCoursesRoutes(app: FastifyInstance) {
   });
 
   app.post("/courses/:slug/checkout", async (request, reply) => {
-    const user = await getAuthUser(request);
-    if (!user) return reply.code(401).send({ message: "Não autenticado." });
+    const user = await requireAcademyUser(request, reply);
+    if (!user) return;
 
     const params = z.object({ slug: z.string().min(1) }).parse(request.params);
     const body = z
@@ -253,8 +253,8 @@ export async function registerCoursesRoutes(app: FastifyInstance) {
   });
 
   app.get("/courses/:slug/media/*", async (request, reply) => {
-    const user = await getAuthUser(request);
-    if (!user) return reply.code(401).send({ message: "Não autenticado." });
+    const user = await requireAcademyUser(request, reply);
+    if (!user) return;
 
     const params = z.object({ slug: z.string().min(1) }).parse(request.params);
     const course = await prisma.course.findUnique({ where: { slug: params.slug } });

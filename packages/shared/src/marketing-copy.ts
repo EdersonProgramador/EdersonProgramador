@@ -448,5 +448,6 @@ export const MARKETING_COPY = {
     ] as const
   },
 
-  loginCta: "Área do cliente"
+  loginCta: "Área do cliente",
+  academyLoginCta: "Academia interna"
 } as const;
