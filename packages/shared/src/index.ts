@@ -8,13 +8,18 @@ export type { AuthContext, SessionUser } from "./auth-context.js";
 export {
   ACADEMY_ADMIN_COURSES_BASE,
   ACADEMY_APP_BASE,
+  ACADEMY_STORE_BASE,
   AGENCY_APP_BASE,
   agencyHomePathForRole,
   canAccessAcademy,
   canAccessAgency,
   homePathAfterLogin,
-  loginPathForContext
+  inferAuthContextFromPath,
+  loginPathForContext,
+  resolvePostLoginPath,
+  sanitizeReturnPath
 } from "./auth-context.js";
+export type { AuthRouteState } from "./auth-context.js";
 
 /** Usuário autenticado (JWT). `authContext` indica o login usado: Agência ou Academia. */
 export type AuthUser = {

@@ -31,6 +31,29 @@ function resolveMediaPath(relative: string) {
   return existsSync(full) ? full : null;
 }
 
+async function courseCardDto(
+  course: Awaited<ReturnType<typeof prisma.course.findMany>>[number],
+  user: { id: string; role: string }
+) {
+  const hasAccess = await userCanAccessCourse(user.id, user.role, course);
+  const purchasable =
+    course.visibility === "PUBLIC_SALE" && course.priceCents != null && course.priceCents > 0;
+  return {
+    id: course.id,
+    slug: course.slug,
+    title: course.title,
+    summary: course.summary,
+    visibility: course.visibility,
+    priceCents: course.priceCents,
+    currency: course.currency,
+    purchasable,
+    hasAccess,
+    locked: !hasAccess && purchasable,
+    contentReady: await courseContentReady(course),
+    coverUrl: course.coverUrl
+  };
+}
+
 export async function registerCoursesRoutes(app: FastifyInstance) {
   app.get("/courses", async (request, reply) => {
     const user = await requireAcademyUser(request, reply);
@@ -43,24 +66,29 @@ export async function registerCoursesRoutes(app: FastifyInstance) {
 
     const cards = [];
     for (const course of courses) {
-      const hasAccess = await userCanAccessCourse(user.id, user.role, course);
-      const purchasable = course.visibility === "PUBLIC_SALE" && course.priceCents != null && course.priceCents > 0;
-      if (!hasAccess && !purchasable) continue;
+      const card = await courseCardDto(course, user);
+      if (!card.hasAccess) continue;
+      cards.push(card);
+    }
+    return { courses: cards };
+  });
 
-      cards.push({
-        id: course.id,
-        slug: course.slug,
-        title: course.title,
-        summary: course.summary,
-        visibility: course.visibility,
-        priceCents: course.priceCents,
-        currency: course.currency,
-        purchasable,
-        hasAccess,
-        locked: !hasAccess && purchasable,
-        contentReady: await courseContentReady(course),
-        coverUrl: course.coverUrl
-      });
+  app.get("/courses/store", async (request, reply) => {
+    const user = await requireAcademyUser(request, reply);
+    if (!user) return;
+
+    const courses = await prisma.course.findMany({
+      where: {
+        status: "PUBLISHED",
+        visibility: "PUBLIC_SALE",
+        priceCents: { gt: 0 }
+      },
+      orderBy: [{ sortOrder: "asc" }, { title: "asc" }]
+    });
+
+    const cards = [];
+    for (const course of courses) {
+      cards.push(await courseCardDto(course, user));
     }
     return { courses: cards };
   });

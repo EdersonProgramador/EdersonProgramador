@@ -1,5 +1,6 @@
 import axios from "axios";
 import type { AuthContext, AuthUser } from "@ederson-agencia/shared";
+import { notifySessionExpired } from "./auth/sessionNavigation.js";
 
 export class ApiError extends Error {
   status: number;
@@ -34,8 +35,6 @@ const client = axios.create({
 let agencyToken: string | null = localStorage.getItem(TOKEN_KEYS.agency);
 let academyToken: string | null = localStorage.getItem(TOKEN_KEYS.academy);
 
-let onUnauthorized: ((realm: AuthContext | "unknown") => void) | null = null;
-
 export function migrateLegacyAuthToken(): void {
   const legacy = localStorage.getItem(LEGACY_TOKEN_KEY);
   if (legacy && !agencyToken) {
@@ -43,10 +42,6 @@ export function migrateLegacyAuthToken(): void {
     localStorage.setItem(TOKEN_KEYS.agency, legacy);
   }
   if (legacy) localStorage.removeItem(LEGACY_TOKEN_KEY);
-}
-
-export function setUnauthorizedHandler(handler: (realm: AuthContext | "unknown") => void) {
-  onUnauthorized = handler;
 }
 
 export function getStoredToken(context: AuthContext): string | null {
@@ -106,9 +101,10 @@ client.interceptors.response.use(
     const status = error.response?.status ?? 500;
     const message = error.response?.data?.message ?? "Erro de comunicação com a API.";
     const path = String(error.config?.url ?? "");
-    const isLoginAttempt = path.includes("/auth/login");
-    if (status === 401 && onUnauthorized && !isLoginAttempt) {
-      onUnauthorized(realmForRequest(path));
+    const isAuthAttempt = path.includes("/auth/login") || path.includes("/auth/register");
+    if (status === 401 && !isAuthAttempt && typeof window !== "undefined") {
+      const returnPath = `${window.location.pathname}${window.location.search}`;
+      notifySessionExpired(realmForRequest(path), returnPath);
     }
     return Promise.reject(new ApiError(message, status));
   }

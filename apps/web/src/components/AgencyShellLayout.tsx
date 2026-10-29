@@ -1,4 +1,5 @@
-import { Link, Outlet, useNavigate } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { loginPathForContext } from "@ederson-agencia/shared";
 import { LogOut } from "lucide-react";
 import { AgencyNav } from "./portal/AgencyNav";
 import { BrandLogo } from "./brand/BrandLogo";
@@ -9,7 +10,9 @@ export function AgencyShellLayout({ title }: { title: string }) {
   const session = useAgencySession();
   const clearSession = useAuthStore((s) => s.clearSession);
   const navigate = useNavigate();
+  const location = useLocation();
   const user = session?.user;
+  const agencyLogin = loginPathForContext("agency");
 
   return (
     <div className="surface-light min-h-screen bg-[var(--app-bg-solid)] text-[var(--app-text)]">
@@ -37,14 +40,18 @@ export function AgencyShellLayout({ title }: { title: string }) {
                   aria-label="Sair da Agência"
                   onClick={() => {
                     clearSession("agency");
-                    navigate("/");
+                    navigate(agencyLogin, { replace: true });
                   }}
                 >
                   <LogOut className="h-4 w-4" />
                 </button>
               </>
             ) : (
-              <Link to="/login" className="btn-ghost inline-flex min-h-11 items-center text-sm">
+              <Link
+                to={agencyLogin}
+                state={{ from: `${location.pathname}${location.search}` }}
+                className="btn-ghost inline-flex min-h-11 items-center text-sm"
+              >
                 Entrar
               </Link>
             )}

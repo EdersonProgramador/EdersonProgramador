@@ -1,8 +1,7 @@
 import { useEffect } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
-import type { AuthContext } from "@ederson-agencia/shared";
 import { ACADEMY_APP_BASE, AGENCY_APP_BASE } from "@ederson-agencia/shared";
-import { setUnauthorizedHandler } from "./api";
+import { AuthSessionBridge } from "./auth/AuthSessionBridge";
 import { AcademyShellLayout } from "./components/AcademyShellLayout";
 import { AgencyShellLayout } from "./components/AgencyShellLayout";
 import {
@@ -18,6 +17,7 @@ import { AgencyLoginPage } from "./pages/LoginPage";
 import { AcademyLoginPage } from "./pages/AcademyLoginPage";
 import { CertificateVerifyPage } from "./pages/CertificateVerifyPage";
 import { CourseStudyPage } from "./pages/CourseStudyPage";
+import { AcademyStorePage } from "./pages/AcademyStorePage";
 import { CoursesCatalogPage } from "./pages/CoursesCatalogPage";
 import { AdminCourseContentPage } from "./pages/AdminCourseContentPage";
 import { AdminCoursesPage } from "./pages/AdminCoursesPage";
@@ -28,18 +28,14 @@ import { useAuthStore } from "./stores/authStore";
 
 export default function App() {
   const bootstrap = useAuthStore((s) => s.bootstrap);
-  const clearSession = useAuthStore((s) => s.clearSession);
 
   useEffect(() => {
-    setUnauthorizedHandler((realm: AuthContext | "unknown") => {
-      if (realm === "agency" || realm === "unknown") clearSession("agency");
-      if (realm === "academy" || realm === "unknown") clearSession("academy");
-    });
     void bootstrap();
-  }, [bootstrap, clearSession]);
+  }, [bootstrap]);
 
   return (
     <>
+      <AuthSessionBridge />
       <ThemeSync />
       <Routes>
         <Route index element={<LandingPage />} />
@@ -65,6 +61,7 @@ export default function App() {
         <Route path={ACADEMY_APP_BASE} element={<ProtectedRoute realm="academy" />}>
           <Route element={<AcademyShellLayout title="Academia" />}>
             <Route index element={<CoursesCatalogPage />} />
+            <Route path="loja" element={<AcademyStorePage />} />
             <Route element={<ProtectedRoute realm="academy" roles={["ADMIN"]} />}>
               <Route path="admin/cursos" element={<AdminCoursesPage />} />
               <Route path="admin/cursos/:courseId/conteudo" element={<AdminCourseContentPage />} />

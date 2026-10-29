@@ -27,16 +27,18 @@ export function ProtectedRoute({ roles, realm }: { roles?: AgencyRole[]; realm: 
     );
   }
 
+  const returnTo = `${location.pathname}${location.search}`;
+
   if (!user) {
-    return <Navigate to={loginPathForContext(realm)} replace state={{ from: location.pathname }} />;
+    return <Navigate to={loginPathForContext(realm)} replace state={{ from: returnTo }} />;
   }
 
   if (realm === "agency" && !canAccessAgency(user)) {
-    return <Navigate to="/academia/entrar" replace state={{ from: location.pathname, needAgency: true }} />;
+    return <Navigate to="/academia/entrar" replace state={{ from: returnTo, needAgency: true }} />;
   }
 
   if (realm === "academy" && !canAccessAcademy(user)) {
-    return <Navigate to="/login" replace state={{ from: location.pathname, needAcademy: true }} />;
+    return <Navigate to="/login" replace state={{ from: returnTo, needAcademy: true }} />;
   }
 
   if (roles && !roles.includes(user.role)) {

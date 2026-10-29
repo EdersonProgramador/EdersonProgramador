@@ -25,17 +25,31 @@ export const COURSES_UI = {
       "Trilhas de formação do time, com progresso salvo na sua conta. Novos conteúdos entram pelo administrador."
   },
   catalog: {
-    title: "Academia",
-    subtitle:
-      "Cursos internos da Ederson Programador. Escolha uma trilha e continue de onde parou.",
+    title: "Meus cursos",
+    subtitle: "Trilhas liberadas na sua conta. Continue de onde parou.",
     badgeInternal: "Equipe",
-    badgeSale: "Em breve — venda online",
+    badgeSale: "Matriculado",
     lockedHint: "Este curso será liberado após a compra (pagamento ainda em preparação).",
     enter: "Acessar trilha",
     contentNotReady: "Trilha ainda sem conteúdo vinculado (contentKey fl no admin).",
     openFlTrail: "Abrir trilha FL",
-    empty: "Nenhum curso publicado ainda.",
+    empty: "Nenhuma trilha liberada na sua conta.",
+    emptyStoreLink: "Ver cursos à venda",
     loading: "Carregando cursos…"
+  },
+  store: {
+    title: "Cursos à venda",
+    subtitle:
+      "Programas publicados para matrícula. Após a compra, a trilha aparece em Meus cursos.",
+    badge: "Disponível para compra",
+    badgeOwned: "Já na sua conta",
+    priceFrom: "Investimento",
+    buyHint: "Pagamento em integração — escolha a forma para reservar sua vaga.",
+    enter: "Acessar trilha",
+    buy: "Comprar acesso",
+    empty: "Nenhum curso publicado para venda no momento.",
+    loading: "Carregando vitrine…",
+    backToMine: "Meus cursos"
   },
   study: {
     loading: "Carregando trilha…",
@@ -159,7 +173,7 @@ export const COURSES_UI = {
       "Deixe vazio para repetições ilimitadas. Ex.: 3 = o aluno deve concluir a trilha 3 vezes (cada volta zera o progresso ao iniciar a próxima).",
     repetitionUnlimited: "Ilimitadas",
     visibilityInternal: "Equipe (interno)",
-    visibilitySale: "Venda pública (em breve)",
+    visibilitySale: "Venda pública (vitrine Academia)",
     statusDraft: "Rascunho",
     statusPublished: "Publicado",
     statusArchived: "Arquivado",

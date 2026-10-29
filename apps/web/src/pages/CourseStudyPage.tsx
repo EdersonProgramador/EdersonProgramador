@@ -18,7 +18,7 @@ import {
 import { CourseCover } from "../components/courses/CourseCover";
 import { AcademyNav } from "../components/portal/AcademyNav";
 import { BrandLogo } from "../components/brand/BrandLogo";
-import { ACADEMY_APP_BASE, COURSES_UI, FL_COURSE } from "@ederson-agencia/shared";
+import { ACADEMY_APP_BASE, COURSES_UI, FL_COURSE, loginPathForContext } from "@ederson-agencia/shared";
 import { ApiError, apiAssetUrl, apiGet, apiPost, apiPut } from "../api";
 import { isYoutubeUrl, parseYoutubeVideoId, youtubeEmbedUrl } from "../lib/youtube";
 import {
@@ -291,7 +291,7 @@ export function CourseStudyPage() {
               aria-label="Sair da Academia"
               onClick={() => {
                 clearSession("academy");
-                navigate("/");
+                navigate(loginPathForContext("academy"), { replace: true });
               }}
             >
               <LogOut className="h-4 w-4" />

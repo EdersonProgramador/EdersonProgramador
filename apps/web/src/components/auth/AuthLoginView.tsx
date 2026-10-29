@@ -1,10 +1,10 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import type { AuthContext } from "@ederson-agencia/shared";
-import { loginPathForContext } from "@ederson-agencia/shared";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import type { AuthContext, AuthRouteState } from "@ederson-agencia/shared";
+import { loginPathForContext, resolvePostLoginPath } from "@ederson-agencia/shared";
 import { apiPost, type LoginResponse } from "../../api";
 import { BrandLogo } from "../brand/BrandLogo";
-import { useAuthStore } from "../../stores/authStore";
+import { useAcademySession, useAgencySession, useAuthStore } from "../../stores/authStore";
 
 type AuthLoginViewProps = {
   context: AuthContext;
@@ -22,7 +22,13 @@ export function AuthLoginView({
   alternateLogin
 }: AuthLoginViewProps) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const routeState = (location.state ?? {}) as AuthRouteState;
+  const returnPath = routeState.from;
   const setSession = useAuthStore((s) => s.setSession);
+  const agencySession = useAgencySession();
+  const academySession = useAcademySession();
+  const activeSession = context === "agency" ? agencySession : academySession;
   const [mode, setMode] = useState<"login" | "register">("login");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -34,6 +40,15 @@ export function AuthLoginView({
     (isAgency
       ? "Acompanhe pacotes, etapas e entregas do seu projeto contratado."
       : "Acesso restrito a alunos matriculados. Use o e-mail cadastrado pelo administrador.");
+
+  useEffect(() => {
+    if (!activeSession?.user) return;
+    navigate(resolvePostLoginPath(activeSession.user.role, context, returnPath), { replace: true });
+  }, [activeSession, context, navigate, returnPath]);
+
+  function goAfterAuth(data: LoginResponse) {
+    navigate(resolvePostLoginPath(data.user.role, context, returnPath), { replace: true });
+  }
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -49,7 +64,7 @@ export function AuthLoginView({
           context
         });
         setSession(context, data);
-        navigate(data.homePath);
+        goAfterAuth(data);
         return;
       }
 
@@ -64,7 +79,7 @@ export function AuthLoginView({
         context: "agency"
       });
       setSession("agency", data);
-      navigate(data.homePath);
+      goAfterAuth(data);
     } catch (err) {
       const raw = err instanceof Error ? err.message : "Falha na autenticação.";
       const safe =
@@ -149,7 +164,11 @@ export function AuthLoginView({
       <div className="space-y-2 text-center text-sm text-[var(--app-text-muted)]">
         {alternateLogin ? (
           <p>
-            <Link to={alternateLogin.href} className="text-brand-primary hover:underline">
+            <Link
+              to={alternateLogin.href}
+              state={returnPath ? { from: returnPath } : undefined}
+              className="text-brand-primary hover:underline"
+            >
               {alternateLogin.label}
             </Link>
           </p>

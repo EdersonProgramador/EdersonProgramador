@@ -1,4 +1,5 @@
-import { Link, Outlet, useNavigate } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { loginPathForContext } from "@ederson-agencia/shared";
 import { LogOut } from "lucide-react";
 import { AcademyNav } from "./portal/AcademyNav";
 import { BrandLogo } from "./brand/BrandLogo";
@@ -9,7 +10,9 @@ export function AcademyShellLayout({ title }: { title: string }) {
   const session = useAcademySession();
   const clearSession = useAuthStore((s) => s.clearSession);
   const navigate = useNavigate();
+  const location = useLocation();
   const user = session?.user;
+  const academyLogin = loginPathForContext("academy");
 
   return (
     <div className="surface-light min-h-screen bg-[var(--app-bg-solid)] text-[var(--app-text)]">
@@ -37,14 +40,18 @@ export function AcademyShellLayout({ title }: { title: string }) {
                   aria-label="Sair da Academia"
                   onClick={() => {
                     clearSession("academy");
-                    navigate("/");
+                    navigate(academyLogin, { replace: true });
                   }}
                 >
                   <LogOut className="h-4 w-4" />
                 </button>
               </>
             ) : (
-              <Link to="/academia/entrar" className="btn-ghost inline-flex min-h-11 items-center text-sm">
+              <Link
+                to={academyLogin}
+                state={{ from: `${location.pathname}${location.search}` }}
+                className="btn-ghost inline-flex min-h-11 items-center text-sm"
+              >
                 Entrar
               </Link>
             )}
