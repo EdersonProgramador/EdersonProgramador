@@ -32,6 +32,8 @@ export function CourseCatalogCard({ course, variant, onCheckout }: CourseCatalog
         ? COURSES_UI.catalog.badgeInternal
         : COURSES_UI.catalog.badgeSale;
 
+  const showPrice = variant === "store" && course.priceCents != null && course.priceCents > 0;
+
   return (
     <div className="course-card panel flex h-full flex-col p-0">
       <CourseCover title={course.title} coverUrl={course.coverUrl} className="course-cover--card" />
@@ -44,10 +46,10 @@ export function CourseCatalogCard({ course, variant, onCheckout }: CourseCatalog
         {course.summary ? (
           <p className="course-text-muted mt-2 flex-1 text-sm leading-relaxed">{course.summary}</p>
         ) : null}
-        {course.priceCents != null && course.priceCents > 0 ? (
+        {showPrice ? (
           <p className="mt-3 text-sm font-medium text-[var(--course-fg)]">
-            {variant === "store" ? `${COURSES_UI.store.priceFrom}: ` : null}
-            {(course.priceCents / 100).toLocaleString("pt-BR", {
+            {`${COURSES_UI.store.priceFrom}: `}
+            {(course.priceCents! / 100).toLocaleString("pt-BR", {
               style: "currency",
               currency: "BRL"
             })}

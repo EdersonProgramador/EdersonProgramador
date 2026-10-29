@@ -1,6 +1,13 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { ShoppingCart } from "lucide-react";
-import { ACADEMY_SALES, ACADEMY_STORE_BASE, ACADEMY_STORE_PATHS, loginPathForContext } from "@ederson-agencia/shared";
+import {
+  ACADEMY_APP_BASE,
+  ACADEMY_SALES,
+  ACADEMY_STORE_BASE,
+  ACADEMY_STORE_PATHS,
+  loginPathForContext
+} from "@ederson-agencia/shared";
+import { useAcademySession } from "../../stores/authStore";
 import { BrandLogo } from "../brand/BrandLogo";
 import { ThemeToggle } from "../theme/ThemeToggle";
 import { useAcademyCartStore } from "../../stores/academyCartStore";
@@ -15,7 +22,8 @@ export function AcademyStoreShell({
   nav?: React.ReactNode;
 }) {
   const count = useAcademyCartStore((s) => s.items.length);
-  const location = useLocation();
+  const academyUser = useAcademySession()?.user;
+  const academyLogin = loginPathForContext("academy");
 
   return (
     <div className="academy-sales surface-light min-h-screen">
@@ -28,11 +36,11 @@ export function AcademyStoreShell({
           <div className="flex items-center gap-2">
             <ThemeToggle compact className="academy-sales__theme-toggle shrink-0" />
             <Link
-              to={loginPathForContext("academy")}
-              state={{ from: `${location.pathname}${location.search}${location.hash}` }}
-              className="btn-secondary hidden text-sm sm:inline-flex"
+              to={academyUser ? ACADEMY_APP_BASE : academyLogin}
+              state={academyUser ? undefined : { from: ACADEMY_APP_BASE }}
+              className="btn-secondary inline-flex min-h-10 items-center text-sm"
             >
-              {copy.courses.loginCta}
+              {academyUser ? "Meus cursos" : copy.courses.loginCta}
             </Link>
             <Link
               to={ACADEMY_STORE_PATHS.cart}

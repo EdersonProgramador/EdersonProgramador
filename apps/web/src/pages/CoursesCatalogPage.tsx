@@ -46,13 +46,15 @@ export function CoursesCatalogPage() {
           <p className="course-text-muted mt-2 text-sm">{COURSES_UI.catalog.subtitle}</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <a href={ACADEMY_STORE_BASE} className="btn-primary inline-flex min-h-11 items-center text-sm">
-            {COURSES_UI.store.title}
-          </a>
           {academyUser && isAcademyInternalAdmin(academyUser) ? (
-            <Link to={ACADEMY_ADMIN_COURSES_BASE} className="btn-secondary inline-flex min-h-11 items-center text-sm">
-              Gerenciar cursos
-            </Link>
+            <>
+              <a href={ACADEMY_STORE_BASE} className="btn-primary inline-flex min-h-11 items-center text-sm">
+                {COURSES_UI.store.title}
+              </a>
+              <Link to={ACADEMY_ADMIN_COURSES_BASE} className="btn-secondary inline-flex min-h-11 items-center text-sm">
+                Gerenciar cursos
+              </Link>
+            </>
           ) : null}
         </div>
       </div>
@@ -68,9 +70,13 @@ export function CoursesCatalogPage() {
       ) : (
         <div className="panel space-y-4 p-6 text-center">
           <p className="course-text-subtle text-sm">{COURSES_UI.catalog.empty}</p>
-          <a href={ACADEMY_STORE_BASE} className="btn-secondary inline-flex min-h-11 items-center text-sm">
-            {COURSES_UI.catalog.emptyStoreLink} →
-          </a>
+          {academyUser && isAcademyInternalAdmin(academyUser) ? (
+            <a href={ACADEMY_STORE_BASE} className="btn-secondary inline-flex min-h-11 items-center text-sm">
+              {COURSES_UI.catalog.emptyStoreLink} →
+            </a>
+          ) : (
+            <p className="course-text-muted text-xs leading-relaxed">{COURSES_UI.catalog.emptyStudentHint}</p>
+          )}
         </div>
       )}
     </div>

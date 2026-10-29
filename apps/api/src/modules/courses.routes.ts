@@ -1,6 +1,8 @@
 import { createReadStream, existsSync } from "node:fs";
 import { extname, resolve } from "node:path";
 import type { FastifyInstance } from "fastify";
+import { isAcademyInternalAdmin } from "@ederson-agencia/shared";
+import type { AgencyRole } from "@ederson-agencia/shared";
 import { z } from "zod";
 import { requireAcademyUser } from "../auth-access.js";
 import {
@@ -64,11 +66,31 @@ export async function registerCoursesRoutes(app: FastifyInstance) {
       orderBy: [{ sortOrder: "asc" }, { title: "asc" }]
     });
 
+    const internalAdmin = isAcademyInternalAdmin({
+      role: user.role as AgencyRole,
+      email: user.email
+    });
+
     const cards = [];
     for (const course of courses) {
+      if (!internalAdmin) {
+        if (course.visibility === "INTERNAL") continue;
+        if (course.visibility === "PUBLIC_SALE") {
+          const enrollment = await prisma.courseEnrollment.findUnique({
+            where: { userId_courseId: { userId: user.id, courseId: course.id } }
+          });
+          if (enrollment?.status !== "ACTIVE") continue;
+        }
+      }
+
       const card = await courseCardDto(course, user);
       if (!card.hasAccess) continue;
-      cards.push(card);
+
+      if (!internalAdmin) {
+        cards.push({ ...card, purchasable: false, locked: false, priceCents: null });
+      } else {
+        cards.push(card);
+      }
     }
     return { courses: cards };
   });
@@ -291,6 +313,17 @@ export async function registerCoursesRoutes(app: FastifyInstance) {
   app.post("/courses/:slug/checkout", async (request, reply) => {
     const user = await requireAcademyUser(request, reply);
     if (!user) return;
+
+    if (
+      !isAcademyInternalAdmin({
+        role: user.role as AgencyRole,
+        email: user.email
+      })
+    ) {
+      return reply.code(403).send({
+        message: "Compras são feitas na vitrine pública (/cursos), não na área do aluno."
+      });
+    }
 
     const params = z.object({ slug: z.string().min(1) }).parse(request.params);
     const body = z

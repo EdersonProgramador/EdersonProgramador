@@ -1,15 +1,19 @@
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useLocation } from "react-router-dom";
+import { ACADEMY_STORE_BASE } from "@ederson-agencia/shared";
 import { BrandLogo } from "./brand/BrandLogo";
 import { ThemeToggle } from "./theme/ThemeToggle";
 
 /** Layout mínimo para telas públicas de login (sem nav de Agência/Academia). */
 export function ShellLayout({ title }: { title: string }) {
+  const { pathname } = useLocation();
+  const brandTo = pathname.startsWith("/academia/entrar") ? ACADEMY_STORE_BASE : "/";
+
   return (
     <div className="surface-light min-h-screen bg-[var(--app-bg-solid)] text-[var(--app-text)]">
       <header className="app-shell-header sticky top-0 z-50">
         <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:py-4">
           <div className="min-w-0">
-            <Link to="/" className="group inline-block">
+            <Link to={brandTo} className="group inline-block">
               <BrandLogo size="sm" />
             </Link>
             <p className="mt-1.5 truncate pl-11 text-xs text-[var(--app-text-muted)] sm:max-w-xs">{title}</p>

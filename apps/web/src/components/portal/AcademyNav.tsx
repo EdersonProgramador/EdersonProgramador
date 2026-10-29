@@ -1,14 +1,14 @@
 import { useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
-import { ACADEMY_ADMIN_COURSES_BASE, ACADEMY_APP_BASE } from "@ederson-agencia/shared";
+import { ACADEMY_ADMIN_COURSES_BASE, ACADEMY_APP_BASE, isAcademyInternalAdmin } from "@ederson-agencia/shared";
 import type { AuthUser } from "@ederson-agencia/shared";
 
 type NavLink = { to: string; label: string };
 
 function academyLinks(user: AuthUser | undefined): NavLink[] {
   const links: NavLink[] = [{ to: ACADEMY_APP_BASE, label: "Meus cursos" }];
-  if (user?.role === "ADMIN") {
+  if (user && isAcademyInternalAdmin(user)) {
     links.push({ to: ACADEMY_ADMIN_COURSES_BASE, label: "Gerenciar cursos" });
   }
   return links;

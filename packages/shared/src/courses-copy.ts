@@ -34,6 +34,7 @@ export const COURSES_UI = {
     contentNotReady: "Trilha ainda sem conteúdo vinculado (contentKey fl no admin).",
     openFlTrail: "Abrir trilha FL",
     empty: "Nenhuma trilha liberada na sua conta.",
+    emptyStudentHint: "Suas trilhas matriculadas aparecem aqui. Para comprar novos programas, use a vitrine em /cursos.",
     emptyStoreLink: "Ver cursos à venda",
     loading: "Carregando cursos…"
   },

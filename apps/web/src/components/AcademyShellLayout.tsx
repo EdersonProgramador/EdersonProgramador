@@ -19,9 +19,9 @@ export function AcademyShellLayout({ title }: { title: string }) {
       <header className="app-shell-header sticky top-0 z-50 border-b border-[var(--app-border)]">
         <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:py-4">
           <div className="min-w-0">
-            <Link to="/" className="group inline-block">
+            <div className="inline-block">
               <BrandLogo size="sm" />
-            </Link>
+            </div>
             <p className="mt-1.5 truncate pl-11 text-xs text-[var(--app-text-muted)]">
               Academia interna · {title}
             </p>

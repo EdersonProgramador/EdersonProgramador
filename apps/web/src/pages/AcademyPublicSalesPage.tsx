@@ -346,7 +346,7 @@ export function AcademyPublicSalesPage() {
           {ACADEMY_CART.cartTitle}
         </Link>
         <span className="mx-2 text-white/25">·</span>
-        <Link to="/academia/entrar" className="text-brand-primary hover:underline">
+        <Link to="/academia/entrar" state={{ from: ACADEMY_APP_BASE }} className="text-brand-primary hover:underline">
           {copy.footer.portal}
         </Link>
         <span className="mx-2 text-white/25">·</span>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import type { AuthContext, AuthRouteState } from "@ederson-agencia/shared";
-import { loginPathForContext, resolvePostLoginPath } from "@ederson-agencia/shared";
+import { ACADEMY_STORE_BASE, loginPathForContext, resolvePostLoginPath } from "@ederson-agencia/shared";
 import { ApiError, apiPost, type LoginResponse } from "../../api";
 import { normalizeAuthFields, warmAcademyStoreTestAccount } from "../../lib/academy-store-auth";
 import { BrandLogo } from "../brand/BrandLogo";
@@ -106,7 +106,10 @@ export function AuthLoginView({
   return (
     <div className="mx-auto max-w-md space-y-6">
       <div className="space-y-4 text-center">
-        <Link to="/" className="inline-flex justify-center transition hover:opacity-90">
+        <Link
+          to={context === "academy" ? ACADEMY_STORE_BASE : "/"}
+          className="inline-flex justify-center transition hover:opacity-90"
+        >
           <BrandLogo size="md" />
         </Link>
         <h1 className="text-3xl font-bold text-[var(--app-text)]">
