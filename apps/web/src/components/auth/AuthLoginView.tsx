@@ -66,7 +66,12 @@ export function AuthLoginView({
       setSession("agency", data);
       navigate(data.homePath);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha na autenticação.");
+      const raw = err instanceof Error ? err.message : "Falha na autenticação.";
+      const safe =
+        raw.length > 180 || /prisma|invocation|\.ts:\d+/i.test(raw)
+          ? "Não foi possível entrar agora. Confira e-mail e senha ou tente de novo em instantes."
+          : raw;
+      setError(safe);
     } finally {
       setLoading(false);
     }

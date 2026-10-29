@@ -6,6 +6,22 @@ import { z } from "zod";
 
 const nodeEnv = (process.env.NODE_ENV ?? "development") as "development" | "test" | "production";
 
+const DEFAULT_DEV_DATABASE_URL =
+  "postgresql://postgres:postgres@localhost:5432/ederson_agencia?schema=public";
+
+/** Prisma exige postgres:// ou postgresql:// — ignora legado SQLite (file:). */
+function normalizeDatabaseUrl(raw: unknown): string | undefined {
+  if (typeof raw !== "string") return undefined;
+  let url = raw.trim();
+  if (!url) return undefined;
+  if (url.startsWith("file:")) return undefined;
+  if (/^postgres(ql)?:\/\//i.test(url)) return url;
+  if (url.includes("@") || /^[a-z0-9.-]+:\d+\//i.test(url)) {
+    return `postgresql://${url.replace(/^postgresql:\/\//i, "")}`;
+  }
+  return url;
+}
+
 // Em produção (Render), use só variáveis do painel — não sobrescreva com .env local do build.
 if (nodeEnv !== "production") {
   const moduleDir = dirname(fileURLToPath(import.meta.url));
@@ -28,10 +44,15 @@ const envSchema = z
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
     API_PORT: z.preprocess((value) => value ?? process.env.PORT, z.coerce.number().default(3333)),
     DATABASE_URL: z.preprocess(
-      (value) => (typeof value === "string" && value.trim() ? value.trim() : undefined),
+      normalizeDatabaseUrl,
       nodeEnv === "production"
-        ? z.string().min(1, "DATABASE_URL é obrigatória em produção.")
-        : z.string().default("postgresql://postgres:postgres@localhost:5432/ederson_agencia?schema=public")
+        ? z
+            .string()
+            .min(1, "DATABASE_URL é obrigatória em produção.")
+            .refine((u) => /^postgres(ql)?:\/\//i.test(u), {
+              message: "DATABASE_URL deve começar com postgresql:// ou postgres://."
+            })
+        : z.string().default(DEFAULT_DEV_DATABASE_URL)
     ),
     WEB_ORIGIN: z.string().default("http://localhost:5174"),
     JWT_SECRET: z.preprocess((value) => {
@@ -93,3 +114,5 @@ if (!parsed.success) {
 }
 
 export const env = parsed.data;
+
+process.env.DATABASE_URL = env.DATABASE_URL;

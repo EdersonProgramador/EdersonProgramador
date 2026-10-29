@@ -50,7 +50,16 @@ app.setErrorHandler((error, _request, reply) => {
   }
   const statusCode = "statusCode" in error && typeof error.statusCode === "number" ? error.statusCode : 500;
   if (statusCode >= 500) app.log.error(error);
-  return reply.code(statusCode).send({ message: error.message || "Erro interno." });
+  const raw = error.message || "Erro interno.";
+  const isDbConfig =
+    /prisma|datasource|DATABASE_URL|invocation/i.test(raw) || error.name === "PrismaClientInitializationError";
+  const message =
+    statusCode >= 500 && (env.NODE_ENV === "production" || isDbConfig)
+      ? isDbConfig
+        ? "Banco de dados indisponível. Verifique DATABASE_URL e se o Postgres está acessível."
+        : "Erro interno do servidor."
+      : raw;
+  return reply.code(statusCode).send({ message });
 });
 
 app.get("/health", async () => {
