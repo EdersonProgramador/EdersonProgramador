@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { ShoppingCart } from "lucide-react";
 import { ACADEMY_SALES, ACADEMY_STORE_BASE, ACADEMY_STORE_PATHS, loginPathForContext } from "@ederson-agencia/shared";
 import { BrandLogo } from "../brand/BrandLogo";
@@ -15,6 +15,7 @@ export function AcademyStoreShell({
   nav?: React.ReactNode;
 }) {
   const count = useAcademyCartStore((s) => s.items.length);
+  const location = useLocation();
 
   return (
     <div className="academy-sales surface-light min-h-screen">
@@ -26,7 +27,11 @@ export function AcademyStoreShell({
           {nav ? <div className="hidden flex-1 justify-center md:flex">{nav}</div> : null}
           <div className="flex items-center gap-2">
             <ThemeToggle compact className="academy-sales__theme-toggle shrink-0" />
-            <Link to={loginPathForContext("academy")} className="btn-secondary hidden text-sm sm:inline-flex">
+            <Link
+              to={loginPathForContext("academy")}
+              state={{ from: `${location.pathname}${location.search}${location.hash}` }}
+              className="btn-secondary hidden text-sm sm:inline-flex"
+            >
               {copy.courses.loginCta}
             </Link>
             <Link

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { Lock, Shield } from "lucide-react";
 import {
@@ -8,6 +8,7 @@ import {
   ACADEMY_STORE_BASE
 } from "@ederson-agencia/shared";
 import { ApiError, apiPost, type LoginResponse } from "../api";
+import { normalizeAuthFields, warmAcademyStoreTestAccount } from "../lib/academy-store-auth";
 import { AcademyCheckoutSocial } from "../components/academy/AcademyCheckoutSocial";
 import { AcademyStoreShell } from "../components/academy/AcademyStoreShell";
 import { CourseCover } from "../components/courses/CourseCover";
@@ -38,6 +39,10 @@ export function AcademyStoreCheckoutPage() {
   const [success, setSuccess] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (step === "account") void warmAcademyStoreTestAccount();
+  }, [step]);
+
   if (items.length === 0 && !success) {
     return <Navigate to={ACADEMY_STORE_PATHS.cart} replace />;
   }
@@ -52,8 +57,8 @@ export function AcademyStoreCheckoutPage() {
     setAuthError(null);
     const fd = new FormData(event.currentTarget);
     try {
-      const email = String(fd.get("email") ?? "").trim();
-      const password = String(fd.get("password") ?? "");
+      const { email, password } = normalizeAuthFields(fd.get("email"), fd.get("password"));
+      await warmAcademyStoreTestAccount();
       const data = await apiPost<LoginResponse>("/auth/login", {
         email,
         password,

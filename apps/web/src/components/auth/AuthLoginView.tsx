@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import type { AuthContext, AuthRouteState } from "@ederson-agencia/shared";
 import { loginPathForContext, resolvePostLoginPath } from "@ederson-agencia/shared";
-import { apiPost, type LoginResponse } from "../../api";
+import { ApiError, apiPost, type LoginResponse } from "../../api";
+import { normalizeAuthFields, warmAcademyStoreTestAccount } from "../../lib/academy-store-auth";
 import { BrandLogo } from "../brand/BrandLogo";
 import { useAcademySession, useAgencySession, useAuthStore } from "../../stores/authStore";
 
@@ -46,6 +47,10 @@ export function AuthLoginView({
     navigate(resolvePostLoginPath(activeSession.user.role, context, returnPath), { replace: true });
   }, [activeSession, context, navigate, returnPath]);
 
+  useEffect(() => {
+    if (context === "academy") void warmAcademyStoreTestAccount();
+  }, [context]);
+
   function goAfterAuth(data: LoginResponse) {
     navigate(resolvePostLoginPath(data.user.role, context, returnPath), { replace: true });
   }
@@ -58,9 +63,11 @@ export function AuthLoginView({
 
     try {
       if (mode === "login") {
+        const { email, password } = normalizeAuthFields(form.get("email"), form.get("password"));
+        if (context === "academy") await warmAcademyStoreTestAccount();
         const data = await apiPost<LoginResponse>("/auth/login", {
-          email: form.get("email"),
-          password: form.get("password"),
+          email,
+          password,
           context
         });
         setSession(context, data);
@@ -81,11 +88,15 @@ export function AuthLoginView({
       setSession("agency", data);
       goAfterAuth(data);
     } catch (err) {
-      const raw = err instanceof Error ? err.message : "Falha na autenticação.";
+      const raw = err instanceof ApiError ? err.message : err instanceof Error ? err.message : "Falha na autenticação.";
+      const hint =
+        context === "academy" && err instanceof ApiError && err.status === 401
+          ? " Compradores: use aluno@gmail.com / 123465 ou cadastre-se em /cursos/finalizar."
+          : "";
       const safe =
         raw.length > 180 || /prisma|invocation|\.ts:\d+/i.test(raw)
           ? "Não foi possível entrar agora. Confira e-mail e senha ou tente de novo em instantes."
-          : raw;
+          : `${raw}${hint}`;
       setError(safe);
     } finally {
       setLoading(false);
