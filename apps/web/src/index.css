@@ -472,8 +472,8 @@
   }
 
   .brand-logo-img--sm {
-    height: clamp(2.5rem, 3vw + 1.4rem, 3.1rem);
-    max-width: min(100%, clamp(10rem, 54vw, 13.5rem));
+    height: clamp(3.75rem, calc(3vw + 1.4rem + 1.25rem), 4.375rem);
+    max-width: min(100%, clamp(12.5rem, 54vw, 15.625rem));
   }
 
   .brand-logo-img--md {
