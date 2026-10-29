@@ -14,6 +14,7 @@ import { registerFichamentoRoutes } from "./modules/fichamento.routes.js";
 import { registerPublicRoutes } from "./modules/public.routes.js";
 import { ensureSeedCourses } from "./seed-courses.js";
 import { prisma } from "./prisma.js";
+import { ensureAcademyTestUser } from "./seed-academy-test-user.js";
 import { ensureSeedAdmin } from "./seed-admin.js";
 
 const app = Fastify({
@@ -100,6 +101,14 @@ try {
   await ensureSeedCourses(app.log);
 } catch (err) {
   app.log.warn({ err }, "Seed de cursos não concluído");
+}
+
+if (env.ACADEMY_SYNC_TEST_ALUNO) {
+  try {
+    await ensureAcademyTestUser(app.log, env.ACADEMY_TEST_ALUNO_PASSWORD);
+  } catch (err) {
+    app.log.warn({ err }, "Sync da conta de teste aluno@gmail.com não concluído");
+  }
 }
 
 const port = env.API_PORT;

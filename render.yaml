@@ -39,6 +39,8 @@ projects:
                 value: https://www.edersonprogramador.com.br,https://edersonprogramador.com.br,http://localhost:5174,http://127.0.0.1:5174
               - key: ADMIN_BOOTSTRAP
                 value: "true"
+              - key: ACADEMY_SYNC_TEST_ALUNO
+                value: "true"
               - key: ADMIN_EMAIL
                 sync: false
               - key: ADMIN_PASSWORD
