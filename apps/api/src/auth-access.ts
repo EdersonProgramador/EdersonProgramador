@@ -1,5 +1,5 @@
-import type { AuthContext, AgencyRole } from "@ederson-agencia/shared";
-import { canAccessAcademy, canAccessAgency } from "@ederson-agencia/shared";
+import type { AgencyRole, AuthContext } from "@ederson-agencia/shared";
+import { canAccessAcademy, canAccessAgency, isAcademyInternalAdmin } from "@ederson-agencia/shared";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import type { AuthTokenPayload } from "./auth.js";
 import { getAuthUser } from "./auth.js";
@@ -21,9 +21,10 @@ export function isAcademyStoreCustomer(company: string | null | undefined): bool
 export async function assertEligibleForAcademyLogin(
   userId: string,
   role: AgencyRole,
-  company?: string | null
+  company?: string | null,
+  email?: string
 ): Promise<void> {
-  if (role === "ADMIN") return;
+  if (email && isAcademyInternalAdmin({ role, email })) return;
   if (isAcademyStoreCustomer(company)) return;
   const ok = await userHasActiveEnrollment(userId);
   if (!ok) {
@@ -47,6 +48,15 @@ export function assertAcademySession(user: AuthTokenPayload): void {
   if (!canAccessAcademy(user)) {
     throw Object.assign(
       new Error("Use o login da Academia para acessar os cursos."),
+      { statusCode: 403 }
+    );
+  }
+}
+
+export function assertAcademyInternalAdmin(user: { email: string; role: AgencyRole }): void {
+  if (!isAcademyInternalAdmin(user)) {
+    throw Object.assign(
+      new Error("Acesso restrito ao administrador de cursos internos."),
       { statusCode: 403 }
     );
   }

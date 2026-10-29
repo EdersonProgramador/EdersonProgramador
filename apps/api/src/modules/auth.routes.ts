@@ -44,7 +44,12 @@ export async function registerAuthRoutes(app: FastifyInstance) {
 
     if (context === "academy") {
       try {
-        await assertEligibleForAcademyLogin(user.id, user.role as "ADMIN" | "CLIENT" | "FREELANCER", user.company);
+        await assertEligibleForAcademyLogin(
+          user.id,
+          user.role as "ADMIN" | "CLIENT" | "FREELANCER",
+          user.company,
+          user.email
+        );
       } catch (error) {
         const statusCode = (error as { statusCode?: number }).statusCode ?? 403;
         return reply.code(statusCode).send({ message: (error as Error).message });

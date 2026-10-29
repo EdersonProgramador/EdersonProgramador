@@ -1,17 +1,23 @@
+import { isAcademyInternalAdmin } from "@ederson-agencia/shared";
+import type { AgencyRole } from "@ederson-agencia/shared";
 import type { Course } from "@prisma/client";
 import { prisma } from "../prisma.js";
 
 export async function userCanAccessCourse(
   userId: string,
   role: string,
+  email: string,
   course: Course
 ): Promise<boolean> {
-  if (role === "ADMIN") return true;
-  if (course.status !== "PUBLISHED") return false;
+  const internalAdmin = isAcademyInternalAdmin({ role: role as AgencyRole, email });
 
   if (course.visibility === "INTERNAL") {
-    return true;
+    return internalAdmin;
   }
+
+  if (internalAdmin) return true;
+
+  if (course.status !== "PUBLISHED") return false;
 
   if (course.visibility === "PUBLIC_SALE") {
     const enrollment = await prisma.courseEnrollment.findUnique({

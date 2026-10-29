@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { assertAcademySession } from "../auth-access.js";
+import { assertAcademyInternalAdmin, assertAcademySession } from "../auth-access.js";
 import { getAuthUser, requireRole } from "../auth.js";
 import { PORTAL_CONTENT_KEY } from "../courses/content-key.js";
 import { ensurePortalStarterContent } from "../courses/portal-starter.js";
@@ -33,6 +33,7 @@ export async function registerCoursesAdminRoutes(app: FastifyInstance) {
     try {
       assertAcademySession(user);
       requireRole(user, ["ADMIN"]);
+      assertAcademyInternalAdmin(user);
     } catch (error) {
       const statusCode = (error as { statusCode?: number }).statusCode ?? 403;
       return reply.code(statusCode).send({

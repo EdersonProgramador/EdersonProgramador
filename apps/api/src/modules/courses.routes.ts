@@ -33,9 +33,9 @@ function resolveMediaPath(relative: string) {
 
 async function courseCardDto(
   course: Awaited<ReturnType<typeof prisma.course.findMany>>[number],
-  user: { id: string; role: string }
+  user: { id: string; role: string; email: string }
 ) {
-  const hasAccess = await userCanAccessCourse(user.id, user.role, course);
+  const hasAccess = await userCanAccessCourse(user.id, user.role, user.email, course);
   const purchasable =
     course.visibility === "PUBLIC_SALE" && course.priceCents != null && course.priceCents > 0;
   return {
@@ -100,7 +100,7 @@ export async function registerCoursesRoutes(app: FastifyInstance) {
     const params = z.object({ slug: z.string().min(1) }).parse(request.params);
     const course = await prisma.course.findUnique({ where: { slug: params.slug } });
     if (!course) return reply.code(404).send({ message: "Curso não encontrado." });
-    if (!(await userCanAccessCourse(user.id, user.role, course))) {
+    if (!(await userCanAccessCourse(user.id, user.role, user.email, course))) {
       return reply.code(403).send({ message: "Você não tem acesso a este curso." });
     }
 
@@ -154,7 +154,7 @@ export async function registerCoursesRoutes(app: FastifyInstance) {
     const params = z.object({ slug: z.string().min(1) }).parse(request.params);
     const course = await prisma.course.findUnique({ where: { slug: params.slug } });
     if (!course) return reply.code(404).send({ message: "Curso não encontrado." });
-    if (!(await userCanAccessCourse(user.id, user.role, course))) {
+    if (!(await userCanAccessCourse(user.id, user.role, user.email, course))) {
       return reply.code(403).send({ message: "Sem acesso." });
     }
 
@@ -182,7 +182,7 @@ export async function registerCoursesRoutes(app: FastifyInstance) {
     const params = z.object({ slug: z.string().min(1) }).parse(request.params);
     const course = await prisma.course.findUnique({ where: { slug: params.slug } });
     if (!course) return reply.code(404).send({ message: "Curso não encontrado." });
-    if (!(await userCanAccessCourse(user.id, user.role, course))) {
+    if (!(await userCanAccessCourse(user.id, user.role, user.email, course))) {
       return reply.code(403).send({ message: "Sem acesso." });
     }
 
@@ -206,7 +206,7 @@ export async function registerCoursesRoutes(app: FastifyInstance) {
     const body = progressBody.parse(request.body);
     const course = await prisma.course.findUnique({ where: { slug: params.slug } });
     if (!course) return reply.code(404).send({ message: "Curso não encontrado." });
-    if (!(await userCanAccessCourse(user.id, user.role, course))) {
+    if (!(await userCanAccessCourse(user.id, user.role, user.email, course))) {
       return reply.code(403).send({ message: "Sem acesso." });
     }
 
@@ -266,7 +266,7 @@ export async function registerCoursesRoutes(app: FastifyInstance) {
     const params = z.object({ slug: z.string().min(1) }).parse(request.params);
     const course = await prisma.course.findUnique({ where: { slug: params.slug } });
     if (!course) return reply.code(404).send({ message: "Curso não encontrado." });
-    if (!(await userCanAccessCourse(user.id, user.role, course))) {
+    if (!(await userCanAccessCourse(user.id, user.role, user.email, course))) {
       return reply.code(403).send({ message: "Sem acesso." });
     }
 
@@ -330,7 +330,7 @@ export async function registerCoursesRoutes(app: FastifyInstance) {
     const params = z.object({ slug: z.string().min(1) }).parse(request.params);
     const course = await prisma.course.findUnique({ where: { slug: params.slug } });
     if (!course) return reply.code(404).send({ message: "Curso não encontrado." });
-    if (!(await userCanAccessCourse(user.id, user.role, course))) {
+    if (!(await userCanAccessCourse(user.id, user.role, user.email, course))) {
       return reply.code(403).send({ message: "Sem acesso." });
     }
 

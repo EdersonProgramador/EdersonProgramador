@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 import {
   ACADEMY_ADMIN_COURSES_BASE,
   ACADEMY_STORE_BASE,
-  COURSES_UI
+  COURSES_UI,
+  isAcademyInternalAdmin
 } from "@ederson-agencia/shared";
 import { apiGet } from "../api";
 import { CourseCatalogCard, type CourseCatalogItem } from "../components/courses/CourseCatalogCard";
@@ -48,7 +49,7 @@ export function CoursesCatalogPage() {
           <a href={ACADEMY_STORE_BASE} className="btn-primary inline-flex min-h-11 items-center text-sm">
             {COURSES_UI.store.title}
           </a>
-          {academyUser?.role === "ADMIN" ? (
+          {academyUser && isAcademyInternalAdmin(academyUser) ? (
             <Link to={ACADEMY_ADMIN_COURSES_BASE} className="btn-secondary inline-flex min-h-11 items-center text-sm">
               Gerenciar cursos
             </Link>

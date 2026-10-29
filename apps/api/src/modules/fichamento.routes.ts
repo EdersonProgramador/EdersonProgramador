@@ -28,7 +28,7 @@ export async function registerFichamentoRoutes(app: FastifyInstance) {
   ): Promise<CourseContextResult> {
     const course = await prisma.course.findUnique({ where: { slug } });
     if (!course) return { ok: false as const, status: 404 as const, message: "Curso não encontrado." };
-    if (!(await userCanAccessCourse(user.id, user.role, course))) {
+    if (!(await userCanAccessCourse(user.id, user.role, user.email, course))) {
       return { ok: false as const, status: 403 as const, message: "Sem acesso." };
     }
     return { ok: true as const, course };

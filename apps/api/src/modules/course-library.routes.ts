@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { assertAcademySession, requireAcademyUser } from "../auth-access.js";
+import { assertAcademyInternalAdmin, assertAcademySession, requireAcademyUser } from "../auth-access.js";
 import { getAuthUser, requireRole } from "../auth.js";
 import { userCanAccessCourse } from "../courses/access.js";
 import { prisma } from "../prisma.js";
@@ -29,7 +29,7 @@ const bookPatch = bookBody.partial().omit({ slug: true });
 async function courseForUser(slug: string, user: NonNullable<Awaited<ReturnType<typeof getAuthUser>>>) {
   const course = await prisma.course.findUnique({ where: { slug } });
   if (!course) return { ok: false as const, status: 404 as const, message: "Curso não encontrado." };
-  if (!(await userCanAccessCourse(user.id, user.role, course))) {
+  if (!(await userCanAccessCourse(user.id, user.role, user.email, course))) {
     return { ok: false as const, status: 403 as const, message: "Sem acesso." };
   }
   return { ok: true as const, course };
@@ -189,6 +189,7 @@ export async function registerCourseLibraryRoutes(app: FastifyInstance) {
     try {
       assertAcademySession(user);
       requireRole(user, ["ADMIN"]);
+      assertAcademyInternalAdmin(user);
     } catch (error) {
       const statusCode = (error as { statusCode?: number }).statusCode ?? 403;
       return reply.code(statusCode).send({

@@ -6,11 +6,20 @@ import {
   agencyHomePathForRole,
   canAccessAcademy,
   canAccessAgency,
+  isAcademyInternalAdmin,
   loginPathForContext
 } from "@ederson-agencia/shared";
 import { useAcademySession, useAgencySession, useAuthStore } from "../stores/authStore";
 
-export function ProtectedRoute({ roles, realm }: { roles?: AgencyRole[]; realm: AuthContext }) {
+export function ProtectedRoute({
+  roles,
+  realm,
+  internalAdminOnly
+}: {
+  roles?: AgencyRole[];
+  realm: AuthContext;
+  internalAdminOnly?: boolean;
+}) {
   const booting = useAuthStore((s) => s.booting);
   const agencySession = useAgencySession();
   const academySession = useAcademySession();
@@ -44,6 +53,10 @@ export function ProtectedRoute({ roles, realm }: { roles?: AgencyRole[]; realm: 
   if (roles && !roles.includes(user.role)) {
     const fallback = realm === "agency" ? agencyHomePathForRole(user.role) : ACADEMY_APP_BASE;
     return <Navigate to={fallback} replace />;
+  }
+
+  if (internalAdminOnly && !isAcademyInternalAdmin(user)) {
+    return <Navigate to={ACADEMY_APP_BASE} replace />;
   }
 
   return <Outlet />;

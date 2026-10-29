@@ -68,7 +68,7 @@ export default function App() {
         <Route path={ACADEMY_APP_BASE} element={<ProtectedRoute realm="academy" />}>
           <Route element={<AcademyShellLayout title="Academia" />}>
             <Route index element={<CoursesCatalogPage />} />
-            <Route element={<ProtectedRoute realm="academy" roles={["ADMIN"]} />}>
+            <Route element={<ProtectedRoute realm="academy" roles={["ADMIN"]} internalAdminOnly />}>
               <Route path="admin/cursos" element={<AdminCoursesPage />} />
               <Route path="admin/cursos/:courseId/conteudo" element={<AdminCourseContentPage />} />
             </Route>

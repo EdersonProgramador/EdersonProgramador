@@ -15,6 +15,16 @@ export function academyCourseCheckoutPath(courseSlug: string): string {
 /** Gestão de cursos (admin) — sempre dentro da Academia. */
 export const ACADEMY_ADMIN_COURSES_BASE = `${ACADEMY_APP_BASE}/admin/cursos`;
 
+/** Único admin que pode ver e gerenciar cursos com visibilidade INTERNAL. */
+export const ACADEMY_INTERNAL_ADMIN_EMAIL = "edersonprogramador@gmail.com";
+
+export function isAcademyInternalAdmin(user: Pick<SessionUser, "email" | "role">): boolean {
+  return (
+    user.role === "ADMIN" &&
+    user.email.trim().toLowerCase() === ACADEMY_INTERNAL_ADMIN_EMAIL.toLowerCase()
+  );
+}
+
 export type SessionUser = {
   id: string;
   name: string;
