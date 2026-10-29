@@ -7,6 +7,11 @@ export const AGENCY_APP_BASE = "/agencia";
 export const ACADEMY_APP_BASE = "/academia";
 /** Vitrine pública de vendas — fora da área logada (/academia). */
 export const ACADEMY_STORE_BASE = "/cursos";
+
+export function academyCourseCheckoutPath(courseSlug: string): string {
+  const slug = courseSlug.replace(/^\/+|\/+$/g, "");
+  return `${ACADEMY_STORE_BASE}/${encodeURIComponent(slug)}/comprar`;
+}
 /** Gestão de cursos (admin) — sempre dentro da Academia. */
 export const ACADEMY_ADMIN_COURSES_BASE = `${ACADEMY_APP_BASE}/admin/cursos`;
 

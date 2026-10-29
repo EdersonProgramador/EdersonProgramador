@@ -16,3 +16,30 @@
 .academy-sales .academy-sales__step {
   height: 100%;
 }
+
+.academy-sales .academy-sales__offer {
+  animation: academy-offer-in 0.25s ease-out;
+}
+
+.academy-sales .academy-sales__capture {
+  box-shadow: 0 0 0 1px rgb(16 185 129 / 0.08);
+}
+
+.academy-sales .academy-sales__capture .btn-secondary {
+  font-weight: 600;
+}
+
+@keyframes academy-offer-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.academy-checkout .panel {
+  border-radius: var(--radius-lg, 12px);
+}

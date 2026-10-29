@@ -17,6 +17,7 @@ import { AgencyLoginPage } from "./pages/LoginPage";
 import { AcademyLoginPage } from "./pages/AcademyLoginPage";
 import { CertificateVerifyPage } from "./pages/CertificateVerifyPage";
 import { CourseStudyPage } from "./pages/CourseStudyPage";
+import { AcademyCourseCheckoutPage } from "./pages/AcademyCourseCheckoutPage";
 import { AcademyPublicSalesPage } from "./pages/AcademyPublicSalesPage";
 import { CoursesCatalogPage } from "./pages/CoursesCatalogPage";
 import { AdminCourseContentPage } from "./pages/AdminCourseContentPage";
@@ -40,6 +41,7 @@ export default function App() {
       <Routes>
         <Route index element={<LandingPage />} />
         <Route path="cursos" element={<AcademyPublicSalesPage />} />
+        <Route path="cursos/:courseSlug/comprar" element={<AcademyCourseCheckoutPage />} />
         <Route path="/certificado/:code" element={<CertificateVerifyPage />} />
 
         <Route element={<ShellLayout title="Acesso" />}>

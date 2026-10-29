@@ -5,6 +5,7 @@ export const ACADEMY_SALES = {
   nav: [
     { href: "#caminho", label: "Seu caminho" },
     { href: "#cursos", label: "Cursos" },
+    { href: "#proposta", label: "Proposta" },
     { href: "#bonus", label: "Bônus" },
     { href: "#garantia", label: "Garantia" }
   ] as const,
@@ -22,12 +23,12 @@ export const ACADEMY_SALES = {
         body: "Compare objetivos, investimento e o que está incluso. Cada curso na vitrine é publicado pelo admin com preço e conteúdo ativo."
       },
       {
-        title: "Finalize com PIX ou cartão",
-        body: "Informe nome e e-mail. Os dados da compra ficam vinculados à sua conta de aluno na Academia."
+        title: "Receba a proposta",
+        body: "Deixe nome, e-mail e WhatsApp na lista. Enviamos orientações e condições do programa que você selecionou."
       },
       {
-        title: "Receba o acesso por e-mail",
-        body: "Enviamos login, link da plataforma e orientações para entrar em Meus cursos e iniciar a trilha."
+        title: "Checkout seguro",
+        body: "Quando decidir, finalize na página de compra do curso com PIX ou cartão — matrícula vinculada à sua conta na Academia."
       },
       {
         title: "Estude com progresso salvo",
@@ -37,9 +38,36 @@ export const ACADEMY_SALES = {
   },
   courses: {
     title: "Cursos e preços",
-    subtitle: "Valores publicados na vitrine. Matrícula liberada após confirmação do pagamento.",
+    subtitle: "Selecione um programa para ver a oferta. Valores publicados na vitrine.",
+    loading: "Carregando cursos…",
     empty: "Novos programas em breve. Acompanhe esta página ou fale conosco.",
-    selectLabel: "Quero este curso",
+    offerTitle: "Oferta do programa",
+    offerHint: "Pagamento (PIX ou cartão) e matrícula ficam apenas na página de checkout — separada desta vitrine.",
+    acquireCta: "Ir para checkout",
+    selectPrompt: "Clique em um curso acima para ver a oferta completa.",
+    contentReady: "Conteúdo disponível na plataforma",
+    contentPending: "Conteúdo em preparação — compra liberada conforme publicação",
+    loginCta: "Já recebeu? Entrar na Academia"
+  },
+  lead: {
+    sectionTitle: "Lista e proposta",
+    sectionSubtitle: "Sem pagamento aqui — só captação para enviar condições e novidades.",
+    formTitle: "Receba a proposta e entre na lista",
+    subtitle: "Nome, e-mail e WhatsApp. Respondo com orientações; a compra é em outra página.",
+    name: "Nome completo",
+    email: "E-mail",
+    phone: "WhatsApp",
+    terms:
+      "Autorizo contato por e-mail e WhatsApp sobre cursos da Academia e aceito o uso dos dados conforme a política de privacidade.",
+    submit: "Quero receber a proposta",
+    submitting: "Enviando…",
+    successTitle: "Dados recebidos!",
+    successBody: "Em breve você recebe a proposta e orientações no e-mail informado."
+  },
+  checkout: {
+    backToStore: "Voltar aos cursos",
+    title: "Finalizar matrícula",
+    summaryTitle: "Resumo do pedido",
     formTitle: "Dados para matrícula e nota fiscal",
     name: "Nome completo",
     email: "E-mail (receberá o acesso)",
@@ -48,13 +76,14 @@ export const ACADEMY_SALES = {
     pix: "PIX",
     card: "Cartão",
     terms:
-      "Li e aceito os termos: acesso digital à plataforma Academia, uso pessoal e política de reembolso conforme garantia abaixo.",
+      "Li e aceito os termos: acesso digital à plataforma Academia, uso pessoal e política de reembolso conforme garantia.",
     submit: "Confirmar compra",
     submitting: "Processando…",
     successTitle: "Compra registrada!",
     successBody:
       "Enviamos as instruções de acesso para o e-mail informado. Se não encontrar, verifique spam ou promoções.",
-    loginCta: "Já recebeu? Entrar na Academia"
+    notFound: "Curso não encontrado ou indisponível para compra.",
+    secureNote: "Ambiente seguro · confirmação imediata da matrícula (pagamento simulado até integração do gateway)"
   },
   bonus: {
     title: "Bônus",

@@ -55,6 +55,57 @@ export async function registerPublicRoutes(app: FastifyInstance) {
     return { courses };
   });
 
+  app.get("/public/academy/courses/:slug", async (request, reply) => {
+    const { slug } = z.object({ slug: z.string().min(1).max(120) }).parse(request.params);
+    const courses = await listPublicSaleCourses();
+    const course = courses.find((c) => c.slug === slug);
+    if (!course) return reply.code(404).send({ message: "Curso indisponível." });
+    return { course };
+  });
+
+  app.post("/public/academy/lead", async (request, reply) => {
+    const body = z
+      .object({
+        name: z.string().min(2).max(120),
+        email: z.string().email(),
+        phone: z.string().min(8).max(40),
+        acceptMarketing: z.literal(true, {
+          errorMap: () => ({ message: "Aceite o consentimento para continuar." })
+        }),
+        courseSlug: z.string().min(1).max(120).optional()
+      })
+      .parse(request.body);
+
+    let courseTitle: string | null = null;
+    if (body.courseSlug) {
+      const row = await prisma.course.findUnique({
+        where: { slug: body.courseSlug },
+        select: { title: true, status: true, visibility: true }
+      });
+      if (row?.status === "PUBLISHED" && row.visibility === "PUBLIC_SALE") {
+        courseTitle = row.title;
+      }
+    }
+
+    const interest = courseTitle
+      ? `Interesse no programa: ${courseTitle} (${body.courseSlug}).`
+      : "Interesse geral na vitrine Academia.";
+
+    await prisma.lead.create({
+      data: {
+        name: body.name.trim(),
+        email: body.email.trim().toLowerCase(),
+        phone: body.phone.trim(),
+        message: `[Academia /cursos] ${interest} Pediu proposta e entrada na lista.`,
+        source: "academy_sales"
+      }
+    });
+
+    return reply.code(201).send({
+      message: "Recebemos seus dados. Em breve enviamos a proposta no e-mail informado."
+    });
+  });
+
   app.post("/public/academy/purchase", async (request, reply) => {
     const body = z
       .object({

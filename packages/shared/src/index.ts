@@ -10,6 +10,7 @@ export {
   ACADEMY_ADMIN_COURSES_BASE,
   ACADEMY_APP_BASE,
   ACADEMY_STORE_BASE,
+  academyCourseCheckoutPath,
   AGENCY_APP_BASE,
   agencyHomePathForRole,
   canAccessAcademy,
