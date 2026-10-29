@@ -12,7 +12,9 @@ export const ACADEMY_SALES = {
   hero: {
     headline: "Formação prática para quem quer executar — não só assistir aula",
     subheadline:
-      "Programas publicados pela Academia Ederson Programador: trilhas organizadas, progresso na plataforma e suporte para aplicar o método no seu ritmo."
+      "Programas publicados pela Academia Ederson Programador: trilhas organizadas, progresso na plataforma e suporte para aplicar o método no seu ritmo.",
+    trustLine: "Garantia de 7 dias · Acesso imediato · PIX e cartão",
+    primaryCta: "Ver cursos disponíveis"
   },
   path: {
     title: "Transformação / Caminho",
@@ -37,12 +39,17 @@ export const ACADEMY_SALES = {
     ]
   },
   courses: {
-    title: "Cursos e preços",
-    subtitle: "Selecione um programa para ver a oferta. Valores publicados na vitrine.",
+    title: "Cursos em destaque",
+    subtitle: "Programas da Academia — escolha um card para ver a oferta completa.",
+    instructor: "Academia Ederson Programador",
+    badgeActive: "Conteúdo ativo",
+    badgePreparing: "Em breve",
     loading: "Carregando cursos…",
+    loadError: "A vitrine está temporariamente indisponível. Atualize a página ou peça sua proposta abaixo.",
+    loadErrorCta: "Receber proposta",
     empty: "Novos programas em breve. Acompanhe esta página ou fale conosco.",
     offerTitle: "Oferta do programa",
-    offerHint: "Pagamento (PIX ou cartão) e matrícula ficam apenas na página de checkout — separada desta vitrine.",
+    offerHint: "Finalize a matrícula na página de checkout do programa.",
     acquireCta: "Ir para checkout",
     selectPrompt: "Clique em um curso acima para ver a oferta completa.",
     contentReady: "Conteúdo disponível na plataforma",
@@ -50,10 +57,7 @@ export const ACADEMY_SALES = {
     loginCta: "Já recebeu? Entrar na Academia"
   },
   lead: {
-    sectionTitle: "Lista e proposta",
-    sectionSubtitle: "Sem pagamento aqui — só captação para enviar condições e novidades.",
     formTitle: "Receba a proposta e entre na lista",
-    subtitle: "Nome, e-mail e WhatsApp. Respondo com orientações; a compra é em outra página.",
     name: "Nome completo",
     email: "E-mail",
     phone: "WhatsApp",

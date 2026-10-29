@@ -1,4 +1,9 @@
 export { ACADEMY_SALES } from "./academy-sales-copy.js";
+export {
+  ACADEMY_CART,
+  ACADEMY_DEMO_COUPONS,
+  ACADEMY_STORE_PATHS
+} from "./academy-cart-copy.js";
 export { COURSE_COVER, COURSES_UI, FL_COURSE } from "./courses-copy.js";
 
 import { ACADEMY_APP_BASE, AGENCY_APP_BASE, agencyHomePathForRole } from "./auth-context.js";

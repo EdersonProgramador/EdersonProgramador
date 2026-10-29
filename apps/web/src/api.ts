@@ -26,7 +26,25 @@ export function normalizeApiBaseUrl(raw: string | undefined): string {
   return `https://${trimmed.replace(/\/$/, "")}`;
 }
 
-const API_BASE_URL = normalizeApiBaseUrl(import.meta.env.VITE_API_URL);
+/** API pública em produção (Render) — fallback quando VITE_API_URL não foi definido no build. */
+const DEFAULT_PUBLIC_API = "https://ederson-agencia-api.onrender.com";
+
+function isLocalDevApi(url: string): boolean {
+  return /^https?:\/\/(127\.0\.0\.1|localhost):3333\/?$/i.test(url);
+}
+
+function resolveApiBaseUrl(): string {
+  const configured = normalizeApiBaseUrl(import.meta.env.VITE_API_URL);
+  if (import.meta.env.DEV) {
+    // Sem VITE_API_URL → proxy do Vite (VITE_DEV_API_TARGET, padrão Render).
+    // localhost:3333 sem Postgres local → 500; não usar como base no browser.
+    if (!configured || isLocalDevApi(configured)) return "";
+    return configured;
+  }
+  return configured || DEFAULT_PUBLIC_API;
+}
+
+const API_BASE_URL = resolveApiBaseUrl();
 
 const client = axios.create({
   baseURL: API_BASE_URL

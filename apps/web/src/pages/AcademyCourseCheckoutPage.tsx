@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, Lock, Shield } from "lucide-react";
-import { ACADEMY_SALES, ACADEMY_STORE_BASE, loginPathForContext } from "@ederson-agencia/shared";
+import { ACADEMY_SALES, ACADEMY_STORE_BASE } from "@ederson-agencia/shared";
 import { apiGet, apiPost } from "../api";
-import { BrandLogo } from "../components/brand/BrandLogo";
+import { AcademyStoreShell } from "../components/academy/AcademyStoreShell";
 import { CourseCover } from "../components/courses/CourseCover";
-import { ThemeToggle } from "../components/theme/ThemeToggle";
 import "../styles/academy-sales.css";
 
 type StoreCourse = {
@@ -80,26 +79,14 @@ export function AcademyCourseCheckoutPage() {
     (course.priceCents / 100).toLocaleString("pt-BR", { style: "currency", currency: course.currency || "BRL" });
 
   return (
-    <div className="academy-sales academy-checkout min-h-screen bg-black text-white">
-      <header className="academy-sales__nav sticky top-0 z-50 border-b border-white/10 bg-black/85 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
-          <Link to={ACADEMY_STORE_BASE} className="inline-flex shrink-0 items-center gap-2 text-sm text-white/75 hover:text-white">
-            <ArrowLeft className="h-4 w-4" aria-hidden />
-            {copy.checkout.backToStore}
-          </Link>
-          <Link to={ACADEMY_STORE_BASE} className="hidden sm:block">
-            <BrandLogo size="sm" />
-          </Link>
-          <div className="flex items-center gap-2">
-            <ThemeToggle compact />
-            <Link to={loginPathForContext("academy")} className="btn-secondary hidden text-sm sm:inline-flex">
-              {copy.courses.loginCta}
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-6xl px-4 py-10 sm:py-14">
+    <AcademyStoreShell>
+      <div className="mx-auto max-w-6xl px-4 pt-4">
+        <Link to={ACADEMY_STORE_BASE} className="inline-flex items-center gap-2 text-sm text-white/75 hover:text-white">
+          <ArrowLeft className="h-4 w-4" aria-hidden />
+          {copy.checkout.backToStore}
+        </Link>
+      </div>
+      <main className="academy-checkout mx-auto max-w-6xl px-4 py-8 sm:py-10">
         {loading ? <p className="text-white/50">{copy.courses.loading}</p> : null}
         {error && !loading ? (
           <div className="panel mx-auto max-w-lg border-white/10 bg-white/[0.03] p-8 text-center">
@@ -190,6 +177,6 @@ export function AcademyCourseCheckoutPage() {
           </>
         ) : null}
       </main>
-    </div>
+    </AcademyStoreShell>
   );
 }

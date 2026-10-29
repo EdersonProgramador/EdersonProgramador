@@ -12,8 +12,19 @@ export async function userHasActiveEnrollment(userId: string): Promise<boolean> 
   return count > 0;
 }
 
-export async function assertEligibleForAcademyLogin(userId: string, role: AgencyRole): Promise<void> {
+const ACADEMY_STORE_CUSTOMER_MARKER = "__academy_store__";
+
+export function isAcademyStoreCustomer(company: string | null | undefined): boolean {
+  return company === ACADEMY_STORE_CUSTOMER_MARKER;
+}
+
+export async function assertEligibleForAcademyLogin(
+  userId: string,
+  role: AgencyRole,
+  company?: string | null
+): Promise<void> {
   if (role === "ADMIN") return;
+  if (isAcademyStoreCustomer(company)) return;
   const ok = await userHasActiveEnrollment(userId);
   if (!ok) {
     throw Object.assign(

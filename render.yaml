@@ -36,7 +36,7 @@ projects:
               - key: JWT_SECRET
                 generateValue: true
               - key: WEB_ORIGIN
-                value: https://www.edersonprogramador.com.br,https://edersonprogramador.com.br
+                value: https://www.edersonprogramador.com.br,https://edersonprogramador.com.br,http://localhost:5174,http://127.0.0.1:5174
               - key: ADMIN_BOOTSTRAP
                 value: "true"
               - key: ADMIN_EMAIL

@@ -70,6 +70,9 @@ export function sanitizeReturnPath(
   const base = context === "academy" ? ACADEMY_APP_BASE : AGENCY_APP_BASE;
   const pathname = path.split("?")[0] ?? path;
   if (pathname === base || pathname.startsWith(`${base}/`)) return path;
+  if (context === "academy" && (pathname === ACADEMY_STORE_BASE || pathname.startsWith(`${ACADEMY_STORE_BASE}/`))) {
+    return path;
+  }
   return null;
 }
 

@@ -31,7 +31,8 @@ await app.register(cors, {
       callback(null, true);
       return;
     }
-    if (env.NODE_ENV !== "production" && /^http:\/\/localhost:\d+$/.test(origin)) {
+    // Front local (Vite) ou preview — evita 500 quando VITE_API_URL aponta direto ao Render.
+    if (/^https?:\/\/(localhost|127\.0\.0\.1):\d+$/i.test(origin)) {
       callback(null, true);
       return;
     }
@@ -54,10 +55,12 @@ app.setErrorHandler((error, _request, reply) => {
   const isDbConfig =
     /prisma|datasource|DATABASE_URL|invocation/i.test(raw) || error.name === "PrismaClientInitializationError";
   const message =
-    statusCode >= 500 && (env.NODE_ENV === "production" || isDbConfig)
+    statusCode >= 500
       ? isDbConfig
-        ? "Banco de dados indisponível. Verifique DATABASE_URL e se o Postgres está acessível."
-        : "Erro interno do servidor."
+        ? "Serviço temporariamente indisponível. Tente novamente em instantes."
+        : env.NODE_ENV === "production"
+          ? "Erro interno do servidor."
+          : raw
       : raw;
   return reply.code(statusCode).send({ message });
 });

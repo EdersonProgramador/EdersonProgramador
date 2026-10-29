@@ -1,0 +1,204 @@
+/**
+ * Vitrine Academia — psicologia das cores (conversão)
+ * - Fundo creme: conforto, reduz ansiedade na decisão
+ * - Azul petróleo: confiança, competência (marca / links)
+ * - Laranja ação: CTA principal (decisão, energia controlada)
+ * - Verde: confirmação, “seguro comprar”
+ * - Teal no preço: valor claro sem alarme (vermelho)
+ */
+
+html[data-theme="day"] .academy-sales {
+  --as-bg: #faf7f2;
+  --as-bg-hero: linear-gradient(165deg, #faf7f2 0%, #f0f4f8 48%, #faf7f2 100%);
+  --as-fg: #1a2332;
+  --as-muted: #5c6578;
+  --as-border: rgb(26 35 50 / 0.1);
+  --as-panel: #ffffff;
+  --as-chrome-bg: rgb(2 6 23 / 0.94);
+  --as-chrome-bg-solid: #020617;
+  --as-chrome-border: rgb(255 255 255 / 0.1);
+  --as-chrome-text: rgb(255 255 255 / 0.88);
+  --as-chrome-muted: rgb(255 255 255 / 0.45);
+  --as-chrome-link: #38bdf8;
+  --as-chrome-link-hover: #7dd3fc;
+  --as-trust: #0369a1;
+  --as-trust-soft: rgb(3 105 161 / 0.08);
+  --as-action: #c2410c;
+  --as-action-deep: #9a3412;
+  --as-action-glow: rgb(194 65 12 / 0.32);
+  --as-success: #059669;
+  --as-success-soft: rgb(5 150 105 / 0.12);
+  --as-price: #0f766e;
+  --as-shadow: 0 12px 40px rgb(26 35 50 / 0.08);
+  --as-shadow-cta: 0 8px 24px var(--as-action-glow);
+  background-color: var(--as-bg);
+  color: var(--as-fg);
+  color-scheme: light;
+}
+
+html[data-theme="night"] .academy-sales {
+  --as-bg: #020617;
+  --as-bg-hero: linear-gradient(165deg, #020617 0%, #0f172a 45%, #020617 100%);
+  --as-fg: #f8fafc;
+  --as-muted: #94a3b8;
+  --as-border: rgb(255 255 255 / 0.1);
+  --as-panel: rgb(255 255 255 / 0.04);
+  --as-trust: #38bdf8;
+  --as-trust-soft: rgb(56 189 248 / 0.12);
+  --as-action: #ea580c;
+  --as-action-deep: #c2410c;
+  --as-action-glow: rgb(234 88 12 / 0.35);
+  --as-success: #34d399;
+  --as-success-soft: rgb(52 211 153 / 0.12);
+  --as-price: #7dd3fc;
+  --as-shadow: 0 12px 40px rgb(0 0 0 / 0.35);
+  --as-shadow-cta: 0 8px 28px var(--as-action-glow);
+  background-color: var(--as-bg);
+  color: var(--as-fg);
+  color-scheme: dark;
+}
+
+.academy-sales .academy-sales__hero {
+  background: var(--as-bg-hero);
+}
+
+.academy-sales .academy-sales__eyebrow {
+  color: var(--as-trust);
+  font-weight: 600;
+}
+
+.academy-sales .academy-sales__hero-title {
+  color: var(--as-fg);
+  letter-spacing: -0.02em;
+}
+
+.academy-sales .academy-sales__trust-bar {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 999px;
+  border: 1px solid var(--as-border);
+  background: var(--as-panel);
+  padding: 0.5rem 1rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--as-muted);
+  box-shadow: 0 2px 12px rgb(26 35 50 / 0.04);
+}
+
+.academy-sales .academy-sales__trust-item::before {
+  content: "✓ ";
+  color: var(--as-success);
+  font-weight: 700;
+}
+
+.academy-sales .btn-primary.academy-sales__cta-primary,
+.academy-sales .academy-sales__cta-primary.btn-primary {
+  border: none;
+  background: linear-gradient(180deg, #ea580c 0%, var(--as-action) 55%, var(--as-action-deep) 100%);
+  color: #fff;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  box-shadow: var(--as-shadow-cta);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+.academy-sales .btn-primary.academy-sales__cta-primary:hover,
+.academy-sales .academy-sales__cta-primary.btn-primary:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 32px var(--as-action-glow);
+}
+
+.academy-sales .academy-sales__cta-cart,
+.academy-sales .academy-udemy-card__cart-btn.academy-sales__cta-cart {
+  border: 2px solid var(--as-trust);
+  background: var(--as-trust-soft);
+  color: var(--as-trust);
+  font-weight: 600;
+}
+
+.academy-sales .academy-sales__cta-cart:hover:not(:disabled) {
+  background: rgb(3 105 161 / 0.14);
+  border-color: #0284c7;
+}
+
+.academy-sales .academy-udemy-card__price {
+  color: var(--as-price);
+  font-size: 1.0625rem;
+}
+
+.academy-sales .academy-udemy-card__badge {
+  background: var(--as-success);
+  color: #fff;
+  font-weight: 700;
+}
+
+.academy-sales .academy-sales__offer {
+  border-color: rgb(3 105 161 / 0.25);
+  border-left: 4px solid var(--as-action);
+  box-shadow: var(--as-shadow);
+}
+
+.academy-sales .academy-sales__offer .text-sky-300,
+.academy-sales .text-sky-300 {
+  color: var(--as-price);
+}
+
+.academy-sales .academy-sales__step {
+  box-shadow: 0 4px 20px rgb(26 35 50 / 0.04);
+  transition: box-shadow 0.2s ease;
+}
+
+.academy-sales .academy-sales__step:hover {
+  box-shadow: var(--as-shadow);
+}
+
+.academy-sales .academy-sales__step .text-brand-primary,
+.academy-sales .font-mono.text-brand-primary {
+  color: var(--as-trust);
+}
+
+.academy-sales .academy-sales__capture {
+  border-color: rgb(3 105 161 / 0.22);
+  box-shadow: var(--as-shadow);
+}
+
+.academy-sales .academy-cart-layout__summary,
+.academy-sales .academy-checkout-layout__summary {
+  box-shadow: var(--as-shadow);
+  border: 1px solid var(--as-border);
+}
+
+.academy-sales .text-brand-primary {
+  color: var(--as-trust);
+}
+
+.academy-sales .text-sky-400 {
+  color: var(--as-trust);
+}
+
+html[data-theme="day"] .academy-sales .input {
+  border-color: var(--as-border);
+  background: #fff;
+}
+
+html[data-theme="day"] .academy-sales .input:focus {
+  border-color: var(--as-trust);
+  outline: 2px solid rgb(3 105 161 / 0.2);
+  outline-offset: 0;
+}
+
+.academy-sales .academy-udemy-card.is-selected .academy-udemy-card__media {
+  box-shadow:
+    0 0 0 2px var(--as-trust),
+    var(--as-shadow);
+}
+
+.academy-sales .academy-udemy-card__cart-btn.is-in-cart {
+  border-color: var(--as-success);
+  background: var(--as-success-soft);
+  color: var(--as-success);
+}

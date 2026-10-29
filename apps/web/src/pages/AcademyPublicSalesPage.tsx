@@ -3,27 +3,25 @@ import { Link } from "react-router-dom";
 import { Check, Shield } from "lucide-react";
 import {
   ACADEMY_APP_BASE,
+  ACADEMY_CART,
   ACADEMY_SALES,
   ACADEMY_STORE_BASE,
-  academyCourseCheckoutPath,
-  loginPathForContext
+  ACADEMY_STORE_PATHS,
+  academyCourseCheckoutPath
 } from "@ederson-agencia/shared";
-import { apiGet, apiPost } from "../api";
-import { BrandLogo } from "../components/brand/BrandLogo";
+import { ApiError, apiGet, apiPost } from "../api";
+import {
+  AcademyStoreCourseCard,
+  AcademyStoreCourseCardSkeleton,
+  type AcademyStoreCourseCardData
+} from "../components/academy/AcademyStoreCourseCard";
+import { AcademyStoreShell } from "../components/academy/AcademyStoreShell";
 import { CourseCover } from "../components/courses/CourseCover";
-import { ThemeToggle } from "../components/theme/ThemeToggle";
+import { useAcademyCartStore } from "../stores/academyCartStore";
+import "../styles/course-study.css";
 import "../styles/academy-sales.css";
 
-type StoreCourse = {
-  id: string;
-  slug: string;
-  title: string;
-  summary: string | null;
-  priceCents: number;
-  currency: string;
-  coverUrl?: string | null;
-  contentReady?: boolean;
-};
+type StoreCourse = AcademyStoreCourseCardData;
 
 const copy = ACADEMY_SALES;
 
@@ -36,6 +34,8 @@ export function AcademyPublicSalesPage() {
   const [leadSuccess, setLeadSuccess] = useState<string | null>(null);
   const [leadError, setLeadError] = useState<string | null>(null);
   const [leadCourseSlug, setLeadCourseSlug] = useState("");
+  const addItem = useAcademyCartStore((s) => s.addItem);
+  const hasSlug = useAcademyCartStore((s) => s.hasSlug);
 
   useEffect(() => {
     void (async () => {
@@ -44,7 +44,7 @@ export function AcademyPublicSalesPage() {
         setCourses(data.courses);
         if (data.courses[0]) setSelectedSlug(data.courses[0].slug);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Não foi possível carregar os cursos.");
+        setError(err instanceof ApiError ? err.message : "Não foi possível carregar os cursos.");
       } finally {
         setLoading(false);
       }
@@ -82,41 +82,38 @@ export function AcademyPublicSalesPage() {
     }
   }
 
-  return (
-    <div className="academy-sales min-h-screen bg-black text-white">
-      <header className="academy-sales__nav sticky top-0 z-50 border-b border-white/10 bg-black/85 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
-          <Link to={ACADEMY_STORE_BASE} className="shrink-0">
-            <BrandLogo size="sm" />
-          </Link>
-          <nav className="hidden items-center gap-1 md:flex" aria-label="Seções">
-            {copy.nav.map((item) => (
-              <a key={item.href} href={item.href} className="rounded-lg px-3 py-2 text-sm text-white/75 hover:text-white">
-                {item.label}
-              </a>
-            ))}
-          </nav>
-          <div className="flex items-center gap-2">
-            <ThemeToggle compact />
-            <Link to={loginPathForContext("academy")} className="btn-secondary hidden text-sm sm:inline-flex">
-              {copy.courses.loginCta}
-            </Link>
-          </div>
-        </div>
-      </header>
+  const sectionNav = (
+    <nav className="flex items-center gap-1" aria-label="Seções">
+      {copy.nav.map((item) => (
+        <a key={item.href} href={item.href} className="rounded-lg px-3 py-2 text-sm text-white/75 hover:text-white">
+          {item.label}
+        </a>
+      ))}
+    </nav>
+  );
 
+  return (
+    <AcademyStoreShell nav={sectionNav}>
       <section className="academy-sales__hero relative overflow-hidden px-4 pb-16 pt-12 sm:pt-16">
         <div className="mesh-hero pointer-events-none absolute inset-0 opacity-80" aria-hidden />
         <div className="relative mx-auto max-w-3xl text-center">
-          <p className="text-xs uppercase tracking-[0.2em] text-sky-400">{copy.brand}</p>
-          <h1 className="mt-4 text-balance text-3xl font-bold leading-tight sm:text-4xl md:text-5xl">
+          <p className="academy-sales__eyebrow text-xs uppercase tracking-[0.2em]">{copy.brand}</p>
+          <h1 className="academy-sales__hero-title mt-4 text-balance text-3xl font-bold leading-tight sm:text-4xl md:text-5xl">
             {copy.hero.headline}
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-white/70 sm:text-lg">
             {copy.hero.subheadline}
           </p>
-          <a href="#cursos" className="btn-primary mt-8 inline-flex min-h-11 items-center px-6">
-            Ver cursos e preços
+          <p className="academy-sales__trust-bar mt-6">
+            {copy.hero.trustLine.split("·").map((part, i) => (
+              <span key={part.trim()}>
+                {i > 0 ? <span className="mx-1 opacity-40">·</span> : null}
+                <span className="academy-sales__trust-item">{part.trim()}</span>
+              </span>
+            ))}
+          </p>
+          <a href="#cursos" className="btn-primary academy-sales__cta-primary mt-8 inline-flex min-h-12 items-center px-8 text-base">
+            {copy.hero.primaryCta}
           </a>
         </div>
       </section>
@@ -137,160 +134,179 @@ export function AcademyPublicSalesPage() {
         </div>
       </section>
 
-      <section id="cursos" className="scroll-mt-24 border-t border-white/10 px-4 py-16">
+      <section id="cursos" className="academy-sales__catalog scroll-mt-24 border-t border-white/10 px-4 py-16">
         <div className="mx-auto max-w-6xl">
-          <h2 className="text-2xl font-bold sm:text-3xl">{copy.courses.title}</h2>
-          <p className="mt-3 max-w-2xl text-white/65">{copy.courses.subtitle}</p>
+          <header className="max-w-3xl">
+            <h2 className="text-2xl font-bold tracking-tight sm:text-[1.75rem]">{copy.courses.title}</h2>
+            <p className="mt-2 text-sm text-white/60 sm:text-base">{copy.courses.subtitle}</p>
+          </header>
 
-          {loading ? <p className="mt-8 text-white/50">{copy.courses.loading}</p> : null}
-          {error ? <p className="mt-8 text-red-300">{error}</p> : null}
+          {loading ? (
+            <div className="academy-sales__course-track mt-8" aria-busy="true" aria-label={copy.courses.loading}>
+              <ul className="academy-sales__course-row">
+                {[0, 1, 2, 3].map((i) => (
+                  <li key={i} className="academy-sales__course-cell">
+                    <AcademyStoreCourseCardSkeleton />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {!loading && error ? (
+            <div className="panel mt-10 max-w-xl border-white/10 bg-white/[0.03] p-6 text-center sm:text-left">
+              <p className="text-sm leading-relaxed text-white/70">{error || copy.courses.loadError}</p>
+              <a href="#proposta" className="btn-secondary mt-5 inline-flex min-h-10 items-center px-5 text-sm">
+                {copy.courses.loadErrorCta}
+              </a>
+            </div>
+          ) : null}
 
           {!loading && !error && courses.length === 0 ? (
             <p className="mt-8 text-white/55">{copy.courses.empty}</p>
           ) : null}
 
-          <div className="mt-10 grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
-            <div className="space-y-8">
-              <ul className="grid gap-5 sm:grid-cols-2">
+          {!loading && !error && courses.length > 0 ? (
+            <div className="academy-sales__course-track mt-8">
+              <ul className="academy-sales__course-row">
                 {courses.map((course) => (
-                  <li key={course.id}>
-                    <button
-                      type="button"
-                      className={`academy-sales__course w-full text-left ${selectedSlug === course.slug ? "is-selected" : ""}`}
-                      onClick={() => setSelectedSlug(course.slug)}
-                    >
-                      <CourseCover title={course.title} coverUrl={course.coverUrl} className="course-cover--card" />
-                      <div className="p-4">
-                        <h3 className="font-semibold">{course.title}</h3>
-                        {course.summary ? (
-                          <p className="mt-2 line-clamp-3 text-sm text-white/60">{course.summary}</p>
-                        ) : null}
-                        <p className="mt-3 text-lg font-medium text-sky-300">
-                          {(course.priceCents / 100).toLocaleString("pt-BR", {
-                            style: "currency",
-                            currency: course.currency || "BRL"
-                          })}
-                        </p>
-                      </div>
-                    </button>
+                  <li key={course.id} className="academy-sales__course-cell">
+                    <AcademyStoreCourseCard
+                      course={course}
+                      selected={selectedSlug === course.slug}
+                      inCart={hasSlug(course.slug)}
+                      instructorLabel={copy.courses.instructor}
+                      onSelect={() => setSelectedSlug(course.slug)}
+                      onAddToCart={() => addItem(course)}
+                    />
                   </li>
                 ))}
               </ul>
-
-              {selected ? (
-                <article className="academy-sales__offer panel border-sky-500/25 bg-white/[0.03] p-6 sm:p-8">
-                  <p className="text-xs uppercase tracking-[0.15em] text-sky-400">{copy.courses.offerTitle}</p>
-                  <div className="mt-4 flex flex-col gap-6 sm:flex-row">
-                    <CourseCover
-                      title={selected.title}
-                      coverUrl={selected.coverUrl}
-                      className="course-cover--card sm:max-w-[220px] shrink-0"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <h3 className="text-xl font-semibold">{selected.title}</h3>
-                      {selected.summary ? (
-                        <p className="mt-3 text-sm leading-relaxed text-white/70">{selected.summary}</p>
-                      ) : null}
-                      <p className="mt-4 text-2xl font-semibold text-sky-300">
-                        {(selected.priceCents / 100).toLocaleString("pt-BR", {
-                          style: "currency",
-                          currency: selected.currency || "BRL"
-                        })}
-                      </p>
-                      <p className="mt-2 text-xs text-white/50">
-                        {selected.contentReady ? copy.courses.contentReady : copy.courses.contentPending}
-                      </p>
-                      <p className="mt-4 text-sm text-white/60">{copy.courses.offerHint}</p>
-                      <Link
-                        to={academyCourseCheckoutPath(selected.slug)}
-                        className="btn-primary mt-6 inline-flex min-h-11 w-full items-center justify-center sm:w-auto sm:px-8"
-                      >
-                        {copy.courses.acquireCta}
-                      </Link>
-                    </div>
-                  </div>
-                </article>
-              ) : (
-                !loading && courses.length > 0 ? (
-                  <p className="text-sm text-white/50">{copy.courses.selectPrompt}</p>
-                ) : null
-              )}
             </div>
+          ) : null}
 
-            <aside
-              id="proposta"
-              className="academy-sales__capture panel sticky top-24 h-fit scroll-mt-24 border-emerald-500/25 bg-white/[0.03] p-6"
-            >
-              <h3 className="text-lg font-semibold">{copy.lead.formTitle}</h3>
-              <p className="mt-2 text-sm text-white/60">{copy.lead.subtitle}</p>
-              <p className="mt-3 rounded-md border border-white/10 bg-black/30 px-3 py-2 text-xs text-white/55">
-                {copy.lead.sectionSubtitle}
+          {!loading && !error && selected ? (
+            <article className="academy-sales__offer panel mt-10 border-sky-500/25 bg-white/[0.03] p-6 sm:p-8">
+              <p className="text-xs uppercase tracking-[0.15em] text-sky-400">{copy.courses.offerTitle}</p>
+              <div className="mt-4 flex flex-col gap-6 sm:flex-row">
+                <CourseCover
+                  title={selected.title}
+                  coverUrl={selected.coverUrl}
+                  className="course-cover--card sm:max-w-[220px] shrink-0"
+                />
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-xl font-semibold">{selected.title}</h3>
+                  {selected.summary ? (
+                    <p className="mt-3 text-sm leading-relaxed text-white/70">{selected.summary}</p>
+                  ) : null}
+                  <p className="mt-4 text-2xl font-semibold text-sky-300">
+                    {(selected.priceCents / 100).toLocaleString("pt-BR", {
+                      style: "currency",
+                      currency: selected.currency || "BRL"
+                    })}
+                  </p>
+                  <p className="mt-2 text-xs text-white/50">
+                    {selected.contentReady ? copy.courses.contentReady : copy.courses.contentPending}
+                  </p>
+                  <p className="mt-4 text-sm text-white/60">{copy.courses.offerHint}</p>
+                      <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                        <button
+                          type="button"
+                          className="btn-secondary inline-flex min-h-11 items-center justify-center sm:px-6"
+                          disabled={hasSlug(selected.slug)}
+                          onClick={() => addItem(selected)}
+                        >
+                          {hasSlug(selected.slug) ? ACADEMY_CART.inCart : ACADEMY_CART.addToCart}
+                        </button>
+                        <Link
+                          to={ACADEMY_STORE_PATHS.cart}
+                          className="btn-primary academy-sales__cta-primary inline-flex min-h-12 items-center justify-center sm:px-8"
+                        >
+                          {ACADEMY_CART.goToCart}
+                        </Link>
+                        <Link
+                          to={academyCourseCheckoutPath(selected.slug)}
+                          className="text-center text-sm text-brand-primary hover:underline sm:self-center"
+                        >
+                          {copy.courses.acquireCta}
+                        </Link>
+                      </div>
+                </div>
+              </div>
+            </article>
+          ) : null}
+
+        </div>
+      </section>
+
+      <section id="proposta" className="academy-sales__proposta scroll-mt-24 border-t border-white/10 px-4 py-16">
+        <div className="mx-auto max-w-6xl">
+          <aside className="academy-sales__capture panel mx-auto max-w-xl border-emerald-500/25 bg-white/[0.03] p-6 sm:p-8">
+            <h2 className="text-xl font-semibold sm:text-2xl">{copy.lead.formTitle}</h2>
+
+            {leadSuccess ? (
+              <p className="mt-4 rounded-lg border border-green-500/30 bg-green-500/10 p-4 text-sm text-green-100">
+                <strong>{copy.lead.successTitle}</strong>
+                <br />
+                {leadSuccess}
               </p>
+            ) : null}
 
-              {leadSuccess ? (
-                <p className="mt-4 rounded-lg border border-green-500/30 bg-green-500/10 p-4 text-sm text-green-100">
-                  <strong>{copy.lead.successTitle}</strong>
-                  <br />
-                  {leadSuccess}
-                </p>
-              ) : null}
-
-              <form className="mt-5 space-y-4" onSubmit={(e) => void onLeadSubmit(e)}>
-                {courses.length > 0 ? (
-                  <label className="block text-sm text-white/70">
-                    Programa de interesse
-                    <select
-                      className="input mt-1.5 w-full"
-                      name="courseSlug"
-                      value={leadCourseSlug}
-                      onChange={(e) => setLeadCourseSlug(e.target.value)}
-                      disabled={leadSubmitting}
-                    >
-                      <option value="">Todos / ainda não decidi</option>
-                      {courses.map((c) => (
-                        <option key={c.id} value={c.slug}>
-                          {c.title}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                ) : null}
-                <input
-                  className="input w-full"
-                  name="name"
-                  placeholder={copy.lead.name}
-                  required
-                  disabled={leadSubmitting}
-                />
-                <input
-                  className="input w-full"
-                  type="email"
-                  name="email"
-                  placeholder={copy.lead.email}
-                  required
-                  autoComplete="email"
-                  disabled={leadSubmitting}
-                />
-                <input
-                  className="input w-full"
-                  type="tel"
-                  name="phone"
-                  placeholder={copy.lead.phone}
-                  required
-                  autoComplete="tel"
-                  disabled={leadSubmitting}
-                />
-                <label className="flex items-start gap-2 text-xs text-white/65">
-                  <input type="checkbox" name="acceptMarketing" className="mt-0.5" required disabled={leadSubmitting} />
-                  {copy.lead.terms}
+            <form className="mt-5 space-y-4" onSubmit={(e) => void onLeadSubmit(e)}>
+              {courses.length > 0 ? (
+                <label className="block text-sm text-white/70">
+                  Programa de interesse
+                  <select
+                    className="input mt-1.5 w-full"
+                    name="courseSlug"
+                    value={leadCourseSlug}
+                    onChange={(e) => setLeadCourseSlug(e.target.value)}
+                    disabled={leadSubmitting}
+                  >
+                    <option value="">Todos / ainda não decidi</option>
+                    {courses.map((c) => (
+                      <option key={c.id} value={c.slug}>
+                        {c.title}
+                      </option>
+                    ))}
+                  </select>
                 </label>
-                {leadError ? <p className="text-sm text-red-300">{leadError}</p> : null}
-                <button type="submit" className="btn-secondary w-full min-h-11" disabled={leadSubmitting}>
-                  {leadSubmitting ? copy.lead.submitting : copy.lead.submit}
-                </button>
-              </form>
-            </aside>
-          </div>
+              ) : null}
+              <input
+                className="input w-full"
+                name="name"
+                placeholder={copy.lead.name}
+                required
+                disabled={leadSubmitting}
+              />
+              <input
+                className="input w-full"
+                type="email"
+                name="email"
+                placeholder={copy.lead.email}
+                required
+                autoComplete="email"
+                disabled={leadSubmitting}
+              />
+              <input
+                className="input w-full"
+                type="tel"
+                name="phone"
+                placeholder={copy.lead.phone}
+                required
+                autoComplete="tel"
+                disabled={leadSubmitting}
+              />
+              <label className="flex items-start gap-2 text-xs text-white/65">
+                <input type="checkbox" name="acceptMarketing" className="mt-0.5" required disabled={leadSubmitting} />
+                {copy.lead.terms}
+              </label>
+              {leadError ? <p className="text-sm text-red-300">{leadError}</p> : null}
+              <button type="submit" className="btn-secondary w-full min-h-11" disabled={leadSubmitting}>
+                {leadSubmitting ? copy.lead.submitting : copy.lead.submit}
+              </button>
+            </form>
+          </aside>
         </div>
       </section>
 
@@ -325,19 +341,23 @@ export function AcademyPublicSalesPage() {
         </div>
       </section>
 
-      <footer className="border-t border-white/10 px-4 py-8 text-center text-sm text-white/45">
-        <Link to={loginPathForContext("academy")} className="text-brand-primary hover:underline">
+      <footer className="academy-sales__footer border-t px-4 py-8 text-center text-sm text-white/45">
+        <Link to={ACADEMY_STORE_PATHS.cart} className="text-brand-primary hover:underline">
+          {ACADEMY_CART.cartTitle}
+        </Link>
+        <span className="mx-2 text-white/25">·</span>
+        <Link to="/academia/entrar" className="text-brand-primary hover:underline">
           {copy.footer.portal}
         </Link>
-        <span className="mx-2">·</span>
-        <Link to="/" className="hover:text-white/70">
+        <span className="mx-2 text-white/25">·</span>
+        <Link to="/" className="text-white/45 hover:text-white/70">
           {copy.footer.agency}
         </Link>
-        <span className="mx-2">·</span>
-        <Link to={ACADEMY_APP_BASE} className="hover:text-white/70">
+        <span className="mx-2 text-white/25">·</span>
+        <Link to={ACADEMY_APP_BASE} className="text-white/45 hover:text-white/70">
           Área interna (alunos)
         </Link>
       </footer>
-    </div>
+    </AcademyStoreShell>
   );
 }

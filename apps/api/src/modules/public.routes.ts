@@ -6,8 +6,11 @@ import {
   PORTFOLIO_GITHUB,
   PORTFOLIO_PRODUCTION
 } from "@ederson-agencia/shared";
+import { hashPassword, toAuthUser } from "../auth.js";
 import { fulfillAcademyPurchase, listPublicSaleCourses } from "../courses/academy-purchase.js";
 import { prisma } from "../prisma.js";
+
+const ACADEMY_STORE_CUSTOMER_MARKER = "__academy_store__";
 
 const leadSchema = z.object({
   name: z.string().min(2),
@@ -61,6 +64,44 @@ export async function registerPublicRoutes(app: FastifyInstance) {
     const course = courses.find((c) => c.slug === slug);
     if (!course) return reply.code(404).send({ message: "Curso indisponível." });
     return { course };
+  });
+
+  app.post("/public/academy/signup", async (request, reply) => {
+    const body = z
+      .object({
+        name: z.string().min(2).max(120),
+        email: z.string().email(),
+        password: z.string().min(6).max(120),
+        acceptTerms: z.literal(true, {
+          errorMap: () => ({ message: "Aceite os termos para continuar." })
+        })
+      })
+      .parse(request.body);
+
+    const email = body.email.trim().toLowerCase();
+    const existing = await prisma.user.findUnique({ where: { email } });
+    if (existing) {
+      return reply.code(409).send({ message: "Já existe uma conta com este e-mail. Faça login." });
+    }
+
+    const user = await prisma.user.create({
+      data: {
+        name: body.name.trim(),
+        email,
+        passwordHash: await hashPassword(body.password),
+        role: "CLIENT",
+        company: ACADEMY_STORE_CUSTOMER_MARKER
+      }
+    });
+
+    const authUser = toAuthUser(user, "academy");
+    const token = await reply.jwtSign(authUser);
+
+    return reply.code(201).send({
+      token,
+      user: authUser,
+      authContext: "academy" as const
+    });
   });
 
   app.post("/public/academy/lead", async (request, reply) => {

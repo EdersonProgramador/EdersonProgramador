@@ -17,8 +17,10 @@ import { AgencyLoginPage } from "./pages/LoginPage";
 import { AcademyLoginPage } from "./pages/AcademyLoginPage";
 import { CertificateVerifyPage } from "./pages/CertificateVerifyPage";
 import { CourseStudyPage } from "./pages/CourseStudyPage";
+import { AcademyCartPage } from "./pages/AcademyCartPage";
 import { AcademyCourseCheckoutPage } from "./pages/AcademyCourseCheckoutPage";
 import { AcademyPublicSalesPage } from "./pages/AcademyPublicSalesPage";
+import { AcademyStoreCheckoutPage } from "./pages/AcademyStoreCheckoutPage";
 import { CoursesCatalogPage } from "./pages/CoursesCatalogPage";
 import { AdminCourseContentPage } from "./pages/AdminCourseContentPage";
 import { AdminCoursesPage } from "./pages/AdminCoursesPage";
@@ -41,6 +43,8 @@ export default function App() {
       <Routes>
         <Route index element={<LandingPage />} />
         <Route path="cursos" element={<AcademyPublicSalesPage />} />
+        <Route path="cursos/carrinho" element={<AcademyCartPage />} />
+        <Route path="cursos/finalizar" element={<AcademyStoreCheckoutPage />} />
         <Route path="cursos/:courseSlug/comprar" element={<AcademyCourseCheckoutPage />} />
         <Route path="/certificado/:code" element={<CertificateVerifyPage />} />
 
