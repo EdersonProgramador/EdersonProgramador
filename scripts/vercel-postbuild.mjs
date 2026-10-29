@@ -2,11 +2,7 @@ import { cpSync, existsSync, rmSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-/** Espelha apps/web/dist → ./dist na raiz (Vercel UI costuma exigir "dist"). */
-if (!process.env.VERCEL) {
-  process.exit(0);
-}
-
+/** Espelha apps/web/dist → ./dist na raiz (outputDirectory da Vercel na raiz do repo). */
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const webDist = resolve(repoRoot, "apps/web/dist");
 const rootDist = resolve(repoRoot, "dist");

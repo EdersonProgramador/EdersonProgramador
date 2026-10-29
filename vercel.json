@@ -2,8 +2,17 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
   "installCommand": "npm install --workspace=@ederson-agencia/web --workspace=@ederson-agencia/shared --include-workspace-root",
-  "buildCommand": "npm run build --workspace=@ederson-agencia/shared && npm run build --workspace=@ederson-agencia/web",
+  "buildCommand": "npm run vercel-build",
   "outputDirectory": "dist",
   "framework": null,
-  "rewrites": [{ "source": "/((?!assets/|brand/|.*\\.(pdf|jpg|jpeg|png|webp|svg)$).*)", "destination": "/index.html" }]
+  "headers": [
+    {
+      "source": "/index.html",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
+    }
+  ],
+  "rewrites": [
+    { "source": "/cursos", "destination": "/index.html" },
+    { "source": "/((?!assets/|brand/|.*\\.(pdf|jpg|jpeg|png|webp|svg)$).*)", "destination": "/index.html" }
+  ]
 }

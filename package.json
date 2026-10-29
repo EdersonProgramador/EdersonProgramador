@@ -14,7 +14,7 @@
     "dev:api": "npm run build --workspace @ederson-agencia/shared && npm run dev --workspace @ederson-agencia/api",
     "build": "npm run build --workspaces --if-present",
     "build:web": "npm run build --workspace @ederson-agencia/shared && npm run build --workspace @ederson-agencia/web && node scripts/vercel-postbuild.mjs",
-    "vercel-build": "npm run build --workspace @ederson-agencia/shared && npm run build --workspace @ederson-agencia/web",
+    "vercel-build": "npm run build:web",
     "build:api:render": "npm run build --workspace=@ederson-agencia/shared && npm run prisma:generate --workspace=@ederson-agencia/api && npm run build --workspace=@ederson-agencia/api",
     "typecheck": "npm run build --workspace @ederson-agencia/shared && npm run typecheck --workspaces --if-present",
     "prisma:generate": "npm run prisma:generate --workspace @ederson-agencia/api",

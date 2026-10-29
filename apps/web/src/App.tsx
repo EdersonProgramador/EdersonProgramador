@@ -39,7 +39,7 @@ export default function App() {
       <ThemeSync />
       <Routes>
         <Route index element={<LandingPage />} />
-        <Route path={ACADEMY_STORE_BASE} element={<AcademyPublicSalesPage />} />
+        <Route path="cursos" element={<AcademyPublicSalesPage />} />
         <Route path="/certificado/:code" element={<CertificateVerifyPage />} />
 
         <Route element={<ShellLayout title="Acesso" />}>

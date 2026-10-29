@@ -183,6 +183,9 @@ function SalesFooter() {
             <a href={AGENCY_META.github} target="_blank" rel="noreferrer" className="btn-ghost inline-flex gap-1">
               <Github className="h-4 w-4" /> GitHub
             </a>
+            <Link to="/cursos" className="text-sm text-white/45 transition hover:text-blue-glow">
+              Academia — cursos
+            </Link>
             <Link to="/academia/entrar" className="text-sm text-white/45 transition hover:text-blue-glow">
               {copy.academyLoginCta}
             </Link>
