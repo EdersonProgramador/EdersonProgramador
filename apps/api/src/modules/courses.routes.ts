@@ -8,6 +8,11 @@ import {
   ensureCourseCertificate,
   getCourseProgressSummary
 } from "../courses/certificate.js";
+import {
+  getRepetitionDto,
+  recordRepetitionIfComplete,
+  startNextRepetition
+} from "../courses/course-repetitions.js";
 import { courseContentReady, resolveStudyPayload } from "../courses/resolve-study-payload.js";
 import { userCanAccessCourse } from "../courses/access.js";
 import { env } from "../env.js";
@@ -83,11 +88,13 @@ export async function registerCoursesRoutes(app: FastifyInstance) {
     const progressSummary = await getCourseProgressSummary(course, user.id);
     let certificate: ReturnType<typeof certificateToDto> | null = null;
     if (progressSummary.isComplete) {
+      await recordRepetitionIfComplete(course, user.id);
       const ensured = await ensureCourseCertificate(course, user.id);
       if (ensured.issued && ensured.certificate) {
         certificate = certificateToDto(ensured.certificate, course, { name: user.name }, env.WEB_ORIGIN);
       }
     }
+    const repetitions = await getRepetitionDto(course, user.id);
 
     return {
       course: {
@@ -106,6 +113,7 @@ export async function registerCoursesRoutes(app: FastifyInstance) {
         percent: progressSummary.percent,
         isComplete: progressSummary.isComplete
       },
+      repetitions,
       certificate,
       ...study
     };
@@ -198,12 +206,16 @@ export async function registerCoursesRoutes(app: FastifyInstance) {
 
     const progressSummary = await getCourseProgressSummary(course, user.id);
     let certificate: ReturnType<typeof certificateToDto> | null = null;
+    let repetitionJustCompleted: number | null = null;
     if (progressSummary.isComplete) {
+      const rep = await recordRepetitionIfComplete(course, user.id);
+      if (rep.recorded) repetitionJustCompleted = rep.cycleNumber;
       const ensured = await ensureCourseCertificate(course, user.id);
       if (ensured.issued && ensured.certificate) {
         certificate = certificateToDto(ensured.certificate, course, { name: user.name }, env.WEB_ORIGIN);
       }
     }
+    const repetitions = await getRepetitionDto(course, user.id);
 
     return {
       ok: true,
@@ -213,8 +225,39 @@ export async function registerCoursesRoutes(app: FastifyInstance) {
         percent: progressSummary.percent,
         isComplete: progressSummary.isComplete
       },
+      repetitions,
+      repetitionJustCompleted,
       certificate
     };
+  });
+
+  app.post("/courses/:slug/repetitions/start-next", async (request, reply) => {
+    const user = await requireAcademyUser(request, reply);
+    if (!user) return;
+
+    const params = z.object({ slug: z.string().min(1) }).parse(request.params);
+    const course = await prisma.course.findUnique({ where: { slug: params.slug } });
+    if (!course) return reply.code(404).send({ message: "Curso não encontrado." });
+    if (!(await userCanAccessCourse(user.id, user.role, course))) {
+      return reply.code(403).send({ message: "Sem acesso." });
+    }
+
+    try {
+      const repetitions = await startNextRepetition(course, user.id);
+      const rows = await prisma.lessonProgress.findMany({
+        where: { userId: user.id, courseId: course.id },
+        select: { lessonSlug: true }
+      });
+      return {
+        ok: true,
+        repetitions,
+        completedSlugs: rows.map((r) => r.lessonSlug),
+        progress: await getCourseProgressSummary(course, user.id)
+      };
+    } catch (error) {
+      const statusCode = (error as { statusCode?: number }).statusCode ?? 500;
+      return reply.code(statusCode).send({ message: (error as Error).message });
+    }
   });
 
   app.post("/courses/:slug/checkout", async (request, reply) => {

@@ -159,6 +159,7 @@ export async function registerFichamentoRoutes(app: FastifyInstance) {
       update: {
         moduleTitle: compiled.moduleTitle,
         docHtml: compiled.docHtml,
+        docJson: null,
         compiledAt: new Date()
       }
     });
@@ -227,6 +228,7 @@ export async function registerFichamentoRoutes(app: FastifyInstance) {
       },
       update: {
         docHtml: compiled.docHtml,
+        docJson: null,
         compiledAt: new Date()
       }
     });

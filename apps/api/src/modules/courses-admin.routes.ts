@@ -19,7 +19,8 @@ const courseBodySchema = z.object({
   priceCents: z.number().int().min(0).optional().nullable(),
   contentKey: z.enum(["fl", "portal"]).optional().nullable(),
   coverUrl: z.string().url().max(2000).optional().nullable().or(z.literal("")),
-  sortOrder: z.number().int().default(0)
+  sortOrder: z.number().int().default(0),
+  repetitionGoalMax: z.number().int().min(1).max(999).optional().nullable()
 });
 
 const coursePatchSchema = courseBodySchema.partial().omit({ slug: true });
@@ -60,6 +61,7 @@ export async function registerCoursesAdminRoutes(app: FastifyInstance) {
         contentKey: c.contentKey,
         coverUrl: c.coverUrl,
         sortOrder: c.sortOrder,
+        repetitionGoalMax: c.repetitionGoalMax,
         enrollments: c._count.enrollments,
         progressRows: c._count.progress
       }))
@@ -86,7 +88,8 @@ export async function registerCoursesAdminRoutes(app: FastifyInstance) {
         priceCents: body.visibility === "PUBLIC_SALE" ? body.priceCents : null,
         contentKey,
         coverUrl: body.coverUrl?.trim() || null,
-        sortOrder: body.sortOrder
+        sortOrder: body.sortOrder,
+        repetitionGoalMax: body.repetitionGoalMax ?? null
       }
     });
     if (contentKey === PORTAL_CONTENT_KEY) {

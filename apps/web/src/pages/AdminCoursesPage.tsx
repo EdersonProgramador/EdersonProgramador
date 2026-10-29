@@ -17,6 +17,7 @@ type AdminCourse = {
   contentKey: string | null;
   coverUrl: string | null;
   sortOrder: number;
+  repetitionGoalMax: number | null;
   enrollments: number;
 };
 
@@ -32,6 +33,7 @@ type CourseForm = {
   priceCents: string;
   coverUrl: string;
   sortOrder: string;
+  repetitionGoalMax: string;
 };
 
 const emptyForm: CourseForm = {
@@ -42,7 +44,8 @@ const emptyForm: CourseForm = {
   visibility: "INTERNAL",
   priceCents: "",
   coverUrl: "",
-  sortOrder: "0"
+  sortOrder: "0",
+  repetitionGoalMax: ""
 };
 
 const UI = COURSES_UI.adminCourses;
@@ -136,7 +139,8 @@ export function AdminCoursesPage() {
       visibility: course.visibility as CourseVisibility,
       priceCents: course.priceCents != null ? String(course.priceCents / 100) : "",
       coverUrl: course.coverUrl ?? "",
-      sortOrder: String(course.sortOrder)
+      sortOrder: String(course.sortOrder),
+      repetitionGoalMax: course.repetitionGoalMax != null ? String(course.repetitionGoalMax) : ""
     });
     setFormOpen(true);
     setError(null);
@@ -164,6 +168,7 @@ export function AdminCoursesPage() {
       sortOrder: Number(form.sortOrder) || 0,
       contentKey: isFixedFl ? "fl" : "portal",
       coverUrl: form.coverUrl.trim() || null,
+      repetitionGoalMax: form.repetitionGoalMax.trim() ? Number(form.repetitionGoalMax) : null,
       priceCents:
         form.visibility === "PUBLIC_SALE" ? Math.round(Number(form.priceCents.replace(",", ".")) * 100) : null
     };
@@ -333,6 +338,16 @@ export function AdminCoursesPage() {
                       type="number"
                       value={form.sortOrder}
                       onChange={(e) => setForm((f) => ({ ...f, sortOrder: e.target.value }))}
+                    />
+                  </Field>
+                  <Field label={UI.fieldRepetitionGoal} hint={UI.fieldRepetitionGoalHint}>
+                    <input
+                      className="input w-full"
+                      type="number"
+                      min={1}
+                      placeholder={UI.repetitionUnlimited}
+                      value={form.repetitionGoalMax}
+                      onChange={(e) => setForm((f) => ({ ...f, repetitionGoalMax: e.target.value }))}
                     />
                   </Field>
                 </div>

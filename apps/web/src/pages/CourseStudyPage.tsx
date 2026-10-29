@@ -19,7 +19,7 @@ import { CourseCover } from "../components/courses/CourseCover";
 import { AcademyNav } from "../components/portal/AcademyNav";
 import { BrandLogo } from "../components/brand/BrandLogo";
 import { ACADEMY_APP_BASE, COURSES_UI, FL_COURSE } from "@ederson-agencia/shared";
-import { ApiError, apiAssetUrl, apiGet, apiPut } from "../api";
+import { ApiError, apiAssetUrl, apiGet, apiPost, apiPut } from "../api";
 import { isYoutubeUrl, parseYoutubeVideoId, youtubeEmbedUrl } from "../lib/youtube";
 import {
   telegramLessonUrl,
@@ -70,6 +70,14 @@ type CoursePayload = {
   telegramMessageMap: Record<string, number>;
   completedSlugs: string[];
   progress?: { completed: number; total: number; percent: number; isComplete: boolean };
+  repetitions?: {
+    goalMax: number | null;
+    completedCount: number;
+    activeCycle: number;
+    goalReached: boolean;
+    unlimited: boolean;
+    canStartNext: boolean;
+  };
   certificate?: CertificateData | null;
 };
 
@@ -111,6 +119,8 @@ export function CourseStudyPage() {
   const [error, setError] = useState<string | null>(null);
   const [certificate, setCertificate] = useState<CertificateData | null>(null);
   const [fichamento, setFichamento] = useState<FichamentoBundle | null>(null);
+  const [repetitions, setRepetitions] = useState<CoursePayload["repetitions"] | null>(null);
+  const [repetitionToast, setRepetitionToast] = useState<number | null>(null);
 
   useEffect(() => {
     if (!courseSlug) return;
@@ -118,6 +128,7 @@ export function CourseStudyPage() {
       try {
         const data = await apiGet<CoursePayload>(`/courses/${courseSlug}`);
         setPayload(data);
+        setRepetitions(data.repetitions ?? null);
         setCompleted(new Set(data.completedSlugs));
         setCertificate(data.certificate ?? null);
       } catch (err) {
@@ -178,11 +189,28 @@ export function CourseStudyPage() {
     setCompleted(next);
     const res = await apiPut<{
       certificate?: CertificateData | null;
-      progress?: { isComplete: boolean };
+      progress?: { isComplete: boolean; completed: number; total: number; percent: number };
+      repetitions?: CoursePayload["repetitions"];
+      repetitionJustCompleted?: number | null;
+      completedSlugs?: string[];
     }>(`/courses/${courseSlug}/progress`, { lessonSlug: slug, completed: done });
+    if (res.repetitions) setRepetitions(res.repetitions);
+    if (res.repetitionJustCompleted) setRepetitionToast(res.repetitionJustCompleted);
     if (res.certificate) setCertificate(res.certificate);
     else if (res.progress && !res.progress.isComplete) setCertificate(null);
   };
+
+  async function startNextRepetition() {
+    if (!courseSlug) return;
+    const res = await apiPost<{
+      completedSlugs: string[];
+      repetitions: CoursePayload["repetitions"];
+    }>(`/courses/${courseSlug}/repetitions/start-next`, {});
+    setCompleted(new Set(res.completedSlugs));
+    setRepetitions(res.repetitions);
+    setRepetitionToast(null);
+    setCertificate(null);
+  }
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -288,10 +316,40 @@ export function CourseStudyPage() {
             <div className="course-text-muted mt-3 text-xs">
               {COURSES_UI.study.progressLabel}: {completedTrackable} / {trackableSlugs.length} ({progressPct}
               %)
+              {repetitions ? (
+                <span className="mt-1 block text-brand-primary">
+                  {COURSES_UI.study.repetitionCycle(repetitions.activeCycle)}
+                </span>
+              ) : null}
             </div>
             <div className="course-study__progress-track mt-1 h-1.5 overflow-hidden rounded-full">
               <div className="h-full bg-brand-primary transition-all" style={{ width: `${progressPct}%` }} />
             </div>
+            {repetitions ? (
+              <div className="course-text-muted mt-2 space-y-1 text-xs">
+                <p>
+                  {COURSES_UI.study.repetitionLabel}: <strong>{repetitions.completedCount}</strong>
+                  {!repetitions.unlimited && repetitions.goalMax != null
+                    ? ` · ${COURSES_UI.study.repetitionGoalProgress(repetitions.completedCount, repetitions.goalMax)}`
+                    : repetitions.unlimited
+                      ? ` · ${COURSES_UI.adminCourses.repetitionUnlimited}`
+                      : null}
+                </p>
+                {repetitionToast ? (
+                  <p className="font-medium text-green-400">{COURSES_UI.study.repetitionJustDone(repetitionToast)}</p>
+                ) : null}
+                {repetitions.canStartNext && !repetitions.goalReached ? (
+                  <div className="space-y-1 pt-1">
+                    <button type="button" className="btn-primary w-full text-xs" onClick={() => void startNextRepetition()}>
+                      {COURSES_UI.study.repetitionStartNext}
+                    </button>
+                    <p className="course-text-faint text-[0.65rem] leading-snug">{COURSES_UI.study.repetitionStartHint}</p>
+                  </div>
+                ) : repetitions.goalReached ? (
+                  <p className="text-brand-primary">{COURSES_UI.study.repetitionGoalDone}</p>
+                ) : null}
+              </div>
+            ) : null}
             {courseComplete && certificate ? (
               <div className="course-certificate-banner">
                 <p>{COURSES_UI.study.certificateReadyTitle}</p>
@@ -386,7 +444,7 @@ export function CourseStudyPage() {
                               docHtml: null
                             }),
                             docHtml: html,
-                            docJson: json ?? prev.modules[moduleFichamentoNum]?.docJson ?? null
+                            docJson: json !== undefined ? json : (prev.modules[moduleFichamentoNum]?.docJson ?? null)
                           }
                         }
                       }
@@ -404,7 +462,15 @@ export function CourseStudyPage() {
               onBack={() => goLesson("")}
               onCompiled={(html, json) =>
                 setFichamento((prev) =>
-                  prev ? { ...prev, course: { docHtml: html, docJson: json ?? prev.course?.docJson ?? null } } : prev
+                  prev
+                    ? {
+                        ...prev,
+                        course: {
+                          docHtml: html,
+                          docJson: json !== undefined ? json : (prev.course?.docJson ?? null)
+                        }
+                      }
+                    : prev
                 )
               }
             />

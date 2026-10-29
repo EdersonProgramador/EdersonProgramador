@@ -1,5 +1,5 @@
 import { COURSES_UI } from "@ederson-agencia/shared";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { apiPost, apiPut } from "../../api";
 import { downloadHtmlDocument } from "../../fichamento/downloadDocument";
 import { NotionEditor } from "./NotionEditor";
@@ -30,11 +30,13 @@ export function FichamentoWorkspace({
   const [contentHtml, setContentHtml] = useState(initialHtml ?? "");
   const [contentJson, setContentJson] = useState(initialJson ?? null);
   const [editorKey, setEditorKey] = useState(0);
+  const autoCompiledRef = useRef(false);
 
   useEffect(() => {
     setContentHtml(initialHtml ?? "");
     setContentJson(initialJson ?? null);
     setEditorKey((k) => k + 1);
+    autoCompiledRef.current = false;
   }, [initialHtml, initialJson, mode, moduleNumber]);
 
   const title =
@@ -55,27 +57,36 @@ export function FichamentoWorkspace({
     [courseSlug, mode, moduleNumber]
   );
 
-  async function compileFromSources() {
+  const compileFromSources = useCallback(async () => {
     if (mode === "module" && moduleNumber != null) {
       const res = await apiPost<{
         docHtml: string | null;
         docJson: string | null;
       }>(`/courses/${courseSlug}/fichamento/modules/${moduleNumber}/compile`, {});
-      setContentHtml(res.docHtml ?? "");
-      setContentJson(res.docJson);
+      const html = res.docHtml ?? "";
+      setContentHtml(html);
+      setContentJson(null);
       setEditorKey((k) => k + 1);
-      onCompiled?.(res.docHtml ?? "", res.docJson);
+      onCompiled?.(html, null);
       return;
     }
     const res = await apiPost<{ docHtml: string | null; docJson: string | null }>(
       `/courses/${courseSlug}/fichamento/course/compile`,
       {}
     );
-    setContentHtml(res.docHtml ?? "");
-    setContentJson(res.docJson);
+    const html = res.docHtml ?? "";
+    setContentHtml(html);
+    setContentJson(null);
     setEditorKey((k) => k + 1);
-    onCompiled?.(res.docHtml ?? "", res.docJson);
-  }
+    onCompiled?.(html, null);
+  }, [courseSlug, mode, moduleNumber, onCompiled]);
+
+  useEffect(() => {
+    if (autoCompiledRef.current) return;
+    if (initialHtml?.trim()) return;
+    autoCompiledRef.current = true;
+    void compileFromSources();
+  }, [initialHtml, compileFromSources]);
 
   function download() {
     const name =
