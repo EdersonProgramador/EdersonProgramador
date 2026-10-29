@@ -9,6 +9,7 @@ import {
 import { AdminCourseLibraryPanel } from "../components/admin/AdminCourseLibraryPanel";
 import { CourseCover } from "../components/courses/CourseCover";
 import { apiDelete, apiGet, apiPatch, apiPost } from "../api";
+import "../styles/course-admin.css";
 import "../styles/course-study.css";
 
 type LessonType = "article" | "video" | "document";
@@ -317,31 +318,28 @@ export function AdminCourseContentPage() {
   const ui = COURSES_UI.adminContent;
 
   return (
-    <div className="courses-academy space-y-8">
+    <div className="course-admin space-y-8">
       <div>
-        <Link to={ACADEMY_ADMIN_COURSES_BASE} className="text-sm text-brand-primary hover:underline">
-          ← Gestão da academia
+        <Link to={ACADEMY_ADMIN_COURSES_BASE} className="text-sm font-medium text-brand-primary hover:underline">
+          ← {COURSES_UI.adminCourses.title}
         </Link>
-        <h1 className="mt-2 text-3xl font-bold text-white">Sumário e conteúdo</h1>
+        <h1 className="course-admin__title mt-2">Sumário e aulas</h1>
         {course ? (
-          <p className="course-text-muted text-sm leading-relaxed">
+          <p className="course-admin__subtitle">
             {course.title}{" "}
             <span className="font-mono text-brand-primary">({course.slug})</span>
             {" · "}
-            {course.status}
-            {course.contentKey ? ` · ${course.contentKey}` : ""}
+            {course.status === "PUBLISHED" ? COURSES_UI.adminCourses.statusPublished : COURSES_UI.adminCourses.statusDraft}
           </p>
         ) : null}
       </div>
 
       {isFlLocked ? (
-        <p className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
-          {ui.flLockedHint}
-        </p>
+        <p className="course-admin__alert course-admin__alert--ok">{ui.flLockedHint}</p>
       ) : null}
 
-      {message ? <p className="text-sm text-green-300">{message}</p> : null}
-      {error ? <p className="text-sm text-red-300">{error}</p> : null}
+      {message ? <div className="course-admin__alert course-admin__alert--ok">{message}</div> : null}
+      {error ? <div className="course-admin__alert course-admin__alert--err">{error}</div> : null}
 
       {course && !isFlLocked ? (
         <form className="panel space-y-4 p-5" onSubmit={(e) => void saveCourseMeta(e)}>
