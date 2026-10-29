@@ -1,17 +1,13 @@
 import { useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
-import { AGENCY_APP_BASE, agencyHomePathForRole } from "@ederson-agencia/shared";
+import { agencyHomePathForRole } from "@ederson-agencia/shared";
 import type { AuthUser } from "@ederson-agencia/shared";
 
 type NavLink = { to: string; label: string };
 
 function agencyLinks(user: AuthUser): NavLink[] {
-  const links: NavLink[] = [{ to: agencyHomePathForRole(user.role), label: "Início" }];
-  if (user.role === "ADMIN") {
-    links.push({ to: `${AGENCY_APP_BASE}/admin/cursos`, label: "Cursos (admin)" });
-  }
-  return links;
+  return [{ to: agencyHomePathForRole(user.role), label: "Início" }];
 }
 
 function linkClass(pathname: string, path: string, block?: boolean) {

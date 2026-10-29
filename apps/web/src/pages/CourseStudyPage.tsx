@@ -256,7 +256,7 @@ export function CourseStudyPage() {
           </div>
           <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
             <ThemeToggle compact />
-            {user ? <AcademyNav /> : null}
+            {user ? <AcademyNav user={user} /> : null}
             <button
               type="button"
               className="btn-secondary inline-flex min-h-11 min-w-11 items-center justify-center p-2"

@@ -67,3 +67,10 @@ export function LegacyAcademyCursosRedirect() {
   const suffix = rest ? `/${rest.replace(/^\//, "")}` : "";
   return <Navigate to={`${ACADEMY_APP_BASE}/cursos${suffix}`} replace />;
 }
+
+/** /app/admin/cursos/* e /agencia/admin/cursos/* → /academia/admin/cursos/* */
+export function LegacyAcademyAdminCursosRedirect() {
+  const { "*": rest } = useParams<{ "*": string }>();
+  const suffix = rest ? `/${rest.replace(/^\//, "")}` : "";
+  return <Navigate to={`${ACADEMY_APP_BASE}/admin/cursos${suffix}`} replace />;
+}

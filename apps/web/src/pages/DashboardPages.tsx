@@ -175,11 +175,6 @@ export function AdminDashboard() {
         <p className="text-[var(--app-text-muted)]">Leads, pacotes e jornada dos projetos.</p>
       </div>
       <StatGrid stats={stats} />
-      <p className="text-sm">
-        <Link to={`${AGENCY_APP_BASE}/admin/cursos`} className="text-brand-primary hover:underline">
-          Gerenciar cursos online →
-        </Link>
-      </p>
       <section className="space-y-4">
         <h2 className="text-xl font-semibold text-[var(--app-text)]">Leads da landing</h2>
         <div className="space-y-3">

@@ -55,16 +55,12 @@ export function setAuthToken(context: AuthContext, token: string | null) {
 
 function isAcademyApiPath(url: string): boolean {
   const path = url.split("?")[0] ?? url;
-  return (
-    path.includes("/courses") &&
-    !path.startsWith("/admin/courses") &&
-    !path.includes("/admin/courses/")
-  );
+  return path.startsWith("/courses") || path.startsWith("/admin/courses");
 }
 
 function isAgencyApiPath(url: string): boolean {
   const path = url.split("?")[0] ?? url;
-  return path.startsWith("/agency") || path.startsWith("/admin/");
+  return path.startsWith("/agency");
 }
 
 function tokenForRequest(url: string): string | null {

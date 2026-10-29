@@ -27,7 +27,7 @@ export function AcademyShellLayout({ title }: { title: string }) {
             <ThemeToggle compact />
             {user ? (
               <>
-                <AcademyNav />
+                <AcademyNav user={user} />
                 <span className="hidden max-w-[8rem] truncate text-sm text-[var(--app-text-muted)] lg:inline">
                   {user.name}
                 </span>

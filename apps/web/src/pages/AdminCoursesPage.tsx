@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ACADEMY_APP_BASE, AGENCY_APP_BASE, COURSE_COVER } from "@ederson-agencia/shared";
+import { ACADEMY_ADMIN_COURSES_BASE, ACADEMY_APP_BASE, COURSE_COVER } from "@ederson-agencia/shared";
 import { apiGet, apiPatch, apiPost } from "../api";
 import { CourseCover } from "../components/courses/CourseCover";
 import "../styles/course-study.css";
@@ -129,8 +129,8 @@ export function AdminCoursesPage() {
   return (
     <div className="courses-academy space-y-8">
       <div>
-        <Link to={`${AGENCY_APP_BASE}/admin`} className="text-sm text-brand-primary hover:underline">
-          ← Administração
+        <Link to={ACADEMY_APP_BASE} className="text-sm text-brand-primary hover:underline">
+          ← Meus cursos
         </Link>
         <h1 className="mt-2 text-3xl font-bold text-white">Gestão da academia</h1>
         <p className="course-text-muted text-sm leading-relaxed">
@@ -264,7 +264,7 @@ export function AdminCoursesPage() {
                 <Link to={`${ACADEMY_APP_BASE}/cursos/${course.slug}`} className="btn-secondary text-sm">
                   Abrir trilha
                 </Link>
-                <Link to={`${AGENCY_APP_BASE}/admin/cursos/${course.id}/conteudo`} className="btn-primary text-sm">
+                <Link to={`${ACADEMY_ADMIN_COURSES_BASE}/${course.id}/conteudo`} className="btn-primary text-sm">
                   Conteúdo
                 </Link>
                 <button type="button" className="btn-secondary text-sm" onClick={() => startEdit(course)}>

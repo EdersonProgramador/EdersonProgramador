@@ -5,6 +5,8 @@ type AgencyRole = "ADMIN" | "CLIENT" | "FREELANCER";
 /** Prefixos de URL — Agência e Academia são apps internos separados. */
 export const AGENCY_APP_BASE = "/agencia";
 export const ACADEMY_APP_BASE = "/academia";
+/** Gestão de cursos (admin) — sempre dentro da Academia. */
+export const ACADEMY_ADMIN_COURSES_BASE = `${ACADEMY_APP_BASE}/admin/cursos`;
 
 export type SessionUser = {
   id: string;
@@ -17,14 +19,13 @@ export type SessionUser = {
 };
 
 export function canAccessAgency(user: Pick<SessionUser, "role"> & { authContext?: AuthContext }): boolean {
-  if (user.role === "ADMIN") return true;
   const ctx = user.authContext ?? "agency";
   return ctx === "agency";
 }
 
 export function canAccessAcademy(user: Pick<SessionUser, "role"> & { authContext?: AuthContext }): boolean {
-  if (user.role === "ADMIN") return true;
-  return user.authContext === "academy";
+  const ctx = user.authContext ?? "agency";
+  return ctx === "academy";
 }
 
 export function loginPathForContext(context: AuthContext = "agency"): string {

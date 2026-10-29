@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ACADEMY_APP_BASE, COURSES_UI } from "@ederson-agencia/shared";
+import { ACADEMY_ADMIN_COURSES_BASE, ACADEMY_APP_BASE, COURSES_UI } from "@ederson-agencia/shared";
 import { apiGet, apiPost } from "../api";
+import { useAcademySession } from "../stores/authStore";
 import { CourseCover } from "../components/courses/CourseCover";
 import "../styles/course-study.css";
 
@@ -20,6 +21,7 @@ type CourseCard = {
 };
 
 export function CoursesCatalogPage() {
+  const academyUser = useAcademySession()?.user;
   const [courses, setCourses] = useState<CourseCard[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -48,9 +50,16 @@ export function CoursesCatalogPage() {
 
   return (
     <div className="courses-academy space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-white">{COURSES_UI.catalog.title}</h1>
-        <p className="course-text-muted mt-2 text-sm">{COURSES_UI.catalog.subtitle}</p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-white">{COURSES_UI.catalog.title}</h1>
+          <p className="course-text-muted mt-2 text-sm">{COURSES_UI.catalog.subtitle}</p>
+        </div>
+        {academyUser?.role === "ADMIN" ? (
+          <Link to={ACADEMY_ADMIN_COURSES_BASE} className="btn-secondary inline-flex min-h-11 items-center text-sm">
+            Gerenciar cursos
+          </Link>
+        ) : null}
       </div>
 
       <ul className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">

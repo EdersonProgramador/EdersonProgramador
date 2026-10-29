@@ -1,7 +1,13 @@
 import { useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
-import { agencyHomePathForRole, canAccessAcademy, canAccessAgency, portalHomePath } from "@ederson-agencia/shared";
+import {
+  ACADEMY_APP_BASE,
+  agencyHomePathForRole,
+  canAccessAcademy,
+  canAccessAgency,
+  portalHomePath
+} from "@ederson-agencia/shared";
 import type { AuthUser } from "@ederson-agencia/shared";
 
 type NavLink = { to: string; label: string };
@@ -9,13 +15,10 @@ type NavLink = { to: string; label: string };
 function portalLinks(user: AuthUser): NavLink[] {
   const links: NavLink[] = [{ to: portalHomePath(), label: "Início" }];
   if (canAccessAcademy(user)) {
-    links.push({ to: "/app/cursos", label: "Academia" });
+    links.push({ to: ACADEMY_APP_BASE, label: "Academia" });
   }
   if (canAccessAgency(user)) {
     links.push({ to: agencyHomePathForRole(user.role), label: "Agência" });
-  }
-  if (user.role === "ADMIN" && canAccessAgency(user)) {
-    links.push({ to: "/app/admin/cursos", label: "Cursos (admin)" });
   }
   return links;
 }

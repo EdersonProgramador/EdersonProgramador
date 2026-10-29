@@ -6,6 +6,7 @@ export type AgencyRole = "ADMIN" | "CLIENT" | "FREELANCER";
 
 export type { AuthContext, SessionUser } from "./auth-context.js";
 export {
+  ACADEMY_ADMIN_COURSES_BASE,
   ACADEMY_APP_BASE,
   AGENCY_APP_BASE,
   agencyHomePathForRole,
