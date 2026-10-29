@@ -5,8 +5,8 @@ type AgencyRole = "ADMIN" | "CLIENT" | "FREELANCER";
 /** Prefixos de URL — Agência e Academia são apps internos separados. */
 export const AGENCY_APP_BASE = "/agencia";
 export const ACADEMY_APP_BASE = "/academia";
-/** Catálogo de cursos com venda pública (PUBLIC_SALE no admin). */
-export const ACADEMY_STORE_BASE = `${ACADEMY_APP_BASE}/loja`;
+/** Vitrine pública de vendas — fora da área logada (/academia). */
+export const ACADEMY_STORE_BASE = "/cursos";
 /** Gestão de cursos (admin) — sempre dentro da Academia. */
 export const ACADEMY_ADMIN_COURSES_BASE = `${ACADEMY_APP_BASE}/admin/cursos`;
 

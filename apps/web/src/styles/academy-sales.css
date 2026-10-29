@@ -1,0 +1,18 @@
+.academy-sales .academy-sales__course {
+  display: block;
+  overflow: hidden;
+  border-radius: var(--radius-lg, 12px);
+  border: 1px solid rgb(255 255 255 / 0.08);
+  background: rgb(255 255 255 / 0.02);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.academy-sales .academy-sales__course:hover,
+.academy-sales .academy-sales__course.is-selected {
+  border-color: rgb(var(--brand-primary-rgb, 56 189 248) / 0.55);
+  box-shadow: 0 0 0 1px rgb(var(--brand-primary-rgb, 56 189 248) / 0.25);
+}
+
+.academy-sales .academy-sales__step {
+  height: 100%;
+}

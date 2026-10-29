@@ -45,9 +45,9 @@ export function CoursesCatalogPage() {
           <p className="course-text-muted mt-2 text-sm">{COURSES_UI.catalog.subtitle}</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Link to={ACADEMY_STORE_BASE} className="btn-primary inline-flex min-h-11 items-center text-sm">
+          <a href={ACADEMY_STORE_BASE} className="btn-primary inline-flex min-h-11 items-center text-sm">
             {COURSES_UI.store.title}
-          </Link>
+          </a>
           {academyUser?.role === "ADMIN" ? (
             <Link to={ACADEMY_ADMIN_COURSES_BASE} className="btn-secondary inline-flex min-h-11 items-center text-sm">
               Gerenciar cursos
@@ -67,9 +67,9 @@ export function CoursesCatalogPage() {
       ) : (
         <div className="panel space-y-4 p-6 text-center">
           <p className="course-text-subtle text-sm">{COURSES_UI.catalog.empty}</p>
-          <Link to={ACADEMY_STORE_BASE} className="btn-secondary inline-flex min-h-11 items-center text-sm">
+          <a href={ACADEMY_STORE_BASE} className="btn-secondary inline-flex min-h-11 items-center text-sm">
             {COURSES_UI.catalog.emptyStoreLink} →
-          </Link>
+          </a>
         </div>
       )}
     </div>

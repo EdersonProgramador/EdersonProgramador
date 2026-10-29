@@ -6,6 +6,7 @@ import {
   PORTFOLIO_GITHUB,
   PORTFOLIO_PRODUCTION
 } from "@ederson-agencia/shared";
+import { fulfillAcademyPurchase, listPublicSaleCourses } from "../courses/academy-purchase.js";
 import { prisma } from "../prisma.js";
 
 const leadSchema = z.object({
@@ -47,6 +48,51 @@ export async function registerPublicRoutes(app: FastifyInstance) {
       completedAt: row.completedAt.toISOString(),
       lessonCount: row.lessonCount
     };
+  });
+
+  app.get("/public/academy/catalog", async () => {
+    const courses = await listPublicSaleCourses();
+    return { courses };
+  });
+
+  app.post("/public/academy/purchase", async (request, reply) => {
+    const body = z
+      .object({
+        courseSlug: z.string().min(1).max(120),
+        name: z.string().min(2).max(120),
+        email: z.string().email(),
+        phone: z.string().max(40).optional(),
+        paymentMethod: z.enum(["PIX", "CARD"]),
+        acceptTerms: z.literal(true, {
+          errorMap: () => ({ message: "Aceite os termos para continuar." })
+        })
+      })
+      .parse(request.body);
+
+    const course = await prisma.course.findUnique({ where: { slug: body.courseSlug } });
+    if (
+      !course ||
+      course.status !== "PUBLISHED" ||
+      course.visibility !== "PUBLIC_SALE" ||
+      course.priceCents == null ||
+      course.priceCents <= 0
+    ) {
+      return reply.code(400).send({ message: "Curso indisponível para compra." });
+    }
+
+    const result = await fulfillAcademyPurchase({
+      course,
+      name: body.name,
+      email: body.email,
+      phone: body.phone,
+      paymentMethod: body.paymentMethod,
+      log: request.log
+    });
+
+    return reply.code(201).send({
+      message: "Compra confirmada. Enviamos o acesso ao e-mail informado.",
+      ...result
+    });
   });
 
   app.post("/public/leads", async (request, reply) => {

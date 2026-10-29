@@ -82,6 +82,14 @@ const envSchema = z
     FL_MEDIA_ROOT: z.preprocess(
       (value) => (typeof value === "string" && value.trim() ? value.trim() : undefined),
       z.string().optional()
+    ),
+    RESEND_API_KEY: z.preprocess(
+      (value) => (typeof value === "string" && value.trim() ? value.trim() : undefined),
+      z.string().optional()
+    ),
+    MAIL_FROM: z.preprocess(
+      (value) => (typeof value === "string" && value.trim() ? value.trim() : undefined),
+      z.string().optional()
     )
   })
   .superRefine((data, ctx) => {

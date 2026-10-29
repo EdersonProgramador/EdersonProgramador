@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
-import { ACADEMY_APP_BASE, AGENCY_APP_BASE } from "@ederson-agencia/shared";
+import { ACADEMY_APP_BASE, ACADEMY_STORE_BASE, AGENCY_APP_BASE } from "@ederson-agencia/shared";
 import { AuthSessionBridge } from "./auth/AuthSessionBridge";
 import { AcademyShellLayout } from "./components/AcademyShellLayout";
 import { AgencyShellLayout } from "./components/AgencyShellLayout";
@@ -17,7 +17,7 @@ import { AgencyLoginPage } from "./pages/LoginPage";
 import { AcademyLoginPage } from "./pages/AcademyLoginPage";
 import { CertificateVerifyPage } from "./pages/CertificateVerifyPage";
 import { CourseStudyPage } from "./pages/CourseStudyPage";
-import { AcademyStorePage } from "./pages/AcademyStorePage";
+import { AcademyPublicSalesPage } from "./pages/AcademyPublicSalesPage";
 import { CoursesCatalogPage } from "./pages/CoursesCatalogPage";
 import { AdminCourseContentPage } from "./pages/AdminCourseContentPage";
 import { AdminCoursesPage } from "./pages/AdminCoursesPage";
@@ -39,6 +39,7 @@ export default function App() {
       <ThemeSync />
       <Routes>
         <Route index element={<LandingPage />} />
+        <Route path={ACADEMY_STORE_BASE} element={<AcademyPublicSalesPage />} />
         <Route path="/certificado/:code" element={<CertificateVerifyPage />} />
 
         <Route element={<ShellLayout title="Acesso" />}>
@@ -61,7 +62,6 @@ export default function App() {
         <Route path={ACADEMY_APP_BASE} element={<ProtectedRoute realm="academy" />}>
           <Route element={<AcademyShellLayout title="Academia" />}>
             <Route index element={<CoursesCatalogPage />} />
-            <Route path="loja" element={<AcademyStorePage />} />
             <Route element={<ProtectedRoute realm="academy" roles={["ADMIN"]} />}>
               <Route path="admin/cursos" element={<AdminCoursesPage />} />
               <Route path="admin/cursos/:courseId/conteudo" element={<AdminCourseContentPage />} />
@@ -79,6 +79,8 @@ export default function App() {
         <Route path="/app/freelancer" element={<Navigate to={`${AGENCY_APP_BASE}/freelancer`} replace />} />
         <Route path="/app/projetos/:projectId" element={<LegacyProjectRedirect />} />
         <Route path="/app/cursos/*" element={<LegacyAcademyCursosRedirect />} />
+        <Route path="/academia/loja" element={<Navigate to={ACADEMY_STORE_BASE} replace />} />
+        <Route path="/academia/comprar" element={<Navigate to={ACADEMY_STORE_BASE} replace />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
