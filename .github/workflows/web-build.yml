@@ -1,0 +1,28 @@
+name: Web build (Vercel parity)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/web/**"
+      - "packages/shared/**"
+      - "scripts/vercel-postbuild.mjs"
+      - "vercel.json"
+      - "package.json"
+      - "package-lock.json"
+  pull_request:
+    paths:
+      - "apps/web/**"
+      - "packages/shared/**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci
+      - run: npm run vercel-build
