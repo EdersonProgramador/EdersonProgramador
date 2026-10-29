@@ -19,6 +19,8 @@ export async function ensurePortalStarterContent(
           slug: "boas-vindas",
           sortOrder: 0,
           title: `Boas-vindas — ${courseTitle}`,
+          sectionTitle: "Boas-vindas",
+          sectionSortOrder: 1,
           lessonType: "article",
           status: "PUBLISHED",
           bodyHtml:

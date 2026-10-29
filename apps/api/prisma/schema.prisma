@@ -82,10 +82,12 @@ model CourseLesson {
   title       String
   lessonType  String       @default("article")
   status      String       @default("DRAFT")
-  bodyHtml    String?
-  videoUrl    String?
-  documentUrl String?
-  telegramRef String?
+  bodyHtml           String?
+  videoUrl           String?
+  documentUrl        String?
+  telegramRef      String?
+  sectionTitle     String?
+  sectionSortOrder Int          @default(1)
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 

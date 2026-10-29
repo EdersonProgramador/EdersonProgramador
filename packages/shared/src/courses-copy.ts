@@ -117,6 +117,26 @@ export const COURSES_UI = {
     libraryLoading: "Carregando PDF…",
     libraryLoadError: "Não foi possível carregar o PDF."
   },
+  adminContent: {
+    courseMetaTitle: "Apresentação no catálogo",
+    courseMetaHint:
+      "Capa (16:9), descrição e publicação seguem o mesmo padrão das trilhas atuais: sumário com módulos → submódulos → aulas.",
+    summaryLabel: "Descrição do curso",
+    coverLabel: "URL da capa",
+    publishCourse: "Publicar curso no catálogo",
+    publishAllLessons: "Publicar rascunhos das aulas",
+    moduleLabel: "Módulo",
+    submoduleLabel: "Submódulo (seção do sumário)",
+    submoduleAdd: "Adicionar submódulo",
+    lessonAdd: "Nova aula",
+    lessonKeyLabel: "Código da aula (opcional, ex.: F042)",
+    sectionTitleLabel: "Nome do submódulo",
+    sectionOrderLabel: "Ordem do submódulo",
+    videoUrlHint: "YouTube, Vimeo ou link direto (.mp4, .webm)",
+    bodyHint: "Texto/HTML exibido abaixo do player (descrição, links, materiais)",
+    flLockedHint:
+      "Este curso usa trilha fixa (contentKey fl). Edite apenas cursos com contentKey portal criados pela academia."
+  },
   adminLibrary: {
     heading: "Biblioteca digital",
     hint: "Cadastre PDFs por URL pública (HTTPS). Cada curso tem sua própria biblioteca.",

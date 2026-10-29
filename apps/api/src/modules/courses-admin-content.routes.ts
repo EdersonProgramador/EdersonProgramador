@@ -17,16 +17,20 @@ const moduleBody = z.object({
   sortOrder: z.number().int().optional()
 });
 
+const mediaUrlField = z.string().max(2000).optional().nullable().or(z.literal(""));
+
 const lessonBody = z.object({
   slug: slugField,
   title: z.string().min(1).max(300),
   lessonKey: z.string().max(40).optional().nullable(),
   sortOrder: z.number().int().optional(),
+  sectionTitle: z.string().max(200).optional().nullable(),
+  sectionSortOrder: z.number().int().min(1).optional(),
   lessonType: z.enum(["article", "video", "document"]).default("article"),
   status: z.enum(["DRAFT", "PUBLISHED"]).default("DRAFT"),
   bodyHtml: z.string().max(500_000).optional().nullable(),
-  videoUrl: z.string().url().optional().nullable().or(z.literal("")),
-  documentUrl: z.string().url().optional().nullable().or(z.literal("")),
+  videoUrl: mediaUrlField,
+  documentUrl: mediaUrlField,
   telegramRef: z.string().max(120).optional().nullable()
 });
 
@@ -73,8 +77,11 @@ export async function registerCoursesAdminContentRoutes(app: FastifyInstance) {
         id: course.id,
         slug: course.slug,
         title: course.title,
+        summary: course.summary,
+        coverUrl: course.coverUrl,
         contentKey: course.contentKey,
-        status: course.status
+        status: course.status,
+        visibility: course.visibility
       },
       stats: { modules: modules.length, lessons: modules.reduce((a, m) => a + m.lessons.length, 0), published },
       modules
@@ -104,6 +111,25 @@ export async function registerCoursesAdminContentRoutes(app: FastifyInstance) {
       data: { status: "PUBLISHED" }
     });
     return { ok: true, published: result.count };
+  });
+
+  /** Publica curso no catálogo + todas as aulas (padrão portal). */
+  app.post("/admin/courses/:id/content/publish-course", async (request, reply) => {
+    const { id } = z.object({ id: z.string().min(1) }).parse(request.params);
+    const course = await getCourseOr404(id);
+    if (!course) return reply.code(404).send({ message: "Curso não encontrado." });
+
+    const publishedLessons = await prisma.courseLesson.updateMany({
+      where: { module: { courseId: id } },
+      data: { status: "PUBLISHED" }
+    });
+
+    await prisma.course.update({
+      where: { id },
+      data: { status: "PUBLISHED", contentKey: PORTAL_CONTENT_KEY }
+    });
+
+    return { ok: true, publishedLessons: publishedLessons.count, courseStatus: "PUBLISHED" };
   });
 
   app.post("/admin/courses/:id/modules", async (request, reply) => {
@@ -173,6 +199,8 @@ export async function registerCoursesAdminContentRoutes(app: FastifyInstance) {
         title: body.title.trim(),
         lessonKey: body.lessonKey?.trim() || null,
         sortOrder,
+        sectionTitle: body.sectionTitle?.trim() || null,
+        sectionSortOrder: body.sectionSortOrder ?? 1,
         lessonType: body.lessonType,
         status: body.status,
         bodyHtml: body.bodyHtml ?? null,
@@ -201,6 +229,8 @@ export async function registerCoursesAdminContentRoutes(app: FastifyInstance) {
         title: body.title?.trim(),
         lessonKey: body.lessonKey === undefined ? undefined : body.lessonKey?.trim() || null,
         sortOrder: body.sortOrder,
+        sectionTitle: body.sectionTitle === undefined ? undefined : body.sectionTitle?.trim() || null,
+        sectionSortOrder: body.sectionSortOrder,
         lessonType: body.lessonType,
         status: body.status,
         bodyHtml: body.bodyHtml === undefined ? undefined : body.bodyHtml,

@@ -134,7 +134,8 @@ export function AdminCoursesPage() {
         </Link>
         <h1 className="mt-2 text-3xl font-bold text-white">Gestão da academia</h1>
         <p className="course-text-muted text-sm leading-relaxed">
-          Publique trilhas para o time ou prepare cursos para venda (pagamento online será ligado depois dos testes).
+          Crie cursos com contentKey <strong className="text-white/80">portal</strong> e monte módulos, submódulos e aulas na
+          tela de conteúdo — o sumário segue o mesmo padrão das trilhas atuais. A trilha FL permanece fixa (contentKey fl).
         </p>
       </div>
 

@@ -18,9 +18,10 @@ export type StudyCurriculumItem = {
   next: string | null;
 };
 
-/** Artigos e PDFs externos usam o painel de vídeo + `lessonNotes` (sem PDF em `/media/docs`). */
 function mapLessonType(lessonType: string): "document" | "video" {
-  return lessonType === "video" ? "video" : "video";
+  if (lessonType === "document") return "document";
+  if (lessonType === "article") return "document";
+  return "video";
 }
 
 function buildLessonNoteHtml(lesson: {
@@ -38,6 +39,41 @@ function buildLessonNoteHtml(lesson: {
   }
   if (lesson.bodyHtml?.trim()) parts.push(lesson.bodyHtml.trim());
   return parts.length ? parts.join("\n") : null;
+}
+
+type PublishedLesson = {
+  slug: string;
+  title: string;
+  lessonKey: string | null;
+  lessonType: string;
+  sortOrder: number;
+  sectionTitle: string | null;
+  sectionSortOrder: number;
+  bodyHtml: string | null;
+  videoUrl: string | null;
+  documentUrl: string | null;
+};
+
+function sectionKey(lesson: Pick<PublishedLesson, "sectionSortOrder" | "sectionTitle">) {
+  const title = lesson.sectionTitle?.trim() || "";
+  return `${lesson.sectionSortOrder}::${title}`;
+}
+
+function buildSectionMap(lessons: PublishedLesson[]) {
+  const order: string[] = [];
+  const map = new Map<string, PublishedLesson[]>();
+  for (const lesson of lessons) {
+    const key = sectionKey(lesson);
+    if (!map.has(key)) {
+      map.set(key, []);
+      order.push(key);
+    }
+    map.get(key)!.push(lesson);
+  }
+  for (const list of map.values()) {
+    list.sort((a, b) => a.sortOrder - b.sortOrder);
+  }
+  return { order, map };
 }
 
 export async function countPublishedPortalLessons(courseId: string) {
@@ -84,36 +120,45 @@ export async function buildPortalStudyPayload(
     const published = mod.lessons;
     if (published.length === 0) continue;
 
-    published.forEach((lesson, li) => {
-      const id = lesson.lessonKey?.trim() || lesson.slug.toUpperCase();
-      const type = mapLessonType(lesson.lessonType);
-      const slug = lesson.slug;
+    const { order: sectionOrder, map: sectionMap } = buildSectionMap(published);
 
-      const noteHtml = buildLessonNoteHtml(lesson);
-      if (noteHtml) {
-        lessonNotes[slug] = { html: noteHtml, displayTitle: lesson.title };
-      }
-      if (lesson.videoUrl?.trim()) {
-        files[id] = lesson.videoUrl.trim();
-      }
+    sectionOrder.forEach((key, sectionIndex) => {
+      const sectionLessons = sectionMap.get(key)!;
+      const sectionNum = sectionIndex + 1;
+      const sectionTitle =
+        sectionLessons[0]?.sectionTitle?.trim() || mod.title;
 
-      items.push({
-        order,
-        type,
-        id,
-        slug,
-        title: lesson.title,
-        module: moduleNum,
-        moduleTitle: mod.title,
-        section: 1,
-        sectionTitle: mod.title,
-        indexInSection: li + 1,
-        countInSection: published.length,
-        breadcrumb: [mod.title, lesson.title],
-        prev: null,
-        next: null
+      sectionLessons.forEach((lesson, li) => {
+        const id = lesson.lessonKey?.trim() || lesson.slug.toUpperCase();
+        const type = mapLessonType(lesson.lessonType);
+        const slug = lesson.slug;
+
+        const noteHtml = buildLessonNoteHtml(lesson);
+        if (noteHtml) {
+          lessonNotes[slug] = { html: noteHtml, displayTitle: lesson.title };
+        }
+        if (lesson.videoUrl?.trim()) {
+          files[id] = lesson.videoUrl.trim();
+        }
+
+        items.push({
+          order,
+          type,
+          id,
+          slug,
+          title: lesson.title,
+          module: moduleNum,
+          moduleTitle: mod.title,
+          section: sectionNum,
+          sectionTitle,
+          indexInSection: li + 1,
+          countInSection: sectionLessons.length,
+          breadcrumb: [mod.title, sectionTitle, lesson.title].filter(Boolean),
+          prev: null,
+          next: null
+        });
+        order += 1;
       });
-      order += 1;
     });
   }
 
