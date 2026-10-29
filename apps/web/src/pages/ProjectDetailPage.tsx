@@ -7,11 +7,11 @@ import {
   ProjectJourneyPanel,
   type JourneyProject
 } from "../components/portal/ProjectJourneyPanel";
-import { useAuthStore } from "../stores/authStore";
+import { useAgencySession } from "../stores/authStore";
 
 export function ProjectDetailPage() {
   const { projectId } = useParams<{ projectId: string }>();
-  const user = useAuthStore((s) => s.user);
+  const user = useAgencySession()?.user;
   const [project, setProject] = useState<JourneyProject | null>(null);
   const [error, setError] = useState<string | null>(null);
 

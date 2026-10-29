@@ -2,6 +2,10 @@ export type AuthContext = "agency" | "academy";
 
 type AgencyRole = "ADMIN" | "CLIENT" | "FREELANCER";
 
+/** Prefixos de URL — Agência e Academia são apps internos separados. */
+export const AGENCY_APP_BASE = "/agencia";
+export const ACADEMY_APP_BASE = "/academia";
+
 export type SessionUser = {
   id: string;
   name: string;
@@ -27,15 +31,19 @@ export function loginPathForContext(context: AuthContext = "agency"): string {
   return context === "academy" ? "/academia/entrar" : "/login";
 }
 
-export function homePathAfterLogin(role: AgencyRole, context: AuthContext): string {
-  if (context === "academy") return "/app/cursos";
+export function agencyHomePathForRole(role: AgencyRole): string {
   switch (role) {
     case "ADMIN":
-      return "/app/admin";
+      return `${AGENCY_APP_BASE}/admin`;
     case "FREELANCER":
-      return "/app/freelancer";
+      return `${AGENCY_APP_BASE}/freelancer`;
     case "CLIENT":
     default:
-      return "/app/cliente";
+      return `${AGENCY_APP_BASE}/cliente`;
   }
+}
+
+export function homePathAfterLogin(role: AgencyRole, context: AuthContext): string {
+  if (context === "academy") return ACADEMY_APP_BASE;
+  return agencyHomePathForRole(role);
 }

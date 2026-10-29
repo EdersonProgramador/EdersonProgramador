@@ -1,12 +1,20 @@
 import { useEffect } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
+import type { AuthContext } from "@ederson-agencia/shared";
+import { ACADEMY_APP_BASE, AGENCY_APP_BASE } from "@ederson-agencia/shared";
 import { setUnauthorizedHandler } from "./api";
-import { ProtectedRoute } from "./components/ProtectedRoute";
+import { AcademyShellLayout } from "./components/AcademyShellLayout";
+import { AgencyShellLayout } from "./components/AgencyShellLayout";
+import {
+  AgencyHomeRedirect,
+  LegacyAcademyCursosRedirect,
+  LegacyProjectRedirect,
+  ProtectedRoute
+} from "./components/ProtectedRoute";
 import { ShellLayout } from "./components/ShellLayout";
 import { LandingPage } from "./pages/LandingPage";
 import { AgencyLoginPage } from "./pages/LoginPage";
 import { AcademyLoginPage } from "./pages/AcademyLoginPage";
-import { AppHubPage } from "./pages/AppHubPage";
 import { CertificateVerifyPage } from "./pages/CertificateVerifyPage";
 import { CourseStudyPage } from "./pages/CourseStudyPage";
 import { CoursesCatalogPage } from "./pages/CoursesCatalogPage";
@@ -22,7 +30,10 @@ export default function App() {
   const clearSession = useAuthStore((s) => s.clearSession);
 
   useEffect(() => {
-    setUnauthorizedHandler(() => clearSession());
+    setUnauthorizedHandler((realm: AuthContext | "unknown") => {
+      if (realm === "agency" || realm === "unknown") clearSession("agency");
+      if (realm === "academy" || realm === "unknown") clearSession("academy");
+    });
     void bootstrap();
   }, [bootstrap, clearSession]);
 
@@ -30,54 +41,45 @@ export default function App() {
     <>
       <ThemeSync />
       <Routes>
-      <Route index element={<LandingPage />} />
-      <Route path="/certificado/:code" element={<CertificateVerifyPage />} />
-      <Route element={<ShellLayout title="Acesso" />}>
-        <Route path="login" element={<AgencyLoginPage />} />
-        <Route path="academia/entrar" element={<AcademyLoginPage />} />
-      </Route>
+        <Route index element={<LandingPage />} />
+        <Route path="/certificado/:code" element={<CertificateVerifyPage />} />
 
-      <Route path="/app" element={<ProtectedRoute />}>
-        <Route element={<ShellLayout title="Portal" />}>
-          <Route index element={<AppHubPage />} />
+        <Route element={<ShellLayout title="Acesso" />}>
+          <Route path="login" element={<AgencyLoginPage />} />
+          <Route path="academia/entrar" element={<AcademyLoginPage />} />
         </Route>
-      </Route>
 
-      <Route element={<ProtectedRoute realm="academy" />}>
-        <Route element={<ShellLayout title="Academia" />}>
-          <Route path="/app/cursos" element={<CoursesCatalogPage />} />
+        {/* ——— Agência (projetos, operação) ——— */}
+        <Route path={AGENCY_APP_BASE} element={<ProtectedRoute realm="agency" />}>
+          <Route element={<AgencyShellLayout title="Operação" />}>
+            <Route index element={<AgencyHomeRedirect />} />
+            <Route path="admin" element={<AdminDashboard />} />
+            <Route path="admin/cursos" element={<AdminCoursesPage />} />
+            <Route path="admin/cursos/:courseId/conteudo" element={<AdminCourseContentPage />} />
+            <Route path="cliente" element={<ClientDashboard />} />
+            <Route path="freelancer" element={<FreelancerDashboard />} />
+            <Route path="projetos/:projectId" element={<ProjectDetailPage />} />
+          </Route>
         </Route>
-        <Route path="/app/cursos/:courseSlug/*" element={<CourseStudyPage />} />
-      </Route>
 
-      <Route element={<ProtectedRoute realm="agency" roles={["ADMIN"]} />}>
-        <Route element={<ShellLayout title="Administração" />}>
-          <Route path="/app/admin" element={<AdminDashboard />} />
-          <Route path="/app/admin/cursos" element={<AdminCoursesPage />} />
-          <Route path="/app/admin/cursos/:courseId/conteudo" element={<AdminCourseContentPage />} />
+        {/* ——— Academia (cursos internos) ——— */}
+        <Route path={ACADEMY_APP_BASE} element={<ProtectedRoute realm="academy" />}>
+          <Route element={<AcademyShellLayout title="Cursos" />}>
+            <Route index element={<CoursesCatalogPage />} />
+          </Route>
+          <Route path="cursos/:courseSlug/*" element={<CourseStudyPage />} />
         </Route>
-      </Route>
 
-      <Route element={<ProtectedRoute realm="agency" roles={["CLIENT"]} />}>
-        <Route element={<ShellLayout title="Cliente" />}>
-          <Route path="/app/cliente" element={<ClientDashboard />} />
-        </Route>
-      </Route>
+        {/* Legado /app → novos prefixos */}
+        <Route path="/app" element={<Navigate to={AGENCY_APP_BASE} replace />} />
+        <Route path="/app/admin/*" element={<Navigate to={`${AGENCY_APP_BASE}/admin`} replace />} />
+        <Route path="/app/cliente" element={<Navigate to={`${AGENCY_APP_BASE}/cliente`} replace />} />
+        <Route path="/app/freelancer" element={<Navigate to={`${AGENCY_APP_BASE}/freelancer`} replace />} />
+        <Route path="/app/projetos/:projectId" element={<LegacyProjectRedirect />} />
+        <Route path="/app/cursos/*" element={<LegacyAcademyCursosRedirect />} />
 
-      <Route element={<ProtectedRoute realm="agency" roles={["FREELANCER"]} />}>
-        <Route element={<ShellLayout title="Freelancer" />}>
-          <Route path="/app/freelancer" element={<FreelancerDashboard />} />
-        </Route>
-      </Route>
-
-      <Route element={<ProtectedRoute realm="agency" />}>
-        <Route element={<ShellLayout title="Projeto" />}>
-          <Route path="/app/projetos/:projectId" element={<ProjectDetailPage />} />
-        </Route>
-      </Route>
-
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </>
   );
 }

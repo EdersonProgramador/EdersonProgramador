@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
+  AGENCY_APP_BASE,
   formatBRL,
   packageTierLabel,
   parsePackageTier,
@@ -101,7 +102,7 @@ function ProjectCard({ project, role }: { project: Project; role: "ADMIN" | "CLI
         </div>
       </div>
 
-      <Link to={`/app/projetos/${project.id}`} className="btn-primary inline-flex text-sm">
+      <Link to={`${AGENCY_APP_BASE}/projetos/${project.id}`} className="btn-primary inline-flex text-sm">
         {role === "CLIENT" ? "Acompanhar etapas e entregas" : "Gerenciar jornada do projeto"}
       </Link>
     </article>
@@ -175,7 +176,7 @@ export function AdminDashboard() {
       </div>
       <StatGrid stats={stats} />
       <p className="text-sm">
-        <Link to="/app/admin/cursos" className="text-brand-primary hover:underline">
+        <Link to={`${AGENCY_APP_BASE}/admin/cursos`} className="text-brand-primary hover:underline">
           Gerenciar cursos online →
         </Link>
       </p>

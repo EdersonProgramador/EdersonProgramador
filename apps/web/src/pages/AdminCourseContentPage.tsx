@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { ACADEMY_APP_BASE, AGENCY_APP_BASE } from "@ederson-agencia/shared";
 import { AdminCourseLibraryPanel } from "../components/admin/AdminCourseLibraryPanel";
 import { apiDelete, apiGet, apiPatch, apiPost } from "../api";
 import "../styles/course-study.css";
@@ -162,7 +163,7 @@ export function AdminCourseContentPage() {
   return (
     <div className="courses-academy space-y-8">
       <div>
-        <Link to="/app/admin/cursos" className="text-sm text-brand-primary hover:underline">
+        <Link to={`${AGENCY_APP_BASE}/admin/cursos`} className="text-sm text-brand-primary hover:underline">
           ← Gestão da academia
         </Link>
         <h1 className="mt-2 text-3xl font-bold text-white">Conteúdo do curso</h1>
@@ -209,7 +210,7 @@ export function AdminCourseContentPage() {
             </button>
           ) : null}
           {course ? (
-            <Link to={`/app/cursos/${course.slug}`} className="btn-secondary text-sm">
+            <Link to={`${ACADEMY_APP_BASE}/cursos/${course.slug}`} className="btn-secondary text-sm">
               Ver trilha
             </Link>
           ) : null}

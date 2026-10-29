@@ -1,9 +1,14 @@
 export { COURSE_COVER, COURSES_UI, FL_COURSE } from "./courses-copy.js";
 
+import { ACADEMY_APP_BASE, AGENCY_APP_BASE, agencyHomePathForRole } from "./auth-context.js";
+
 export type AgencyRole = "ADMIN" | "CLIENT" | "FREELANCER";
 
 export type { AuthContext, SessionUser } from "./auth-context.js";
 export {
+  ACADEMY_APP_BASE,
+  AGENCY_APP_BASE,
+  agencyHomePathForRole,
   canAccessAcademy,
   canAccessAgency,
   homePathAfterLogin,
@@ -21,26 +26,14 @@ export type AuthUser = {
   authContext?: import("./auth-context.js").AuthContext;
 };
 
-/** Hub após login (Agência + Cursos). */
+/** @deprecated Use AGENCY_APP_BASE ou agencyHomePathForRole. */
 export function portalHomePath(): string {
-  return "/app";
+  return AGENCY_APP_BASE;
 }
 
-export function agencyHomePathForRole(role: AgencyRole): string {
-  switch (role) {
-    case "ADMIN":
-      return "/app/admin";
-    case "FREELANCER":
-      return "/app/freelancer";
-    case "CLIENT":
-    default:
-      return "/app/cliente";
-  }
-}
-
-/** @deprecated Prefer portalHomePath — mantido para compatibilidade. */
+/** @deprecated Use agencyHomePathForRole(role). */
 export function homePathForRole(role: AgencyRole): string {
-  return portalHomePath();
+  return agencyHomePathForRole(role);
 }
 
 export const CONTRACT_DEFAULTS = {

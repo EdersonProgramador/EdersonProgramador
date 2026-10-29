@@ -48,7 +48,7 @@ export function AuthLoginView({
           password: form.get("password"),
           context
         });
-        setSession(data);
+        setSession(context, data);
         navigate(data.homePath);
         return;
       }
@@ -63,7 +63,7 @@ export function AuthLoginView({
         acceptTerms: form.get("acceptTerms") === "on",
         context: "agency"
       });
-      setSession(data);
+      setSession("agency", data);
       navigate(data.homePath);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Falha na autenticação.");

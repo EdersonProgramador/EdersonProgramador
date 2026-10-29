@@ -1,12 +1,23 @@
-import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { Navigate, Outlet, useLocation, useParams } from "react-router-dom";
 import type { AgencyRole, AuthContext } from "@ederson-agencia/shared";
-import { canAccessAcademy, canAccessAgency, loginPathForContext } from "@ederson-agencia/shared";
-import { useAuthStore } from "../stores/authStore";
+import {
+  ACADEMY_APP_BASE,
+  AGENCY_APP_BASE,
+  agencyHomePathForRole,
+  canAccessAcademy,
+  canAccessAgency,
+  loginPathForContext
+} from "@ederson-agencia/shared";
+import { useAcademySession, useAgencySession, useAuthStore } from "../stores/authStore";
 
-export function ProtectedRoute({ roles, realm }: { roles?: AgencyRole[]; realm?: AuthContext }) {
+export function ProtectedRoute({ roles, realm }: { roles?: AgencyRole[]; realm: AuthContext }) {
   const booting = useAuthStore((s) => s.booting);
-  const user = useAuthStore((s) => s.user);
+  const agencySession = useAgencySession();
+  const academySession = useAcademySession();
   const location = useLocation();
+
+  const session = realm === "agency" ? agencySession : academySession;
+  const user = session?.user;
 
   if (booting) {
     return (
@@ -17,8 +28,7 @@ export function ProtectedRoute({ roles, realm }: { roles?: AgencyRole[]; realm?:
   }
 
   if (!user) {
-    const loginTo = loginPathForContext(realm ?? "agency");
-    return <Navigate to={loginTo} replace state={{ from: location.pathname }} />;
+    return <Navigate to={loginPathForContext(realm)} replace state={{ from: location.pathname }} />;
   }
 
   if (realm === "agency" && !canAccessAgency(user)) {
@@ -30,8 +40,30 @@ export function ProtectedRoute({ roles, realm }: { roles?: AgencyRole[]; realm?:
   }
 
   if (roles && !roles.includes(user.role)) {
-    return <Navigate to="/app" replace />;
+    const fallback = realm === "agency" ? agencyHomePathForRole(user.role) : ACADEMY_APP_BASE;
+    return <Navigate to={fallback} replace />;
   }
 
   return <Outlet />;
+}
+
+/** Redireciona /agencia para o painel do papel. */
+export function AgencyHomeRedirect() {
+  const session = useAgencySession();
+  if (!session?.user) return <Navigate to="/login" replace />;
+  return <Navigate to={agencyHomePathForRole(session.user.role)} replace />;
+}
+
+/** /app/projetos/:id → /agencia/projetos/:id */
+export function LegacyProjectRedirect() {
+  const { projectId } = useParams<{ projectId: string }>();
+  if (!projectId) return <Navigate to={AGENCY_APP_BASE} replace />;
+  return <Navigate to={`${AGENCY_APP_BASE}/projetos/${projectId}`} replace />;
+}
+
+/** /app/cursos/* → /academia/cursos/* */
+export function LegacyAcademyCursosRedirect() {
+  const { "*": rest } = useParams<{ "*": string }>();
+  const suffix = rest ? `/${rest.replace(/^\//, "")}` : "";
+  return <Navigate to={`${ACADEMY_APP_BASE}/cursos${suffix}`} replace />;
 }

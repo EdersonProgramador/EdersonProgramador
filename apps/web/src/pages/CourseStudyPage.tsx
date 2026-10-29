@@ -16,9 +16,9 @@ import {
   type CertificateData
 } from "../components/courses/CourseCertificateDocument";
 import { CourseCover } from "../components/courses/CourseCover";
-import { PortalNav } from "../components/portal/PortalNav";
+import { AcademyNav } from "../components/portal/AcademyNav";
 import { BrandLogo } from "../components/brand/BrandLogo";
-import { COURSES_UI, FL_COURSE } from "@ederson-agencia/shared";
+import { ACADEMY_APP_BASE, COURSES_UI, FL_COURSE } from "@ederson-agencia/shared";
 import { ApiError, apiAssetUrl, apiGet, apiPut } from "../api";
 import { isYoutubeUrl, parseYoutubeVideoId, youtubeEmbedUrl } from "../lib/youtube";
 import {
@@ -28,7 +28,7 @@ import {
   type TelegramConfig
 } from "../courses/telegram";
 import { ThemeToggle } from "../components/theme/ThemeToggle";
-import { useAuthStore } from "../stores/authStore";
+import { useAcademySession, useAuthStore } from "../stores/authStore";
 import { FichamentoWorkspace } from "../components/fichamento/FichamentoWorkspace";
 import { LessonFichamentoBlock } from "../components/fichamento/LessonFichamentoBlock";
 import { CourseLibraryView } from "../components/library/CourseLibraryView";
@@ -101,7 +101,7 @@ export function CourseStudyPage() {
       ? subPath
       : "";
   const navigate = useNavigate();
-  const user = useAuthStore((s) => s.user);
+  const user = useAcademySession()?.user;
   const clearSession = useAuthStore((s) => s.clearSession);
 
   const [payload, setPayload] = useState<CoursePayload | null>(null);
@@ -164,7 +164,7 @@ export function CourseStudyPage() {
   const goLesson = useCallback(
     (slug: string) => {
       if (!courseSlug) return;
-      navigate(`/app/cursos/${courseSlug}/${slug}`);
+      navigate(`${ACADEMY_APP_BASE}/cursos/${courseSlug}/${slug}`);
       setSidebarOpen(false);
     },
     [courseSlug, navigate]
@@ -220,11 +220,11 @@ export function CourseStudyPage() {
           {notConfigured ? COURSES_UI.catalog.contentNotReady : error}
         </p>
         {notConfigured && courseSlug !== FL_COURSE.slug ? (
-          <Link to={`/app/cursos/${FL_COURSE.slug}`} className="btn-primary mt-4 inline-flex min-h-11 items-center">
+          <Link to={`${ACADEMY_APP_BASE}/cursos/${FL_COURSE.slug}`} className="btn-primary mt-4 inline-flex min-h-11 items-center">
             {COURSES_UI.catalog.openFlTrail}
           </Link>
         ) : null}
-        <Link to="/app/cursos" className="btn-secondary mt-4 inline-flex min-h-11 items-center">
+        <Link to={ACADEMY_APP_BASE} className="btn-secondary mt-4 inline-flex min-h-11 items-center">
           Voltar à academia
         </Link>
       </div>
@@ -250,19 +250,19 @@ export function CourseStudyPage() {
             >
               <Menu className="h-5 w-5" />
             </button>
-            <Link to="/app/cursos" className="min-w-0 shrink">
+            <Link to={ACADEMY_APP_BASE} className="min-w-0 shrink">
               <BrandLogo size="sm" />
             </Link>
           </div>
           <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
             <ThemeToggle compact />
-            {user ? <PortalNav user={user} /> : null}
+            {user ? <AcademyNav /> : null}
             <button
               type="button"
               className="btn-secondary inline-flex min-h-11 min-w-11 items-center justify-center p-2"
-              aria-label="Sair"
+              aria-label="Sair da Academia"
               onClick={() => {
-                clearSession();
+                clearSession("academy");
                 navigate("/");
               }}
             >

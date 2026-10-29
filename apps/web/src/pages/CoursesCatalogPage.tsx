@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { COURSES_UI } from "@ederson-agencia/shared";
+import { ACADEMY_APP_BASE, COURSES_UI } from "@ederson-agencia/shared";
 import { apiGet, apiPost } from "../api";
 import { CourseCover } from "../components/courses/CourseCover";
 import "../styles/course-study.css";
@@ -77,7 +77,7 @@ export function CoursesCatalogPage() {
                 <p className="course-text-subtle mt-4 text-xs leading-relaxed">{COURSES_UI.catalog.contentNotReady}</p>
               ) : null}
               {course.hasAccess && course.contentReady !== false ? (
-                <Link to={`/app/cursos/${course.slug}`} className="btn-primary mt-4 inline-flex w-full min-h-11 items-center justify-center sm:w-auto">
+                <Link to={`${ACADEMY_APP_BASE}/cursos/${course.slug}`} className="btn-primary mt-4 inline-flex w-full min-h-11 items-center justify-center sm:w-auto">
                   {COURSES_UI.catalog.enter} →
                 </Link>
               ) : course.locked ? (
