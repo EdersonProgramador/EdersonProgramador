@@ -2,8 +2,12 @@ import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   AGENCY_APP_BASE,
+  AGENCY_CONTRACT_VERSION,
   AGENCY_FUNNEL_COPY,
+  contractSummaryForTier,
   formatBRL,
+  PACKAGE_TIER_CONFIG,
+  PACKAGE_TIER_IDS,
   parsePackageTier,
   type PackageTierId
 } from "@ederson-agencia/shared";
@@ -77,6 +81,107 @@ function funnelStepKey(step: FunnelState["step"]) {
   return step === "register" ? "live" : step;
 }
 
+function defaultFunnelConfig(): FunnelConfigPublic {
+  const summary = contractSummaryForTier("professional");
+  return {
+    live: null,
+    contract: {
+      version: AGENCY_CONTRACT_VERSION,
+      intro: null,
+      clauses: summary.clauses
+    },
+    checkout: { title: null, body: null, pixKey: null }
+  };
+}
+
+function mergeFunnelConfig(partial?: Partial<FunnelConfigPublic> | null): FunnelConfigPublic {
+  const base = defaultFunnelConfig();
+  if (!partial) return base;
+  return {
+    live: partial.live ?? base.live,
+    contract: {
+      version: partial.contract?.version ?? base.contract.version,
+      intro: partial.contract?.intro ?? base.contract.intro,
+      clauses: partial.contract?.clauses?.length ? partial.contract.clauses : base.contract.clauses
+    },
+    checkout: {
+      title: partial.checkout?.title ?? base.checkout.title,
+      body: partial.checkout?.body ?? base.checkout.body,
+      pixKey: partial.checkout?.pixKey ?? base.checkout.pixKey
+    }
+  };
+}
+
+type FunnelApiResponse = Partial<FunnelState> &
+  Pick<FunnelState, "step" | "liveOk" | "canSelectPackage" | "lead"> & {
+    config?: FunnelConfigPublic | null;
+    tiers?: FunnelState["tiers"];
+  };
+
+function normalizeLegacyTier(
+  row: Partial<FunnelState["tiers"][number]> & { id: PackageTierId; contractSummary: ContractSummary }
+): FunnelState["tiers"][number] {
+  const base = PACKAGE_TIER_CONFIG[row.id];
+  return {
+    id: row.id,
+    name: row.name ?? base.name,
+    tagline: row.tagline ?? base.tagline,
+    totalValueCents: row.totalValueCents ?? base.totalValueCents,
+    entryValueCents:
+      row.entryValueCents ?? Math.round(base.totalValueCents * (base.entryPercent / 100)),
+    bullets: row.bullets?.length ? row.bullets : [base.tagline],
+    contractSummary: row.contractSummary
+  };
+}
+
+function fallbackTiersFromCatalog(): FunnelState["tiers"] {
+  return PACKAGE_TIER_IDS.map((id) => {
+    const base = PACKAGE_TIER_CONFIG[id];
+    return {
+      id,
+      name: base.name,
+      tagline: base.tagline,
+      totalValueCents: base.totalValueCents,
+      entryValueCents: Math.round(base.totalValueCents * (base.entryPercent / 100)),
+      bullets: [base.tagline],
+      contractSummary: contractSummaryForTier(id)
+    };
+  });
+}
+
+async function normalizeClientFunnelState(raw: FunnelApiResponse): Promise<FunnelState> {
+  let config = mergeFunnelConfig(raw.config);
+  if (!raw.config) {
+    try {
+      const pub = await apiGet<FunnelConfigPublic>("/public/agency-funnel");
+      config = mergeFunnelConfig(pub);
+    } catch {
+      // API antiga ou rota indisponível — defaults locais
+    }
+  }
+
+  const tiersRaw = raw.tiers ?? [];
+  const tiers =
+    tiersRaw.length > 0
+      ? tiersRaw.map((t) => normalizeLegacyTier(t as FunnelState["tiers"][number]))
+      : fallbackTiersFromCatalog();
+
+  return {
+    step: raw.step,
+    liveOk: raw.liveOk,
+    canSelectPackage: raw.canSelectPackage,
+    config,
+    lead: raw.lead,
+    pendingContractProject: raw.pendingContractProject ?? null,
+    awaitingCheckoutProject: raw.awaitingCheckoutProject ?? null,
+    activeProject: raw.activeProject ?? null,
+    tiers,
+    deliveryProgress: raw.deliveryProgress ?? null,
+    unreadNotificationCount: raw.unreadNotificationCount ?? 0,
+    notifications: raw.notifications ?? []
+  };
+}
+
 function formatLiveWhen(iso: string | null) {
   if (!iso) return null;
   try {
@@ -101,12 +206,15 @@ export function ClientFunnelPanel() {
   const [busy, setBusy] = useState(false);
 
   const reload = useCallback(async () => {
-    const res = await apiGet<FunnelState>("/agency/client/funnel");
-    setState(res);
-    const fromLead = parsePackageTier(res.lead?.packageTier);
+    const res = await apiGet<FunnelApiResponse>("/agency/client/funnel");
+    const normalized = await normalizeClientFunnelState(res);
+    setState(normalized);
+    const fromLead = parsePackageTier(normalized.lead?.packageTier);
     setTier((prev) => {
       if (fromLead) return fromLead;
-      if (res.tiers.length && !res.tiers.some((t) => t.id === prev)) return res.tiers[0]!.id;
+      if (normalized.tiers.length && !normalized.tiers.some((t) => t.id === prev)) {
+        return normalized.tiers[0]!.id;
+      }
       return prev;
     });
   }, []);
@@ -193,12 +301,13 @@ export function ClientFunnelPanel() {
     state.tiers.find((t) => t.id === pendingTier)?.contractSummary ??
     state.tiers.find((t) => t.id === tier)?.contractSummary;
   const checkoutPkg = state.tiers.find((t) => t.id === checkoutTier);
-  const contractClauses = state.config.contract.clauses?.length
-    ? state.config.contract.clauses
+  const funnelConfig = state.config;
+  const contractClauses = funnelConfig.contract.clauses.length
+    ? funnelConfig.contract.clauses
     : summary?.clauses ?? [];
   const canConfirmLive =
     Boolean(state.lead) &&
-    (state.lead?.source === "seed_launch" || state.config.live) &&
+    (state.lead?.source === "seed_launch" || funnelConfig.live) &&
     attendedConfirm &&
     !state.liveOk;
 
@@ -242,21 +351,21 @@ export function ClientFunnelPanel() {
 
         {(state.step === "live" || state.step === "register") && state.lead ? (
           <div className="space-y-4">
-            {state.config.live ? (
+            {funnelConfig.live ? (
               <div className="rounded-xl border border-sky-500/30 bg-sky-500/5 p-4 text-sm">
-                <p className="font-semibold text-[var(--app-text)]">{state.config.live.title}</p>
-                {state.config.live.subtitle ? (
-                  <p className="mt-1 text-[var(--app-text-muted)]">{state.config.live.subtitle}</p>
+                <p className="font-semibold text-[var(--app-text)]">{funnelConfig.live.title}</p>
+                {funnelConfig.live.subtitle ? (
+                  <p className="mt-1 text-[var(--app-text-muted)]">{funnelConfig.live.subtitle}</p>
                 ) : null}
-                {formatLiveWhen(state.config.live.scheduledAt) ? (
+                {formatLiveWhen(funnelConfig.live.scheduledAt) ? (
                   <p className="mt-2 text-xs text-[var(--app-text-subtle)]">
-                    {formatLiveWhen(state.config.live.scheduledAt)}
+                    {formatLiveWhen(funnelConfig.live.scheduledAt)}
                   </p>
                 ) : null}
                 <div className="mt-3 flex flex-wrap gap-3">
-                  {state.config.live.streamUrl ? (
+                  {funnelConfig.live.streamUrl ? (
                     <a
-                      href={state.config.live.streamUrl}
+                      href={funnelConfig.live.streamUrl}
                       target="_blank"
                       rel="noreferrer"
                       className="text-brand-primary hover:underline"
@@ -264,9 +373,9 @@ export function ClientFunnelPanel() {
                       Entrar na live
                     </a>
                   ) : null}
-                  {state.config.live.replayUrl ? (
+                  {funnelConfig.live.replayUrl ? (
                     <a
-                      href={state.config.live.replayUrl}
+                      href={funnelConfig.live.replayUrl}
                       target="_blank"
                       rel="noreferrer"
                       className="text-brand-primary hover:underline"
@@ -334,8 +443,8 @@ export function ClientFunnelPanel() {
             <div>
               <h3 className="font-semibold">{ui.signTitle}</h3>
               <p className="text-sm text-[var(--app-text-muted)]">{ui.signSubtitle}</p>
-              {state.config.contract.intro ? (
-                <p className="mt-2 text-sm text-[var(--app-text-muted)]">{state.config.contract.intro}</p>
+              {funnelConfig.contract.intro ? (
+                <p className="mt-2 text-sm text-[var(--app-text-muted)]">{funnelConfig.contract.intro}</p>
               ) : null}
             </div>
             <dl className="space-y-2 rounded-xl border border-[var(--app-border)] p-4 text-sm">
@@ -372,7 +481,7 @@ export function ClientFunnelPanel() {
                 checked={acceptTerms}
                 onChange={(e) => setAcceptTerms(e.target.checked)}
               />
-              Li e aceito o contrato de prestação de serviços (versão {state.config.contract.version}).
+              Li e aceito o contrato de prestação de serviços (versão {funnelConfig.contract.version}).
             </label>
             <button type="button" className="btn-primary w-full sm:w-auto" disabled={busy} onClick={() => void sign(pendingId)}>
               {ui.signCta}
@@ -383,9 +492,9 @@ export function ClientFunnelPanel() {
         {state.step === "checkout" && checkoutId ? (
           <div className="space-y-4">
             <div>
-              <h3 className="font-semibold">{state.config.checkout.title?.trim() || ui.checkoutTitle}</h3>
+              <h3 className="font-semibold">{funnelConfig.checkout.title?.trim() || ui.checkoutTitle}</h3>
               <p className="text-sm text-[var(--app-text-muted)]">
-                {state.config.checkout.body?.trim() ||
+                {funnelConfig.checkout.body?.trim() ||
                   "Efetue o pagamento da entrada para liberar a jornada de desenvolvimento."}
               </p>
             </div>
@@ -394,10 +503,10 @@ export function ClientFunnelPanel() {
                 Entrada: <strong>{formatBRL(checkoutPkg.entryValueCents)}</strong> ({checkoutPkg.name})
               </p>
             ) : null}
-            {state.config.checkout.pixKey ? (
+            {funnelConfig.checkout.pixKey ? (
               <div className="rounded-xl border border-[var(--app-border)] p-4 text-sm">
                 <p className="text-xs uppercase text-[var(--app-text-subtle)]">Chave PIX</p>
-                <p className="mt-1 font-mono text-[var(--app-text)]">{state.config.checkout.pixKey}</p>
+                <p className="mt-1 font-mono text-[var(--app-text)]">{funnelConfig.checkout.pixKey}</p>
               </div>
             ) : null}
             <label className="flex cursor-pointer gap-3 text-xs">
