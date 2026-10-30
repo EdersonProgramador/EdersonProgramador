@@ -340,16 +340,7 @@ export function ClientFunnelPanel() {
 
         {error ? <p className="text-sm text-red-500">{error}</p> : null}
 
-        {!state.lead ? (
-          <div className="space-y-2 text-sm text-[var(--app-text-muted)]">
-            <p>Não encontramos sua inscrição vinculada a esta conta.</p>
-            <Link to="/lancamento" className="text-brand-primary hover:underline">
-              Inscreva-se no lançamento com o mesmo e-mail do login →
-            </Link>
-          </div>
-        ) : null}
-
-        {(state.step === "live" || state.step === "register") && state.lead ? (
+        {(state.step === "live" || state.step === "register") ? (
           <div className="space-y-4">
             {funnelConfig.live ? (
               <div className="rounded-xl border border-sky-500/30 bg-sky-500/5 p-4 text-sm">

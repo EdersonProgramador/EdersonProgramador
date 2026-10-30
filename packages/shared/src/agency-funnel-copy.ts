@@ -21,7 +21,8 @@ export const AGENCY_FUNNEL_COPY = {
   ],
   client: {
     title: "Contratar App do Zero ao Lançamento",
-    subtitle: "Após a live, escolha o pacote, assine o contrato digital e entre na jornada do projeto.",
+    subtitle:
+      "Com sua conta (mesmo e-mail do lançamento), siga live → pacote → contrato → checkout → entrega.",
     liveRequired:
       "Para contratar pelo funil pós-live, confirme sua participação na aula ou aguarde liberação pelo administrador.",
     selectPackage: "Selecione o pacote",

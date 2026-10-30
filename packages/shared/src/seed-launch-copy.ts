@@ -110,7 +110,8 @@ export const SEED_LAUNCH_COPY = {
     title: "Garanta sua vaga na aula gratuita",
     subtitle: "Preencha abaixo para entrar na lista deste lançamento semente.",
     submit: "Confirmar minha inscrição",
-    successHint: "Verifique e-mail e spam. Próximo passo: conteúdo CPL 1 em até 24 h.",
+    successHint:
+      "Use o mesmo e-mail para entrar em /login e acessar o funil de contratação na Área do cliente.",
     fields: {
       challenge: "Qual seu maior desafio hoje com o app ou a ideia? (opcional)"
     }

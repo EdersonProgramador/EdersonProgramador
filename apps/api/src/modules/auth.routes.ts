@@ -84,6 +84,10 @@ export async function registerAuthRoutes(app: FastifyInstance) {
       }
     }
 
+    if (context === "agency" && user.role === "CLIENT") {
+      await linkLeadToUser(user.id, email);
+    }
+
     const authUser = toAuthUser(user, context);
     const token = await reply.jwtSign(authUser);
 

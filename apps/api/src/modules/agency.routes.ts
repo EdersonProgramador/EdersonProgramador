@@ -20,7 +20,7 @@ import {
   recordContractSignature,
   resolvePackageTier
 } from "./agency-project.js";
-import { findLeadForClient, resolveClientFunnelState } from "../agency/client-funnel.js";
+import { ensureClientFunnelLead, findLeadForClient, resolveClientFunnelState } from "../agency/client-funnel.js";
 import {
   funnelConfigPublicDto,
   getAgencyFunnelConfigRow,
@@ -489,7 +489,7 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
   app.get("/agency/client/funnel", async (request) => {
     requireRole(request.agencyUser ?? null, ["CLIENT"]);
     const user = request.agencyUser!;
-    return resolveClientFunnelState(user.id, user.email);
+    return resolveClientFunnelState(user.id, user.email, user.name);
   });
 
   app.post("/agency/client/confirm-live", async (request, reply) => {
@@ -497,10 +497,7 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
     const user = request.agencyUser!;
     z.object({ attendedLiveConfirm: z.literal(true) }).parse(request.body);
 
-    let lead = await findLeadForClient(user.id, user.email);
-    if (!lead) {
-      return reply.code(404).send({ message: "Inscrição não encontrada. Use o mesmo e-mail da aula gratuita." });
-    }
+    let lead = await ensureClientFunnelLead(user.id, user.email, user.name);
     const funnelConfig = await getAgencyFunnelConfigRow();
     if (lead.source !== "seed_launch" && !funnelConfig.livePublished) {
       return reply.code(403).send({
@@ -526,21 +523,7 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
     const user = request.agencyUser!;
     const body = z.object({ packageTier: tierSchema }).parse(request.body);
 
-    let lead = await findLeadForClient(user.id, user.email);
-    if (!lead) {
-      lead = await prisma.lead.create({
-        data: {
-          name: user.name,
-          email: user.email.toLowerCase(),
-          message: "[Funil] Cliente cadastrou-se sem lead prévio — contratação pelo portal.",
-          source: "portal",
-          userId: user.id,
-          status: "QUALIFIED"
-        }
-      });
-    } else if (!lead.userId) {
-      lead = await prisma.lead.update({ where: { id: lead.id }, data: { userId: user.id } });
-    }
+    const lead = await ensureClientFunnelLead(user.id, user.email, user.name);
 
     if (!lead.liveAttended) {
       return reply.code(403).send({

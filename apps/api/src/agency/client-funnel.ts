@@ -16,6 +16,33 @@ export async function linkLeadToUser(userId: string, email: string) {
   });
 }
 
+/** Conta cliente + inscrição lançamento (mesmo e-mail) → lead único no funil interno. */
+export async function ensureClientFunnelLead(userId: string, email: string, name: string) {
+  const normalized = email.trim().toLowerCase();
+  await linkLeadToUser(userId, normalized);
+
+  let lead = await findLeadForClient(userId, normalized);
+  if (lead && !lead.userId) {
+    lead = await prisma.lead.update({
+      where: { id: lead.id },
+      data: { userId, status: lead.status === "NEW" ? "QUALIFIED" : lead.status }
+    });
+    return lead;
+  }
+  if (lead) return lead;
+
+  return prisma.lead.create({
+    data: {
+      name: name.trim() || normalized,
+      email: normalized,
+      message: "[Funil] Cliente com conta — funil interno de contratação.",
+      source: "portal",
+      userId,
+      status: "QUALIFIED"
+    }
+  });
+}
+
 export async function findLeadForClient(userId: string, email: string) {
   const normalized = email.trim().toLowerCase();
   return prisma.lead.findFirst({
@@ -26,8 +53,8 @@ export async function findLeadForClient(userId: string, email: string) {
   });
 }
 
-export async function resolveClientFunnelState(userId: string, email: string) {
-  const lead = await findLeadForClient(userId, email);
+export async function resolveClientFunnelState(userId: string, email: string, name: string) {
+  const lead = await ensureClientFunnelLead(userId, email, name);
   const projects = await prisma.project.findMany({
     where: { clientId: userId },
     orderBy: { updatedAt: "desc" },
@@ -48,20 +75,11 @@ export async function resolveClientFunnelState(userId: string, email: string) {
   const config = funnelConfigPublicDto(configRow);
   const tiers = resolveFunnelPackages(configRow);
 
-  let step:
-    | "register"
-    | "live"
-    | "package"
-    | "contract"
-    | "checkout"
-    | "delivery" = "register";
-  if (lead) {
-    if (activeProject) step = "delivery";
-    else if (awaitingCheckout) step = "checkout";
-    else if (pendingContract) step = "contract";
-    else if (liveOk) step = "package";
-    else step = "live";
-  }
+  let step: "live" | "package" | "contract" | "checkout" | "delivery" = "live";
+  if (activeProject) step = "delivery";
+  else if (awaitingCheckout) step = "checkout";
+  else if (pendingContract) step = "contract";
+  else if (liveOk) step = "package";
 
   const [unreadNotifications, notifications] = await Promise.all([
     listUnreadNotifications(userId, 10),
