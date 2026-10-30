@@ -126,18 +126,36 @@ export async function recordContractSignature(
     documentPlain: contractDocumentToPlainText(document)
   };
 
-  return prisma.project.update({
-    where: { id: projectId },
-    data: {
-      contractStatus: "SIGNED",
-      contractSignedAt: signedAt,
-      contractAcceptedName: snapshot.legalName,
-      contractPartyJson: snapshot,
-      status: "AWAITING_CHECKOUT",
-      paymentStatus: "PENDING"
-    },
-    include: projectInclude
-  });
+  const partyJson = JSON.parse(JSON.stringify(snapshot)) as AgencyContractPartySnapshot;
+
+  const signedData = {
+    contractStatus: "SIGNED" as const,
+    contractSignedAt: signedAt,
+    contractAcceptedName: snapshot.legalName,
+    contractPartyJson: partyJson,
+    status: "AWAITING_CHECKOUT" as const,
+    paymentStatus: "PENDING" as const
+  };
+
+  try {
+    return await prisma.project.update({
+      where: { id: projectId },
+      data: signedData,
+      include: projectInclude
+    });
+  } catch (error) {
+    const code = (error as { code?: string }).code;
+    const msg = error instanceof Error ? error.message : "";
+    if (code === "P2022" || /contractPartyJson|Unknown field/i.test(msg)) {
+      const { contractPartyJson: _omit, ...withoutPartyJson } = signedData;
+      return prisma.project.update({
+        where: { id: projectId },
+        data: withoutPartyJson,
+        include: projectInclude
+      });
+    }
+    throw error;
+  }
 }
 
 export async function activateProjectAfterCheckout(projectId: string) {

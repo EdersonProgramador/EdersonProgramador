@@ -30,15 +30,12 @@ export function buildInstitutionalPackagesJson(): FunnelPackageJson {
     const base = PACKAGE_TIER_CONFIG[id];
     out[id] = {
       enabled: true,
-      name: tier.name,
-      tagline: tier.tagline,
+      name: tier?.name ?? base.name,
+      tagline: tier?.tagline ?? base.tagline,
       totalValueCents: base.totalValueCents,
-      bullets: [
-        tier.audience,
-        ...tier.deliverables.slice(0, 4),
-        tier.bonus,
-        tier.timeline
-      ].filter(Boolean)
+      bullets: tier
+        ? [tier.audience, ...tier.deliverables.slice(0, 4), tier.bonus, tier.timeline].filter(Boolean)
+        : [base.tagline]
     };
   }
   return out;

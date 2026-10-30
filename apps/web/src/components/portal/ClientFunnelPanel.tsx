@@ -7,6 +7,7 @@ import {
   composeAgencyContractDocument,
   contractKindForTier,
   contractSummaryForTier,
+  entryValueCentsForTier,
   formatBRL,
   isPartnershipTier,
   normalizePartyDetails,
@@ -158,7 +159,10 @@ function normalizeLegacyTier(
     tagline: row.tagline ?? base.tagline,
     totalValueCents: row.totalValueCents ?? base.totalValueCents,
     entryValueCents:
-      row.entryValueCents ?? Math.round(base.totalValueCents * (base.entryPercent / 100)),
+      row.entryValueCents ??
+      (base.totalValueCents > 0
+        ? Math.round(base.totalValueCents * (base.entryPercent / 100))
+        : entryValueCentsForTier(row.id)),
     bullets: row.bullets?.length ? row.bullets : [base.tagline],
     contractSummary: row.contractSummary
   };
@@ -172,7 +176,7 @@ function fallbackTiersFromCatalog(): FunnelState["tiers"] {
       name: base.name,
       tagline: base.tagline,
       totalValueCents: base.totalValueCents,
-      entryValueCents: Math.round(base.totalValueCents * (base.entryPercent / 100)),
+      entryValueCents: entryValueCentsForTier(id),
       bullets: [base.tagline],
       contractSummary: contractSummaryForTier(id)
     };

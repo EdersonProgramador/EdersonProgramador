@@ -65,17 +65,21 @@ app.setErrorHandler((error, _request, reply) => {
   const statusCode = "statusCode" in error && typeof error.statusCode === "number" ? error.statusCode : 500;
   if (statusCode >= 500) app.log.error(error);
   const raw = error.message || "Erro interno.";
+  const prismaCode = "code" in error && typeof (error as { code?: string }).code === "string" ? (error as { code: string }).code : "";
   const isDbConfig =
     /prisma|datasource|DATABASE_URL|invocation/i.test(raw) || error.name === "PrismaClientInitializationError";
+  const isSchemaDrift = prismaCode === "P2022" || /column.*does not exist|Unknown field/i.test(raw);
   const message =
     statusCode >= 500
       ? isDbConfig
         ? env.NODE_ENV === "production"
           ? "Serviço temporariamente indisponível. Tente novamente em instantes."
           : "Banco indisponível no dev: confira DATABASE_URL em apps/api/.env ou use o proxy Render (sem VITE_DEV_API_USE_LOCAL)."
-        : env.NODE_ENV === "production"
-          ? "Erro interno do servidor."
-          : raw
+        : isSchemaDrift
+          ? "Serviço em atualização. Aguarde alguns minutos e tente novamente."
+          : env.NODE_ENV === "production"
+            ? "Erro interno do servidor."
+            : raw
       : raw;
   return reply.code(statusCode).send({ message });
 });

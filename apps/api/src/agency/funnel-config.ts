@@ -131,7 +131,10 @@ export function resolveFunnelPackages(config: Awaited<ReturnType<typeof getAgenc
     const totalValueCents = o?.totalValueCents ?? base.totalValueCents;
     const tier = id;
     const summary = contractSummaryForTier(tier);
-    const entryValueCents = Math.round(totalValueCents * (base.entryPercent / 100));
+    const entryValueCents =
+      totalValueCents > 0
+        ? Math.round(totalValueCents * (base.entryPercent / 100))
+        : entryValueCentsForTier(tier);
     return {
       id: tier,
       enabled: o?.enabled !== false,

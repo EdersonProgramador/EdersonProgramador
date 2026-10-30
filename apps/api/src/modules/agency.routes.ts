@@ -696,13 +696,17 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
         });
       }
     }
-    await notifyAgencyUser({
-      userId: user.id,
-      projectId: project.id,
-      kind: "contract",
-      title: "Contrato assinado",
-      body: "Prossiga para o checkout (entrada) para liberar a jornada de desenvolvimento."
-    });
+    try {
+      await notifyAgencyUser({
+        userId: user.id,
+        projectId: project.id,
+        kind: "contract",
+        title: "Contrato assinado",
+        body: "Prossiga para o checkout (entrada) para liberar a jornada de desenvolvimento."
+      });
+    } catch (notifyError) {
+      request.log.warn({ err: notifyError, projectId: project.id }, "Falha ao criar notificação pós-assinatura");
+    }
     return {
       project: updated,
       contractVersion: AGENCY_CONTRACT_VERSION,
