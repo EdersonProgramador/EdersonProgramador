@@ -142,6 +142,7 @@ export type ContractPhaseKey = (typeof CONTRACT_DEFAULTS.phases)[number]["key"];
 export { BRAND_IDENTITY } from "./brand.js";
 export { CONTRACT_COPY } from "./contract-copy.js";
 export { MARKETING_COPY } from "./marketing-copy.js";
+export { SEED_LAUNCH_COPY, SEED_LAUNCH_PATH } from "./seed-launch-copy.js";
 export {
   PACKAGE_TIER_CONFIG,
   PACKAGE_TIER_IDS,

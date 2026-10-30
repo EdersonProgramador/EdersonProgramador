@@ -13,6 +13,7 @@ import {
 } from "./components/ProtectedRoute";
 import { ShellLayout } from "./components/ShellLayout";
 import { LandingPage } from "./pages/LandingPage";
+import { SeedLaunchPage } from "./pages/SeedLaunchPage";
 import { AgencyLoginPage } from "./pages/LoginPage";
 import { AcademyLoginPage } from "./pages/AcademyLoginPage";
 import { CertificateVerifyPage } from "./pages/CertificateVerifyPage";
@@ -44,6 +45,7 @@ export default function App() {
       <ThemeSync />
       <Routes>
         <Route index element={<LandingPage />} />
+        <Route path="lancamento" element={<SeedLaunchPage />} />
         <Route path="cursos" element={<AcademyPublicSalesPage />} />
         <Route path="cursos/carrinho" element={<AcademyCartPage />} />
         <Route path="cursos/finalizar" element={<AcademyStoreCheckoutPage />} />
