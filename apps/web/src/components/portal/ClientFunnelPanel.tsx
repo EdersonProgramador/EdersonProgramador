@@ -11,7 +11,8 @@ import {
   parsePackageTier,
   type PackageTierId
 } from "@ederson-agencia/shared";
-import { apiGet, apiPost } from "../../api";
+import { ApiError, apiGet, apiPost } from "../../api";
+import { useAgencySession } from "../../stores/authStore";
 import { ClientDeliveryProgress } from "./ClientDeliveryProgress";
 import { ClientNotificationsBanner } from "./ClientNotificationsBanner";
 import { ClientFunnelStepper, FunnelStepPanel, streamEmbedUrl } from "./funnel-ui";
@@ -197,6 +198,7 @@ function formatLiveWhen(iso: string | null) {
 
 export function ClientFunnelPanel() {
   const ui = AGENCY_FUNNEL_COPY.client;
+  const agencyUser = useAgencySession()?.user;
   const [state, setState] = useState<FunnelState | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [tier, setTier] = useState<PackageTierId>("professional");
@@ -221,8 +223,11 @@ export function ClientFunnelPanel() {
   }, []);
 
   useEffect(() => {
-    void reload().catch((err) => setError(err instanceof Error ? err.message : "Erro ao carregar funil."));
-  }, [reload]);
+    if (agencyUser?.role !== "CLIENT") return;
+    void reload().catch((err) =>
+      setError(err instanceof ApiError ? err.message : err instanceof Error ? err.message : "Erro ao carregar funil.")
+    );
+  }, [reload, agencyUser?.role]);
 
   async function confirmLive() {
     setBusy(true);
@@ -287,6 +292,10 @@ export function ClientFunnelPanel() {
     } finally {
       setBusy(false);
     }
+  }
+
+  if (agencyUser?.role !== "CLIENT") {
+    return null;
   }
 
   if (!state) {

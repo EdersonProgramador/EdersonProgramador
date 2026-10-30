@@ -63,3 +63,17 @@ export function requireRole(user: AuthTokenPayload | null, roles: AgencyRole[]):
     throw Object.assign(new Error("Acesso negado."), { statusCode: 403 });
   }
 }
+
+export function requireClientRole(user: AuthTokenPayload | null): asserts user is AuthTokenPayload {
+  if (!user) {
+    throw Object.assign(new Error("Faça login na Agência para continuar."), { statusCode: 401 });
+  }
+  if (user.role !== "CLIENT") {
+    throw Object.assign(
+      new Error(
+        "O funil de contratação é exclusivo para clientes. Entre com a conta criada no lançamento ou use /login como cliente."
+      ),
+      { statusCode: 403 }
+    );
+  }
+}

@@ -10,7 +10,7 @@ import {
   type PackageTierId
 } from "@ederson-agencia/shared";
 import { assertAgencySession } from "../auth-access.js";
-import { getAuthUser, requireRole } from "../auth.js";
+import { getAuthUser, requireClientRole, requireRole, toAuthUser } from "../auth.js";
 import { prisma } from "../prisma.js";
 import {
   activateProjectAfterCheckout,
@@ -49,10 +49,16 @@ async function assertProjectAccess(
 export async function registerAgencyRoutes(app: FastifyInstance) {
   app.addHook("preHandler", async (request, reply) => {
     if (!request.url.startsWith("/agency")) return;
-    const user = await getAuthUser(request);
-    if (!user) {
+    const tokenUser = await getAuthUser(request);
+    if (!tokenUser) {
       return reply.code(401).send({ message: "Faça login para continuar." });
     }
+    const context = tokenUser.authContext ?? "agency";
+    const dbUser = await prisma.user.findUnique({ where: { id: tokenUser.id } });
+    if (!dbUser || dbUser.status !== "ACTIVE") {
+      return reply.code(401).send({ message: "Sessão expirada. Faça login novamente." });
+    }
+    const user = toAuthUser(dbUser, context);
     try {
       assertAgencySession(user);
     } catch (error) {
@@ -487,13 +493,13 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
   });
 
   app.get("/agency/client/funnel", async (request) => {
-    requireRole(request.agencyUser ?? null, ["CLIENT"]);
+    requireClientRole(request.agencyUser ?? null);
     const user = request.agencyUser!;
     return resolveClientFunnelState(user.id, user.email, user.name);
   });
 
   app.post("/agency/client/confirm-live", async (request, reply) => {
-    requireRole(request.agencyUser ?? null, ["CLIENT"]);
+    requireClientRole(request.agencyUser ?? null);
     const user = request.agencyUser!;
     z.object({ attendedLiveConfirm: z.literal(true) }).parse(request.body);
 
@@ -519,7 +525,7 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
   });
 
   app.post("/agency/client/hire", async (request, reply) => {
-    requireRole(request.agencyUser ?? null, ["CLIENT"]);
+    requireClientRole(request.agencyUser ?? null);
     const user = request.agencyUser!;
     const body = z.object({ packageTier: tierSchema }).parse(request.body);
 
@@ -576,7 +582,7 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
   });
 
   app.post("/agency/projects/:id/sign-contract", async (request, reply) => {
-    requireRole(request.agencyUser ?? null, ["CLIENT"]);
+    requireClientRole(request.agencyUser ?? null);
     const user = request.agencyUser!;
     const params = z.object({ id: z.string() }).parse(request.params);
     const body = z
@@ -610,7 +616,7 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
   });
 
   app.post("/agency/projects/:id/complete-checkout", async (request, reply) => {
-    requireRole(request.agencyUser ?? null, ["CLIENT"]);
+    requireClientRole(request.agencyUser ?? null);
     const user = request.agencyUser!;
     const params = z.object({ id: z.string() }).parse(request.params);
     z.object({ acknowledgePayment: z.literal(true) }).parse(request.body);

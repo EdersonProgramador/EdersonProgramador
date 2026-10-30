@@ -65,7 +65,9 @@ export default function App() {
             <Route element={<ProtectedRoute realm="agency" roles={["ADMIN"]} />}>
               <Route path="admin" element={<AdminDashboard />} />
             </Route>
-            <Route path="cliente" element={<ClientDashboard />} />
+            <Route element={<ProtectedRoute realm="agency" roles={["CLIENT"]} />}>
+              <Route path="cliente" element={<ClientDashboard />} />
+            </Route>
             <Route path="freelancer" element={<FreelancerDashboard />} />
             <Route path="projetos/:projectId" element={<ProjectDetailPage />} />
             <Route path="perfil" element={<UserProfilePage realm="agency" />} />
