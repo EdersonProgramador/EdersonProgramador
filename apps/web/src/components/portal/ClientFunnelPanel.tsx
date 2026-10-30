@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   AGENCY_APP_BASE,
@@ -15,7 +15,7 @@ import { ApiError, apiGet, apiPost } from "../../api";
 import { useAgencySession } from "../../stores/authStore";
 import { ClientDeliveryProgress } from "./ClientDeliveryProgress";
 import { ClientNotificationsBanner } from "./ClientNotificationsBanner";
-import { ClientFunnelStepper, FunnelStepPanel, streamEmbedUrl } from "./funnel-ui";
+import { ClientFunnelStepper, funnelStepIndex, FunnelStepPanel, streamEmbedUrl } from "./funnel-ui";
 
 type ContractSummary = {
   tierLabel: string;
@@ -81,6 +81,16 @@ type FunnelState = {
 
 function funnelStepKey(step: FunnelState["step"]) {
   return step === "register" ? "live" : step;
+}
+
+/** Etapa do painel alinhada ao stepper após cada confirmação (API + fallback local). */
+function resolveDisplayStep(state: FunnelState): FunnelState["step"] {
+  const base = state.step === "register" ? "live" : state.step;
+  if (!state.liveOk || base !== "live") return base;
+  if (state.activeProject) return "delivery";
+  if (state.awaitingCheckoutProject) return "checkout";
+  if (state.pendingContractProject) return "contract";
+  return "package";
 }
 
 function defaultFunnelConfig(): FunnelConfigPublic {
@@ -184,6 +194,13 @@ async function normalizeClientFunnelState(raw: FunnelApiResponse): Promise<Funne
   };
 }
 
+function formatFunnelApiError(message: string, ui: (typeof AGENCY_FUNNEL_COPY)["client"]) {
+  if (/inscrição não encontrada/i.test(message)) {
+    return ui.staleLeadLinkError;
+  }
+  return message;
+}
+
 function formatLiveWhen(iso: string | null) {
   if (!iso) return null;
   try {
@@ -207,6 +224,9 @@ export function ClientFunnelPanel() {
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [checkoutAck, setCheckoutAck] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [stepSuccess, setStepSuccess] = useState<string | null>(null);
+  const stepPanelRef = useRef<HTMLDivElement>(null);
+  const prevStepRef = useRef<string | null>(null);
 
   const reload = useCallback(async () => {
     const res = await apiGet<FunnelApiResponse>("/agency/client/funnel");
@@ -229,14 +249,28 @@ export function ClientFunnelPanel() {
     );
   }, [reload, agencyUser?.role]);
 
+  useEffect(() => {
+    if (!state) return;
+    const displayStep = resolveDisplayStep(state);
+    const stepKey = funnelStepKey(displayStep);
+    if (prevStepRef.current !== null && prevStepRef.current !== stepKey) {
+      stepPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    prevStepRef.current = stepKey;
+  }, [state]);
+
   async function confirmLive() {
     setBusy(true);
     setError(null);
+    setStepSuccess(null);
     try {
+      await reload();
       await apiPost("/agency/client/confirm-live", { attendedLiveConfirm: true as const });
+      setStepSuccess(ui.stepCompleteLive);
       await reload();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Não foi possível confirmar.");
+      const raw = err instanceof ApiError ? err.message : err instanceof Error ? err.message : "Não foi possível confirmar.";
+      setError(formatFunnelApiError(raw, ui));
     } finally {
       setBusy(false);
     }
@@ -245,8 +279,10 @@ export function ClientFunnelPanel() {
   async function hire() {
     setBusy(true);
     setError(null);
+    setStepSuccess(null);
     try {
       await apiPost("/agency/client/hire", { packageTier: tier });
+      setStepSuccess(ui.stepCompletePackage);
       await reload();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Não foi possível continuar.");
@@ -262,11 +298,13 @@ export function ClientFunnelPanel() {
     }
     setBusy(true);
     setError(null);
+    setStepSuccess(null);
     try {
       await apiPost(`/agency/projects/${projectId}/sign-contract`, {
         acceptedName: acceptedName.trim(),
         acceptTerms: true as const
       });
+      setStepSuccess(ui.stepCompleteContract);
       await reload();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Falha ao assinar.");
@@ -282,10 +320,12 @@ export function ClientFunnelPanel() {
     }
     setBusy(true);
     setError(null);
+    setStepSuccess(null);
     try {
       await apiPost(`/agency/projects/${projectId}/complete-checkout`, {
         acknowledgePayment: true as const
       });
+      setStepSuccess(ui.stepCompleteCheckout);
       await reload();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Falha no checkout.");
@@ -302,7 +342,8 @@ export function ClientFunnelPanel() {
     return <p className="text-[var(--app-text-muted)]">Carregando funil…</p>;
   }
 
-  const currentStep = funnelStepKey(state.step);
+  const displayStep = resolveDisplayStep(state);
+  const currentStep = funnelStepKey(displayStep);
   const pendingId = state.pendingContractProject?.id;
   const checkoutId = state.awaitingCheckoutProject?.id;
   const pendingTier = parsePackageTier(state.pendingContractProject?.packageTier) ?? tier;
@@ -315,11 +356,9 @@ export function ClientFunnelPanel() {
   const contractClauses = funnelConfig.contract.clauses.length
     ? funnelConfig.contract.clauses
     : summary?.clauses ?? [];
-  const canConfirmLive =
-    Boolean(state.lead) &&
-    (state.lead?.source === "seed_launch" || funnelConfig.live) &&
-    attendedConfirm &&
-    !state.liveOk;
+  const showLiveConfirm = attendedConfirm && !state.liveOk;
+  const currentIdx = funnelStepIndex(currentStep);
+  const stepEyebrow = (n: number) => `Etapa ${n} de ${AGENCY_FUNNEL_COPY.steps.length}`;
 
   const liveEmbed =
     funnelConfig.live?.streamUrl ? streamEmbedUrl(funnelConfig.live.streamUrl) : null;
@@ -351,14 +390,31 @@ export function ClientFunnelPanel() {
 
         <ClientFunnelStepper currentKey={currentStep} liveOk={state.liveOk} />
 
+        {stepSuccess ? (
+          <p className="mb-4 rounded-lg border border-emerald-500/35 bg-emerald-500/10 px-4 py-3 text-sm font-medium text-emerald-800 dark:text-emerald-200">
+            {stepSuccess}
+          </p>
+        ) : null}
+
+        {currentIdx > 0 ? (
+          <p className="mb-4 text-xs text-[var(--app-text-muted)]">
+            Concluídas:{" "}
+            {AGENCY_FUNNEL_COPY.steps
+              .slice(0, currentIdx)
+              .map((s) => s.label)
+              .join(" → ")}
+          </p>
+        ) : null}
+
         {error ? (
           <p className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm text-red-600 dark:text-red-300">
             {error}
           </p>
         ) : null}
 
-        {(state.step === "live" || state.step === "register") ? (
-          <FunnelStepPanel eyebrow="Etapa 1" title={ui.stepLiveTitle} description={ui.stepLiveDesc}>
+        <div ref={stepPanelRef} className="scroll-mt-28">
+        {displayStep === "live" ? (
+          <FunnelStepPanel eyebrow={stepEyebrow(1)} title={ui.stepLiveTitle} description={ui.stepLiveDesc}>
             {funnelConfig.live ? (
               <div className="space-y-4">
                 <div className="rounded-xl border border-[var(--app-border)] bg-black/20 p-4">
@@ -418,16 +474,21 @@ export function ClientFunnelPanel() {
                 Live confirmada — você pode escolher o pacote.
               </p>
             )}
-            {canConfirmLive ? (
+            {showLiveConfirm ? (
               <button type="button" className="btn-primary w-full sm:w-auto" disabled={busy} onClick={() => void confirmLive()}>
-                Confirmar participação e continuar
+                {ui.liveConfirmCta}
               </button>
+            ) : null}
+            {!state.liveOk && attendedConfirm && !funnelConfig.live && state.lead?.source !== "seed_launch" ? (
+              <p className="text-xs text-[var(--app-text-muted)]">
+                Se a confirmação falhar, aguarde o admin publicar a live ou marcar sua participação.
+              </p>
             ) : null}
           </FunnelStepPanel>
         ) : null}
 
-        {state.step === "package" && state.canSelectPackage ? (
-          <FunnelStepPanel eyebrow="Etapa 2" title={ui.stepPackageTitle} description={ui.stepPackageDesc}>
+        {displayStep === "package" && state.canSelectPackage ? (
+          <FunnelStepPanel eyebrow={stepEyebrow(2)} title={ui.stepPackageTitle} description={ui.stepPackageDesc}>
             <div className="grid gap-4 lg:grid-cols-3">
               {state.tiers.map((pkg) => {
                 const selected = tier === pkg.id;
@@ -474,8 +535,14 @@ export function ClientFunnelPanel() {
           </FunnelStepPanel>
         ) : null}
 
-        {state.step === "contract" && pendingId && summary ? (
-          <FunnelStepPanel eyebrow="Etapa 3" title={ui.stepContractTitle} description={ui.stepContractDesc}>
+        {displayStep === "package" && state.liveOk && !state.canSelectPackage ? (
+          <FunnelStepPanel eyebrow={stepEyebrow(2)} title="Pacote em andamento" description="Você já possui um projeto aberto neste funil. Continue na etapa indicada acima ou fale com a equipe.">
+            <p className="text-sm text-[var(--app-text-muted)]">Etapa atual: {currentStep}.</p>
+          </FunnelStepPanel>
+        ) : null}
+
+        {displayStep === "contract" && pendingId && summary ? (
+          <FunnelStepPanel eyebrow={stepEyebrow(3)} title={ui.stepContractTitle} description={ui.stepContractDesc}>
             {funnelConfig.contract.intro ? (
               <p className="text-sm text-[var(--app-text-muted)]">{funnelConfig.contract.intro}</p>
             ) : null}
@@ -528,9 +595,9 @@ export function ClientFunnelPanel() {
           </FunnelStepPanel>
         ) : null}
 
-        {state.step === "checkout" && checkoutId ? (
+        {displayStep === "checkout" && checkoutId ? (
           <FunnelStepPanel
-            eyebrow="Etapa 4"
+            eyebrow={stepEyebrow(4)}
             title={funnelConfig.checkout.title?.trim() || ui.stepCheckoutTitle}
             description={funnelConfig.checkout.body?.trim() || ui.stepCheckoutDesc}
           >
@@ -574,8 +641,8 @@ export function ClientFunnelPanel() {
           </FunnelStepPanel>
         ) : null}
 
-        {state.step === "delivery" && state.activeProject ? (
-          <FunnelStepPanel eyebrow="Etapa 5" title="Projeto liberado" description={ui.signedSuccess}>
+        {displayStep === "delivery" && state.activeProject ? (
+          <FunnelStepPanel eyebrow={stepEyebrow(5)} title="Projeto liberado" description={ui.signedSuccess}>
             <Link
               to={`${AGENCY_APP_BASE}/projetos/${state.activeProject.id}`}
               className="btn-primary inline-flex w-full justify-center sm:w-auto"
@@ -584,9 +651,10 @@ export function ClientFunnelPanel() {
             </Link>
           </FunnelStepPanel>
         ) : null}
+        </div>
       </section>
 
-      {state.deliveryProgress && state.step === "delivery" ? (
+      {state.deliveryProgress && displayStep === "delivery" ? (
         <ClientDeliveryProgress projectId={state.deliveryProgress.projectId} phases={state.deliveryProgress.phases} />
       ) : null}
     </div>

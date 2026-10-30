@@ -30,8 +30,16 @@ export const AGENCY_FUNNEL_COPY = {
     stepContractDesc: "Revise investimento, jornada e cláusulas antes de assinar.",
     stepCheckoutTitle: "Pagamento da entrada",
     stepCheckoutDesc: "Finalize o checkout para iniciar a jornada de desenvolvimento.",
+    stepCompleteLive: "Etapa concluída: live confirmada. Avance para a escolha do pacote.",
+    stepCompletePackage: "Etapa concluída: pacote escolhido. Prossiga para a assinatura do contrato.",
+    stepCompleteContract: "Etapa concluída: contrato assinado. Faça o checkout da entrada.",
+    stepCompleteCheckout: "Etapa concluída: checkout registrado. Acompanhe a jornada de entrega.",
+    liveConfirmCta: "Confirmar participação e ir para o pacote",
     liveRequired:
       "Para contratar pelo funil pós-live, confirme sua participação na aula ou aguarde liberação pelo administrador.",
+    /** Resposta legada da API (Render desatualizado) — conta existe, faltava vínculo Lead. */
+    staleLeadLinkError:
+      "Sua conta na plataforma está ativa, mas o servidor ainda não vinculou seu cadastro ao funil de contratação (registro interno, diferente do login). Saia e entre de novo; se a mensagem continuar, a API em produção precisa ser atualizada ou a equipe marca a live no admin.",
     selectPackage: "Selecione o pacote",
     hireCta: "Continuar para o contrato",
     signTitle: "Contrato digital",

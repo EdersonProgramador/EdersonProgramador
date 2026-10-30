@@ -9,7 +9,7 @@
     "apps/api"
   ],
   "scripts": {
-    "dev": "npm run build --workspace @ederson-agencia/shared && concurrently -n web,api -c cyan,magenta \"npm run dev --workspace @ederson-agencia/web\" \"npm run dev --workspace @ederson-agencia/api\"",
+    "dev": "npm run build --workspace @ederson-agencia/shared && concurrently -n web,api -c cyan,magenta \"npm run dev:local-api --workspace @ederson-agencia/web\" \"npm run dev --workspace @ederson-agencia/api\"",
     "dev:web": "npm run build --workspace @ederson-agencia/shared && npm run dev --workspace @ederson-agencia/web",
     "dev:api": "npm run build --workspace @ederson-agencia/shared && npm run dev --workspace @ederson-agencia/api",
     "build": "npm run build --workspaces --if-present",
@@ -25,7 +25,8 @@
     "setup:local": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/setup-local-academia.ps1"
   },
   "devDependencies": {
-    "concurrently": "^9.1.2"
+    "concurrently": "^9.1.2",
+    "cross-env": "^7.0.3"
   },
   "engines": {
     "node": ">=20"

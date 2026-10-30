@@ -16,6 +16,18 @@ export function funnelStepIndex(key: string) {
   return STEP_ORDER.indexOf(key);
 }
 
+function stepStatusFor(
+  stepKey: string,
+  currentIdx: number,
+  liveOk: boolean
+): "done" | "current" | "upcoming" {
+  const idx = funnelStepIndex(stepKey);
+  if (idx < currentIdx) return "done";
+  if (stepKey === "live" && liveOk && idx <= currentIdx) return "done";
+  if (idx === currentIdx) return "current";
+  return "upcoming";
+}
+
 export function ClientFunnelStepper({
   currentKey,
   liveOk
@@ -24,6 +36,10 @@ export function ClientFunnelStepper({
   liveOk: boolean;
 }) {
   const currentIdx = funnelStepIndex(currentKey);
+  const progressPct =
+    liveOk && currentKey === "live"
+      ? ((funnelStepIndex("package") + 1) / STEP_ORDER.length) * 100
+      : ((currentIdx + 1) / STEP_ORDER.length) * 100;
 
   return (
     <nav aria-label="Etapas do funil" className="mb-8">
@@ -31,10 +47,7 @@ export function ClientFunnelStepper({
         {AGENCY_FUNNEL_COPY.steps.map((step) => {
           const idx = funnelStepIndex(step.key);
           const Icon = STEP_ICONS[step.key] ?? Radio;
-          let status: "done" | "current" | "upcoming" = "upcoming";
-          if (idx < currentIdx) status = "done";
-          else if (idx === currentIdx) status = "current";
-          if (step.key === "live" && liveOk && currentIdx > 0) status = "done";
+          const status = stepStatusFor(step.key, currentIdx, liveOk);
 
           return (
             <li
@@ -73,7 +86,7 @@ export function ClientFunnelStepper({
         <div
           className="h-full rounded-full bg-gradient-to-r from-sky-500 via-violet-500 to-emerald-500 transition-all duration-500"
           style={{
-            width: `${Math.max(8, ((currentIdx + 1) / STEP_ORDER.length) * 100)}%`
+            width: `${Math.max(8, progressPct)}%`
           }}
         />
       </div>

@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 5174",
+    "dev:local-api": "cross-env VITE_DEV_API_USE_LOCAL=true vite --host 0.0.0.0 --port 5174",
     "build": "vite build && node ../../scripts/vercel-postbuild.mjs",
     "preview": "vite preview --host 0.0.0.0",
     "typecheck": "tsc -p tsconfig.json --noEmit"

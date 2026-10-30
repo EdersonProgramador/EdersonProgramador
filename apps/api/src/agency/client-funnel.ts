@@ -5,6 +5,9 @@ import { projectInclude } from "../modules/agency-project.js";
 
 export async function linkLeadToUser(userId: string, email: string) {
   const normalized = email.trim().toLowerCase();
+  const existingForUser = await prisma.lead.findFirst({ where: { userId } });
+  if (existingForUser) return existingForUser;
+
   const lead = await prisma.lead.findFirst({
     where: { email: normalized, userId: null },
     orderBy: { createdAt: "desc" }
@@ -31,24 +34,34 @@ export async function ensureClientFunnelLead(userId: string, email: string, name
   }
   if (lead) return lead;
 
-  return prisma.lead.create({
-    data: {
-      name: name.trim() || normalized,
-      email: normalized,
-      message: "[Funil] Cliente com conta — funil interno de contratação.",
-      source: "portal",
-      userId,
-      status: "QUALIFIED"
+  try {
+    return await prisma.lead.create({
+      data: {
+        name: name.trim() || normalized,
+        email: normalized,
+        message: "[Funil] Cliente com conta — funil interno de contratação.",
+        source: "portal",
+        userId,
+        status: "QUALIFIED"
+      }
+    });
+  } catch (error) {
+    const code = (error as { code?: string }).code;
+    if (code === "P2002") {
+      const again = await findLeadForClient(userId, normalized);
+      if (again) return again;
     }
-  });
+    throw error;
+  }
 }
 
 export async function findLeadForClient(userId: string, email: string) {
   const normalized = email.trim().toLowerCase();
+  const byUser = await prisma.lead.findFirst({ where: { userId } });
+  if (byUser) return byUser;
+
   return prisma.lead.findFirst({
-    where: {
-      OR: [{ userId }, { email: normalized }]
-    },
+    where: { email: normalized, userId: null },
     orderBy: { createdAt: "desc" }
   });
 }
