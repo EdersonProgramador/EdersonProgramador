@@ -21,7 +21,7 @@ import {
   recordContractSignature,
   resolvePackageTier
 } from "./agency-project.js";
-import { ensureClientFunnelLead, findLeadForClient, resolveClientFunnelState } from "../agency/client-funnel.js";
+import { ensureClientFunnelLead, resolveClientFunnelState } from "../agency/client-funnel.js";
 import {
   applyInstitutionalFunnelConfig,
   funnelConfigPublicDto,
