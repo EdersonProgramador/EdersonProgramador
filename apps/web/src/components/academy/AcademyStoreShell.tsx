@@ -34,7 +34,7 @@ export function AcademyStoreShell({
           </Link>
           {nav ? <div className="hidden flex-1 justify-center md:flex">{nav}</div> : null}
           <div className="flex items-center gap-2">
-            <ThemeToggle compact className="academy-sales__theme-toggle shrink-0" />
+            <ThemeToggle compact variant="chrome" className="academy-sales__theme-toggle shrink-0" />
             <Link
               to={academyUser ? ACADEMY_APP_BASE : academyLogin}
               state={academyUser ? undefined : { from: ACADEMY_APP_BASE }}

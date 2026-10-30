@@ -9,8 +9,9 @@
 }
 
 .academy-sales .academy-sales__nav {
-  background: rgb(0 0 0 / 0.88);
+  background: var(--as-chrome-bg);
   backdrop-filter: blur(16px);
+  color: var(--as-chrome-text);
 }
 
 .academy-sales .academy-sales__footer {
@@ -105,16 +106,28 @@ html[data-theme="day"] .academy-sales.surface-light .academy-sales__nav .btn-sec
 }
 
 .academy-sales .academy-sales__nav .academy-sales__cart-btn,
-.academy-sales .academy-sales__nav .academy-sales__theme-toggle {
-  border-color: rgb(255 255 255 / 0.18);
+.academy-sales .academy-sales__nav .theme-toggle--chrome {
+  border: 1px solid rgb(255 255 255 / 0.28);
   color: #fff;
-  background: rgb(255 255 255 / 0.05);
+  background: rgb(255 255 255 / 0.1);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.2);
 }
 
 .academy-sales .academy-sales__nav .academy-sales__cart-btn:hover,
-.academy-sales .academy-sales__nav .academy-sales__theme-toggle:hover {
-  background: rgb(56 189 248 / 0.14);
-  border-color: rgb(56 189 248 / 0.4);
+.academy-sales .academy-sales__nav .theme-toggle--chrome:hover {
+  background: rgb(56 189 248 / 0.18);
+  border-color: rgb(125 211 252 / 0.55);
+  color: #fff;
+}
+
+.academy-sales .academy-sales__nav .theme-toggle--chrome:focus-visible {
+  outline: 2px solid rgb(125 211 252 / 0.75);
+  outline-offset: 2px;
+}
+
+.academy-sales .academy-sales__nav .theme-toggle--chrome[aria-pressed="true"] {
+  border-color: rgb(125 211 252 / 0.65);
+  background: rgb(56 189 248 / 0.22);
 }
 
 .academy-sales .academy-cart-layout .academy-sales__cart-btn,
@@ -183,10 +196,12 @@ html[data-theme="day"] .academy-sales .academy-udemy-card__meta {
   color: var(--as-muted);
 }
 
-.academy-sales .academy-sales__nav .academy-sales__theme-toggle {
+.academy-sales .academy-sales__nav .academy-sales__theme-toggle,
+.academy-sales .academy-sales__nav .theme-toggle--chrome {
   min-height: 2.5rem;
   min-width: 2.5rem;
   padding: 0.5rem;
+  border-radius: 0.5rem;
 }
 
 .academy-sales .academy-udemy-card__media {
@@ -576,19 +591,32 @@ html[data-theme="day"] .academy-sales .academy-udemy-card__meta {
 }
 
 /* ——— Vitrine institucional (faculdade) ——— */
-.academy-inst-hero {
-  background: linear-gradient(180deg, rgb(15 23 42 / 0.92) 0%, rgb(15 23 42 / 0.75) 100%);
+html[data-theme="day"] .academy-sales .academy-inst-hero {
+  background: var(--as-bg-hero);
 }
 
-.academy-inst-section {
-  background: var(--as-body-bg, #f8fafc);
-  color: var(--as-body-text, #0f172a);
+html[data-theme="night"] .academy-sales .academy-inst-hero {
+  background: linear-gradient(180deg, rgb(15 23 42 / 0.95) 0%, rgb(2 6 23 / 0.88) 100%);
 }
 
-html[data-theme="night"] .academy-inst-section,
-.academy-sales.surface-light .academy-inst-section {
-  background: rgb(2 6 23 / 0.35);
-  color: inherit;
+html[data-theme="day"] .academy-sales .academy-inst-section {
+  background: var(--as-bg);
+  color: var(--as-fg);
+}
+
+html[data-theme="night"] .academy-sales .academy-inst-section {
+  background: rgb(15 23 42 / 0.55);
+  color: var(--as-fg);
+}
+
+html[data-theme="day"] .academy-sales .academy-inst-section .panel {
+  border-color: var(--as-border);
+  background: var(--as-panel);
+}
+
+html[data-theme="night"] .academy-sales .academy-inst-section .panel {
+  border-color: rgb(255 255 255 / 0.1);
+  background: rgb(255 255 255 / 0.04);
 }
 
 .academy-inst-program-grid {
@@ -615,19 +643,32 @@ html[data-theme="night"] .academy-inst-section,
   height: 100%;
 }
 
-.academy-inst-section .academy-udemy-card__cart-btn.academy-sales__cta-cart {
-  border: 1px solid rgb(255 255 255 / 0.22);
-  background: rgb(255 255 255 / 0.07);
-  color: rgb(255 255 255 / 0.92);
+html[data-theme="day"] .academy-sales .academy-inst-section .academy-udemy-card__cart-btn.academy-sales__cta-cart {
+  border: 2px solid var(--as-trust);
+  background: var(--as-trust-soft);
+  color: var(--as-trust);
 }
 
-.academy-inst-section .academy-udemy-card__cart-btn.academy-sales__cta-cart:hover:not(:disabled) {
-  background: rgb(var(--brand-primary-rgb, 56 189 248) / 0.18);
-  border-color: rgb(var(--brand-primary-rgb, 56 189 248) / 0.45);
+html[data-theme="day"] .academy-sales .academy-inst-section .academy-udemy-card__cart-btn.academy-sales__cta-cart:hover:not(:disabled) {
+  background: rgb(3 105 161 / 0.14);
+  border-color: #0284c7;
 }
 
-.academy-inst-section .academy-udemy-card__cart-btn.academy-sales__cta-cart.is-in-cart,
-.academy-inst-section .academy-udemy-card__cart-btn.academy-sales__cta-cart:disabled {
+html[data-theme="night"] .academy-sales .academy-inst-section .academy-udemy-card__cart-btn.academy-sales__cta-cart {
+  border: 1px solid rgb(255 255 255 / 0.28);
+  background: rgb(255 255 255 / 0.08);
+  color: rgb(255 255 255 / 0.95);
+}
+
+html[data-theme="night"] .academy-sales .academy-inst-section .academy-udemy-card__cart-btn.academy-sales__cta-cart:hover:not(:disabled) {
+  background: rgb(56 189 248 / 0.18);
+  border-color: rgb(125 211 252 / 0.5);
+}
+
+html[data-theme="day"] .academy-sales .academy-inst-section .academy-udemy-card__cart-btn.is-in-cart,
+html[data-theme="day"] .academy-sales .academy-inst-section .academy-udemy-card__cart-btn:disabled,
+html[data-theme="night"] .academy-sales .academy-inst-section .academy-udemy-card__cart-btn.is-in-cart,
+html[data-theme="night"] .academy-sales .academy-inst-section .academy-udemy-card__cart-btn:disabled {
   border-color: var(--as-success);
   background: var(--as-success-soft);
   color: var(--as-success);

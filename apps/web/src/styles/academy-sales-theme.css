@@ -43,6 +43,13 @@ html[data-theme="night"] .academy-sales {
   --as-muted: #94a3b8;
   --as-border: rgb(255 255 255 / 0.1);
   --as-panel: rgb(255 255 255 / 0.04);
+  --as-chrome-bg: rgb(2 6 23 / 0.94);
+  --as-chrome-bg-solid: #020617;
+  --as-chrome-border: rgb(255 255 255 / 0.12);
+  --as-chrome-text: rgb(248 250 252 / 0.92);
+  --as-chrome-muted: rgb(148 163 184 / 0.95);
+  --as-chrome-link: #7dd3fc;
+  --as-chrome-link-hover: #bae6fd;
   --as-trust: #38bdf8;
   --as-trust-soft: rgb(56 189 248 / 0.12);
   --as-action: #ea580c;

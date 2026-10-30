@@ -9,6 +9,14 @@ export const COURSE_COVER = {
     "URL da capa em 1280×720 px (16:9), JPG/PNG/WebP. Use CDN, Vercel Blob ou link público estável."
 } as const;
 
+export const TANAR_COURSE = {
+  slug: "tanar",
+  title: "Tanar — Trilha de estudos hebraicos",
+  summary:
+    "Shema, Sidur, Torá, Profetas, Ketuvim e Bíblia Hebraica — trilha de formação na Academia.",
+  coverUrl: "https://i.ytimg.com/vi/ZC5IuSkEHEM/hqdefault.jpg"
+} as const;
+
 export const FL_COURSE = {
   slug: "fl-formula-de-lancamento",
   title: "Academia interna — Fórmula de Lançamento (6 em 7)",

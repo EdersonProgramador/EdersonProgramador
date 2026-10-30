@@ -92,7 +92,7 @@ export function AcademyPublicSalesPage() {
           <h1 className="academy-sales__hero-title mt-4 text-balance text-3xl font-bold leading-tight sm:text-4xl md:text-[2.75rem]">
             {copy.hero.headline}
           </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-white/75 sm:text-lg">{copy.hero.subheadline}</p>
+          <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-[var(--as-muted)] sm:text-lg">{copy.hero.subheadline}</p>
           <p className="academy-sales__trust-bar mt-6">{copy.hero.trustLine}</p>
           <a href="#programas" className="btn-primary academy-sales__cta-primary mt-8 inline-flex min-h-12 items-center px-8 text-base">
             {copy.hero.primaryCta}
@@ -104,13 +104,13 @@ export function AcademyPublicSalesPage() {
         <div className="mx-auto max-w-6xl">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-2xl font-bold sm:text-3xl">{copy.institute.title}</h2>
-            <p className="mt-4 text-base leading-relaxed text-white/70">{copy.institute.body}</p>
+            <p className="mt-4 text-base leading-relaxed text-[var(--as-muted)]">{copy.institute.body}</p>
           </div>
           <ul className="mt-12 grid gap-6 md:grid-cols-3">
             {copy.institute.pillars.map((pillar) => (
               <li key={pillar.title} className="panel border-white/10 bg-white/[0.04] p-6 text-center md:text-left">
                 <h3 className="text-lg font-semibold">{pillar.title}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-white/65">{pillar.body}</p>
+                <p className="mt-3 text-sm leading-relaxed text-[var(--as-muted)]">{pillar.body}</p>
               </li>
             ))}
           </ul>
@@ -121,7 +121,7 @@ export function AcademyPublicSalesPage() {
         <div className="mx-auto max-w-6xl">
           <header className="mx-auto max-w-2xl text-center">
             <h2 className="text-2xl font-bold sm:text-3xl">{copy.courses.title}</h2>
-            <p className="mt-3 text-sm text-white/65 sm:text-base">{copy.courses.subtitle}</p>
+            <p className="mt-3 text-sm text-[var(--as-muted)] sm:text-base">{copy.courses.subtitle}</p>
           </header>
 
           {loading ? (
