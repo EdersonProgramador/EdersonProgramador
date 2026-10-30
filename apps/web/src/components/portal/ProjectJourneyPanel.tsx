@@ -37,6 +37,7 @@ export type JourneyProject = {
   title: string;
   description?: string | null;
   status: string;
+  contractStatus?: string;
   paymentStatus: string;
   packageTier: string;
   totalValueCents: number;

@@ -1,6 +1,8 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import {
+  AGENCY_CONTRACT_VERSION,
+  contractSummaryForTier,
   PACKAGE_TIER_CONFIG,
   PACKAGE_TIER_IDS,
   nextUpgradeTier,
@@ -11,11 +13,13 @@ import { assertAgencySession } from "../auth-access.js";
 import { getAuthUser, requireRole } from "../auth.js";
 import { prisma } from "../prisma.js";
 import {
+  activateProjectAfterContract,
   applyApprovedUpgrade,
   createProjectFromPackage,
   projectInclude,
   resolvePackageTier
 } from "./agency-project.js";
+import { findLeadForClient, resolveClientFunnelState } from "../agency/client-funnel.js";
 
 const leadStatusSchema = z.enum(["NEW", "CONTACTED", "QUALIFIED", "WON", "LOST"]);
 const phaseStatusSchema = z.enum(["PENDING", "IN_PROGRESS", "WAITING_APPROVAL", "APPROVED", "DONE"]);
@@ -100,7 +104,8 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
       .object({
         status: leadStatusSchema.optional(),
         assigneeId: z.string().nullable().optional(),
-        packageTier: tierSchema.optional()
+        packageTier: tierSchema.optional(),
+        liveAttended: z.boolean().optional()
       })
       .parse(request.body);
 
@@ -109,7 +114,9 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
       data: {
         status: body.status,
         assigneeId: body.assigneeId,
-        packageTier: body.packageTier
+        packageTier: body.packageTier,
+        liveAttended: body.liveAttended,
+        liveAttendedAt: body.liveAttended === true ? new Date() : body.liveAttended === false ? null : undefined
       }
     });
     return { lead };
@@ -138,7 +145,13 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
     }
 
     const tier = resolvePackageTier(body.packageTier ?? lead.packageTier, "professional");
-    const project = await createProjectFromPackage(client.id, body.projectTitle, tier, lead.message);
+    const project = await createProjectFromPackage(
+      client.id,
+      body.projectTitle,
+      tier,
+      lead.message,
+      "immediate"
+    );
     await prisma.lead.update({
       where: { id: lead.id },
       data: { status: "WON", projectId: project.id, packageTier: tier }
@@ -188,7 +201,13 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
       })
       .parse(request.body);
 
-    let project = await createProjectFromPackage(body.clientId, body.title, body.packageTier, body.description);
+    let project = await createProjectFromPackage(
+      body.clientId,
+      body.title,
+      body.packageTier,
+      body.description,
+      "immediate"
+    );
     if (body.freelancerId) {
       project = await prisma.project.update({
         where: { id: project.id },
@@ -417,6 +436,128 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
       select: { id: true, name: true, email: true, role: true, company: true, github: true, createdAt: true }
     });
     return { users };
+  });
+
+  app.get("/agency/client/funnel", async (request, reply) => {
+    requireRole(request.agencyUser ?? null, ["CLIENT"]);
+    const user = request.agencyUser!;
+    const state = await resolveClientFunnelState(user.id, user.email);
+    return {
+      ...state,
+      tiers: PACKAGE_TIER_IDS.map((id) => ({
+        id,
+        ...PACKAGE_TIER_CONFIG[id],
+        contractSummary: contractSummaryForTier(id)
+      }))
+    };
+  });
+
+  app.post("/agency/client/confirm-live", async (request, reply) => {
+    requireRole(request.agencyUser ?? null, ["CLIENT"]);
+    const user = request.agencyUser!;
+    z.object({ attendedLiveConfirm: z.literal(true) }).parse(request.body);
+
+    let lead = await findLeadForClient(user.id, user.email);
+    if (!lead) {
+      return reply.code(404).send({ message: "Inscrição não encontrada. Use o mesmo e-mail da aula gratuita." });
+    }
+    if (lead.source !== "seed_launch") {
+      return reply.code(403).send({
+        message: "Confirmação automática só para inscrições do lançamento semente. Peça liberação ao administrador."
+      });
+    }
+
+    lead = await prisma.lead.update({
+      where: { id: lead.id },
+      data: {
+        userId: user.id,
+        liveAttended: true,
+        liveAttendedAt: new Date(),
+        status: lead.status === "NEW" ? "QUALIFIED" : lead.status
+      }
+    });
+
+    return { ok: true, lead: { id: lead.id, liveAttended: lead.liveAttended } };
+  });
+
+  app.post("/agency/client/hire", async (request, reply) => {
+    requireRole(request.agencyUser ?? null, ["CLIENT"]);
+    const user = request.agencyUser!;
+    const body = z.object({ packageTier: tierSchema }).parse(request.body);
+
+    let lead = await findLeadForClient(user.id, user.email);
+    if (!lead) {
+      lead = await prisma.lead.create({
+        data: {
+          name: user.name,
+          email: user.email.toLowerCase(),
+          message: "[Funil] Cliente cadastrou-se sem lead prévio — contratação pelo portal.",
+          source: "portal",
+          userId: user.id,
+          status: "QUALIFIED"
+        }
+      });
+    } else if (!lead.userId) {
+      lead = await prisma.lead.update({ where: { id: lead.id }, data: { userId: user.id } });
+    }
+
+    if (!lead.liveAttended) {
+      return reply.code(403).send({
+        message:
+          "Participação na live ainda não confirmada. Confirme na área do cliente ou peça liberação ao administrador."
+      });
+    }
+
+    const existingPending = await prisma.project.findFirst({
+      where: { clientId: user.id, contractStatus: "PENDING_SIGNATURE" }
+    });
+    if (existingPending) {
+      return reply.code(409).send({
+        message: "Você já tem um projeto aguardando assinatura do contrato.",
+        projectId: existingPending.id
+      });
+    }
+
+    const tier = resolvePackageTier(body.packageTier, "professional");
+    const title = `App do Zero ao Lançamento — ${user.company ?? user.name}`;
+    const project = await createProjectFromPackage(user.id, title, tier, lead.message, "await_contract");
+
+    await prisma.lead.update({
+      where: { id: lead.id },
+      data: { packageTier: tier, status: "WON", projectId: project.id }
+    });
+
+    return reply.code(201).send({
+      project,
+      contractSummary: contractSummaryForTier(tier)
+    });
+  });
+
+  app.post("/agency/projects/:id/sign-contract", async (request, reply) => {
+    requireRole(request.agencyUser ?? null, ["CLIENT"]);
+    const user = request.agencyUser!;
+    const params = z.object({ id: z.string() }).parse(request.params);
+    const body = z
+      .object({
+        acceptedName: z.string().min(3),
+        acceptTerms: z.literal(true)
+      })
+      .parse(request.body);
+
+    const project = await prisma.project.findUnique({ where: { id: params.id } });
+    if (!project || project.clientId !== user.id) {
+      return reply.code(404).send({ message: "Projeto não encontrado." });
+    }
+    if (project.contractStatus !== "PENDING_SIGNATURE") {
+      return reply.code(400).send({ message: "Este projeto não está aguardando assinatura." });
+    }
+
+    const updated = await activateProjectAfterContract(project.id, body.acceptedName);
+    return {
+      project: updated,
+      contractVersion: AGENCY_CONTRACT_VERSION,
+      message: "Contrato assinado. Projeto ativado."
+    };
   });
 }
 

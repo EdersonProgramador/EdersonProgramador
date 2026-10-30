@@ -13,13 +13,17 @@ export function resolvePackageTier(value: unknown, fallback: PackageTierId = "pr
   return parsePackageTier(value) ?? fallback;
 }
 
+export type ProjectActivationMode = "await_contract" | "immediate";
+
 export async function createProjectFromPackage(
   clientId: string,
   title: string,
   tier: PackageTierId,
-  description?: string
+  description?: string,
+  activation: ProjectActivationMode = "await_contract"
 ) {
   const cfg = PACKAGE_TIER_CONFIG[tier];
+  const immediate = activation === "immediate";
   const phasesData = JOURNEY_PHASES.map((phase, index) => {
     const labels = deliverablesForTierPhase(tier, phase.key);
     return {
@@ -27,7 +31,7 @@ export async function createProjectFromPackage(
       label: phase.label,
       sortOrder: index,
       daysPlanned: phase.daysPlanned,
-      status: index === 0 ? "IN_PROGRESS" : "PENDING",
+      status: immediate && index === 0 ? "IN_PROGRESS" : "PENDING",
       deliverables: {
         create: labels.map((label, sortOrder) => ({
           label,
@@ -44,12 +48,44 @@ export async function createProjectFromPackage(
       description,
       clientId,
       packageTier: tier,
-      status: "ACTIVE",
+      status: immediate ? "ACTIVE" : "DRAFT",
+      contractStatus: immediate ? "SIGNED" : "PENDING_SIGNATURE",
+      contractSignedAt: immediate ? new Date() : null,
+      contractVersion: "app-zero-v1",
       totalValueCents: cfg.totalValueCents,
       entryValueCents: entryValueCentsForTier(tier),
       phases: { create: phasesData }
     },
     include: projectInclude
+  });
+}
+
+export async function activateProjectAfterContract(projectId: string, acceptedName: string) {
+  const project = await prisma.project.findUnique({ where: { id: projectId }, include: { phases: true } });
+  if (!project) throw Object.assign(new Error("Projeto não encontrado."), { statusCode: 404 });
+  if (project.contractStatus === "SIGNED") {
+    throw Object.assign(new Error("Contrato já assinado."), { statusCode: 409 });
+  }
+
+  const firstPhase = project.phases.sort((a, b) => a.sortOrder - b.sortOrder)[0];
+
+  return prisma.$transaction(async (tx) => {
+    if (firstPhase) {
+      await tx.projectPhase.update({
+        where: { id: firstPhase.id },
+        data: { status: "IN_PROGRESS" }
+      });
+    }
+    return tx.project.update({
+      where: { id: projectId },
+      data: {
+        status: "ACTIVE",
+        contractStatus: "SIGNED",
+        contractSignedAt: new Date(),
+        contractAcceptedName: acceptedName.trim()
+      },
+      include: projectInclude
+    });
   });
 }
 

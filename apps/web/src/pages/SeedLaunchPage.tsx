@@ -122,7 +122,8 @@ export function SeedLaunchPage() {
         email: form.get("email"),
         phone: form.get("phone"),
         company: form.get("company"),
-        message
+        message,
+        source: "seed_launch"
       });
       setLeadStatus(`${res.message} ${copy.form.successHint}`);
       event.currentTarget.reset();
@@ -353,7 +354,18 @@ export function SeedLaunchPage() {
                   {submitting ? "Enviando…" : copy.form.submit}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </button>
-                {leadStatus ? <p className="text-sm text-blue-glow">{leadStatus}</p> : null}
+                {leadStatus ? (
+                  <div className="space-y-2 text-sm text-blue-glow">
+                    <p>{leadStatus}</p>
+                    <p>
+                      Próximo passo:{" "}
+                      <Link to="/login" className="underline">
+                        criar sua conta
+                      </Link>{" "}
+                      na Agência com o mesmo e-mail para escolher pacote e assinar o contrato após a live.
+                    </p>
+                  </div>
+                ) : null}
               </form>
             </div>
           </div>

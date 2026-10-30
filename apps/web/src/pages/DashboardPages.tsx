@@ -8,6 +8,8 @@ import {
   projectProgressPercent,
   type PackageTierId
 } from "@ederson-agencia/shared";
+import { AGENCY_FUNNEL_COPY } from "@ederson-agencia/shared";
+import { ClientFunnelPanel } from "../components/portal/ClientFunnelPanel";
 import { apiGet, apiPatch, apiPost } from "../api";
 
 type DashboardStats = Record<string, number>;
@@ -29,6 +31,7 @@ type Project = {
   title: string;
   description?: string | null;
   status: string;
+  contractStatus?: string;
   paymentStatus: string;
   packageTier: string;
   totalValueCents: number;
@@ -47,6 +50,8 @@ type Lead = {
   message: string;
   packageTier?: string | null;
   status: string;
+  source?: string | null;
+  liveAttended?: boolean;
   createdAt: string;
 };
 
@@ -85,6 +90,9 @@ function ProjectCard({ project, role }: { project: Project; role: "ADMIN" | "CLI
           </p>
           <h3 className="text-lg font-semibold text-[var(--app-text)]">{project.title}</h3>
           <p className="text-sm text-[var(--app-text-muted)]">{project.description}</p>
+          {project.contractStatus === "PENDING_SIGNATURE" ? (
+            <p className="mt-1 text-xs font-medium text-amber-600 dark:text-amber-300">Contrato pendente</p>
+          ) : null}
         </div>
         <div className="text-right text-sm">
           <p className="font-medium text-[var(--app-text)]">{formatBRL(project.totalValueCents)}</p>
@@ -168,6 +176,18 @@ export function AdminDashboard() {
     setLeads(refreshed.leads);
   }
 
+  async function toggleLiveAttended(lead: Lead, liveAttended: boolean) {
+    await apiPatch(`/agency/leads/${lead.id}`, { liveAttended });
+    const refreshed = await apiGet<{ leads: Lead[] }>("/agency/leads");
+    setLeads(refreshed.leads);
+  }
+
+  async function setLeadStatus(leadId: string, status: string) {
+    await apiPatch(`/agency/leads/${leadId}`, { status });
+    const refreshed = await apiGet<{ leads: Lead[] }>("/agency/leads");
+    setLeads(refreshed.leads);
+  }
+
   return (
     <div className="space-y-8">
       <div>
@@ -191,10 +211,29 @@ export function AdminDashboard() {
                 </p>
                 <p className="text-sm text-[var(--app-text-muted)]">
                   {lead.email} {lead.phone ? `· ${lead.phone}` : ""}
+                  {lead.source ? (
+                    <span className="ml-2 text-xs uppercase tracking-wide text-sky-600 dark:text-sky-300">
+                      {AGENCY_FUNNEL_COPY.admin.funnelSource}: {lead.source}
+                    </span>
+                  ) : null}
+                  {lead.liveAttended ? (
+                    <span className="ml-2 text-xs text-green-600 dark:text-green-400">· Live ✓</span>
+                  ) : null}
                 </p>
                 <p className="mt-2 text-sm text-[var(--app-text-muted)]">{lead.message}</p>
               </div>
               <div className="flex flex-col gap-2">
+                <select
+                  className="input text-sm"
+                  value={lead.status}
+                  onChange={(e) => void setLeadStatus(lead.id, e.target.value)}
+                >
+                  <option value="NEW">NEW</option>
+                  <option value="CONTACTED">CONTACTED</option>
+                  <option value="QUALIFIED">QUALIFIED</option>
+                  <option value="WON">WON</option>
+                  <option value="LOST">LOST</option>
+                </select>
                 <select
                   className="input text-sm"
                   value={lead.packageTier ?? ""}
@@ -208,8 +247,16 @@ export function AdminDashboard() {
                   <option value="professional">Profissional</option>
                   <option value="advanced">Avançado</option>
                 </select>
+                <label className="flex cursor-pointer items-center gap-2 text-xs">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(lead.liveAttended)}
+                    onChange={(e) => void toggleLiveAttended(lead, e.target.checked)}
+                  />
+                  {AGENCY_FUNNEL_COPY.admin.liveToggle}
+                </label>
                 <button type="button" className="btn-secondary text-sm" onClick={() => void convertLead(lead)}>
-                  Converter em projeto
+                  Converter em projeto (admin)
                 </button>
               </div>
             </div>
@@ -233,6 +280,7 @@ export function ClientDashboard() {
         </p>
       </div>
       <StatGrid stats={stats} />
+      <ClientFunnelPanel />
       <ProjectsPanel role="CLIENT" />
     </div>
   );

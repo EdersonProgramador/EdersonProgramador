@@ -23,7 +23,8 @@ const leadSchema = z.object({
   company: z.string().optional(),
   message: z.string().min(10),
   budgetHint: z.string().optional(),
-  packageTier: z.enum(["essential", "professional", "advanced"]).optional()
+  packageTier: z.enum(["essential", "professional", "advanced"]).optional(),
+  source: z.enum(["landing", "seed_launch", "portal"]).optional()
 });
 
 export async function registerPublicRoutes(app: FastifyInstance) {
@@ -227,7 +228,8 @@ export async function registerPublicRoutes(app: FastifyInstance) {
         company: body.company?.trim(),
         message: body.message.trim(),
         budgetHint: body.budgetHint?.trim(),
-        packageTier: body.packageTier
+        packageTier: body.packageTier,
+        source: body.source ?? "landing"
       }
     });
 

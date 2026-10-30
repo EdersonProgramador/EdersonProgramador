@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import type { PackageTierId } from "@ederson-agencia/shared";
-import { agencyHomePathForRole } from "@ederson-agencia/shared";
+import { AGENCY_APP_BASE, agencyHomePathForRole } from "@ederson-agencia/shared";
 import { apiGet, apiPatch, apiPost } from "../api";
 import {
   ProjectJourneyPanel,
@@ -42,6 +42,19 @@ export function ProjectDetailPage() {
   }
 
   const role = user.role;
+
+  if (role === "CLIENT" && project.contractStatus === "PENDING_SIGNATURE") {
+    return (
+      <div className="panel space-y-4 p-6">
+        <p className="text-[var(--app-text-muted)]">
+          Este projeto aguarda assinatura do contrato digital antes de iniciar as etapas de entrega.
+        </p>
+        <Link to={`${AGENCY_APP_BASE}/cliente`} className="btn-primary inline-flex text-sm">
+          Ir para assinatura do contrato
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

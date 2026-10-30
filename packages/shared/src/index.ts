@@ -144,6 +144,11 @@ export { CONTRACT_COPY } from "./contract-copy.js";
 export { MARKETING_COPY } from "./marketing-copy.js";
 export { SEED_LAUNCH_COPY, SEED_LAUNCH_PATH } from "./seed-launch-copy.js";
 export {
+  AGENCY_CONTRACT_VERSION,
+  AGENCY_FUNNEL_COPY,
+  contractSummaryForTier
+} from "./agency-funnel-copy.js";
+export {
   PACKAGE_TIER_CONFIG,
   PACKAGE_TIER_IDS,
   JOURNEY_PHASES,

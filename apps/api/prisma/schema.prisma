@@ -23,7 +23,7 @@ model User {
 
   clientProjects     Project[] @relation("ClientProjects")
   freelancerProjects Project[] @relation("FreelancerProjects")
-  leadsAssigned      Lead[]
+  leadsAssigned      Lead[] @relation("LeadAssignee")
   courseEnrollments  CourseEnrollment[]
   lessonProgress     LessonProgress[]
   courseOrders       CourseOrder[]
@@ -36,6 +36,7 @@ model User {
   repetitionCompletions CourseRepetitionCompletion[]
   moduleStudyStates  CourseModuleUserStudyState[]
   moduleRepetitionCompletions CourseModuleRepetitionCompletion[]
+  leadProfile                 Lead? @relation("LeadUser")
 }
 
 model Course {
@@ -303,22 +304,28 @@ model CourseOrder {
 }
 
 model Lead {
-  id          String   @id @default(cuid())
-  name        String
-  email       String
-  phone       String?
-  company     String?
-  message     String
-  budgetHint  String?
-  packageTier String?
-  status      String   @default("NEW")
-  source      String?  @default("landing")
-  assigneeId  String?
-  assignee    User?    @relation(fields: [assigneeId], references: [id])
-  projectId   String?  @unique
-  project     Project? @relation(fields: [projectId], references: [id])
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String    @id @default(cuid())
+  name            String
+  email           String
+  phone           String?
+  company         String?
+  message         String
+  budgetHint      String?
+  packageTier     String?
+  status          String    @default("NEW")
+  source          String?   @default("landing")
+  liveAttended    Boolean   @default(false)
+  liveAttendedAt  DateTime?
+  userId          String?   @unique
+  user            User?     @relation("LeadUser", fields: [userId], references: [id], onDelete: SetNull)
+  assigneeId      String?
+  assignee        User?     @relation("LeadAssignee", fields: [assigneeId], references: [id])
+  projectId       String?   @unique
+  project         Project?  @relation(fields: [projectId], references: [id])
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([email])
 }
 
 model Project {
@@ -329,7 +336,11 @@ model Project {
   paymentStatus   String   @default("PENDING")
   totalValueCents Int      @default(300000)
   entryValueCents Int      @default(150000)
-  packageTier     String   @default("professional")
+  packageTier            String    @default("professional")
+  contractStatus         String    @default("NONE")
+  contractSignedAt       DateTime?
+  contractAcceptedName   String?
+  contractVersion        String    @default("app-zero-v1")
   clientId        String
   client          User     @relation("ClientProjects", fields: [clientId], references: [id])
   freelancerId    String?

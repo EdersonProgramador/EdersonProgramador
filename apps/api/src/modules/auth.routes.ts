@@ -4,6 +4,7 @@ import { homePathAfterLogin } from "@ederson-agencia/shared";
 import { assertEligibleForAcademyLogin, isAcademyStoreCustomer } from "../auth-access.js";
 import { getAuthUser, hashPassword, toAuthUser, verifyPassword } from "../auth.js";
 import { prisma } from "../prisma.js";
+import { linkLeadToUser } from "../agency/client-funnel.js";
 import { registerUploadRoutes } from "./uploads.routes.js";
 
 const authContextSchema = z.enum(["agency", "academy"]);
@@ -119,6 +120,10 @@ export async function registerAuthRoutes(app: FastifyInstance) {
         github: body.github?.trim() || null
       }
     });
+
+    if (body.role === "CLIENT") {
+      await linkLeadToUser(user.id, email);
+    }
 
     const authUser = toAuthUser(user, "agency");
     const token = await reply.jwtSign(authUser);
