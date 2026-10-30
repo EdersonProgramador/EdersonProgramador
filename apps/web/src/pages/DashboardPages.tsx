@@ -41,6 +41,14 @@ type Project = {
   freelancer?: { name: string; email: string } | null;
 };
 
+type AgencyClient = {
+  id: string;
+  name: string;
+  email: string;
+  company?: string | null;
+  createdAt: string;
+};
+
 type Lead = {
   id: string;
   name: string;
@@ -144,6 +152,66 @@ function useDashboard() {
   return stats;
 }
 
+function AdminClientsList() {
+  const [clients, setClients] = useState<AgencyClient[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  useEffect(() => {
+    void apiGet<{ users: AgencyClient[] }>("/agency/users?role=CLIENT")
+      .then((res) => {
+        setClients(res.users);
+        setLoadError(null);
+      })
+      .catch((err) => {
+        setClients([]);
+        setLoadError(err instanceof Error ? err.message : "Não foi possível carregar clientes.");
+      });
+  }, []);
+
+  if (loadError) {
+    return <p className="text-sm text-red-500">{loadError}</p>;
+  }
+
+  if (clients.length === 0) {
+    return (
+      <p className="text-sm text-[var(--app-text-muted)]">
+        Nenhuma conta com perfil <strong>CLIENT</strong> cadastrada ainda.
+      </p>
+    );
+  }
+
+  return (
+    <div className="overflow-x-auto rounded-xl border border-[var(--app-border)]">
+      <table className="w-full min-w-[32rem] text-left text-sm">
+        <thead className="border-b border-[var(--app-border)] bg-[var(--app-hover)]/50 text-xs uppercase tracking-wide text-[var(--app-text-subtle)]">
+          <tr>
+            <th className="px-4 py-3 font-medium">Nome</th>
+            <th className="px-4 py-3 font-medium">E-mail</th>
+            <th className="px-4 py-3 font-medium">Empresa</th>
+            <th className="px-4 py-3 font-medium">Cadastro</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-[var(--app-border)]">
+          {clients.map((client) => (
+            <tr key={client.id} className="bg-[var(--app-panel)]">
+              <td className="px-4 py-3 font-medium text-[var(--app-text)]">{client.name}</td>
+              <td className="px-4 py-3 text-[var(--app-text-muted)]">{client.email}</td>
+              <td className="px-4 py-3 text-[var(--app-text-muted)]">{client.company?.trim() || "—"}</td>
+              <td className="px-4 py-3 text-[var(--app-text-muted)]">
+                {new Date(client.createdAt).toLocaleDateString("pt-BR", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric"
+                })}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 export function AdminDashboard() {
   const stats = useDashboard();
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -195,6 +263,17 @@ export function AdminDashboard() {
         <p className="text-[var(--app-text-muted)]">Leads, pacotes e jornada dos projetos.</p>
       </div>
       <StatGrid stats={stats} />
+      <section className="space-y-4">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="text-xl font-semibold text-[var(--app-text)]">Clientes cadastrados</h2>
+          {typeof stats.clients === "number" ? (
+            <p className="text-sm text-[var(--app-text-muted)]">
+              Total no contador: <strong>{stats.clients}</strong>
+            </p>
+          ) : null}
+        </div>
+        <AdminClientsList />
+      </section>
       <section className="space-y-4">
         <h2 className="text-xl font-semibold text-[var(--app-text)]">Leads da landing</h2>
         <div className="space-y-3">
