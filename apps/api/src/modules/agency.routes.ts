@@ -11,6 +11,7 @@ import {
 } from "@ederson-agencia/shared";
 import { assertAgencySession } from "../auth-access.js";
 import { getAuthUser, requireClientRole, requireRole, toAuthUser } from "../auth.js";
+import { Prisma } from "@prisma/client";
 import { prisma } from "../prisma.js";
 import {
   activateProjectAfterCheckout,
@@ -499,6 +500,21 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
     return resolveClientFunnelState(user.id, user.email, user.name);
   });
 
+  app.post("/agency/client/funnel/sync-lead", async (request) => {
+    requireClientRole(request.agencyUser ?? null);
+    const user = request.agencyUser!;
+    const lead = await ensureClientFunnelLead(user.id, user.email, user.name);
+    return {
+      ok: true,
+      lead: {
+        id: lead.id,
+        source: lead.source,
+        liveAttended: lead.liveAttended,
+        email: lead.email
+      }
+    };
+  });
+
   app.post("/agency/client/confirm-live", async (request, reply) => {
     requireClientRole(request.agencyUser ?? null);
     const user = request.agencyUser!;
@@ -506,11 +522,7 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
 
     let lead = await ensureClientFunnelLead(user.id, user.email, user.name);
     const funnelConfig = await getAgencyFunnelConfigRow();
-    const maySelfConfirmLive =
-      lead.source === "seed_launch" ||
-      lead.source === "portal" ||
-      funnelConfig.livePublished;
-    if (!maySelfConfirmLive) {
+    if (!funnelConfig.livePublished && lead.source !== "seed_launch" && lead.source !== "portal") {
       return reply.code(403).send({
         message: "A live ainda não foi publicada pelo administrador. Peça liberação ou aguarde a aula."
       });
@@ -729,9 +741,15 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
         liveScheduledAt: body.liveScheduledAt ? new Date(body.liveScheduledAt) : body.liveScheduledAt === null ? null : undefined,
         liveStreamUrl: body.liveStreamUrl === "" ? null : body.liveStreamUrl,
         liveReplayUrl: body.liveReplayUrl === "" ? null : body.liveReplayUrl,
-        packagesJson: body.packagesJson === null ? null : body.packagesJson,
+        packagesJson:
+          body.packagesJson === null ? Prisma.DbNull : body.packagesJson === undefined ? undefined : body.packagesJson,
         contractIntro: body.contractIntro,
-        contractClausesJson: body.contractClausesJson === null ? null : body.contractClausesJson,
+        contractClausesJson:
+          body.contractClausesJson === null
+            ? Prisma.DbNull
+            : body.contractClausesJson === undefined
+              ? undefined
+              : body.contractClausesJson,
         checkoutTitle: body.checkoutTitle,
         checkoutBody: body.checkoutBody,
         checkoutPixKey: body.checkoutPixKey

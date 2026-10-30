@@ -39,7 +39,7 @@ export const AGENCY_FUNNEL_COPY = {
       "Para contratar pelo funil pós-live, confirme sua participação na aula ou aguarde liberação pelo administrador.",
     /** Resposta legada da API (Render desatualizado) — conta existe, faltava vínculo Lead. */
     staleLeadLinkError:
-      "Sua conta na plataforma está ativa, mas o servidor ainda não vinculou seu cadastro ao funil de contratação (registro interno, diferente do login). Saia e entre de novo; se a mensagem continuar, a API em produção precisa ser atualizada ou a equipe marca a live no admin.",
+      "Não foi possível confirmar a live neste momento. Aguarde alguns minutos (atualização do servidor) e tente de novo; se persistir, saia e entre ou peça à equipe para marcar a live no admin.",
     selectPackage: "Selecione o pacote",
     hireCta: "Continuar para o contrato",
     signTitle: "Contrato digital",

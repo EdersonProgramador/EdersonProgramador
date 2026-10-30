@@ -265,6 +265,11 @@ export function ClientFunnelPanel() {
     setStepSuccess(null);
     try {
       await reload();
+      try {
+        await apiPost("/agency/client/funnel/sync-lead", {});
+      } catch {
+        /* rota ausente em API antiga — confirm-live fará ensure na versão nova */
+      }
       await apiPost("/agency/client/confirm-live", { attendedLiveConfirm: true as const });
       setStepSuccess(ui.stepCompleteLive);
       await reload();

@@ -22,14 +22,27 @@ export async function linkLeadToUser(userId: string, email: string) {
 /** Conta cliente + inscrição lançamento (mesmo e-mail) → lead único no funil interno. */
 export async function ensureClientFunnelLead(userId: string, email: string, name: string) {
   const normalized = email.trim().toLowerCase();
+
+  const owned = await prisma.lead.findFirst({ where: { userId } });
+  if (owned) return owned;
+
   await linkLeadToUser(userId, normalized);
 
   let lead = await findLeadForClient(userId, normalized);
   if (lead && !lead.userId) {
-    lead = await prisma.lead.update({
-      where: { id: lead.id },
-      data: { userId, status: lead.status === "NEW" ? "QUALIFIED" : lead.status }
-    });
+    try {
+      lead = await prisma.lead.update({
+        where: { id: lead.id },
+        data: { userId, status: lead.status === "NEW" ? "QUALIFIED" : lead.status }
+      });
+    } catch (error) {
+      const code = (error as { code?: string }).code;
+      if (code === "P2002") {
+        const retry = await prisma.lead.findFirst({ where: { userId } });
+        if (retry) return retry;
+      }
+      throw error;
+    }
     return lead;
   }
   if (lead) return lead;
