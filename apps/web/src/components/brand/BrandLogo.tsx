@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type SyntheticEvent } from "react";
 import { BRAND_IDENTITY } from "@ederson-agencia/shared";
 import { BrandMark } from "./BrandMark";
 
@@ -6,6 +6,8 @@ type BrandLogoProps = {
   variant?: "full" | "mark";
   size?: "sm" | "md";
   className?: string;
+  /** false = sem navegação/clique (header do portal). */
+  interactive?: boolean;
 };
 
 const logoImgClass = {
@@ -31,10 +33,16 @@ function LogoFallback({ size, className }: { size: "sm" | "md"; className?: stri
   );
 }
 
+function blockLogoActivation(event: SyntheticEvent) {
+  event.preventDefault();
+  event.stopPropagation();
+}
+
 export function BrandLogo({
   variant = "full",
   size = "md",
-  className = ""
+  className = "",
+  interactive = true
 }: BrandLogoProps) {
   const [imgFailed, setImgFailed] = useState(false);
 
@@ -46,6 +54,14 @@ export function BrandLogo({
     return <LogoFallback size={size} className={className} />;
   }
 
+  const imgClass = [
+    logoImgClass[size],
+    "object-contain object-left",
+    interactive ? "" : "brand-logo-img--static cursor-default"
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <span className={`inline-flex shrink-0 ${className}`}>
       <img
@@ -53,9 +69,14 @@ export function BrandLogo({
         alt={BRAND_IDENTITY.name}
         width={640}
         height={200}
-        className={`${logoImgClass[size]} object-contain object-left`}
+        className={imgClass}
         onError={() => setImgFailed(true)}
         decoding="async"
+        draggable={interactive ? undefined : false}
+        onClick={interactive ? undefined : blockLogoActivation}
+        onMouseDown={interactive ? undefined : blockLogoActivation}
+        onKeyDown={interactive ? undefined : blockLogoActivation}
+        tabIndex={interactive ? undefined : -1}
       />
     </span>
   );

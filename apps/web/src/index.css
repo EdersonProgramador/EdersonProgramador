@@ -476,6 +476,12 @@
     max-width: min(100%, clamp(12.5rem, 54vw, 15.625rem));
   }
 
+  .brand-logo-img--static {
+    pointer-events: auto;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
   .brand-logo-img--md {
     height: clamp(2.85rem, 0.75vw + 2.45rem, 3.75rem);
     max-width: min(100%, clamp(11.5rem, 10vw + 4.5rem, 16.5rem));
