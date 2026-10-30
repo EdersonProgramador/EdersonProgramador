@@ -20,7 +20,8 @@
     "prisma:generate": "npm run prisma:generate --workspace @ederson-agencia/api",
     "prisma:migrate": "npm run prisma:migrate --workspace @ederson-agencia/api",
     "prisma:seed": "npm run prisma:seed --workspace @ederson-agencia/api",
-    "sync:fl-data": "node scripts/sync-fl-data.mjs"
+    "sync:fl-data": "node scripts/sync-fl-data.mjs",
+    "sync:tanar": "npm run build --workspace @ederson-agencia/api && npm run sync:tanar --workspace @ederson-agencia/api"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"

@@ -663,12 +663,16 @@ type ModuleGroup = {
   sections: Map<number, CurriculumItem[]>;
 };
 
+function isOrphanDocument(item: CurriculumItem) {
+  return item.type === "document" && (item.module == null || item.module < 1);
+}
+
 function buildModuleGroups(items: CurriculumItem[]) {
   let currentModule: number | null = null;
   const groups: ModuleGroup[] = [];
 
   for (const item of items) {
-    if (item.type === "document") continue;
+    if (isOrphanDocument(item)) continue;
     const mod = item.module ?? 0;
     if (mod !== currentModule) {
       groups.push({ module: mod, title: item.moduleTitle ?? COURSES_UI.study.moduleLabel(mod), sections: new Map() });
@@ -718,7 +722,7 @@ function TocTree({
   onToggleDone: (slug: string, done: boolean) => void;
 }) {
   const groups = buildModuleGroups(items);
-  const docs = items.filter((i) => i.type === "document");
+  const docs = items.filter((i) => isOrphanDocument(i));
 
   function renderLessonList(lessons: CurriculumItem[]) {
     return (

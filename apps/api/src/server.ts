@@ -65,7 +65,9 @@ app.setErrorHandler((error, _request, reply) => {
   const message =
     statusCode >= 500
       ? isDbConfig
-        ? "Serviço temporariamente indisponível. Tente novamente em instantes."
+        ? env.NODE_ENV === "production"
+          ? "Serviço temporariamente indisponível. Tente novamente em instantes."
+          : "Banco indisponível no dev: confira DATABASE_URL em apps/api/.env ou use o proxy Render (sem VITE_DEV_API_USE_LOCAL)."
         : env.NODE_ENV === "production"
           ? "Erro interno do servidor."
           : raw

@@ -8,9 +8,15 @@ export const TANAR_SLUG = TANAR_CATALOG.slug;
 
 function countCatalogLessons(catalog: TanarCatalog) {
   let n = 0;
-  if (catalog.introModule?.lessons?.length) n += catalog.introModule.lessons.length;
   for (const mod of catalog.modules) n += mod.lessons.length;
   return n;
+}
+
+/** Assinatura do catálogo — detecta mudança de títulos/slugs mesmo com mesma contagem. */
+function catalogSyncSignature(catalog: TanarCatalog) {
+  return catalog.modules
+    .flatMap((mod) => mod.lessons.map((l) => `${mod.title}|${l.sectionTitle}|${l.slug}|${l.title}`))
+    .join("\n");
 }
 
 function lessonCreateData(lesson: TanarLesson, sortOrder: number) {
@@ -24,8 +30,8 @@ function lessonCreateData(lesson: TanarLesson, sortOrder: number) {
     bodyHtml: lesson.bodyHtml ?? null,
     videoUrl: lesson.videoId ? `https://www.youtube.com/watch?v=${lesson.videoId}` : null,
     documentUrl: lesson.documentUrl?.trim() || null,
-    sectionTitle: lesson.sectionTitle ?? null,
-    sectionSortOrder: lesson.sectionSortOrder ?? 1
+    sectionTitle: lesson.sectionTitle,
+    sectionSortOrder: lesson.sectionSortOrder
   };
 }
 
@@ -55,43 +61,20 @@ export async function ensureTanarCourse(prisma: PrismaClient, log: FastifyBaseLo
     }
   });
 
-  const lessonCount = await prisma.courseLesson.count({
-    where: { module: { courseId: course.id } }
-  });
-  const moduleCount = await prisma.courseModule.count({ where: { courseId: course.id } });
-  const expectedModules =
-    catalog.modules.length + (catalog.introModule?.lessons?.length ? 1 : 0);
-  const storedVersion =
-    typeof course.salesPage === "object" &&
-    course.salesPage !== null &&
-    "catalogVersion" in course.salesPage &&
-    typeof (course.salesPage as { catalogVersion?: unknown }).catalogVersion === "number"
-      ? (course.salesPage as { catalogVersion: number }).catalogVersion
-      : 0;
-
+  const expectedModules = catalog.modules.length;
+  const signature = catalogSyncSignature(catalog);
+  const storedPage =
+    course.salesPage != null && typeof course.salesPage === "object"
+      ? (course.salesPage as { catalogVersion?: number; catalogSignature?: string })
+      : {};
   const needsSync =
-    storedVersion !== catalog.catalogVersion ||
-    lessonCount !== expectedLessons ||
-    moduleCount !== expectedModules;
+    storedPage.catalogVersion !== catalog.catalogVersion ||
+    storedPage.catalogSignature !== signature;
 
   if (needsSync) {
     await prisma.courseModule.deleteMany({ where: { courseId: course.id } });
 
     let sortOrder = 0;
-    const intro = catalog.introModule;
-    if (intro?.lessons?.length) {
-      await prisma.courseModule.create({
-        data: {
-          courseId: course.id,
-          sortOrder: sortOrder++,
-          title: intro.title,
-          lessons: {
-            create: intro.lessons.map((lesson, li) => lessonCreateData(lesson, li))
-          }
-        }
-      });
-    }
-
     for (const mod of catalog.modules) {
       await prisma.courseModule.create({
         data: {
@@ -107,7 +90,12 @@ export async function ensureTanarCourse(prisma: PrismaClient, log: FastifyBaseLo
 
     await prisma.course.update({
       where: { id: course.id },
-      data: { salesPage: { catalogVersion: catalog.catalogVersion } }
+      data: {
+        salesPage: {
+          catalogVersion: catalog.catalogVersion,
+          catalogSignature: signature
+        }
+      }
     });
 
     log.info(
