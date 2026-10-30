@@ -20,9 +20,16 @@ export const AGENCY_FUNNEL_COPY = {
     { key: "delivery", label: "Entrega" }
   ],
   client: {
-    title: "Contratar App do Zero ao Lançamento",
-    subtitle:
-      "Com sua conta (mesmo e-mail do lançamento), siga live → pacote → contrato → checkout → entrega.",
+    title: "Seu funil de contratação",
+    subtitle: "Assista à live de apresentação e avance etapa a etapa até liberar seu projeto.",
+    stepLiveTitle: "Live de apresentação",
+    stepLiveDesc: "Assista à aula ao vivo (ou replay) e confirme sua participação para desbloquear os pacotes.",
+    stepPackageTitle: "Escolha seu pacote",
+    stepPackageDesc: "Valores e escopo conforme publicado pela equipe — sem surpresas fora do contrato.",
+    stepContractTitle: "Assinatura digital",
+    stepContractDesc: "Revise investimento, jornada e cláusulas antes de assinar.",
+    stepCheckoutTitle: "Pagamento da entrada",
+    stepCheckoutDesc: "Finalize o checkout para iniciar a jornada de desenvolvimento.",
     liveRequired:
       "Para contratar pelo funil pós-live, confirme sua participação na aula ou aguarde liberação pelo administrador.",
     selectPackage: "Selecione o pacote",

@@ -14,6 +14,7 @@ import {
 import { apiGet, apiPost } from "../../api";
 import { ClientDeliveryProgress } from "./ClientDeliveryProgress";
 import { ClientNotificationsBanner } from "./ClientNotificationsBanner";
+import { ClientFunnelStepper, FunnelStepPanel, streamEmbedUrl } from "./funnel-ui";
 
 type ContractSummary = {
   tierLabel: string;
@@ -311,6 +312,21 @@ export function ClientFunnelPanel() {
     attendedConfirm &&
     !state.liveOk;
 
+  const liveEmbed =
+    funnelConfig.live?.streamUrl ? streamEmbedUrl(funnelConfig.live.streamUrl) : null;
+  const replayEmbed =
+    funnelConfig.live?.replayUrl ? streamEmbedUrl(funnelConfig.live.replayUrl) : null;
+
+  async function copyPix() {
+    const key = funnelConfig.checkout.pixKey?.trim();
+    if (!key) return;
+    try {
+      await navigator.clipboard.writeText(key);
+    } catch {
+      /* ignore */
+    }
+  }
+
   return (
     <div className="space-y-6">
       <ClientNotificationsBanner
@@ -318,145 +334,168 @@ export function ClientFunnelPanel() {
         unreadCount={state.unreadNotificationCount}
       />
 
-      <section className="panel space-y-6 p-6">
-        <div>
-          <h2 className="text-xl font-semibold text-[var(--app-text)]">{ui.title}</h2>
-          <p className="mt-1 text-sm text-[var(--app-text-muted)]">{ui.subtitle}</p>
-          <ol className="mt-4 flex flex-wrap gap-2 text-xs">
-            {AGENCY_FUNNEL_COPY.steps.map((s) => (
-              <li
-                key={s.key}
-                className={`rounded-full px-3 py-1 ${
-                  currentStep === s.key
-                    ? "bg-sky-500/20 text-sky-700 dark:text-sky-200"
-                    : "bg-[var(--app-hover)] text-[var(--app-text-muted)]"
-                }`}
-              >
-                {s.label}
-              </li>
-            ))}
-          </ol>
+      <section className="panel overflow-hidden p-6 sm:p-8">
+        <div className="mb-2">
+          <h2 className="text-2xl font-bold tracking-tight text-[var(--app-text)]">{ui.title}</h2>
+          <p className="mt-2 text-sm text-[var(--app-text-muted)]">{ui.subtitle}</p>
         </div>
 
-        {error ? <p className="text-sm text-red-500">{error}</p> : null}
+        <ClientFunnelStepper currentKey={currentStep} liveOk={state.liveOk} />
+
+        {error ? (
+          <p className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm text-red-600 dark:text-red-300">
+            {error}
+          </p>
+        ) : null}
 
         {(state.step === "live" || state.step === "register") ? (
-          <div className="space-y-4">
+          <FunnelStepPanel eyebrow="Etapa 1" title={ui.stepLiveTitle} description={ui.stepLiveDesc}>
             {funnelConfig.live ? (
-              <div className="rounded-xl border border-sky-500/30 bg-sky-500/5 p-4 text-sm">
-                <p className="font-semibold text-[var(--app-text)]">{funnelConfig.live.title}</p>
-                {funnelConfig.live.subtitle ? (
-                  <p className="mt-1 text-[var(--app-text-muted)]">{funnelConfig.live.subtitle}</p>
-                ) : null}
-                {formatLiveWhen(funnelConfig.live.scheduledAt) ? (
-                  <p className="mt-2 text-xs text-[var(--app-text-subtle)]">
-                    {formatLiveWhen(funnelConfig.live.scheduledAt)}
-                  </p>
-                ) : null}
-                <div className="mt-3 flex flex-wrap gap-3">
-                  {funnelConfig.live.streamUrl ? (
-                    <a
-                      href={funnelConfig.live.streamUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-brand-primary hover:underline"
-                    >
-                      Entrar na live
-                    </a>
+              <div className="space-y-4">
+                <div className="rounded-xl border border-[var(--app-border)] bg-black/20 p-4">
+                  <p className="text-lg font-semibold">{funnelConfig.live.title}</p>
+                  {funnelConfig.live.subtitle ? (
+                    <p className="mt-1 text-sm text-[var(--app-text-muted)]">{funnelConfig.live.subtitle}</p>
                   ) : null}
-                  {funnelConfig.live.replayUrl ? (
-                    <a
-                      href={funnelConfig.live.replayUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-brand-primary hover:underline"
-                    >
-                      Ver replay
-                    </a>
+                  {formatLiveWhen(funnelConfig.live.scheduledAt) ? (
+                    <p className="mt-2 text-xs font-medium uppercase tracking-wide text-sky-600 dark:text-sky-400">
+                      {formatLiveWhen(funnelConfig.live.scheduledAt)}
+                    </p>
                   ) : null}
                 </div>
+                {liveEmbed ? (
+                  <div className="aspect-video overflow-hidden rounded-xl border border-[var(--app-border)] shadow-lg">
+                    <iframe
+                      title="Live de apresentação"
+                      src={liveEmbed}
+                      className="h-full w-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                ) : funnelConfig.live.streamUrl ? (
+                  <a href={funnelConfig.live.streamUrl} target="_blank" rel="noreferrer" className="btn-primary inline-flex">
+                    Abrir live em nova aba
+                  </a>
+                ) : null}
+                {replayEmbed ? (
+                  <div className="space-y-2">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-[var(--app-text-subtle)]">Replay</p>
+                    <div className="aspect-video overflow-hidden rounded-xl border border-[var(--app-border)]">
+                      <iframe title="Replay" src={replayEmbed} className="h-full w-full" allowFullScreen />
+                    </div>
+                  </div>
+                ) : funnelConfig.live.replayUrl ? (
+                  <a href={funnelConfig.live.replayUrl} target="_blank" rel="noreferrer" className="btn-secondary inline-flex text-sm">
+                    Ver replay
+                  </a>
+                ) : null}
               </div>
             ) : (
               <p className="text-sm text-[var(--app-text-muted)]">{ui.liveRequired}</p>
             )}
             {!state.liveOk ? (
-              <label className="flex cursor-pointer gap-3 text-sm">
+              <label className="flex cursor-pointer gap-3 rounded-xl border border-dashed border-[var(--app-border)] p-4 text-sm">
                 <input
                   type="checkbox"
                   className="mt-1 h-4 w-4 accent-sky-500"
                   checked={attendedConfirm}
                   onChange={(e) => setAttendedConfirm(e.target.checked)}
                 />
-                Confirmo que participei (ou participarei) da aula ao vivo deste funil.
+                Confirmo que assisti (ou vou assistir) à live de apresentação para avançar ao pacote.
               </label>
             ) : (
-              <p className="text-sm text-green-600 dark:text-green-400">Participação na live confirmada.</p>
+              <p className="rounded-lg bg-emerald-500/10 px-4 py-3 text-sm font-medium text-emerald-700 dark:text-emerald-300">
+                Live confirmada — você pode escolher o pacote.
+              </p>
             )}
             {canConfirmLive ? (
-              <button type="button" className="btn-primary" disabled={busy} onClick={() => void confirmLive()}>
-                Confirmar participação na live
+              <button type="button" className="btn-primary w-full sm:w-auto" disabled={busy} onClick={() => void confirmLive()}>
+                Confirmar participação e continuar
               </button>
             ) : null}
-          </div>
+          </FunnelStepPanel>
         ) : null}
 
         {state.step === "package" && state.canSelectPackage ? (
-          <div className="space-y-4">
-            <p className="text-sm font-medium">{ui.selectPackage}</p>
-            <div className="grid gap-3 sm:grid-cols-3">
-              {state.tiers.map((pkg) => (
-                <button
-                  key={pkg.id}
-                  type="button"
-                  className={`rounded-xl border p-4 text-left text-sm transition ${
-                    tier === pkg.id
-                      ? "border-sky-500 bg-sky-500/10"
-                      : "border-[var(--app-border)] hover:border-sky-500/40"
-                  }`}
-                  onClick={() => setTier(pkg.id)}
-                >
-                  <p className="font-semibold">{pkg.name}</p>
-                  <p className="mt-1 text-[var(--app-text-muted)]">{pkg.tagline}</p>
-                  <p className="mt-2 text-xs font-medium">
-                    {formatBRL(pkg.totalValueCents)} · entrada {formatBRL(pkg.entryValueCents)}
-                  </p>
-                </button>
-              ))}
+          <FunnelStepPanel eyebrow="Etapa 2" title={ui.stepPackageTitle} description={ui.stepPackageDesc}>
+            <div className="grid gap-4 lg:grid-cols-3">
+              {state.tiers.map((pkg) => {
+                const selected = tier === pkg.id;
+                const featured = pkg.id === "professional";
+                return (
+                  <button
+                    key={pkg.id}
+                    type="button"
+                    className={`relative flex flex-col rounded-2xl border p-5 text-left transition ${
+                      selected
+                        ? "border-sky-500 ring-2 ring-sky-500/40"
+                        : "border-[var(--app-border)] hover:border-sky-500/50"
+                    } ${featured ? "bg-gradient-to-b from-violet-500/10 to-transparent" : "bg-[var(--app-hover)]/30"}`}
+                    onClick={() => setTier(pkg.id)}
+                  >
+                    {featured ? (
+                      <span className="absolute -top-2.5 right-4 rounded-full bg-violet-600 px-2 py-0.5 text-[10px] font-bold uppercase text-white">
+                        Recomendado
+                      </span>
+                    ) : null}
+                    <p className="text-lg font-semibold">{pkg.name}</p>
+                    <p className="mt-2 flex-1 text-sm text-[var(--app-text-muted)]">{pkg.tagline}</p>
+                    <p className="mt-4 font-display text-2xl font-bold text-[var(--app-text)]">
+                      {formatBRL(pkg.totalValueCents)}
+                    </p>
+                    <p className="text-xs text-[var(--app-text-subtle)]">Entrada {formatBRL(pkg.entryValueCents)}</p>
+                    <ul className="mt-3 space-y-1 text-xs text-[var(--app-text-muted)]">
+                      {pkg.bullets.slice(0, 3).map((b) => (
+                        <li key={b}>· {b}</li>
+                      ))}
+                    </ul>
+                  </button>
+                );
+              })}
             </div>
-            <button type="button" className="btn-primary" disabled={busy || !state.tiers.length} onClick={() => void hire()}>
+            <button
+              type="button"
+              className="btn-primary mt-2 w-full sm:w-auto"
+              disabled={busy || !state.tiers.length}
+              onClick={() => void hire()}
+            >
               {ui.hireCta}
             </button>
-          </div>
+          </FunnelStepPanel>
         ) : null}
 
         {state.step === "contract" && pendingId && summary ? (
-          <div className="space-y-4">
-            <div>
-              <h3 className="font-semibold">{ui.signTitle}</h3>
-              <p className="text-sm text-[var(--app-text-muted)]">{ui.signSubtitle}</p>
-              {funnelConfig.contract.intro ? (
-                <p className="mt-2 text-sm text-[var(--app-text-muted)]">{funnelConfig.contract.intro}</p>
-              ) : null}
-            </div>
-            <dl className="space-y-2 rounded-xl border border-[var(--app-border)] p-4 text-sm">
+          <FunnelStepPanel eyebrow="Etapa 3" title={ui.stepContractTitle} description={ui.stepContractDesc}>
+            {funnelConfig.contract.intro ? (
+              <p className="text-sm text-[var(--app-text-muted)]">{funnelConfig.contract.intro}</p>
+            ) : null}
+            <p className="text-sm text-[var(--app-text-muted)]">{ui.signSubtitle}</p>
+            <dl className="grid gap-4 rounded-xl border border-[var(--app-border)] bg-[var(--app-hover)]/40 p-5 text-sm sm:grid-cols-3">
               <div>
-                <dt className="text-[var(--app-text-subtle)]">Pacote</dt>
-                <dd className="font-medium">{summary.tierLabel}</dd>
+                <dt className="text-xs uppercase text-[var(--app-text-subtle)]">Pacote</dt>
+                <dd className="mt-1 font-semibold">{summary.tierLabel}</dd>
               </div>
               <div>
-                <dt className="text-[var(--app-text-subtle)]">Investimento</dt>
-                <dd>
-                  {summary.totalFormatted} · entrada {summary.entryFormatted}
+                <dt className="text-xs uppercase text-[var(--app-text-subtle)]">Investimento</dt>
+                <dd className="mt-1 font-semibold">
+                  {summary.totalFormatted}
+                  <span className="block text-xs font-normal text-[var(--app-text-muted)]">
+                    Entrada {summary.entryFormatted}
+                  </span>
                 </dd>
               </div>
-              <div>
-                <dt className="text-[var(--app-text-subtle)]">Jornada</dt>
-                <dd>{summary.phasesSummary}</dd>
+              <div className="sm:col-span-1">
+                <dt className="text-xs uppercase text-[var(--app-text-subtle)]">Jornada</dt>
+                <dd className="mt-1 text-[var(--app-text-muted)]">{summary.phasesSummary}</dd>
               </div>
             </dl>
-            <ul className="list-inside list-disc space-y-1 text-xs text-[var(--app-text-muted)]">
+            <ul className="max-h-40 space-y-2 overflow-y-auto rounded-xl border border-[var(--app-border)] p-4 text-xs leading-relaxed text-[var(--app-text-muted)]">
               {contractClauses.map((c) => (
-                <li key={c}>{c}</li>
+                <li key={c} className="flex gap-2">
+                  <span className="text-sky-500">•</span>
+                  <span>{c}</span>
+                </li>
               ))}
             </ul>
             <input
@@ -465,42 +504,48 @@ export function ClientFunnelPanel() {
               value={acceptedName}
               onChange={(e) => setAcceptedName(e.target.value)}
             />
-            <label className="flex cursor-pointer gap-3 text-xs">
+            <label className="flex cursor-pointer gap-3 rounded-lg border border-[var(--app-border)] p-3 text-xs">
               <input
                 type="checkbox"
                 className="mt-0.5 h-4 w-4 accent-sky-500"
                 checked={acceptTerms}
                 onChange={(e) => setAcceptTerms(e.target.checked)}
               />
-              Li e aceito o contrato de prestação de serviços (versão {funnelConfig.contract.version}).
+              Li e aceito o contrato (versão {funnelConfig.contract.version}).
             </label>
             <button type="button" className="btn-primary w-full sm:w-auto" disabled={busy} onClick={() => void sign(pendingId)}>
               {ui.signCta}
             </button>
-          </div>
+          </FunnelStepPanel>
         ) : null}
 
         {state.step === "checkout" && checkoutId ? (
-          <div className="space-y-4">
-            <div>
-              <h3 className="font-semibold">{funnelConfig.checkout.title?.trim() || ui.checkoutTitle}</h3>
-              <p className="text-sm text-[var(--app-text-muted)]">
-                {funnelConfig.checkout.body?.trim() ||
-                  "Efetue o pagamento da entrada para liberar a jornada de desenvolvimento."}
-              </p>
-            </div>
+          <FunnelStepPanel
+            eyebrow="Etapa 4"
+            title={funnelConfig.checkout.title?.trim() || ui.stepCheckoutTitle}
+            description={funnelConfig.checkout.body?.trim() || ui.stepCheckoutDesc}
+          >
             {checkoutPkg ? (
-              <p className="text-sm">
-                Entrada: <strong>{formatBRL(checkoutPkg.entryValueCents)}</strong> ({checkoutPkg.name})
-              </p>
-            ) : null}
-            {funnelConfig.checkout.pixKey ? (
-              <div className="rounded-xl border border-[var(--app-border)] p-4 text-sm">
-                <p className="text-xs uppercase text-[var(--app-text-subtle)]">Chave PIX</p>
-                <p className="mt-1 font-mono text-[var(--app-text)]">{funnelConfig.checkout.pixKey}</p>
+              <div className="rounded-xl bg-gradient-to-br from-sky-500/15 to-violet-500/10 p-6 text-center">
+                <p className="text-xs uppercase tracking-wide text-[var(--app-text-subtle)]">Valor da entrada</p>
+                <p className="mt-2 font-display text-4xl font-bold text-[var(--app-text)]">
+                  {formatBRL(checkoutPkg.entryValueCents)}
+                </p>
+                <p className="mt-1 text-sm text-[var(--app-text-muted)]">{checkoutPkg.name}</p>
               </div>
             ) : null}
-            <label className="flex cursor-pointer gap-3 text-xs">
+            {funnelConfig.checkout.pixKey ? (
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[var(--app-border)] p-4">
+                <div>
+                  <p className="text-xs uppercase text-[var(--app-text-subtle)]">PIX</p>
+                  <p className="mt-1 font-mono text-sm text-[var(--app-text)]">{funnelConfig.checkout.pixKey}</p>
+                </div>
+                <button type="button" className="btn-secondary text-xs" onClick={() => void copyPix()}>
+                  Copiar chave
+                </button>
+              </div>
+            ) : null}
+            <label className="flex cursor-pointer gap-3 rounded-lg border border-dashed border-[var(--app-border)] p-4 text-xs">
               <input
                 type="checkbox"
                 className="mt-0.5 h-4 w-4 accent-sky-500"
@@ -517,19 +562,18 @@ export function ClientFunnelPanel() {
             >
               {ui.checkoutCta}
             </button>
-          </div>
+          </FunnelStepPanel>
         ) : null}
 
         {state.step === "delivery" && state.activeProject ? (
-          <div>
-            <p className="text-sm text-green-600 dark:text-green-400">{ui.signedSuccess}</p>
+          <FunnelStepPanel eyebrow="Etapa 5" title="Projeto liberado" description={ui.signedSuccess}>
             <Link
               to={`${AGENCY_APP_BASE}/projetos/${state.activeProject.id}`}
-              className="btn-primary mt-4 inline-flex text-sm"
+              className="btn-primary inline-flex w-full justify-center sm:w-auto"
             >
               {ui.goToProject}
             </Link>
-          </div>
+          </FunnelStepPanel>
         ) : null}
       </section>
 

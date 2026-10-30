@@ -107,11 +107,11 @@ export const SEED_LAUNCH_COPY = {
 
   form: {
     label: "Inscrição",
-    title: "Garanta sua vaga na aula gratuita",
-    subtitle: "Preencha abaixo para entrar na lista deste lançamento semente.",
-    submit: "Confirmar minha inscrição",
-    successHint:
-      "Use o mesmo e-mail para entrar em /login e acessar o funil de contratação na Área do cliente.",
+    title: "Cadastre-se na plataforma",
+    subtitle:
+      "Um único cadastro: você entra na lista da live e já cria sua conta para assistir à apresentação e contratar dentro do sistema.",
+    submit: "Criar conta e entrar na lista",
+    successHint: "Redirecionando para a Área do cliente…",
     fields: {
       challenge: "Qual seu maior desafio hoje com o app ou a ideia? (opcional)"
     }

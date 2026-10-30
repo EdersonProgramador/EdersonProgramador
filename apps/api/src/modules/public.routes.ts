@@ -11,6 +11,7 @@ import { hashPassword, toAuthUser } from "../auth.js";
 import { fulfillAcademyPurchase, listPublicSaleCourses } from "../courses/academy-purchase.js";
 import { getPublicCourseProgram } from "../courses/course-program-public.js";
 import { funnelConfigPublicDto, getAgencyFunnelConfigRow } from "../agency/funnel-config.js";
+import { registerSeedLaunchClient } from "../agency/seed-launch-signup.js";
 import { prisma } from "../prisma.js";
 import { ensureAcademyTestUser } from "../seed-academy-test-user.js";
 import { env } from "../env.js";
@@ -222,6 +223,57 @@ export async function registerPublicRoutes(app: FastifyInstance) {
       message: "Compra confirmada. Enviamos o acesso ao e-mail informado.",
       ...result
     });
+  });
+
+  app.post("/public/seed-launch/signup", async (request, reply) => {
+    const body = z
+      .object({
+        name: z.string().min(2).max(120),
+        email: z.string().email(),
+        password: z.string().min(6).max(128),
+        phone: z.string().min(8).max(40),
+        company: z.string().max(200).optional(),
+        challenge: z.string().max(2000).optional(),
+        acceptTerms: z.literal(true, {
+          errorMap: () => ({ message: "Aceite os termos para continuar." })
+        })
+      })
+      .parse(request.body);
+
+    const message = [
+      "[Funil: Lançamento Semente — App do Zero ao Lançamento]",
+      "[Cadastro na plataforma + lista da aula]",
+      body.challenge?.trim() ? `\nDesafio informado:\n${body.challenge.trim()}` : "",
+      `\n[LGPD: consentimento em ${new Date().toISOString()}]`
+    ]
+      .filter(Boolean)
+      .join("");
+
+    try {
+      const { authUser, homePath } = await registerSeedLaunchClient({
+        name: body.name,
+        email: body.email,
+        password: body.password,
+        phone: body.phone,
+        company: body.company,
+        message
+      });
+      const token = await reply.jwtSign(authUser);
+      return reply.code(201).send({
+        token,
+        user: authUser,
+        authContext: "agency" as const,
+        homePath,
+        message:
+          "Conta criada. Acesse a Área do cliente para assistir à live de apresentação e seguir o funil."
+      });
+    } catch (error) {
+      const statusCode = (error as { statusCode?: number }).statusCode ?? 500;
+      if (statusCode === 409) {
+        return reply.code(409).send({ message: (error as Error).message });
+      }
+      throw error;
+    }
   });
 
   app.post("/public/leads", async (request, reply) => {

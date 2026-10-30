@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
   Calendar,
@@ -17,7 +17,8 @@ import { MoodSection } from "../components/landing/MoodSection";
 import { Reveal } from "../components/landing/Reveal";
 import { SectionHeader } from "../components/landing/SectionHeader";
 import { usePageMood } from "../hooks/usePageMood";
-import { apiGet, apiPost } from "../api";
+import { apiGet, apiPost, type LoginResponse } from "../api";
+import { useAuthStore } from "../stores/authStore";
 import { ThemeToggle } from "../components/theme/ThemeToggle";
 import { scrollToLandingTop } from "../lib/landing-scroll";
 
@@ -85,6 +86,8 @@ type PublicFunnelLive = {
 };
 
 export function SeedLaunchPage() {
+  const navigate = useNavigate();
+  const setSession = useAuthStore((s) => s.setSession);
   const [scrolled, setScrolled] = useState(false);
   const [consent, setConsent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -126,25 +129,35 @@ export function SeedLaunchPage() {
     setLeadStatus(null);
     const form = new FormData(event.currentTarget);
     const challenge = String(form.get("challenge") ?? "").trim();
-    const message = [
-      "[Funil: Lançamento Semente — App do Zero ao Lançamento]",
-      `[Intenção: inscrição aula gratuita]`,
-      challenge ? `\nDesafio informado:\n${challenge}` : "",
-      `\n[LGPD: consentimento em ${new Date().toISOString()}]`
-    ].join("");
+
+    const password = String(form.get("password") ?? "");
+    const passwordConfirm = String(form.get("passwordConfirm") ?? "");
+    if (password.length < 6) {
+      setLeadStatus("A senha deve ter pelo menos 6 caracteres.");
+      setSubmitting(false);
+      return;
+    }
+    if (password !== passwordConfirm) {
+      setLeadStatus("As senhas não coincidem.");
+      setSubmitting(false);
+      return;
+    }
 
     try {
-      const res = await apiPost<{ message: string }>("/public/leads", {
+      const res = await apiPost<LoginResponse & { message: string }>("/public/seed-launch/signup", {
         name: form.get("name"),
         email: form.get("email"),
         phone: form.get("phone"),
         company: form.get("company"),
-        message,
-        source: "seed_launch"
+        password,
+        challenge: challenge || undefined,
+        acceptTerms: true as const
       });
+      setSession("agency", res);
       setLeadStatus(`${res.message} ${copy.form.successHint}`);
       event.currentTarget.reset();
       setConsent(false);
+      navigate(res.homePath ?? "/agencia/cliente", { replace: true });
     } catch (error) {
       setLeadStatus(error instanceof Error ? error.message : "Não foi possível enviar. Tente de novo.");
     } finally {
@@ -346,7 +359,7 @@ export function SeedLaunchPage() {
                     </li>
                     <li className="flex gap-2">
                       <Shield className="h-4 w-4 shrink-0 text-blue-glow" aria-hidden />
-                      Sem exibir preços nesta etapa — apenas inscrição na aula.
+                      Cadastro na plataforma + lista da live — pacotes só dentro do funil após a apresentação.
                     </li>
                   </ul>
                   <p className="mt-6 text-xs leading-relaxed text-white/40">{legal.shortDisclaimer}</p>
@@ -364,6 +377,24 @@ export function SeedLaunchPage() {
                   autoComplete="tel"
                 />
                 <input className="input" name="company" placeholder="Empresa (opcional)" autoComplete="organization" />
+                <input
+                  className="input"
+                  type="password"
+                  name="password"
+                  placeholder="Senha de acesso (mín. 6 caracteres)"
+                  required
+                  minLength={6}
+                  autoComplete="new-password"
+                />
+                <input
+                  className="input"
+                  type="password"
+                  name="passwordConfirm"
+                  placeholder="Confirme a senha"
+                  required
+                  minLength={6}
+                  autoComplete="new-password"
+                />
                 <textarea
                   className="input min-h-24"
                   name="challenge"
@@ -386,18 +417,13 @@ export function SeedLaunchPage() {
                   {submitting ? "Enviando…" : copy.form.submit}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </button>
-                {leadStatus ? (
-                  <div className="space-y-2 text-sm text-blue-glow">
-                    <p>{leadStatus}</p>
-                    <p>
-                      Próximo passo:{" "}
-                      <Link to="/login" className="underline">
-                        criar sua conta
-                      </Link>{" "}
-                      na Agência com o mesmo e-mail para escolher pacote e assinar o contrato após a live.
-                    </p>
-                  </div>
-                ) : null}
+                {leadStatus ? <p className="text-sm text-blue-glow">{leadStatus}</p> : null}
+                <p className="text-center text-xs text-white/45">
+                  Já tem conta?{" "}
+                  <Link to="/login" className="text-blue-glow underline-offset-2 hover:underline">
+                    Entrar
+                  </Link>
+                </p>
               </form>
             </div>
           </div>
