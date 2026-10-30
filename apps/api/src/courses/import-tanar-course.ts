@@ -23,7 +23,9 @@ function lessonCreateData(lesson: TanarLesson, sortOrder: number) {
     status: "PUBLISHED" as const,
     bodyHtml: lesson.bodyHtml ?? null,
     videoUrl: lesson.videoId ? `https://www.youtube.com/watch?v=${lesson.videoId}` : null,
-    documentUrl: lesson.documentUrl?.trim() || null
+    documentUrl: lesson.documentUrl?.trim() || null,
+    sectionTitle: lesson.sectionTitle ?? null,
+    sectionSortOrder: lesson.sectionSortOrder ?? 1
   };
 }
 
@@ -56,8 +58,23 @@ export async function ensureTanarCourse(prisma: PrismaClient, log: FastifyBaseLo
   const lessonCount = await prisma.courseLesson.count({
     where: { module: { courseId: course.id } }
   });
+  const moduleCount = await prisma.courseModule.count({ where: { courseId: course.id } });
+  const expectedModules =
+    catalog.modules.length + (catalog.introModule?.lessons?.length ? 1 : 0);
+  const storedVersion =
+    typeof course.salesPage === "object" &&
+    course.salesPage !== null &&
+    "catalogVersion" in course.salesPage &&
+    typeof (course.salesPage as { catalogVersion?: unknown }).catalogVersion === "number"
+      ? (course.salesPage as { catalogVersion: number }).catalogVersion
+      : 0;
 
-  if (lessonCount < expectedLessons) {
+  const needsSync =
+    storedVersion !== catalog.catalogVersion ||
+    lessonCount !== expectedLessons ||
+    moduleCount !== expectedModules;
+
+  if (needsSync) {
     await prisma.courseModule.deleteMany({ where: { courseId: course.id } });
 
     let sortOrder = 0;
@@ -88,8 +105,13 @@ export async function ensureTanarCourse(prisma: PrismaClient, log: FastifyBaseLo
       });
     }
 
+    await prisma.course.update({
+      where: { id: course.id },
+      data: { salesPage: { catalogVersion: catalog.catalogVersion } }
+    });
+
     log.info(
-      { slug: catalog.slug, modules: catalog.modules.length + (intro ? 1 : 0), lessons: expectedLessons },
+      { slug: catalog.slug, modules: expectedModules, lessons: expectedLessons, catalogVersion: catalog.catalogVersion },
       "Trilha Tanar sincronizada."
     );
   }

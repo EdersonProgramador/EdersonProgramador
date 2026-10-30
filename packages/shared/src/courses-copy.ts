@@ -13,7 +13,7 @@ export const TANAR_COURSE = {
   slug: "tanar",
   title: "Tanar — Trilha de estudos hebraicos",
   summary:
-    "Shema, Sidur, Torá, Profetas, Ketuvim e Bíblia Hebraica — trilha de formação na Academia.",
+    "Oração hebraica (Shema), Escritos (Tehillim e Mishlé), Torá e Profetas — com Bíblia Hebraica na biblioteca.",
   coverUrl: "https://i.ytimg.com/vi/ZC5IuSkEHEM/hqdefault.jpg"
 } as const;
 
