@@ -22,6 +22,7 @@ import {
 } from "./agency-project.js";
 import { ensureClientFunnelLead, findLeadForClient, resolveClientFunnelState } from "../agency/client-funnel.js";
 import {
+  applyInstitutionalFunnelConfig,
   funnelConfigPublicDto,
   getAgencyFunnelConfigRow,
   resolveFunnelPackages,
@@ -695,6 +696,20 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
       config: row,
       public: funnelConfigPublicDto(row),
       packages: resolveFunnelPackages(row)
+    };
+  });
+
+  app.post("/agency/admin/funnel-config/apply-institutional", async (request) => {
+    requireRole(request.agencyUser ?? null, ["ADMIN"]);
+    const body = z.object({ force: z.boolean().optional() }).parse(request.body ?? {});
+    const row = await applyInstitutionalFunnelConfig(body.force === true);
+    return {
+      config: row,
+      public: funnelConfigPublicDto(row),
+      packages: resolveFunnelPackages(row),
+      message: body.force
+        ? "Funil substituído pelos dados da página institucional."
+        : "Campos vazios preenchidos com dados da página institucional."
     };
   });
 

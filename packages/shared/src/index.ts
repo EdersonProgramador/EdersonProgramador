@@ -149,6 +149,11 @@ export {
   contractSummaryForTier
 } from "./agency-funnel-copy.js";
 export {
+  buildInstitutionalPackagesJson,
+  institutionalFunnelDbDefaults,
+  type FunnelPackageJson
+} from "./agency-funnel-institutional.js";
+export {
   PACKAGE_TIER_CONFIG,
   PACKAGE_TIER_IDS,
   JOURNEY_PHASES,

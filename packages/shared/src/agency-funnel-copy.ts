@@ -52,7 +52,11 @@ export const AGENCY_FUNNEL_COPY = {
     funnelEditorTitle: "Funil comercial (fonte da Área do cliente)",
     funnelEditorHint: "Publique a live, pacotes, contrato e checkout — o cliente segue estas etapas na ordem.",
     livePublish: "Publicar live para clientes",
-    saveFunnel: "Salvar funil"
+    saveFunnel: "Salvar funil",
+    applyInstitutional: "Preencher com dados institucionais",
+    applyInstitutionalForce: "Restaurar tudo da landing",
+    applyInstitutionalHint:
+      "Importa live, pacotes (Essencial/Profissional/Avançado), contrato e checkout a partir de MARKETING_COPY / página principal."
   }
 } as const;
 

@@ -4,7 +4,7 @@ import {
   PACKAGE_TIER_IDS,
   type PackageTierId
 } from "@ederson-agencia/shared";
-import { apiGet, apiPatch } from "../../api";
+import { apiGet, apiPatch, apiPost } from "../../api";
 
 type FunnelConfigRow = {
   livePublished: boolean;
@@ -62,28 +62,46 @@ export function AdminFunnelEditor() {
     advanced: tierFormFromJson(null, "advanced")
   });
 
-  useEffect(() => {
-    void apiGet<{ config: FunnelConfigRow }>("/agency/admin/funnel-config").then((res) => {
-      const c = res.config;
-      setLivePublished(c.livePublished);
-      setLiveTitle(c.liveTitle);
-      setLiveSubtitle(c.liveSubtitle ?? "");
-      setLiveScheduledAt(c.liveScheduledAt ? c.liveScheduledAt.slice(0, 16) : "");
-      setLiveStreamUrl(c.liveStreamUrl ?? "");
-      setLiveReplayUrl(c.liveReplayUrl ?? "");
-      setContractIntro(c.contractIntro ?? "");
-      setContractClauses(Array.isArray(c.contractClausesJson) ? c.contractClausesJson.join("\n") : "");
-      setCheckoutTitle(c.checkoutTitle ?? "");
-      setCheckoutBody(c.checkoutBody ?? "");
-      setCheckoutPixKey(c.checkoutPixKey ?? "");
-      const pj = c.packagesJson as Record<string, unknown> | null;
-      setTiers({
-        essential: tierFormFromJson(pj, "essential"),
-        professional: tierFormFromJson(pj, "professional"),
-        advanced: tierFormFromJson(pj, "advanced")
-      });
+  function loadFromConfig(c: FunnelConfigRow) {
+    setLivePublished(c.livePublished);
+    setLiveTitle(c.liveTitle);
+    setLiveSubtitle(c.liveSubtitle ?? "");
+    setLiveScheduledAt(c.liveScheduledAt ? c.liveScheduledAt.slice(0, 16) : "");
+    setLiveStreamUrl(c.liveStreamUrl ?? "");
+    setLiveReplayUrl(c.liveReplayUrl ?? "");
+    setContractIntro(c.contractIntro ?? "");
+    setContractClauses(Array.isArray(c.contractClausesJson) ? c.contractClausesJson.join("\n") : "");
+    setCheckoutTitle(c.checkoutTitle ?? "");
+    setCheckoutBody(c.checkoutBody ?? "");
+    setCheckoutPixKey(c.checkoutPixKey ?? "");
+    const pj = c.packagesJson as Record<string, unknown> | null;
+    setTiers({
+      essential: tierFormFromJson(pj, "essential"),
+      professional: tierFormFromJson(pj, "professional"),
+      advanced: tierFormFromJson(pj, "advanced")
     });
+  }
+
+  useEffect(() => {
+    void apiGet<{ config: FunnelConfigRow }>("/agency/admin/funnel-config").then((res) => loadFromConfig(res.config));
   }, []);
+
+  async function applyInstitutional(force: boolean) {
+    setBusy(true);
+    setStatus(null);
+    try {
+      const res = await apiPost<{ config: FunnelConfigRow; message: string }>(
+        "/agency/admin/funnel-config/apply-institutional",
+        { force }
+      );
+      loadFromConfig(res.config);
+      setStatus(res.message);
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : "Erro ao importar.");
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function save() {
     setBusy(true);
@@ -213,9 +231,18 @@ export function AdminFunnelEditor() {
         <input className="input" placeholder="Chave PIX" value={checkoutPixKey} onChange={(e) => setCheckoutPixKey(e.target.value)} />
       </fieldset>
 
-      <button type="button" className="btn-primary" disabled={busy} onClick={() => void save()}>
-        {busy ? "Salvando…" : ui.saveFunnel}
-      </button>
+      <div className="flex flex-wrap gap-3">
+        <button type="button" className="btn-primary" disabled={busy} onClick={() => void save()}>
+          {busy ? "Salvando…" : ui.saveFunnel}
+        </button>
+        <button type="button" className="btn-secondary" disabled={busy} onClick={() => void applyInstitutional(false)}>
+          {ui.applyInstitutional}
+        </button>
+        <button type="button" className="btn-ghost text-sm" disabled={busy} onClick={() => void applyInstitutional(true)}>
+          {ui.applyInstitutionalForce}
+        </button>
+      </div>
+      <p className="text-xs text-[var(--app-text-subtle)]">{ui.applyInstitutionalHint}</p>
       {status ? <p className="text-sm text-sky-600 dark:text-sky-300">{status}</p> : null}
     </section>
   );
