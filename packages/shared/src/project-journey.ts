@@ -1,6 +1,6 @@
 /** Pacotes e etapas da jornada (App do Zero ao Lançamento) — uso no portal e na API. */
 
-export const PACKAGE_TIER_IDS = ["essential", "professional", "advanced"] as const;
+export const PACKAGE_TIER_IDS = ["essential", "professional", "advanced", "partnership"] as const;
 export type PackageTierId = (typeof PACKAGE_TIER_IDS)[number];
 
 export const JOURNEY_PHASE_KEYS = ["IDEA", "PLAN", "BUILD", "QA", "LAUNCH"] as const;
@@ -51,6 +51,13 @@ const TIER_DELIVERABLES: Record<PackageTierId, Record<JourneyPhaseKey, readonly 
       "Preparação de implantação e documentação",
       "Planejamento de escalabilidade e evolução"
     ]
+  },
+  partnership: {
+    IDEA: ["Diagnóstico do modelo de negócio e metas de receita compartilhada", "Definição do produto mínimo viável da parceria"],
+    PLAN: ["Anexo técnico (backlog) e anexo comercial (percentual e repasses)", "Arquitetura e roadmap alinhados ao risco compartilhado"],
+    BUILD: ["Desenvolvimento do produto digital conforme escopo fechado", "Integrações financeiras para auditoria de métricas"],
+    QA: ["Homologação conjunta antes de abrir receita", "Validação de relatórios e painéis de repasse"],
+    LAUNCH: ["Publicação assistida", "Acordo operacional de divisão de receitas em vigor"]
   }
 };
 
@@ -75,6 +82,12 @@ export const PACKAGE_TIER_CONFIG: Record<
     tagline: "Para projetos de maior complexidade",
     totalValueCents: 2_490_000,
     entryPercent: 40
+  },
+  partnership: {
+    name: "Parceria Comercial",
+    tagline: "Divisão de receitas e riscos compartilhados",
+    totalValueCents: 0,
+    entryPercent: 100
   }
 };
 
@@ -89,6 +102,7 @@ export function packageTierLabel(tier: PackageTierId): string {
 }
 
 export function entryValueCentsForTier(tier: PackageTierId): number {
+  if (tier === "partnership") return 150_000;
   const cfg = PACKAGE_TIER_CONFIG[tier];
   return Math.round((cfg.totalValueCents * cfg.entryPercent) / 100);
 }
@@ -149,6 +163,7 @@ export function currentPhaseIndex(phases: ReadonlyArray<{ status: string; sortOr
 export const UPGRADE_TIER_ORDER: PackageTierId[] = ["essential", "professional", "advanced"];
 
 export function nextUpgradeTier(current: PackageTierId): PackageTierId | null {
+  if (current === "partnership") return null;
   const idx = UPGRADE_TIER_ORDER.indexOf(current);
   if (idx < 0 || idx >= UPGRADE_TIER_ORDER.length - 1) return null;
   return UPGRADE_TIER_ORDER[idx + 1]!;

@@ -80,7 +80,8 @@ export function AdminFunnelEditor() {
   const [tiers, setTiers] = useState<Record<PackageTierId, TierForm>>({
     essential: tierFormFromJson(null, "essential"),
     professional: tierFormFromJson(null, "professional"),
-    advanced: tierFormFromJson(null, "advanced")
+    advanced: tierFormFromJson(null, "advanced"),
+    partnership: tierFormFromJson(null, "partnership")
   });
 
   function loadFromConfig(c: FunnelConfigRow) {
@@ -99,7 +100,8 @@ export function AdminFunnelEditor() {
     setTiers({
       essential: tierFormFromJson(pj, "essential"),
       professional: tierFormFromJson(pj, "professional"),
-      advanced: tierFormFromJson(pj, "advanced")
+      advanced: tierFormFromJson(pj, "advanced"),
+      partnership: tierFormFromJson(pj, "partnership")
     });
   }
 

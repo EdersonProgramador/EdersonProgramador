@@ -3,6 +3,10 @@ import { z } from "zod";
 import {
   AGENCY_CONTRACT_VERSION,
   contractSummaryForTier,
+  sanitizeContractCompany,
+  normalizePartyDetails,
+  validatePartyDetails,
+  type AgencyContractPartyDetails,
   PACKAGE_TIER_CONFIG,
   PACKAGE_TIER_IDS,
   nextUpgradeTier,
@@ -35,6 +39,44 @@ const leadStatusSchema = z.enum(["NEW", "CONTACTED", "QUALIFIED", "WON", "LOST"]
 const phaseStatusSchema = z.enum(["PENDING", "IN_PROGRESS", "WAITING_APPROVAL", "APPROVED", "DONE"]);
 const deliverableStatusSchema = z.enum(["PENDING", "IN_PROGRESS", "DONE"]);
 const tierSchema = z.enum(PACKAGE_TIER_IDS);
+
+const contractAddressSchema = z.object({
+  street: z.string().trim().min(1, "Informe o logradouro."),
+  number: z.string().trim().min(1, "Informe o número."),
+  complement: z.string().trim().optional().nullable(),
+  district: z.string().trim().min(1, "Informe o bairro."),
+  city: z.string().trim().min(1, "Informe a cidade."),
+  state: z.string().trim().min(2, "Informe a UF.").max(2),
+  zip: z.string().trim().min(8, "Informe o CEP completo.")
+});
+
+const contractPartyDetailsSchema = z.discriminatedUnion("kind", [
+  z.object({
+    kind: z.literal("pf"),
+    email: z.string().email("Informe um e-mail válido."),
+    phone: z.string().trim().max(40).optional().nullable(),
+    fullName: z.string().trim().min(3, "Informe o nome completo."),
+    cpf: z.string().trim().min(11, "Informe o CPF completo."),
+    rg: z.string().trim().min(2, "Informe o RG."),
+    profession: z.string().trim().optional().nullable(),
+    maritalStatus: z.string().trim().optional().nullable(),
+    address: contractAddressSchema
+  }),
+  z.object({
+    kind: z.literal("pj"),
+    email: z.string().email("Informe um e-mail válido."),
+    phone: z.string().trim().max(40).optional().nullable(),
+    corporateName: z.string().trim().min(3, "Informe a razão social."),
+    cnpj: z.string().trim().min(14, "Informe o CNPJ completo."),
+    stateRegistration: z.string().trim().optional().nullable(),
+    municipalRegistration: z.string().trim().optional().nullable(),
+    hqAddress: contractAddressSchema,
+    representativeName: z.string().trim().min(3, "Informe o nome do representante legal."),
+    representativeCpf: z.string().trim().min(11, "Informe o CPF do representante."),
+    representativeRg: z.string().trim().min(2, "Informe o RG do representante."),
+    representativeRole: z.string().trim().min(2, "Informe o cargo do representante.")
+  })
+]);
 
 async function assertProjectAccess(
   user: NonNullable<import("fastify").FastifyRequest["agencyUser"]>,
@@ -604,8 +646,8 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
     const params = z.object({ id: z.string() }).parse(request.params);
     const body = z
       .object({
-        acceptedName: z.string().min(3),
-        acceptTerms: z.literal(true)
+        acceptTerms: z.literal(true, { errorMap: () => ({ message: "Aceite os termos do contrato." }) }),
+        partyDetails: contractPartyDetailsSchema
       })
       .parse(request.body);
 
@@ -617,7 +659,43 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
       return reply.code(400).send({ message: "Este projeto não está aguardando assinatura." });
     }
 
-    const updated = await recordContractSignature(project.id, body.acceptedName);
+    const dbUser = await prisma.user.findUnique({ where: { id: user.id } });
+    const email = (dbUser?.email ?? user.email).trim().toLowerCase();
+    const partyDetails = normalizePartyDetails({
+      ...body.partyDetails,
+      email,
+      phone: body.partyDetails.phone?.trim() || null
+    });
+    const validationError = validatePartyDetails(partyDetails);
+    if (validationError) {
+      return reply.code(400).send({ message: validationError });
+    }
+
+    const funnelConfigRow = await getAgencyFunnelConfigRow();
+    const funnelPublic = funnelConfigPublicDto(funnelConfigRow);
+    const tier = parsePackageTier(project.packageTier) ?? "professional";
+    const fallbackClauses = contractSummaryForTier(tier).clauses;
+
+    const updated = await recordContractSignature(project.id, partyDetails, {
+      intro: funnelPublic.contract.intro,
+      clauses: funnelPublic.contract.clauses.length ? funnelPublic.contract.clauses : fallbackClauses
+    });
+
+    if (dbUser && partyDetails.phone?.trim() && !dbUser.phone) {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { phone: partyDetails.phone.trim() }
+      });
+    }
+    if (dbUser && partyDetails.kind === "pj") {
+      const company = sanitizeContractCompany(partyDetails.corporateName);
+      if (company && !sanitizeContractCompany(dbUser.company)) {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { company }
+        });
+      }
+    }
     await notifyAgencyUser({
       userId: user.id,
       projectId: project.id,

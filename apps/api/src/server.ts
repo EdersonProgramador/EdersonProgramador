@@ -55,7 +55,12 @@ await app.register(multipart, {
 app.setErrorHandler((error, _request, reply) => {
   if (error instanceof ZodError) {
     const first = error.issues[0];
-    return reply.code(400).send({ message: first?.message ?? "Dados inválidos." });
+    const msg = first?.message ?? "Dados inválidos.";
+    const friendly =
+      msg === "Required" || msg === "Invalid input"
+        ? "Preencha todos os campos obrigatórios do contrato."
+        : msg;
+    return reply.code(400).send({ message: friendly });
   }
   const statusCode = "statusCode" in error && typeof error.statusCode === "number" ? error.statusCode : 500;
   if (statusCode >= 500) app.log.error(error);

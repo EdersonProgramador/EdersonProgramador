@@ -1,9 +1,18 @@
 import {
+  AGENCY_CONTRACT_VERSION,
   JOURNEY_PHASES,
   PACKAGE_TIER_CONFIG,
+  composeAgencyContractDocument,
+  contractDocumentToPlainText,
+  contractKindForTier,
+  contractSummaryForTier,
   deliverablesForTierPhase,
+  legalNameFromPartyDetails,
+  sanitizeContractCompany,
+  type AgencyContractPartyDetails,
   entryValueCentsForTier,
   parsePackageTier,
+  type AgencyContractPartySnapshot,
   type JourneyPhaseKey,
   type PackageTierId
 } from "@ederson-agencia/shared";
@@ -60,19 +69,70 @@ export async function createProjectFromPackage(
   });
 }
 
-export async function recordContractSignature(projectId: string, acceptedName: string) {
+export async function recordContractSignature(
+  projectId: string,
+  partyDetails: AgencyContractPartyDetails,
+  options?: { clauses?: string[]; intro?: string | null }
+) {
   const project = await prisma.project.findUnique({ where: { id: projectId } });
   if (!project) throw Object.assign(new Error("Projeto não encontrado."), { statusCode: 404 });
   if (project.contractStatus === "SIGNED") {
     throw Object.assign(new Error("Contrato já assinado."), { statusCode: 409 });
   }
 
+  const tier = parsePackageTier(project.packageTier) ?? "professional";
+  const summary = contractSummaryForTier(tier);
+  const signedAt = new Date();
+  const legalName = legalNameFromPartyDetails(partyDetails);
+  const email = partyDetails.email.trim().toLowerCase();
+  const company =
+    partyDetails.kind === "pj"
+      ? sanitizeContractCompany(partyDetails.corporateName)
+      : null;
+  const phone = partyDetails.phone?.trim() || null;
+  const contractVersion = project.contractVersion || AGENCY_CONTRACT_VERSION;
+  const contractKind = contractKindForTier(tier);
+
+  const clauses =
+    options?.clauses?.length ? options.clauses : summary.clauses;
+
+  const document = composeAgencyContractDocument({
+    contractKind,
+    packageTier: tier,
+    partyDetails,
+    packageLabel: summary.tierLabel,
+    totalValueCents: project.totalValueCents,
+    entryValueCents: project.entryValueCents,
+    phasesSummary: summary.phasesSummary,
+    contractVersion,
+    intro: options?.intro,
+    clauses
+  });
+
+  const snapshot: AgencyContractPartySnapshot = {
+    legalName,
+    email,
+    company,
+    phone,
+    contractKind,
+    partyDetails,
+    contractVersion,
+    packageTier: tier,
+    packageLabel: summary.tierLabel,
+    totalValueCents: project.totalValueCents,
+    entryValueCents: project.entryValueCents,
+    phasesSummary: summary.phasesSummary,
+    signedAt: signedAt.toISOString(),
+    documentPlain: contractDocumentToPlainText(document)
+  };
+
   return prisma.project.update({
     where: { id: projectId },
     data: {
       contractStatus: "SIGNED",
-      contractSignedAt: new Date(),
-      contractAcceptedName: acceptedName.trim(),
+      contractSignedAt: signedAt,
+      contractAcceptedName: snapshot.legalName,
+      contractPartyJson: snapshot,
       status: "AWAITING_CHECKOUT",
       paymentStatus: "PENDING"
     },
@@ -111,8 +171,11 @@ export async function activateProjectAfterCheckout(projectId: string) {
 }
 
 /** @deprecated use recordContractSignature + activateProjectAfterCheckout */
-export async function activateProjectAfterContract(projectId: string, acceptedName: string) {
-  await recordContractSignature(projectId, acceptedName);
+export async function activateProjectAfterContract(
+  projectId: string,
+  partyDetails: AgencyContractPartyDetails
+) {
+  await recordContractSignature(projectId, partyDetails);
   return activateProjectAfterCheckout(projectId);
 }
 

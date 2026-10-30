@@ -4,8 +4,14 @@ import {
   AGENCY_APP_BASE,
   AGENCY_CONTRACT_VERSION,
   AGENCY_FUNNEL_COPY,
+  composeAgencyContractDocument,
+  contractKindForTier,
   contractSummaryForTier,
   formatBRL,
+  isPartnershipTier,
+  normalizePartyDetails,
+  validatePartyDetails,
+  type AgencyContractPartyDetails,
   PACKAGE_TIER_CONFIG,
   PACKAGE_TIER_IDS,
   parsePackageTier,
@@ -15,6 +21,11 @@ import { ApiError, apiGet, apiPost } from "../../api";
 import { useAgencySession } from "../../stores/authStore";
 import { ClientDeliveryProgress } from "./ClientDeliveryProgress";
 import { ClientNotificationsBanner } from "./ClientNotificationsBanner";
+import {
+  ClientFunnelContractPartyForm,
+  createInitialPartyDetails
+} from "./ClientFunnelContractPartyForm";
+import { ClientFunnelContractPreview } from "./ClientFunnelContractPreview";
 import { ClientFunnelStepper, funnelStepIndex, FunnelStepPanel, streamEmbedUrl } from "./funnel-ui";
 
 type ContractSummary = {
@@ -77,6 +88,12 @@ type FunnelState = {
   } | null;
   unreadNotificationCount: number;
   notifications: NotificationRow[];
+  clientContractProfile: {
+    name: string;
+    email: string;
+    company: string | null;
+    phone: string | null;
+  } | null;
 };
 
 function funnelStepKey(step: FunnelState["step"]) {
@@ -128,6 +145,7 @@ type FunnelApiResponse = Partial<FunnelState> &
   Pick<FunnelState, "step" | "liveOk" | "canSelectPackage" | "lead"> & {
     config?: FunnelConfigPublic | null;
     tiers?: FunnelState["tiers"];
+    clientContractProfile?: FunnelState["clientContractProfile"];
   };
 
 function normalizeLegacyTier(
@@ -190,13 +208,24 @@ async function normalizeClientFunnelState(raw: FunnelApiResponse): Promise<Funne
     tiers,
     deliveryProgress: raw.deliveryProgress ?? null,
     unreadNotificationCount: raw.unreadNotificationCount ?? 0,
-    notifications: raw.notifications ?? []
+    notifications: raw.notifications ?? [],
+    clientContractProfile: raw.clientContractProfile ?? null
   };
 }
 
 function formatFunnelApiError(message: string, ui: (typeof AGENCY_FUNNEL_COPY)["client"]) {
   if (/inscrição não encontrada/i.test(message)) {
     return ui.staleLeadLinkError;
+  }
+  return message;
+}
+
+function formatSignContractError(message: string) {
+  if (message === "Required" || message === "Invalid input") {
+    return "Preencha todos os campos obrigatórios do contratante (CPF/CNPJ, RG, endereço completo) e aceite os termos.";
+  }
+  if (/acceptedName|partyDetails/i.test(message)) {
+    return "Atualize a página e preencha o formulário completo do contratante. Se persistir, a API em produção pode estar desatualizada.";
   }
   return message;
 }
@@ -220,7 +249,7 @@ export function ClientFunnelPanel() {
   const [error, setError] = useState<string | null>(null);
   const [tier, setTier] = useState<PackageTierId>("professional");
   const [attendedConfirm, setAttendedConfirm] = useState(false);
-  const [acceptedName, setAcceptedName] = useState("");
+  const [partyDetails, setPartyDetails] = useState<AgencyContractPartyDetails | null>(null);
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [checkoutAck, setCheckoutAck] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -258,6 +287,18 @@ export function ClientFunnelPanel() {
     }
     prevStepRef.current = stepKey;
   }, [state]);
+
+  useEffect(() => {
+    if (!state || resolveDisplayStep(state) !== "contract") return;
+    const profile = state.clientContractProfile;
+    const email = profile?.email ?? agencyUser?.email ?? "";
+    const name = profile?.name ?? agencyUser?.name ?? "";
+    const phone = profile?.phone ?? agencyUser?.phone ?? "";
+    setPartyDetails((prev) => {
+      if (prev && prev.email === email) return prev;
+      return createInitialPartyDetails(email, name, phone);
+    });
+  }, [state, agencyUser?.email, agencyUser?.name, agencyUser?.phone]);
 
   async function confirmLive() {
     setBusy(true);
@@ -297,8 +338,18 @@ export function ClientFunnelPanel() {
   }
 
   async function sign(projectId: string) {
-    if (!acceptTerms || acceptedName.trim().length < 3) {
-      setError("Informe seu nome completo e aceite os termos.");
+    if (!partyDetails) {
+      setError("Carregue os dados do contratante.");
+      return;
+    }
+    const normalizedParty = normalizePartyDetails(partyDetails);
+    const partyError = validatePartyDetails(normalizedParty);
+    if (!acceptTerms) {
+      setError("Marque que leu e aceita a minuta do contrato.");
+      return;
+    }
+    if (partyError) {
+      setError(partyError);
       return;
     }
     setBusy(true);
@@ -306,13 +357,14 @@ export function ClientFunnelPanel() {
     setStepSuccess(null);
     try {
       await apiPost(`/agency/projects/${projectId}/sign-contract`, {
-        acceptedName: acceptedName.trim(),
-        acceptTerms: true as const
+        acceptTerms: true as const,
+        partyDetails: normalizedParty
       });
       setStepSuccess(ui.stepCompleteContract);
       await reload();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao assinar.");
+      const raw = err instanceof ApiError ? err.message : err instanceof Error ? err.message : "Falha ao assinar.";
+      setError(formatSignContractError(raw));
     } finally {
       setBusy(false);
     }
@@ -357,6 +409,7 @@ export function ClientFunnelPanel() {
     state.tiers.find((t) => t.id === pendingTier)?.contractSummary ??
     state.tiers.find((t) => t.id === tier)?.contractSummary;
   const checkoutPkg = state.tiers.find((t) => t.id === checkoutTier);
+  const pendingPkg = state.tiers.find((t) => t.id === pendingTier);
   const funnelConfig = state.config;
   const contractClauses = funnelConfig.contract.clauses.length
     ? funnelConfig.contract.clauses
@@ -369,6 +422,22 @@ export function ClientFunnelPanel() {
     funnelConfig.live?.streamUrl ? streamEmbedUrl(funnelConfig.live.streamUrl) : null;
   const replayEmbed =
     funnelConfig.live?.replayUrl ? streamEmbedUrl(funnelConfig.live.replayUrl) : null;
+
+  const contractPreview =
+    summary && pendingPkg && partyDetails
+      ? composeAgencyContractDocument({
+          contractKind: contractKindForTier(pendingTier),
+          packageTier: pendingTier,
+          partyDetails,
+          packageLabel: summary.tierLabel,
+          totalValueCents: pendingPkg.totalValueCents,
+          entryValueCents: pendingPkg.entryValueCents,
+          phasesSummary: summary.phasesSummary,
+          contractVersion: funnelConfig.contract.version,
+          intro: funnelConfig.contract.intro,
+          clauses: contractClauses
+        })
+      : null;
 
   async function copyPix() {
     const key = funnelConfig.checkout.pixKey?.trim();
@@ -494,10 +563,11 @@ export function ClientFunnelPanel() {
 
         {displayStep === "package" && state.canSelectPackage ? (
           <FunnelStepPanel eyebrow={stepEyebrow(2)} title={ui.stepPackageTitle} description={ui.stepPackageDesc}>
-            <div className="grid gap-4 lg:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               {state.tiers.map((pkg) => {
                 const selected = tier === pkg.id;
                 const featured = pkg.id === "professional";
+                const partnership = isPartnershipTier(pkg.id);
                 return (
                   <button
                     key={pkg.id}
@@ -506,7 +576,7 @@ export function ClientFunnelPanel() {
                       selected
                         ? "border-sky-500 ring-2 ring-sky-500/40"
                         : "border-[var(--app-border)] hover:border-sky-500/50"
-                    } ${featured ? "bg-gradient-to-b from-violet-500/10 to-transparent" : "bg-[var(--app-hover)]/30"}`}
+                    } ${partnership ? "bg-gradient-to-b from-amber-500/10 to-transparent" : featured ? "bg-gradient-to-b from-violet-500/10 to-transparent" : "bg-[var(--app-hover)]/30"}`}
                     onClick={() => setTier(pkg.id)}
                   >
                     {featured ? (
@@ -514,12 +584,28 @@ export function ClientFunnelPanel() {
                         Recomendado
                       </span>
                     ) : null}
+                    {partnership ? (
+                      <span className="absolute -top-2.5 right-4 rounded-full bg-amber-600 px-2 py-0.5 text-[10px] font-bold uppercase text-white">
+                        Parceria
+                      </span>
+                    ) : null}
                     <p className="text-lg font-semibold">{pkg.name}</p>
                     <p className="mt-2 flex-1 text-sm text-[var(--app-text-muted)]">{pkg.tagline}</p>
-                    <p className="mt-4 font-display text-2xl font-bold text-[var(--app-text)]">
-                      {formatBRL(pkg.totalValueCents)}
-                    </p>
-                    <p className="text-xs text-[var(--app-text-subtle)]">Entrada {formatBRL(pkg.entryValueCents)}</p>
+                    {partnership ? (
+                      <>
+                        <p className="mt-4 text-sm font-semibold text-[var(--app-text)]">Divisão de receitas</p>
+                        <p className="font-display text-xl font-bold text-[var(--app-text)]">
+                          Setup {formatBRL(pkg.entryValueCents)}
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="mt-4 font-display text-2xl font-bold text-[var(--app-text)]">
+                          {formatBRL(pkg.totalValueCents)}
+                        </p>
+                        <p className="text-xs text-[var(--app-text-subtle)]">Entrada {formatBRL(pkg.entryValueCents)}</p>
+                      </>
+                    )}
                     <ul className="mt-3 space-y-1 text-xs text-[var(--app-text-muted)]">
                       {pkg.bullets.slice(0, 3).map((b) => (
                         <li key={b}>· {b}</li>
@@ -571,20 +657,12 @@ export function ClientFunnelPanel() {
                 <dd className="mt-1 text-[var(--app-text-muted)]">{summary.phasesSummary}</dd>
               </div>
             </dl>
-            <ul className="max-h-40 space-y-2 overflow-y-auto rounded-xl border border-[var(--app-border)] p-4 text-xs leading-relaxed text-[var(--app-text-muted)]">
-              {contractClauses.map((c) => (
-                <li key={c} className="flex gap-2">
-                  <span className="text-sky-500">•</span>
-                  <span>{c}</span>
-                </li>
-              ))}
-            </ul>
-            <input
-              className="input"
-              placeholder={ui.signFieldLabel}
-              value={acceptedName}
-              onChange={(e) => setAcceptedName(e.target.value)}
-            />
+            {contractPreview ? (
+              <ClientFunnelContractPreview document={contractPreview} title={ui.signContractPreviewTitle} />
+            ) : null}
+            {partyDetails ? (
+              <ClientFunnelContractPartyForm details={partyDetails} onChange={setPartyDetails} />
+            ) : null}
             <label className="flex cursor-pointer gap-3 rounded-lg border border-[var(--app-border)] p-3 text-xs">
               <input
                 type="checkbox"
@@ -592,7 +670,11 @@ export function ClientFunnelPanel() {
                 checked={acceptTerms}
                 onChange={(e) => setAcceptTerms(e.target.checked)}
               />
-              Li e aceito o contrato (versão {funnelConfig.contract.version}).
+              Li e aceito a minuta acima (
+              {contractKindForTier(pendingTier) === "partnership"
+                ? "Contrato de Parceria Comercial"
+                : "Contrato de Prestação de Serviços"}{" "}
+              · versão {funnelConfig.contract.version}).
             </label>
             <button type="button" className="btn-primary w-full sm:w-auto" disabled={busy} onClick={() => void sign(pendingId)}>
               {ui.signCta}

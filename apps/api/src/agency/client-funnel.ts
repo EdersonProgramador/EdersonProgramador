@@ -1,3 +1,4 @@
+import { sanitizeContractCompany } from "@ederson-agencia/shared";
 import { prisma } from "../prisma.js";
 import { funnelConfigPublicDto, getAgencyFunnelConfigRow, resolveFunnelPackages } from "./funnel-config.js";
 import { listRecentNotifications, listUnreadNotifications } from "./notifications.js";
@@ -81,6 +82,10 @@ export async function findLeadForClient(userId: string, email: string) {
 
 export async function resolveClientFunnelState(userId: string, email: string, name: string) {
   const lead = await ensureClientFunnelLead(userId, email, name);
+  const clientUser = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { name: true, email: true, company: true, phone: true }
+  });
   const projects = await prisma.project.findMany({
     where: { clientId: userId },
     orderBy: { updatedAt: "desc" },
@@ -145,6 +150,12 @@ export async function resolveClientFunnelState(userId: string, email: string, na
       : null,
     unreadNotificationCount: unreadNotifications.length,
     notifications,
-    step
+    step,
+    clientContractProfile: {
+      name: clientUser?.name ?? name,
+      email: (clientUser?.email ?? email).trim().toLowerCase(),
+      company: sanitizeContractCompany(clientUser?.company ?? lead?.company ?? null),
+      phone: clientUser?.phone ?? lead?.phone ?? null
+    }
   };
 }

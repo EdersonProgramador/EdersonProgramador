@@ -146,13 +146,35 @@ export { SEED_LAUNCH_COPY, SEED_LAUNCH_PATH } from "./seed-launch-copy.js";
 export {
   AGENCY_CONTRACT_VERSION,
   AGENCY_FUNNEL_COPY,
-  contractSummaryForTier
+  contractSummaryForTier,
+  type AgencyContractPartySnapshot
 } from "./agency-funnel-copy.js";
 export {
   buildInstitutionalPackagesJson,
   institutionalFunnelDbDefaults,
   type FunnelPackageJson
 } from "./agency-funnel-institutional.js";
+export {
+  composeAgencyContractDocument,
+  composeAgencyContractDocumentForTier,
+  contractDocumentToPlainText,
+  sanitizeContractCompany,
+  type AgencyContractDocument,
+  type AgencyContractDocumentSection,
+  type ComposeAgencyContractInput
+} from "./agency-contract-document.js";
+export {
+  contractKindForTier,
+  isPartnershipTier,
+  isCompleteContractAddress,
+  legalNameFromPartyDetails,
+  normalizePartyDetails,
+  validatePartyDetails,
+  type AgencyContractAddress,
+  type AgencyContractKind,
+  type AgencyContractPartyDetails,
+  type ContractPartyKind
+} from "./agency-contract-legal.js";
 export {
   PACKAGE_TIER_CONFIG,
   PACKAGE_TIER_IDS,

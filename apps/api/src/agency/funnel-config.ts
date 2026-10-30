@@ -2,6 +2,7 @@ import {
   AGENCY_CONTRACT_VERSION,
   contractSummaryForTier,
   institutionalFunnelDbDefaults,
+  entryValueCentsForTier,
   PACKAGE_TIER_CONFIG,
   PACKAGE_TIER_IDS,
   parsePackageTier,
@@ -197,7 +198,7 @@ export function tierPricingFromConfig(
     return {
       tier,
       totalValueCents: base.totalValueCents,
-      entryValueCents: Math.round(base.totalValueCents * (base.entryPercent / 100))
+      entryValueCents: entryValueCentsForTier(tier)
     };
   }
   return { tier, totalValueCents: pkg.totalValueCents, entryValueCents: pkg.entryValueCents };

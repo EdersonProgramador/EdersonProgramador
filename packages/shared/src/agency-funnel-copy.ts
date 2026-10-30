@@ -1,3 +1,4 @@
+import type { AgencyContractKind, AgencyContractPartyDetails } from "./agency-contract-legal.js";
 import {
   entryValueCentsForTier,
   JOURNEY_PHASES,
@@ -10,6 +11,24 @@ function brl(cents: number) {
 }
 
 export const AGENCY_CONTRACT_VERSION = "app-zero-v1";
+
+/** Dados congelados na assinatura para montagem do contrato formal/PDF. */
+export type AgencyContractPartySnapshot = {
+  legalName: string;
+  email: string;
+  company: string | null;
+  phone: string | null;
+  contractKind: AgencyContractKind;
+  partyDetails: AgencyContractPartyDetails;
+  contractVersion: string;
+  packageTier: string;
+  packageLabel: string;
+  totalValueCents: number;
+  entryValueCents: number;
+  phasesSummary: string;
+  signedAt: string;
+  documentPlain?: string;
+};
 
 export const AGENCY_FUNNEL_COPY = {
   steps: [
@@ -50,6 +69,17 @@ export const AGENCY_FUNNEL_COPY = {
     checkoutAck:
       "Confirmo que realizei (ou combinarei) o pagamento da entrada conforme instruções abaixo e desejo liberar a jornada de desenvolvimento.",
     signFieldLabel: "Nome completo (como no contrato)",
+    signPartyTitle: "Dados do contratante (NF e qualificação jurídica)",
+    signPartyHint:
+      "Informe os dados completos para nota fiscal e contrato. Empresa: razão social, CNPJ, inscrições, sede e representante legal. Pessoa física: nome, CPF, RG, profissão, estado civil e endereço.",
+    signPartyKindPf: "Pessoa física",
+    signPartyKindPj: "Empresa (PJ)",
+    signAddressRequiredHint:
+      "Endereço completo é obrigatório para emissão de NF e qualificação do contrato (logradouro, número, bairro, cidade, UF e CEP).",
+    signEmailLabel: "E-mail",
+    signCompanyLabel: "Empresa / razão social (opcional)",
+    signPhoneLabel: "Telefone / WhatsApp",
+    signContractPreviewTitle: "Minuta do contrato",
     signedSuccess: "Projeto ativo. Acompanhe o progresso de cada fase de desenvolvimento abaixo.",
     pendingContract: "Assinatura pendente",
     goToProject: "Ir para o projeto"
@@ -71,6 +101,20 @@ export const AGENCY_FUNNEL_COPY = {
 export function contractSummaryForTier(tier: PackageTierId) {
   const cfg = PACKAGE_TIER_CONFIG[tier];
   const phases = JOURNEY_PHASES.map((p) => p.shortLabel).join(" → ");
+  if (tier === "partnership") {
+    return {
+      tier,
+      tierLabel: cfg.name,
+      totalFormatted: "Participação sobre receitas (anexo comercial)",
+      entryFormatted: brl(entryValueCentsForTier(tier)),
+      phasesSummary: phases,
+      clauses: [
+        "Contrato de parceria comercial com divisão de receitas, complementar ao anexo técnico e anexo de percentuais.",
+        "Taxa de setup na assinatura; remuneração variável conforme faturamento auditável.",
+        "Auditoria de métricas e direito de suspensão conforme cláusulas de parceria."
+      ]
+    };
+  }
   return {
     tier,
     tierLabel: cfg.name,
