@@ -23,7 +23,9 @@ import {
   applyTanarStudyFallback,
   COURSES_UI,
   FL_COURSE,
-  loginPathForContext
+  loginPathForContext,
+  TANAR_COURSE,
+  tanarBiblePageForLesson
 } from "@ederson-agencia/shared";
 import { ApiError, apiAssetUrl, apiGet, apiPost, apiPut } from "../api";
 import { isYoutubeUrl, parseYoutubeVideoId, youtubeEmbedUrl } from "../lib/youtube";
@@ -38,6 +40,7 @@ import { useAcademySession, useAuthStore } from "../stores/authStore";
 import { FichamentoWorkspace } from "../components/fichamento/FichamentoWorkspace";
 import { LessonFichamentoBlock } from "../components/fichamento/LessonFichamentoBlock";
 import { CourseLibraryView } from "../components/library/CourseLibraryView";
+import { enhanceLessonProseHtml } from "../lib/scripture-prose";
 import "../styles/course-certificate.css";
 import "../styles/course-library.css";
 import "../styles/course-study.css";
@@ -84,7 +87,19 @@ type CoursePayload = {
     unlimited: boolean;
     canStartNext: boolean;
   };
+  moduleRepetitions?: ModuleRepetitionState[];
   certificate?: CertificateData | null;
+};
+
+type ModuleRepetitionState = {
+  moduleNumber: number;
+  moduleTitle: string;
+  goalMax: number | null;
+  completedCount: number;
+  activeCycle: number;
+  goalReached: boolean;
+  unlimited: boolean;
+  canStartNext: boolean;
 };
 
 type FichamentoBundle = {
@@ -102,8 +117,13 @@ export function CourseStudyPage() {
   const isCourseFichamento = subPath === "fichamento/curso";
   const isCertificateView = subPath === "certificado";
   const isBonusPath = subPath.startsWith("bonus/");
-  const libraryBookMatch = subPath.match(/^biblioteca\/([^/]+)$/);
+  const libraryBookMatch = subPath.match(/^biblioteca\/([^/]+)(?:\/p\/(\d+))?$/);
   const libraryBookSlug = libraryBookMatch?.[1];
+  const libraryPageParam = libraryBookMatch?.[2] ? Number.parseInt(libraryBookMatch[2], 10) : undefined;
+  const libraryInitialPage =
+    libraryPageParam != null && Number.isFinite(libraryPageParam) && libraryPageParam > 0
+      ? libraryPageParam
+      : undefined;
   const isLibraryList = subPath === "biblioteca";
   const lessonSlug =
     !isCertificateView &&
@@ -127,26 +147,49 @@ export function CourseStudyPage() {
   const [fichamento, setFichamento] = useState<FichamentoBundle | null>(null);
   const [repetitions, setRepetitions] = useState<CoursePayload["repetitions"] | null>(null);
   const [repetitionToast, setRepetitionToast] = useState<number | null>(null);
+  const [moduleRepetitions, setModuleRepetitions] = useState<ModuleRepetitionState[]>([]);
+  const [moduleRepetitionToast, setModuleRepetitionToast] = useState<{
+    moduleNumber: number;
+    cycleNumber: number;
+  } | null>(null);
+
+  const loadCoursePayload = useCallback(async (bustCache = false) => {
+    if (!courseSlug) return;
+    try {
+      const suffix = bustCache ? `?v=${Date.now()}` : "";
+      const raw = await apiGet<CoursePayload>(`/courses/${courseSlug}${suffix}`);
+      const data = applyTanarStudyFallback(raw);
+      setPayload(data);
+      setRepetitions(data.repetitions ?? null);
+      setModuleRepetitions(data.moduleRepetitions ?? []);
+      setCompleted(new Set(data.completedSlugs));
+      setCertificate(data.certificate ?? null);
+      setError(null);
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 501) {
+        setError("content-not-configured");
+        return;
+      }
+      setError(err instanceof Error ? err.message : "Erro ao carregar curso.");
+    }
+  }, [courseSlug]);
 
   useEffect(() => {
-    if (!courseSlug) return;
-    void (async () => {
-      try {
-        const raw = await apiGet<CoursePayload>(`/courses/${courseSlug}`);
-        const data = applyTanarStudyFallback(raw);
-        setPayload(data);
-        setRepetitions(data.repetitions ?? null);
-        setCompleted(new Set(data.completedSlugs));
-        setCertificate(data.certificate ?? null);
-      } catch (err) {
-        if (err instanceof ApiError && err.status === 501) {
-          setError("content-not-configured");
-          return;
-        }
-        setError(err instanceof Error ? err.message : "Erro ao carregar curso.");
-      }
-    })();
-  }, [courseSlug]);
+    void loadCoursePayload();
+  }, [loadCoursePayload]);
+
+  useEffect(() => {
+    const refresh = () => {
+      if (document.visibilityState === "hidden") return;
+      void loadCoursePayload(true);
+    };
+    window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", refresh);
+    return () => {
+      window.removeEventListener("focus", refresh);
+      document.removeEventListener("visibilitychange", refresh);
+    };
+  }, [loadCoursePayload]);
 
   useEffect(() => {
     if (!courseSlug) return;
@@ -199,10 +242,14 @@ export function CourseStudyPage() {
       progress?: { isComplete: boolean; completed: number; total: number; percent: number };
       repetitions?: CoursePayload["repetitions"];
       repetitionJustCompleted?: number | null;
+      moduleRepetitions?: ModuleRepetitionState[];
+      moduleRepetitionJustCompleted?: { moduleNumber: number; cycleNumber: number } | null;
       completedSlugs?: string[];
     }>(`/courses/${courseSlug}/progress`, { lessonSlug: slug, completed: done });
     if (res.repetitions) setRepetitions(res.repetitions);
     if (res.repetitionJustCompleted) setRepetitionToast(res.repetitionJustCompleted);
+    if (res.moduleRepetitions) setModuleRepetitions(res.moduleRepetitions);
+    if (res.moduleRepetitionJustCompleted) setModuleRepetitionToast(res.moduleRepetitionJustCompleted);
     if (res.certificate) setCertificate(res.certificate);
     else if (res.progress && !res.progress.isComplete) setCertificate(null);
   };
@@ -212,12 +259,35 @@ export function CourseStudyPage() {
     const res = await apiPost<{
       completedSlugs: string[];
       repetitions: CoursePayload["repetitions"];
+      moduleRepetitions?: ModuleRepetitionState[];
     }>(`/courses/${courseSlug}/repetitions/start-next`, {});
     setCompleted(new Set(res.completedSlugs));
     setRepetitions(res.repetitions);
     setRepetitionToast(null);
     setCertificate(null);
+    setModuleRepetitions(res.moduleRepetitions ?? []);
   }
+
+  async function startNextModuleRepetition(moduleNumber: number) {
+    if (!courseSlug) return;
+    const res = await apiPost<{
+      completedSlugs: string[];
+      repetitions: CoursePayload["repetitions"];
+      moduleRepetitions: ModuleRepetitionState[];
+      progress?: { isComplete: boolean };
+    }>(`/courses/${courseSlug}/modules/${moduleNumber}/repetitions/start-next`, {});
+    setCompleted(new Set(res.completedSlugs));
+    setRepetitions(res.repetitions ?? null);
+    setModuleRepetitions(res.moduleRepetitions);
+    setModuleRepetitionToast(null);
+    if (res.progress && !res.progress.isComplete) setCertificate(null);
+  }
+
+  const moduleRepsByNumber = useMemo(() => {
+    const map = new Map<number, ModuleRepetitionState>();
+    for (const row of moduleRepetitions) map.set(row.moduleNumber, row);
+    return map;
+  }, [moduleRepetitions]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -382,6 +452,11 @@ export function CourseStudyPage() {
                     <TocLessonLink
                       item={item}
                       lessonNumber={item.indexInSection ?? item.order + 1}
+                      biblePage={
+                        payload?.course.slug === TANAR_COURSE.slug
+                          ? tanarBiblePageForLesson(item.slug, item.sectionTitle)
+                          : null
+                      }
                       isActive={lessonSlug === item.slug}
                       isDone={completed.has(item.slug)}
                       hasVideo={Boolean(videoFile(item.id))}
@@ -398,12 +473,16 @@ export function CourseStudyPage() {
                 bonus={payload.bonusContent}
                 activeSlug={subPath}
                 completed={completed}
+                showBiblePages={payload.course.slug === TANAR_COURSE.slug}
+                moduleRepsByNumber={moduleRepsByNumber}
+                moduleRepetitionToast={moduleRepetitionToast}
                 hasVideo={(id) => Boolean(videoFile(id))}
                 isYoutube={(id) => isYoutubeUrl(videoFile(id))}
                 onSelect={goLesson}
                 onSelectBonus={(slug) => goLesson(`bonus/${slug}`)}
                 onModuleFichamento={(moduleNum) => goLesson(`fichamento/modulo/${moduleNum}`)}
                 onToggleDone={(slug, done) => void toggleDone(slug, done)}
+                onStartModuleRepetition={(moduleNum) => void startNextModuleRepetition(moduleNum)}
               />
             )}
           </nav>
@@ -423,6 +502,7 @@ export function CourseStudyPage() {
             <CourseLibraryView
               courseSlug={courseSlug}
               bookSlug={libraryBookSlug}
+              initialPage={libraryInitialPage}
               onOpenBook={(slug) => goLesson(`biblioteca/${slug}`)}
               onBackToCourse={() => goLesson("")}
               onBackToLibrary={() => goLesson("biblioteca")}
@@ -528,6 +608,7 @@ export function CourseStudyPage() {
             </article>
           ) : activeItem && courseSlug ? (
             <LessonPanel
+              courseSlug={courseSlug}
               item={activeItem}
               note={payload.lessonNotes[activeItem.slug]}
               documentBase={payload.curriculum.documentBase}
@@ -594,9 +675,17 @@ function lessonKindLabel(
   return COURSES_UI.study.lessonTelegram;
 }
 
+function rewriteCourseLibraryLinks(html: string, courseSlug: string): string {
+  return html.replace(
+    /href="(biblioteca\/[^"]+)"/g,
+    (_, path: string) => `href="${ACADEMY_APP_BASE}/cursos/${courseSlug}/${path}"`
+  );
+}
+
 function TocLessonLink({
   item,
   lessonNumber,
+  biblePage,
   isActive,
   isDone,
   hasVideo,
@@ -604,8 +693,9 @@ function TocLessonLink({
   onOpen,
   onToggleDone
 }: {
-  item: Pick<CurriculumItem, "slug" | "id" | "title" | "type">;
+  item: Pick<CurriculumItem, "slug" | "id" | "title" | "type" | "sectionTitle">;
   lessonNumber?: number;
+  biblePage?: number | null;
   isActive: boolean;
   isDone: boolean;
   hasVideo?: boolean;
@@ -652,6 +742,9 @@ function TocLessonLink({
               <span className="course-study__lesson-index">{String(lessonNumber).padStart(2, "0")}</span>
             ) : null}
             <span className="course-study__lesson-kind">{kind}</span>
+            {biblePage != null ? (
+              <span className="course-study__lesson-page">p. {biblePage}</span>
+            ) : null}
             {showCode ? <span className="course-study__lesson-code">{item.id}</span> : null}
             {isActive ? <span className="course-study__toc-badge course-study__toc-badge--active">{COURSES_UI.study.statusActive}</span> : null}
           </span>
@@ -711,23 +804,31 @@ function TocTree({
   bonus,
   activeSlug,
   completed,
+  showBiblePages,
+  moduleRepsByNumber,
+  moduleRepetitionToast,
   hasVideo,
   isYoutube,
   onSelect,
   onSelectBonus,
   onModuleFichamento,
-  onToggleDone
+  onToggleDone,
+  onStartModuleRepetition
 }: {
   items: CurriculumItem[];
   bonus: { slug: string; title: string }[];
   activeSlug: string;
   completed: Set<string>;
+  showBiblePages?: boolean;
+  moduleRepsByNumber: Map<number, ModuleRepetitionState>;
+  moduleRepetitionToast: { moduleNumber: number; cycleNumber: number } | null;
   hasVideo: (id: string) => boolean;
   isYoutube: (id: string) => boolean;
   onSelect: (slug: string) => void;
   onSelectBonus: (slug: string) => void;
   onModuleFichamento: (moduleNumber: number) => void;
   onToggleDone: (slug: string, done: boolean) => void;
+  onStartModuleRepetition: (moduleNumber: number) => void;
 }) {
   const groups = buildModuleGroups(items);
   const docs = items.filter((i) => isOrphanDocument(i));
@@ -740,6 +841,7 @@ function TocTree({
               <TocLessonLink
                 item={item}
                 lessonNumber={i + 1}
+                biblePage={showBiblePages ? tanarBiblePageForLesson(item.slug, item.sectionTitle) : null}
                 isActive={activeSlug === item.slug}
                 isDone={completed.has(item.slug)}
                 hasVideo={hasVideo(item.id)}
@@ -788,6 +890,7 @@ function TocTree({
         const moduleTotal = lessons.length;
         const moduleComplete = moduleTotal > 0 && moduleDone === moduleTotal;
         const containsActive = lessons.some((l) => l.slug === activeSlug);
+        const moduleRep = moduleRepsByNumber.get(g.module);
         const sectionEntries = [...g.sections.entries()];
         const singleSection =
           sectionEntries.length === 1 ||
@@ -826,6 +929,15 @@ function TocTree({
                   );
                 })
               )}
+              {moduleRep ? (
+                <ModuleRepetitionBlock
+                  rep={moduleRep}
+                  toastCycle={
+                    moduleRepetitionToast?.moduleNumber === g.module ? moduleRepetitionToast.cycleNumber : null
+                  }
+                  onStartNext={() => onStartModuleRepetition(g.module)}
+                />
+              ) : null}
               <button
                 type="button"
                 className="fichamento-module-link fichamento-no-print"
@@ -876,6 +988,46 @@ function TocTree({
             </ul>
           </div>
         </details>
+      ) : null}
+    </div>
+  );
+}
+
+function ModuleRepetitionBlock({
+  rep,
+  toastCycle,
+  onStartNext
+}: {
+  rep: ModuleRepetitionState;
+  toastCycle: number | null;
+  onStartNext: () => void;
+}) {
+  return (
+    <div className="course-study__module-repetition course-text-muted">
+      <p className="course-study__module-repetition-eyebrow">{COURSES_UI.study.repetitionModuleScope}</p>
+      <p className="text-brand-primary">{COURSES_UI.study.repetitionCycle(rep.activeCycle)}</p>
+      <p>
+        {COURSES_UI.study.repetitionLabel}: <strong>{rep.completedCount}</strong>
+        {!rep.unlimited && rep.goalMax != null
+          ? ` · ${COURSES_UI.study.repetitionGoalProgress(rep.completedCount, rep.goalMax)}`
+          : rep.unlimited
+            ? ` · ${COURSES_UI.adminCourses.repetitionUnlimited}`
+            : null}
+      </p>
+      {toastCycle ? (
+        <p className="font-medium text-green-400">{COURSES_UI.study.repetitionJustDone(toastCycle)}</p>
+      ) : null}
+      {rep.canStartNext && !rep.goalReached ? (
+        <div className="space-y-1 pt-1">
+          <button type="button" className="btn-primary w-full text-xs" onClick={onStartNext}>
+            {COURSES_UI.study.repetitionStartNext}
+          </button>
+          <p className="course-text-faint text-[0.65rem] leading-snug">
+            {COURSES_UI.study.repetitionModuleStartHint}
+          </p>
+        </div>
+      ) : rep.goalReached ? (
+        <p className="text-brand-primary">{COURSES_UI.study.repetitionGoalDone}</p>
       ) : null}
     </div>
   );
@@ -984,6 +1136,7 @@ function TelegramPanel({
 }
 
 function LessonPanel({
+  courseSlug,
   item,
   note,
   documentBase,
@@ -994,6 +1147,7 @@ function LessonPanel({
   onToggleDone,
   fichamentoSlot
 }: {
+  courseSlug: string;
   item: CurriculumItem;
   note?: { html?: string; displayTitle?: string };
   documentBase: string;
@@ -1049,7 +1203,12 @@ function LessonPanel({
       )}
 
       {note?.html ? (
-        <div className="course-lesson-prose mt-6 border-t border-[var(--app-border)] pt-6 text-sm" dangerouslySetInnerHTML={{ __html: note.html }} />
+        <div
+          className="course-lesson-prose mt-6 border-t border-[var(--app-border)] pt-6 text-sm"
+          dangerouslySetInnerHTML={{
+            __html: enhanceLessonProseHtml(rewriteCourseLibraryLinks(note.html, courseSlug))
+          }}
+        />
       ) : null}
 
       {fichamentoSlot}

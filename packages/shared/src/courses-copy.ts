@@ -80,6 +80,8 @@ export const COURSES_UI = {
     repetitionGoalDone: "Meta de repetições atingida",
     repetitionStartNext: "Iniciar próxima repetição",
     repetitionStartHint: "Suas marcas de aula serão zeradas para a nova volta.",
+    repetitionModuleScope: "Repetição do módulo",
+    repetitionModuleStartHint: "Apenas as aulas deste módulo serão desmarcadas.",
     welcomeHint:
       "As videoaulas estão no canal de estudos no Telegram. Em cada aula, use o botão Abrir no Telegram (mesma conta com acesso ao grupo).",
     startButton: "Iniciar pela primeira aula",

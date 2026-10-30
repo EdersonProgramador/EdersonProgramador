@@ -34,6 +34,8 @@ model User {
   libraryReading     CourseLibraryReading[]
   courseStudyStates  CourseUserStudyState[]
   repetitionCompletions CourseRepetitionCompletion[]
+  moduleStudyStates  CourseModuleUserStudyState[]
+  moduleRepetitionCompletions CourseModuleRepetitionCompletion[]
 }
 
 model Course {
@@ -73,6 +75,8 @@ model CourseModule {
   sortOrder Int            @default(0)
   title     String
   lessons   CourseLesson[]
+  moduleStudyStates CourseModuleUserStudyState[]
+  moduleRepetitionCompletions CourseModuleRepetitionCompletion[]
   createdAt DateTime       @default(now())
   updatedAt DateTime       @updatedAt
 
@@ -155,6 +159,34 @@ model CourseRepetitionCompletion {
 
   @@unique([userId, courseId, cycleNumber])
   @@index([courseId])
+}
+
+model CourseModuleUserStudyState {
+  id                    String       @id @default(cuid())
+  userId                String
+  user                  User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  moduleId              String
+  module                CourseModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  activeRepetitionCycle Int          @default(1)
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+
+  @@unique([userId, moduleId])
+  @@index([moduleId])
+}
+
+model CourseModuleRepetitionCompletion {
+  id          String       @id @default(cuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  moduleId    String
+  module      CourseModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  cycleNumber Int
+  completedAt DateTime     @default(now())
+  lessonCount Int
+
+  @@unique([userId, moduleId, cycleNumber])
+  @@index([moduleId])
 }
 
 model CourseCertificate {

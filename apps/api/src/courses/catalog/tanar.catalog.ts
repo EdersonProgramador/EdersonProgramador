@@ -1,3 +1,14 @@
+import {
+  TANAR_KETUVIM_TRACK,
+  TANAR_NEVIIM_TRACK,
+  tanarBibleLibraryLinkHtml,
+  tanarMishleChapterLessonHtml,
+  tanarTehillimDayLessonHtml,
+  tanarTorahBlockLessonHtml,
+  tanarTrackBookLessonHtml,
+  type TanarBibleTrackLesson
+} from "@ederson-agencia/shared";
+
 /** Trilha Tanar — módulo → submódulo (sectionTitle) → aula (checklist). */
 
 export type TanarLesson = {
@@ -34,8 +45,6 @@ export type TanarCatalog = {
   }[];
 };
 
-const TEHILLIM_LINK =
-  "https://www.chabad.org/multimedia/music_cdo/aid/4486801/jewish/Daily-Tehillim-Audio.htm";
 const CHABAD_SHEMA =
   "https://www.chabad.org.br/biblioteca/artigos/shema/home.html";
 
@@ -99,31 +108,30 @@ const tehillimLessons: TanarLesson[] = tehillimDayTitles.map((title, index) => {
     1,
     `tehillim-day-${String(day).padStart(2, "0")}`,
     title,
-    `<p><a href="${TEHILLIM_LINK}" target="_blank" rel="noopener noreferrer">Daily Tehillim Audio (Chabad)</a> — ouça o <strong>Day ${day}</strong>.</p>
-<p>${title}</p>`
+    tanarTehillimDayLessonHtml(day, title)
   );
 });
 
 const mishleLessons: TanarLesson[] = Array.from({ length: 31 }, (_, i) => {
   const n = i + 1;
-  let extra = "";
-  if (n === 12) {
-    extra =
-      "<p><em>A diligência na Bíblia é o esforço constante, o cuidado, o zelo e a dedicação em fazer algo com excelência.</em></p>";
-  }
-  return article(
-    "Provérbios",
-    2,
-    `mishle-${n}`,
-    `Mishlé ${n}`,
-    `<p>Leia o capítulo <strong>${n}</strong> de Mishlé na Bíblia Hebraica (Biblioteca do curso).</p>${extra}`
-  );
+  return article("Provérbios", 2, `mishle-${n}`, `Mishlé ${n}`, tanarMishleChapterLessonHtml(n));
 });
+
+function trackLesson(spec: TanarBibleTrackLesson): TanarLesson {
+  return article(
+    spec.sectionTitle,
+    spec.sectionSortOrder,
+    spec.slug,
+    spec.title,
+    tanarTrackBookLessonHtml(spec)
+  );
+}
 
 function torahLessons(
   sectionTitle: string,
   sectionSortOrder: number,
   bookSlug: string,
+  startPage: number,
   blocks: { slug: string; label: string }[]
 ): TanarLesson[] {
   return blocks.map((b) =>
@@ -132,8 +140,7 @@ function torahLessons(
       sectionSortOrder,
       `${bookSlug}-${b.slug}`,
       b.label,
-      `<p>Leitura na <strong>Bíblia Hebraica</strong> (Biblioteca do curso).</p>
-<p>Bloco: <strong>${b.label}</strong>. Marque ao terminar.</p>`
+      tanarTorahBlockLessonHtml(bookSlug, sectionTitle, startPage, b.label)
     )
   );
 }
@@ -214,7 +221,8 @@ const moduloOracao: TanarModule = {
       "shema-estudo-contexto",
       "O que é o Shemá Israel",
       `<p><strong>Shemá Israel</strong> (שְׁמַע יִשְׂרָאֵל) abre Devarim 6:4-9 — <em>Shemá Yisrael Ad-nai Elochêinu Ad-nai Echad</em>.</p>
-<p>Originalmente um verso (Sukkot 42a, Berachot 13b). Hoje inclui Devarim 6:4-9, 11:13-21 e Bamidbar 15:37-41 — <strong>Arvit</strong> e <strong>Shacharit</strong>.</p>`
+<p>Originalmente um verso (Sukkot 42a, Berachot 13b). Hoje inclui Devarim 6:4-9, 11:13-21 e Bamidbar 15:37-41 — <strong>Arvit</strong> e <strong>Shacharit</strong>.</p>
+${tanarBibleLibraryLinkHtml(220, "Ler Devarim na Bíblia Hebraica")}`
     ),
     article(
       "Estudo do Shemá",
@@ -222,7 +230,8 @@ const moduloOracao: TanarModule = {
       "shema-texto-veahavta",
       "Texto integral — abertura e Ve'Ahavta",
       `<p><strong>Ouve ó Israel, Ad-nai nosso D-us é Um.</strong> (Em voz baixa:) Bendito é o Eterno…</p>
-<p><strong>Ve'Ahavta:</strong> Amarás o Eterno… ao deitar e ao levantar. <strong>Tefilin</strong> e <strong>mezuzá</strong>.</p>`
+<p><strong>Ve'Ahavta:</strong> Amarás o Eterno… ao deitar e ao levantar. <strong>Tefilin</strong> e <strong>mezuzá</strong>.</p>
+${tanarBibleLibraryLinkHtml(220, "Texto em Devarim 6 — Bíblia Hebraica")}`
     ),
     article(
       "Estudo do Shemá",
@@ -231,44 +240,48 @@ const moduloOracao: TanarModule = {
       "Texto integral — Veaia, tzitzit e conclusão",
       `<p><strong>Veaia im Shamoa</strong> (Devarim 11) — obediência, chuvas, cuidado com ídolos.</p>
 <p>Palavras no coração; tefilin; ensinar aos filhos; mezuzá.</p>
-<p><strong>Vaiomer Ad-nai:</strong> <strong>Tzitzit</strong>, cordão azul, santidade. «Eu Sou o Eterno, vosso D-us, que vos saquei da terra do Egito…»</p>`
+<p><strong>Vaiomer Ad-nai:</strong> <strong>Tzitzit</strong> (Bamidbar 15:37-41), cordão azul, santidade. «Eu Sou o Eterno, vosso D-us, que vos saquei da terra do Egito…»</p>
+${tanarBibleLibraryLinkHtml(166, "Bamidbar na Bíblia Hebraica")}
+${tanarBibleLibraryLinkHtml(220, "Devarim na Bíblia Hebraica")}`
     )
   ]
 };
 
+const ketuvimLessons: TanarLesson[] = TANAR_KETUVIM_TRACK.map(trackLesson);
+
 const moduloEscritos: TanarModule = {
   title: "Escritos",
-  lessons: [...tehillimLessons, ...mishleLessons]
+  lessons: [...tehillimLessons, ...mishleLessons, ...ketuvimLessons]
 };
 
 const moduloTora: TanarModule = {
   title: "Torá",
   lessons: [
-    ...torahLessons("Gênesis — Bereshit", 1, "bereshit", [
+    ...torahLessons("Gênesis — Bereshit", 1, "bereshit", 15, [
       { slug: "1-9", label: "Capítulos 1 a 9" },
       { slug: "10-19", label: "Capítulos 10 a 19" },
       { slug: "20-29", label: "Capítulos 20 a 29" },
       { slug: "30-39", label: "Capítulos 30 a 39" },
       { slug: "40-50", label: "Capítulos 40 a 50" }
     ]),
-    ...torahLessons("Êxodo — Shemot", 2, "shemot", [
+    ...torahLessons("Êxodo — Shemot", 2, "shemot", 74, [
       { slug: "1-9", label: "Capítulos 1 a 9" },
       { slug: "10-19", label: "Capítulos 10 a 19" },
       { slug: "20-29", label: "Capítulos 20 a 29" },
       { slug: "30-40", label: "Capítulos 30 a 40" }
     ]),
-    ...torahLessons("Levítico — Vayikra", 3, "vaikra", [
+    ...torahLessons("Levítico — Vayikra", 3, "vaikra", 127, [
       { slug: "1-9", label: "Capítulos 1 a 9" },
       { slug: "10-19", label: "Capítulos 10 a 19" },
       { slug: "20-27", label: "Capítulos 20 a 27" }
     ]),
-    ...torahLessons("Números — Bamidbar", 4, "bamidbar", [
+    ...torahLessons("Números — Bamidbar", 4, "bamidbar", 166, [
       { slug: "1-9", label: "Capítulos 1 a 9" },
       { slug: "10-19", label: "Capítulos 10 a 19" },
       { slug: "20-29", label: "Capítulos 20 a 29" },
       { slug: "30-36", label: "Capítulos 30 a 36" }
     ]),
-    ...torahLessons("Deuteronômio — Devarim", 5, "devarim", [
+    ...torahLessons("Deuteronômio — Devarim", 5, "devarim", 220, [
       { slug: "1-9", label: "Capítulos 1 a 9" },
       { slug: "10-19", label: "Capítulos 10 a 19" },
       { slug: "20-29", label: "Capítulos 20 a 29" },
@@ -279,16 +292,7 @@ const moduloTora: TanarModule = {
 
 const moduloProfetas: TanarModule = {
   title: "Profetas",
-  lessons: [
-    article(
-      "Neviim",
-      1,
-      "neviim-em-breve",
-      "Trilha dos Profetas",
-      `<p>Submódulos por livro (Yehoshua, Shoftim, etc.) serão adicionados conforme a leitura avançar.</p>
-<p>Use a Bíblia Hebraica na biblioteca do curso.</p>`
-    )
-  ]
+  lessons: TANAR_NEVIIM_TRACK.map(trackLesson)
 };
 
 export const TANAR_CATALOG: TanarCatalog = {
@@ -298,7 +302,7 @@ export const TANAR_CATALOG: TanarCatalog = {
     "Oração hebraica, Escritos, Torá e Profetas — módulos, submódulos e aulas-checklist na Academia.",
   coverUrl: "/course-covers/tanar-tanakh.jpg",
   sortOrder: 3,
-  catalogVersion: 12,
+  catalogVersion: 14,
   libraryBooks: [
     {
       slug: "biblia-hebraica-gorodovits",

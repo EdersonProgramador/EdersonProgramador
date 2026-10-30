@@ -27,6 +27,7 @@ export type LibraryBook = {
 type CourseLibraryViewProps = {
   courseSlug: string;
   bookSlug?: string;
+  initialPage?: number;
   onOpenBook: (slug: string) => void;
   onBackToCourse: () => void;
   onBackToLibrary: () => void;
@@ -35,6 +36,7 @@ type CourseLibraryViewProps = {
 export function CourseLibraryView({
   courseSlug,
   bookSlug,
+  initialPage,
   onOpenBook,
   onBackToCourse,
   onBackToLibrary
@@ -88,7 +90,7 @@ export function CourseLibraryView({
           courseSlug={courseSlug}
           bookSlug={bookSlug}
           fileUrl={pdfUrl}
-          initialPage={bookDetail.lastPage ?? 1}
+          initialPage={initialPage ?? bookDetail.lastPage ?? 1}
           title={bookDetail.title}
         />
       </div>

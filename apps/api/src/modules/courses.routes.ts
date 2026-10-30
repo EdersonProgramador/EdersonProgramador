@@ -15,6 +15,12 @@ import {
   recordRepetitionIfComplete,
   startNextRepetition
 } from "../courses/course-repetitions.js";
+import {
+  getAllModuleRepetitionsDto,
+  moduleNumberForLessonSlug,
+  recordModuleRepetitionIfComplete,
+  startNextModuleRepetition
+} from "../courses/course-module-repetitions.js";
 import { courseContentReady, resolveStudyPayload } from "../courses/resolve-study-payload.js";
 import { userCanAccessCourse } from "../courses/access.js";
 import { env } from "../env.js";
@@ -145,6 +151,15 @@ export async function registerCoursesRoutes(app: FastifyInstance) {
       }
     }
     const repetitions = await getRepetitionDto(course, user.id);
+    const moduleRows = await prisma.courseModule.findMany({
+      where: { courseId: course.id },
+      orderBy: { sortOrder: "asc" },
+      select: { id: true }
+    });
+    for (let i = 0; i < moduleRows.length; i++) {
+      await recordModuleRepetitionIfComplete(course, user.id, i + 1);
+    }
+    const moduleRepetitions = await getAllModuleRepetitionsDto(course, user.id);
 
     return {
       course: {
@@ -164,6 +179,7 @@ export async function registerCoursesRoutes(app: FastifyInstance) {
         isComplete: progressSummary.isComplete
       },
       repetitions,
+      moduleRepetitions,
       certificate,
       ...study
     };
@@ -257,12 +273,22 @@ export async function registerCoursesRoutes(app: FastifyInstance) {
     const progressSummary = await getCourseProgressSummary(course, user.id);
     let certificate: ReturnType<typeof certificateToDto> | null = null;
     let repetitionJustCompleted: number | null = null;
+    let moduleRepetitionJustCompleted: { moduleNumber: number; cycleNumber: number } | null = null;
     if (progressSummary.isComplete) {
       const rep = await recordRepetitionIfComplete(course, user.id);
       if (rep.recorded) repetitionJustCompleted = rep.cycleNumber;
       const ensured = await ensureCourseCertificate(course, user.id);
       if (ensured.issued && ensured.certificate) {
         certificate = certificateToDto(ensured.certificate, course, { name: user.name }, env.WEB_ORIGIN);
+      }
+    }
+    const moduleNumber = await moduleNumberForLessonSlug(course, user.id, body.lessonSlug);
+    let moduleRepetitions = await getAllModuleRepetitionsDto(course, user.id);
+    if (moduleNumber != null) {
+      const modRep = await recordModuleRepetitionIfComplete(course, user.id, moduleNumber);
+      moduleRepetitions = modRep.moduleRepetitions;
+      if (modRep.recorded && modRep.cycleNumber != null) {
+        moduleRepetitionJustCompleted = { moduleNumber, cycleNumber: modRep.cycleNumber };
       }
     }
     const repetitions = await getRepetitionDto(course, user.id);
@@ -277,6 +303,8 @@ export async function registerCoursesRoutes(app: FastifyInstance) {
       },
       repetitions,
       repetitionJustCompleted,
+      moduleRepetitions,
+      moduleRepetitionJustCompleted,
       certificate
     };
   });
@@ -301,7 +329,40 @@ export async function registerCoursesRoutes(app: FastifyInstance) {
       return {
         ok: true,
         repetitions,
+        moduleRepetitions: await getAllModuleRepetitionsDto(course, user.id),
         completedSlugs: rows.map((r) => r.lessonSlug),
+        progress: await getCourseProgressSummary(course, user.id)
+      };
+    } catch (error) {
+      const statusCode = (error as { statusCode?: number }).statusCode ?? 500;
+      return reply.code(statusCode).send({ message: (error as Error).message });
+    }
+  });
+
+  app.post("/courses/:slug/modules/:moduleNumber/repetitions/start-next", async (request, reply) => {
+    const user = await requireAcademyUser(request, reply);
+    if (!user) return;
+
+    const params = z
+      .object({ slug: z.string().min(1), moduleNumber: z.coerce.number().int().positive() })
+      .parse(request.params);
+    const course = await prisma.course.findUnique({ where: { slug: params.slug } });
+    if (!course) return reply.code(404).send({ message: "Curso não encontrado." });
+    if (!(await userCanAccessCourse(user.id, user.role, user.email, course))) {
+      return reply.code(403).send({ message: "Sem acesso." });
+    }
+
+    try {
+      const moduleRepetitions = await startNextModuleRepetition(course, user.id, params.moduleNumber);
+      const rows = await prisma.lessonProgress.findMany({
+        where: { userId: user.id, courseId: course.id },
+        select: { lessonSlug: true }
+      });
+      return {
+        ok: true,
+        moduleRepetitions,
+        completedSlugs: rows.map((r) => r.lessonSlug),
+        repetitions: await getRepetitionDto(course, user.id),
         progress: await getCourseProgressSummary(course, user.id)
       };
     } catch (error) {

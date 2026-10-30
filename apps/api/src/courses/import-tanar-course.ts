@@ -12,10 +12,22 @@ function countCatalogLessons(catalog: TanarCatalog) {
   return n;
 }
 
-/** Assinatura do catálogo — detecta mudança de títulos/slugs mesmo com mesma contagem. */
+function hashLessonBody(bodyHtml?: string): string {
+  const s = bodyHtml?.trim() ?? "";
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
+  return `${s.length}:${h >>> 0}`;
+}
+
+/** Assinatura do catálogo — inclui bodyHtml para republicar textos das aulas. */
 function catalogSyncSignature(catalog: TanarCatalog) {
   return catalog.modules
-    .flatMap((mod) => mod.lessons.map((l) => `${mod.title}|${l.sectionTitle}|${l.slug}|${l.title}`))
+    .flatMap((mod) =>
+      mod.lessons.map(
+        (l) =>
+          `${mod.title}|${l.sectionTitle}|${l.slug}|${l.title}|${hashLessonBody(l.bodyHtml)}`
+      )
+    )
     .join("\n");
 }
 

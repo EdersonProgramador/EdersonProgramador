@@ -26,6 +26,31 @@ export {
   TANAR_BIBLIA_HEBRAICA,
   type TanarLibraryBookLike
 } from "./tanar-library-fallback.js";
+export {
+  normalizeTanarBibleSectionKey,
+  tanarBibleLibraryLinkHtml,
+  tanarBibleLibraryPath,
+  tanarBiblePageForLesson,
+  tanarBiblePageForSection,
+  tanarBibleReadingIntro,
+  TANAR_BIBLIA_BOOK_SLUG,
+  TANAR_BIBLIA_OUTLINE,
+  TANAR_KETUVIM_EXTRA_EXPECTED,
+  TANAR_KETUVIM_TRACK,
+  TANAR_NEVIIM_TRACK,
+  TANAR_PROFETAS_EXPECTED_LESSONS,
+  type TanarBibleOutlineEntry,
+  type TanarBibleTrackLesson
+} from "./tanar-bible-outline.js";
+export {
+  enrichTanarBibleLessonNotes,
+  needsTanarProseFallback,
+  tanarBibleLessonHtmlForSlug,
+  tanarMishleChapterLessonHtml,
+  tanarTehillimDayLessonHtml,
+  tanarTorahBlockLessonHtml,
+  tanarTrackBookLessonHtml
+} from "./tanar-lesson-prose.js";
 
 import { ACADEMY_APP_BASE, AGENCY_APP_BASE, agencyHomePathForRole } from "./auth-context.js";
 
