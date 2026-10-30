@@ -55,7 +55,8 @@ function article(
   };
 }
 
-const TEHILLIM_SUBMODULE = "Salmos — Tehillim (áudio diário)";
+/** Submódulo Escritos → Salmos (Daily Tehillim, uma aula por dia). */
+const SALMOS_SECTION = "Salmos";
 
 const tehillimDayTitles = [
   "Day 1 — capítulos 1–9",
@@ -90,27 +91,17 @@ const tehillimDayTitles = [
   "Day 30 — capítulos 145–150"
 ] as const;
 
-const tehillimLessons: TanarLesson[] = [
-  article(
-    TEHILLIM_SUBMODULE,
-    1,
-    "tehillim-audio-chabad",
-    "Daily Tehillim Audio (Chabad)",
-    `<p>Trilha de áudio diário: <a href="${TEHILLIM_LINK}" target="_blank" rel="noopener noreferrer">Daily Tehillim Audio (Chabad)</a></p>
-<p>Abaixo, uma aula para cada dia (Day 1 a Day 30). Marque ✓ na plataforma ao concluir cada leitura/áudio.</p>`
-  ),
-  ...tehillimDayTitles.map((title, index) => {
+const tehillimLessons: TanarLesson[] = tehillimDayTitles.map((title, index) => {
     const day = index + 1;
     return article(
-      TEHILLIM_SUBMODULE,
+      SALMOS_SECTION,
       1,
       `tehillim-day-${String(day).padStart(2, "0")}`,
       title,
-      `<p><a href="${TEHILLIM_LINK}" target="_blank" rel="noopener noreferrer">Abrir Daily Tehillim Audio (Chabad)</a> — selecione o <strong>Day ${day}</strong>.</p>
+      `<p><a href="${TEHILLIM_LINK}" target="_blank" rel="noopener noreferrer">Daily Tehillim Audio (Chabad)</a> — ouça o <strong>Day ${day}</strong>.</p>
 <p>${title}</p>`
     );
-  })
-];
+});
 
 const mishleLessons: TanarLesson[] = Array.from({ length: 31 }, (_, i) => {
   const n = i + 1;
@@ -121,7 +112,7 @@ const mishleLessons: TanarLesson[] = Array.from({ length: 31 }, (_, i) => {
   }
   return article(
     "Provérbios — Mishlé",
-    31,
+    3,
     `mishle-${n}`,
     `Mishlé ${n}`,
     `<p>Leia o capítulo <strong>${n}</strong> de Mishlé na Bíblia Hebraica (Biblioteca do curso).</p>${extra}`
@@ -306,7 +297,7 @@ export const TANAR_CATALOG: TanarCatalog = {
     "Oração hebraica, Escritos, Torá e Profetas — módulos, submódulos e aulas-checklist na Academia.",
   coverUrl: "https://i.ytimg.com/vi/ZC5IuSkEHEM/hqdefault.jpg",
   sortOrder: 3,
-  catalogVersion: 7,
+  catalogVersion: 8,
   libraryBooks: [
     {
       slug: "biblia-hebraica-gorodovits",
