@@ -113,6 +113,7 @@ export async function ensureTanarCourse(prisma: PrismaClient, log: FastifyBaseLo
         title: book.title,
         author: book.author ?? null,
         summary: book.summary ?? null,
+        coverUrl: book.coverUrl ?? null,
         pdfUrl: book.pdfUrl,
         sortOrder: i,
         status: "PUBLISHED"
@@ -121,6 +122,7 @@ export async function ensureTanarCourse(prisma: PrismaClient, log: FastifyBaseLo
         title: book.title,
         author: book.author ?? null,
         summary: book.summary ?? null,
+        coverUrl: book.coverUrl ?? null,
         pdfUrl: book.pdfUrl,
         sortOrder: i,
         status: "PUBLISHED"

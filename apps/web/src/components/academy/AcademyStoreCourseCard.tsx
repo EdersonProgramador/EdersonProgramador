@@ -37,7 +37,12 @@ export function AcademyStoreCourseCard({
     <article className="academy-udemy-card academy-inst-card">
       <Link to={detailHref} className="academy-udemy-card__link">
         <div className="academy-udemy-card__media">
-          <CourseCover title={course.title} coverUrl={course.coverUrl} className="academy-udemy-card__cover" />
+          <CourseCover
+            title={course.title}
+            coverUrl={course.coverUrl}
+            courseSlug={course.slug}
+            className="academy-udemy-card__cover"
+          />
         </div>
         <div className="academy-udemy-card__body">
           <h3 className="academy-udemy-card__title">{course.title}</h3>

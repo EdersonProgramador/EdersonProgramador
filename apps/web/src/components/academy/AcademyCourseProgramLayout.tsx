@@ -34,7 +34,12 @@ export function AcademyCourseProgramLayout({
       </Link>
 
       <header className="academy-inst-program__hero mt-8">
-        <CourseCover title={course.title} coverUrl={course.coverUrl} className="course-cover--card academy-inst-program__cover" />
+        <CourseCover
+          title={course.title}
+          coverUrl={course.coverUrl}
+          courseSlug={course.slug}
+          className="course-cover--card academy-inst-program__cover"
+        />
         <div className="min-w-0 flex-1">
           <p className="academy-sales__eyebrow text-xs uppercase tracking-[0.2em]">{copy.brand}</p>
           <h1 className="mt-3 text-3xl font-bold leading-tight sm:text-4xl">{course.title}</h1>

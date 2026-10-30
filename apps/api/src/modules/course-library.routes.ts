@@ -1,9 +1,28 @@
+import { createReadStream, existsSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { assertAcademyInternalAdmin, assertAcademySession, requireAcademyUser } from "../auth-access.js";
 import { getAuthUser, requireRole } from "../auth.js";
 import { userCanAccessCourse } from "../courses/access.js";
+import { env } from "../env.js";
 import { prisma } from "../prisma.js";
+
+function webPublicRoot() {
+  const here = dirname(fileURLToPath(import.meta.url));
+  return resolve(here, "../../../web/public");
+}
+
+function resolveLibraryPdfFetchUrl(pdfUrl: string) {
+  const trimmed = pdfUrl.trim();
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  if (trimmed.startsWith("/")) {
+    const origin = env.WEB_ORIGIN.split(",")[0]?.trim() || "http://localhost:5174";
+    return `${origin.replace(/\/$/, "")}${trimmed}`;
+  }
+  return trimmed;
+}
 
 const slugField = z
   .string()
@@ -161,9 +180,20 @@ export async function registerCourseLibraryRoutes(app: FastifyInstance) {
     });
     if (!book) return reply.code(404).send({ message: "Livro não encontrado." });
 
+    const pdfPath = book.pdfUrl.trim();
+    if (pdfPath.startsWith("/")) {
+      const localFile = resolve(webPublicRoot(), pdfPath.replace(/^\//, ""));
+      if (existsSync(localFile)) {
+        reply.header("Content-Type", "application/pdf");
+        reply.header("Content-Disposition", `inline; filename="${book.slug}.pdf"`);
+        reply.header("Cache-Control", "private, max-age=300");
+        return reply.send(createReadStream(localFile));
+      }
+    }
+
     let upstream: Response;
     try {
-      upstream = await fetch(book.pdfUrl, {
+      upstream = await fetch(resolveLibraryPdfFetchUrl(book.pdfUrl), {
         headers: { "User-Agent": "EdersonAgenciaLibrary/1.0" }
       });
     } catch {

@@ -174,6 +174,7 @@ export function AcademyStoreCheckoutPage() {
                     <CourseCover
                       title={course.title}
                       coverUrl={course.coverUrl}
+                      courseSlug={course.slug}
                       className="academy-checkout-line__cover academy-udemy-card__cover rounded-md"
                     />
                     <div className="academy-checkout-line__body min-w-0">

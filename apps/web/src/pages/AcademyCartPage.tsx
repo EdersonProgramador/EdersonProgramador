@@ -69,6 +69,7 @@ export function AcademyCartPage() {
                   <CourseCover
                     title={course.title}
                     coverUrl={course.coverUrl}
+                    courseSlug={course.slug}
                     className="academy-cart-row__cover academy-udemy-card__cover rounded-md"
                   />
                   <div className="academy-cart-row__body min-w-0">

@@ -36,7 +36,12 @@ export function CourseCatalogCard({ course, variant, onCheckout }: CourseCatalog
 
   return (
     <div className="course-card panel flex h-full flex-col p-0">
-      <CourseCover title={course.title} coverUrl={course.coverUrl} className="course-cover--card" />
+      <CourseCover
+        title={course.title}
+        coverUrl={course.coverUrl}
+        courseSlug={course.slug}
+        className="course-cover--card"
+      />
       <div className="flex flex-1 flex-col p-4 sm:p-6">
         <p className="text-xs uppercase tracking-wider text-brand-primary">
           {badge}

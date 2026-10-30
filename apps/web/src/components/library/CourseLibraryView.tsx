@@ -1,4 +1,9 @@
-import { COURSES_UI } from "@ederson-agencia/shared";
+import {
+  COURSES_UI,
+  mergeTanarLibraryBooks,
+  resolveTanarLibraryPdfUrl,
+  tanarLibraryBookDetailFallback
+} from "@ederson-agencia/shared";
 import { BookOpen, ChevronLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { apiAssetUrl, apiGet } from "../../api";
@@ -16,6 +21,7 @@ export type LibraryBook = {
   pageCount: number | null;
   lastPage?: number;
   pdfStreamPath?: string;
+  publicPdfPath?: string;
 };
 
 type CourseLibraryViewProps = {
@@ -42,8 +48,14 @@ export function CourseLibraryView({
     setLoading(true);
     setError(null);
     void apiGet<{ books: LibraryBook[] }>(`/courses/${courseSlug}/library`)
-      .then((res) => setBooks(res.books))
-      .catch((err) => setError(err instanceof Error ? err.message : "Erro ao carregar biblioteca."))
+      .then((res) => setBooks(mergeTanarLibraryBooks(courseSlug, res.books)))
+      .catch((err) => {
+        const merged = mergeTanarLibraryBooks(courseSlug, []);
+        setBooks(merged);
+        if (merged.length === 0) {
+          setError(err instanceof Error ? err.message : "Erro ao carregar biblioteca.");
+        }
+      })
       .finally(() => setLoading(false));
   }, [courseSlug]);
 
@@ -54,11 +66,18 @@ export function CourseLibraryView({
     }
     void apiGet<{ book: LibraryBook }>(`/courses/${courseSlug}/library/${bookSlug}`)
       .then((res) => setBookDetail(res.book))
-      .catch((err) => setError(err instanceof Error ? err.message : "Livro não encontrado."));
+      .catch(() => {
+        const fallback = tanarLibraryBookDetailFallback(courseSlug, bookSlug);
+        if (fallback) setBookDetail(fallback);
+        else setError("Livro não encontrado.");
+      });
   }, [courseSlug, bookSlug]);
 
   if (bookSlug && bookDetail) {
-    const pdfUrl = apiAssetUrl(bookDetail.pdfStreamPath ?? `/courses/${courseSlug}/library/${bookSlug}/pdf`);
+    const apiPdfUrl = apiAssetUrl(
+      bookDetail.pdfStreamPath ?? `/courses/${courseSlug}/library/${bookSlug}/pdf`
+    );
+    const pdfUrl = resolveTanarLibraryPdfUrl(courseSlug, bookSlug, apiPdfUrl);
     return (
       <div className="course-library">
         <button type="button" className="btn-secondary mb-4 inline-flex items-center gap-2 text-sm" onClick={onBackToLibrary}>

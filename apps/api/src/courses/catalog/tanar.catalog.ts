@@ -29,6 +29,7 @@ export type TanarCatalog = {
     title: string;
     author?: string;
     summary?: string;
+    coverUrl?: string;
     pdfUrl: string;
   }[];
 };
@@ -55,7 +56,7 @@ function article(
   };
 }
 
-/** Submódulo Escritos → Salmos (Daily Tehillim, uma aula por dia). */
+/** Escritos → submódulo Salmos (Daily Tehillim): Day 1 … Day 30. */
 const SALMOS_SECTION = "Salmos";
 
 const tehillimDayTitles = [
@@ -92,15 +93,15 @@ const tehillimDayTitles = [
 ] as const;
 
 const tehillimLessons: TanarLesson[] = tehillimDayTitles.map((title, index) => {
-    const day = index + 1;
-    return article(
-      SALMOS_SECTION,
-      1,
-      `tehillim-day-${String(day).padStart(2, "0")}`,
-      title,
-      `<p><a href="${TEHILLIM_LINK}" target="_blank" rel="noopener noreferrer">Daily Tehillim Audio (Chabad)</a> — ouça o <strong>Day ${day}</strong>.</p>
+  const day = index + 1;
+  return article(
+    SALMOS_SECTION,
+    1,
+    `tehillim-day-${String(day).padStart(2, "0")}`,
+    title,
+    `<p><a href="${TEHILLIM_LINK}" target="_blank" rel="noopener noreferrer">Daily Tehillim Audio (Chabad)</a> — ouça o <strong>Day ${day}</strong>.</p>
 <p>${title}</p>`
-    );
+  );
 });
 
 const mishleLessons: TanarLesson[] = Array.from({ length: 31 }, (_, i) => {
@@ -111,8 +112,8 @@ const mishleLessons: TanarLesson[] = Array.from({ length: 31 }, (_, i) => {
       "<p><em>A diligência na Bíblia é o esforço constante, o cuidado, o zelo e a dedicação em fazer algo com excelência.</em></p>";
   }
   return article(
-    "Provérbios — Mishlé",
-    3,
+    "Provérbios",
+    2,
     `mishle-${n}`,
     `Mishlé ${n}`,
     `<p>Leia o capítulo <strong>${n}</strong> de Mishlé na Bíblia Hebraica (Biblioteca do curso).</p>${extra}`
@@ -295,15 +296,16 @@ export const TANAR_CATALOG: TanarCatalog = {
   title: "Tanar — Trilha de estudos hebraicos",
   summary:
     "Oração hebraica, Escritos, Torá e Profetas — módulos, submódulos e aulas-checklist na Academia.",
-  coverUrl: "https://i.ytimg.com/vi/ZC5IuSkEHEM/hqdefault.jpg",
+  coverUrl: "/course-covers/tanar-tanakh.jpg",
   sortOrder: 3,
-  catalogVersion: 8,
+  catalogVersion: 12,
   libraryBooks: [
     {
       slug: "biblia-hebraica-gorodovits",
       title: "Bíblia Hebraica",
       author: "David Gorodovits",
-      summary: "Edição de referência para leitura paralela hebraico-português.",
+      summary: "Edição de referência para leitura paralela hebraico-português na trilha Tanar.",
+      coverUrl: "/course-covers/tanar-tanakh.jpg",
       pdfUrl: "/course-materials/tanar/biblia-hebraica-gorodovits.pdf"
     }
   ],

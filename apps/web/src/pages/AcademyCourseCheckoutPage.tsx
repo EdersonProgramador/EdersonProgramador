@@ -108,7 +108,12 @@ export function AcademyCourseCheckoutPage() {
             <div className="mt-10 grid gap-8 lg:grid-cols-[0.95fr_1.05fr]">
               <aside className="panel h-fit border-white/10 bg-white/[0.03] p-6 lg:sticky lg:top-24">
                 <h2 className="text-sm font-medium uppercase tracking-wide text-white/50">{copy.checkout.summaryTitle}</h2>
-                <CourseCover title={course.title} coverUrl={course.coverUrl} className="course-cover--card mt-4" />
+                <CourseCover
+                  title={course.title}
+                  coverUrl={course.coverUrl}
+                  courseSlug={course.slug}
+                  className="course-cover--card mt-4"
+                />
                 <h3 className="mt-4 text-xl font-semibold">{course.title}</h3>
                 {course.summary ? <p className="mt-2 text-sm leading-relaxed text-white/65">{course.summary}</p> : null}
                 <p className="mt-6 text-2xl font-semibold text-sky-300">{price}</p>

@@ -18,7 +18,13 @@ import {
 import { CourseCover } from "../components/courses/CourseCover";
 import { AcademyNav } from "../components/portal/AcademyNav";
 import { BrandLogo } from "../components/brand/BrandLogo";
-import { ACADEMY_APP_BASE, COURSES_UI, FL_COURSE, loginPathForContext } from "@ederson-agencia/shared";
+import {
+  ACADEMY_APP_BASE,
+  applyTanarStudyFallback,
+  COURSES_UI,
+  FL_COURSE,
+  loginPathForContext
+} from "@ederson-agencia/shared";
 import { ApiError, apiAssetUrl, apiGet, apiPost, apiPut } from "../api";
 import { isYoutubeUrl, parseYoutubeVideoId, youtubeEmbedUrl } from "../lib/youtube";
 import {
@@ -126,7 +132,8 @@ export function CourseStudyPage() {
     if (!courseSlug) return;
     void (async () => {
       try {
-        const data = await apiGet<CoursePayload>(`/courses/${courseSlug}`);
+        const raw = await apiGet<CoursePayload>(`/courses/${courseSlug}`);
+        const data = applyTanarStudyFallback(raw);
         setPayload(data);
         setRepetitions(data.repetitions ?? null);
         setCompleted(new Set(data.completedSlugs));
@@ -495,6 +502,7 @@ export function CourseStudyPage() {
               <CourseCover
                 title={payload.course.title}
                 coverUrl={payload.course.coverUrl}
+                courseSlug={payload.course.slug}
                 className="course-cover--welcome"
               />
               <h2 className="text-2xl font-bold">{payload.course.title}</h2>

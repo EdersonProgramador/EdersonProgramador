@@ -14,8 +14,14 @@ export const TANAR_COURSE = {
   title: "Tanar — Trilha de estudos hebraicos",
   summary:
     "Oração hebraica (Shema), Escritos (Tehillim e Mishlé), Torá e Profetas — com Bíblia Hebraica na biblioteca.",
-  coverUrl: "https://i.ytimg.com/vi/ZC5IuSkEHEM/hqdefault.jpg"
+  coverUrl: "/course-covers/tanar-tanakh.jpg"
 } as const;
+
+/** Capa canônica no front enquanto a API/Render ainda devolve URL legada. */
+export function resolveCourseCoverUrl(slug: string, coverUrl?: string | null): string | null | undefined {
+  if (slug === TANAR_COURSE.slug && TANAR_COURSE.coverUrl) return TANAR_COURSE.coverUrl;
+  return coverUrl;
+}
 
 export const FL_COURSE = {
   slug: "fl-formula-de-lancamento",
@@ -141,11 +147,27 @@ export const COURSES_UI = {
     libraryPage: (current: number, total: number) => `Página ${current} de ${total}`,
     libraryZoomIn: "Aumentar zoom",
     libraryZoomOut: "Diminuir zoom",
-    libraryFitWidth: "Ajustar à largura",
+    libraryZoomLevel: (percent: number) => `${percent}%`,
+    libraryZoomReset: "Restaurar zoom (100%)",
+    libraryZoomSlider: "Nível de zoom",
+    libraryFitWidth: "Ajustar largura",
     libraryPrev: "Página anterior",
     libraryNext: "Próxima página",
     libraryLoading: "Carregando PDF…",
-    libraryLoadError: "Não foi possível carregar o PDF."
+    libraryLoadError: "Não foi possível carregar o PDF.",
+    libraryThemeLight: "Claro",
+    libraryThemeSepia: "Sépia",
+    libraryThemeDark: "Noturno",
+    libraryGoToPage: "Ir para página",
+    libraryProgress: (page: number, total: number) =>
+      total > 0 ? `${Math.round((page / total) * 100)}% do livro` : "",
+    libraryFocusMode: "Modo leitura",
+    libraryShowToolbar: "Mostrar controles",
+    libraryToc: "Sumário",
+    libraryTocOpen: "Abrir sumário",
+    libraryTocClose: "Fechar sumário",
+    libraryTocEmpty: "Este PDF não inclui marcadores de sumário.",
+    libraryTocLoading: "Carregando sumário…"
   },
   adminCourses: {
     title: "Gerenciar cursos",
