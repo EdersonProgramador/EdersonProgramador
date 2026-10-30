@@ -152,22 +152,7 @@ function useDashboard() {
   return stats;
 }
 
-function AdminClientsList() {
-  const [clients, setClients] = useState<AgencyClient[]>([]);
-  const [loadError, setLoadError] = useState<string | null>(null);
-
-  useEffect(() => {
-    void apiGet<{ users: AgencyClient[] }>("/agency/users?role=CLIENT")
-      .then((res) => {
-        setClients(res.users);
-        setLoadError(null);
-      })
-      .catch((err) => {
-        setClients([]);
-        setLoadError(err instanceof Error ? err.message : "Não foi possível carregar clientes.");
-      });
-  }, []);
-
+function AdminClientsList({ clients, loadError }: { clients: AgencyClient[]; loadError: string | null }) {
   if (loadError) {
     return <p className="text-sm text-red-500">{loadError}</p>;
   }
@@ -212,8 +197,40 @@ function AdminClientsList() {
   );
 }
 
+function useAdminDashboardPayload() {
+  const [stats, setStats] = useState<DashboardStats>({});
+  const [clients, setClients] = useState<AgencyClient[]>([]);
+  const [clientsError, setClientsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    void apiGet<{ stats: DashboardStats; clientAccounts?: AgencyClient[] }>("/agency/dashboard")
+      .then((res) => {
+        setStats(res.stats);
+        if (res.clientAccounts) {
+          setClients(res.clientAccounts);
+          setClientsError(null);
+          return;
+        }
+        return apiGet<{ clients: AgencyClient[] }>("/agency/clients")
+          .then((fallback) => {
+            setClients(fallback.clients);
+            setClientsError(null);
+          })
+          .catch((err) => {
+            setClients([]);
+            setClientsError(err instanceof Error ? err.message : "Não foi possível carregar clientes.");
+          });
+      })
+      .catch((err) => {
+        setClientsError(err instanceof Error ? err.message : "Não foi possível carregar o painel.");
+      });
+  }, []);
+
+  return { stats, clients, clientsError };
+}
+
 export function AdminDashboard() {
-  const stats = useDashboard();
+  const { stats, clients, clientsError } = useAdminDashboardPayload();
   const [leads, setLeads] = useState<Lead[]>([]);
 
   useEffect(() => {
@@ -272,7 +289,7 @@ export function AdminDashboard() {
             </p>
           ) : null}
         </div>
-        <AdminClientsList />
+        <AdminClientsList clients={clients} loadError={clientsError} />
       </section>
       <section className="space-y-4">
         <h2 className="text-xl font-semibold text-[var(--app-text)]">Leads da landing</h2>

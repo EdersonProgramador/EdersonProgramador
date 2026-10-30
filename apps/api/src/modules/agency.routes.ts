@@ -64,13 +64,22 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
   app.get("/agency/dashboard", async (request) => {
     const user = request.agencyUser!;
     if (user.role === "ADMIN") {
-      const [leads, projects, freelancers, clients] = await Promise.all([
+      const [leads, projects, freelancers, clients, clientAccounts] = await Promise.all([
         prisma.lead.count(),
         prisma.project.count(),
         prisma.user.count({ where: { role: "FREELANCER" } }),
-        prisma.user.count({ where: { role: "CLIENT" } })
+        prisma.user.count({ where: { role: "CLIENT" } }),
+        prisma.user.findMany({
+          where: { role: "CLIENT" },
+          orderBy: { createdAt: "desc" },
+          select: { id: true, name: true, email: true, company: true, createdAt: true }
+        })
       ]);
-      return { role: user.role, stats: { leads, projects, freelancers, clients } };
+      return {
+        role: user.role,
+        stats: { leads, projects, freelancers, clients },
+        clientAccounts
+      };
     }
 
     if (user.role === "FREELANCER") {
@@ -427,14 +436,24 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
     return { deliverable: updated };
   });
 
-  app.get("/agency/users", async (request) => {
-    requireRole(request.agencyUser ?? null, ["ADMIN"]);
-    const role = z.enum(["CLIENT", "FREELANCER"]).optional().parse((request.query as { role?: string }).role);
-    const users = await prisma.user.findMany({
-      where: role ? { role } : { role: { in: ["CLIENT", "FREELANCER"] } },
+  async function listAgencyAccounts(roleFilter?: "CLIENT" | "FREELANCER") {
+    return prisma.user.findMany({
+      where: roleFilter ? { role: roleFilter } : { role: { in: ["CLIENT", "FREELANCER"] } },
       orderBy: { createdAt: "desc" },
       select: { id: true, name: true, email: true, role: true, company: true, github: true, createdAt: true }
     });
+  }
+
+  app.get("/agency/clients", async (request) => {
+    requireRole(request.agencyUser ?? null, ["ADMIN"]);
+    const clients = await listAgencyAccounts("CLIENT");
+    return { clients };
+  });
+
+  app.get("/agency/users", async (request) => {
+    requireRole(request.agencyUser ?? null, ["ADMIN"]);
+    const role = z.enum(["CLIENT", "FREELANCER"]).optional().parse((request.query as { role?: string }).role);
+    const users = await listAgencyAccounts(role);
     return { users };
   });
 

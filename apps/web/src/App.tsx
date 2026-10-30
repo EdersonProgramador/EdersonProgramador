@@ -62,7 +62,9 @@ export default function App() {
         <Route path={AGENCY_APP_BASE} element={<ProtectedRoute realm="agency" />}>
           <Route element={<AgencyShellLayout title="Operação" />}>
             <Route index element={<AgencyHomeRedirect />} />
-            <Route path="admin" element={<AdminDashboard />} />
+            <Route element={<ProtectedRoute realm="agency" roles={["ADMIN"]} />}>
+              <Route path="admin" element={<AdminDashboard />} />
+            </Route>
             <Route path="cliente" element={<ClientDashboard />} />
             <Route path="freelancer" element={<FreelancerDashboard />} />
             <Route path="projetos/:projectId" element={<ProjectDetailPage />} />
