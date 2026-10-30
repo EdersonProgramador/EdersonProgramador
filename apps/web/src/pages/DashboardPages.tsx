@@ -9,6 +9,7 @@ import {
   type PackageTierId
 } from "@ederson-agencia/shared";
 import { AGENCY_FUNNEL_COPY } from "@ederson-agencia/shared";
+import { AdminFunnelEditor } from "../components/portal/AdminFunnelEditor";
 import { ClientFunnelPanel } from "../components/portal/ClientFunnelPanel";
 import { apiGet, apiPatch, apiPost } from "../api";
 
@@ -100,6 +101,9 @@ function ProjectCard({ project, role }: { project: Project; role: "ADMIN" | "CLI
           <p className="text-sm text-[var(--app-text-muted)]">{project.description}</p>
           {project.contractStatus === "PENDING_SIGNATURE" ? (
             <p className="mt-1 text-xs font-medium text-amber-600 dark:text-amber-300">Contrato pendente</p>
+          ) : null}
+          {project.status === "AWAITING_CHECKOUT" ? (
+            <p className="mt-1 text-xs font-medium text-amber-600 dark:text-amber-300">Checkout pendente</p>
           ) : null}
         </div>
         <div className="text-right text-sm">
@@ -280,6 +284,7 @@ export function AdminDashboard() {
         <p className="text-[var(--app-text-muted)]">Leads, pacotes e jornada dos projetos.</p>
       </div>
       <StatGrid stats={stats} />
+      <AdminFunnelEditor />
       <section className="space-y-4">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="text-xl font-semibold text-[var(--app-text)]">Clientes cadastrados</h2>

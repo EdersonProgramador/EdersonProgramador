@@ -56,6 +56,19 @@ export function ProjectDetailPage() {
     );
   }
 
+  if (role === "CLIENT" && project.status === "AWAITING_CHECKOUT") {
+    return (
+      <div className="panel space-y-4 p-6">
+        <p className="text-[var(--app-text-muted)]">
+          Contrato assinado. Conclua o checkout (entrada) na área do cliente para liberar a jornada.
+        </p>
+        <Link to={`${AGENCY_APP_BASE}/cliente`} className="btn-primary inline-flex text-sm">
+          Ir para checkout
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <Link

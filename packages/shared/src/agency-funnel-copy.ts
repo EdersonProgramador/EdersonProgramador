@@ -14,9 +14,9 @@ export const AGENCY_CONTRACT_VERSION = "app-zero-v1";
 export const AGENCY_FUNNEL_COPY = {
   steps: [
     { key: "live", label: "Live" },
-    { key: "account", label: "Conta" },
     { key: "package", label: "Pacote" },
     { key: "contract", label: "Contrato" },
+    { key: "checkout", label: "Checkout" },
     { key: "delivery", label: "Entrega" }
   ],
   client: {
@@ -27,16 +27,24 @@ export const AGENCY_FUNNEL_COPY = {
     selectPackage: "Selecione o pacote",
     hireCta: "Continuar para o contrato",
     signTitle: "Contrato digital",
-    signSubtitle: "Leia o resumo abaixo. Ao assinar, o projeto entra na fase de entrega (Diagnóstico).",
-    signCta: "Assinar e iniciar projeto",
+    signSubtitle: "Leia o resumo abaixo. Após assinar, você segue para o checkout (entrada) e então a jornada é liberada.",
+    signCta: "Assinar contrato",
+    checkoutTitle: "Checkout — entrada do projeto",
+    checkoutCta: "Confirmar pagamento da entrada e liberar projeto",
+    checkoutAck:
+      "Confirmo que realizei (ou combinarei) o pagamento da entrada conforme instruções abaixo e desejo liberar a jornada de desenvolvimento.",
     signFieldLabel: "Nome completo (como no contrato)",
-    signedSuccess: "Contrato assinado. Seu projeto foi ativado — acompanhe as etapas abaixo.",
+    signedSuccess: "Projeto ativo. Acompanhe o progresso de cada fase de desenvolvimento abaixo.",
     pendingContract: "Assinatura pendente",
     goToProject: "Ir para o projeto"
   },
   admin: {
     liveToggle: "Participou da live",
-    funnelSource: "Origem do funil"
+    funnelSource: "Origem do funil",
+    funnelEditorTitle: "Funil comercial (fonte da Área do cliente)",
+    funnelEditorHint: "Publique a live, pacotes, contrato e checkout — o cliente segue estas etapas na ordem.",
+    livePublish: "Publicar live para clientes",
+    saveFunnel: "Salvar funil"
   }
 } as const;
 

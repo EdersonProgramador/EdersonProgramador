@@ -10,6 +10,7 @@ import { isAcademyStoreCustomer } from "../auth-access.js";
 import { hashPassword, toAuthUser } from "../auth.js";
 import { fulfillAcademyPurchase, listPublicSaleCourses } from "../courses/academy-purchase.js";
 import { getPublicCourseProgram } from "../courses/course-program-public.js";
+import { funnelConfigPublicDto, getAgencyFunnelConfigRow } from "../agency/funnel-config.js";
 import { prisma } from "../prisma.js";
 import { ensureAcademyTestUser } from "../seed-academy-test-user.js";
 import { env } from "../env.js";
@@ -28,6 +29,11 @@ const leadSchema = z.object({
 });
 
 export async function registerPublicRoutes(app: FastifyInstance) {
+  app.get("/public/agency-funnel", async () => {
+    const row = await getAgencyFunnelConfigRow();
+    return funnelConfigPublicDto(row);
+  });
+
   app.get("/public/landing", async () => ({
     contract: CONTRACT_DEFAULTS,
     production: PORTFOLIO_PRODUCTION,

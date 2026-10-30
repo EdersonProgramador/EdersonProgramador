@@ -13,13 +13,21 @@ import { assertAgencySession } from "../auth-access.js";
 import { getAuthUser, requireRole } from "../auth.js";
 import { prisma } from "../prisma.js";
 import {
-  activateProjectAfterContract,
+  activateProjectAfterCheckout,
   applyApprovedUpgrade,
   createProjectFromPackage,
   projectInclude,
+  recordContractSignature,
   resolvePackageTier
 } from "./agency-project.js";
 import { findLeadForClient, resolveClientFunnelState } from "../agency/client-funnel.js";
+import {
+  funnelConfigPublicDto,
+  getAgencyFunnelConfigRow,
+  resolveFunnelPackages,
+  tierPricingFromConfig
+} from "../agency/funnel-config.js";
+import { notifyAgencyUser } from "../agency/notifications.js";
 
 const leadStatusSchema = z.enum(["NEW", "CONTACTED", "QUALIFIED", "WON", "LOST"]);
 const phaseStatusSchema = z.enum(["PENDING", "IN_PROGRESS", "WAITING_APPROVAL", "APPROVED", "DONE"]);
@@ -386,6 +394,16 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
       include: { deliverables: { orderBy: { sortOrder: "asc" } } }
     });
 
+    if (body.status && (isAdmin || isFreelancer) && project.clientId) {
+      await notifyAgencyUser({
+        userId: project.clientId,
+        projectId: project.id,
+        kind: "phase",
+        title: `Etapa atualizada: ${phase.label}`,
+        body: `Nova situação: ${body.status.replace(/_/g, " ")}.`
+      });
+    }
+
     if (body.status === "APPROVED") {
       const next = await prisma.projectPhase.findFirst({
         where: { projectId: project.id, sortOrder: phase.sortOrder + 1 }
@@ -433,6 +451,17 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
         completedAt: body.status === "DONE" ? new Date() : undefined
       }
     });
+
+    if (body.status === "DONE" && project.clientId) {
+      await notifyAgencyUser({
+        userId: project.clientId,
+        projectId: project.id,
+        kind: "deliverable",
+        title: "Entregável concluído",
+        body: `${deliverable.label} foi marcado como concluído pela equipe.`
+      });
+    }
+
     return { deliverable: updated };
   });
 
@@ -457,18 +486,10 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
     return { users };
   });
 
-  app.get("/agency/client/funnel", async (request, reply) => {
+  app.get("/agency/client/funnel", async (request) => {
     requireRole(request.agencyUser ?? null, ["CLIENT"]);
     const user = request.agencyUser!;
-    const state = await resolveClientFunnelState(user.id, user.email);
-    return {
-      ...state,
-      tiers: PACKAGE_TIER_IDS.map((id) => ({
-        id,
-        ...PACKAGE_TIER_CONFIG[id],
-        contractSummary: contractSummaryForTier(id)
-      }))
-    };
+    return resolveClientFunnelState(user.id, user.email);
   });
 
   app.post("/agency/client/confirm-live", async (request, reply) => {
@@ -480,9 +501,10 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
     if (!lead) {
       return reply.code(404).send({ message: "Inscrição não encontrada. Use o mesmo e-mail da aula gratuita." });
     }
-    if (lead.source !== "seed_launch") {
+    const funnelConfig = await getAgencyFunnelConfigRow();
+    if (lead.source !== "seed_launch" && !funnelConfig.livePublished) {
       return reply.code(403).send({
-        message: "Confirmação automática só para inscrições do lançamento semente. Peça liberação ao administrador."
+        message: "A live ainda não foi publicada pelo administrador. Peça liberação ou aguarde a aula."
       });
     }
 
@@ -527,28 +549,46 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
       });
     }
 
-    const existingPending = await prisma.project.findFirst({
-      where: { clientId: user.id, contractStatus: "PENDING_SIGNATURE" }
+    const existingOpen = await prisma.project.findFirst({
+      where: {
+        clientId: user.id,
+        OR: [
+          { contractStatus: "PENDING_SIGNATURE" },
+          { status: "AWAITING_CHECKOUT" },
+          { status: "ACTIVE" }
+        ]
+      }
     });
-    if (existingPending) {
+    if (existingOpen) {
       return reply.code(409).send({
-        message: "Você já tem um projeto aguardando assinatura do contrato.",
-        projectId: existingPending.id
+        message: "Você já tem uma contratação em andamento.",
+        projectId: existingOpen.id
       });
     }
 
-    const tier = resolvePackageTier(body.packageTier, "professional");
+    const configRow = await getAgencyFunnelConfigRow();
+    const pricing = tierPricingFromConfig(configRow, body.packageTier);
+    const tier = pricing.tier;
     const title = `App do Zero ao Lançamento — ${user.company ?? user.name}`;
-    const project = await createProjectFromPackage(user.id, title, tier, lead.message, "await_contract");
+    let project = await createProjectFromPackage(user.id, title, tier, lead.message, "await_contract");
+    project = await prisma.project.update({
+      where: { id: project.id },
+      data: {
+        totalValueCents: pricing.totalValueCents,
+        entryValueCents: pricing.entryValueCents
+      },
+      include: projectInclude
+    });
 
     await prisma.lead.update({
       where: { id: lead.id },
       data: { packageTier: tier, status: "WON", projectId: project.id }
     });
 
+    const pkg = resolveFunnelPackages(configRow).find((p) => p.id === tier);
     return reply.code(201).send({
       project,
-      contractSummary: contractSummaryForTier(tier)
+      contractSummary: pkg?.contractSummary ?? contractSummaryForTier(tier)
     });
   });
 
@@ -571,11 +611,128 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
       return reply.code(400).send({ message: "Este projeto não está aguardando assinatura." });
     }
 
-    const updated = await activateProjectAfterContract(project.id, body.acceptedName);
+    const updated = await recordContractSignature(project.id, body.acceptedName);
+    await notifyAgencyUser({
+      userId: user.id,
+      projectId: project.id,
+      kind: "contract",
+      title: "Contrato assinado",
+      body: "Prossiga para o checkout (entrada) para liberar a jornada de desenvolvimento."
+    });
     return {
       project: updated,
       contractVersion: AGENCY_CONTRACT_VERSION,
-      message: "Contrato assinado. Projeto ativado."
+      message: "Contrato assinado. Continue para o checkout."
+    };
+  });
+
+  app.post("/agency/projects/:id/complete-checkout", async (request, reply) => {
+    requireRole(request.agencyUser ?? null, ["CLIENT"]);
+    const user = request.agencyUser!;
+    const params = z.object({ id: z.string() }).parse(request.params);
+    z.object({ acknowledgePayment: z.literal(true) }).parse(request.body);
+
+    const project = await prisma.project.findUnique({ where: { id: params.id } });
+    if (!project || project.clientId !== user.id) {
+      return reply.code(404).send({ message: "Projeto não encontrado." });
+    }
+
+    const updated = await activateProjectAfterCheckout(project.id);
+    await notifyAgencyUser({
+      userId: user.id,
+      projectId: project.id,
+      kind: "checkout",
+      title: "Checkout registrado",
+      body: "Sua jornada de desenvolvimento foi liberada. Acompanhe as etapas abaixo."
+    });
+    return {
+      project: updated,
+      message: "Checkout concluído. Projeto ativo."
+    };
+  });
+
+  app.get("/agency/notifications", async (request) => {
+    const user = request.agencyUser!;
+    const rows = await prisma.agencyNotification.findMany({
+      where: { userId: user.id },
+      orderBy: { createdAt: "desc" },
+      take: 40
+    });
+    return { notifications: rows };
+  });
+
+  app.post("/agency/notifications/mark-all-read", async (request) => {
+    const user = request.agencyUser!;
+    await prisma.agencyNotification.updateMany({
+      where: { userId: user.id, readAt: null },
+      data: { readAt: new Date() }
+    });
+    return { ok: true };
+  });
+
+  app.patch("/agency/notifications/:id/read", async (request, reply) => {
+    const user = request.agencyUser!;
+    const params = z.object({ id: z.string() }).parse(request.params);
+    const row = await prisma.agencyNotification.findUnique({ where: { id: params.id } });
+    if (!row || row.userId !== user.id) {
+      return reply.code(404).send({ message: "Notificação não encontrada." });
+    }
+    const updated = await prisma.agencyNotification.update({
+      where: { id: params.id },
+      data: { readAt: new Date() }
+    });
+    return { notification: updated };
+  });
+
+  const funnelConfigPatchSchema = z.object({
+    livePublished: z.boolean().optional(),
+    liveTitle: z.string().min(3).max(200).optional(),
+    liveSubtitle: z.string().max(500).optional().nullable(),
+    liveScheduledAt: z.string().datetime().optional().nullable(),
+    liveStreamUrl: z.string().url().optional().nullable().or(z.literal("")),
+    liveReplayUrl: z.string().url().optional().nullable().or(z.literal("")),
+    packagesJson: z.record(z.any()).optional().nullable(),
+    contractIntro: z.string().max(2000).optional().nullable(),
+    contractClausesJson: z.array(z.string()).optional().nullable(),
+    checkoutTitle: z.string().max(200).optional().nullable(),
+    checkoutBody: z.string().max(4000).optional().nullable(),
+    checkoutPixKey: z.string().max(200).optional().nullable()
+  });
+
+  app.get("/agency/admin/funnel-config", async (request) => {
+    requireRole(request.agencyUser ?? null, ["ADMIN"]);
+    const row = await getAgencyFunnelConfigRow();
+    return {
+      config: row,
+      public: funnelConfigPublicDto(row),
+      packages: resolveFunnelPackages(row)
+    };
+  });
+
+  app.patch("/agency/admin/funnel-config", async (request) => {
+    requireRole(request.agencyUser ?? null, ["ADMIN"]);
+    const body = funnelConfigPatchSchema.parse(request.body);
+    const row = await prisma.agencyFunnelConfig.update({
+      where: { id: "default" },
+      data: {
+        livePublished: body.livePublished,
+        liveTitle: body.liveTitle,
+        liveSubtitle: body.liveSubtitle,
+        liveScheduledAt: body.liveScheduledAt ? new Date(body.liveScheduledAt) : body.liveScheduledAt === null ? null : undefined,
+        liveStreamUrl: body.liveStreamUrl === "" ? null : body.liveStreamUrl,
+        liveReplayUrl: body.liveReplayUrl === "" ? null : body.liveReplayUrl,
+        packagesJson: body.packagesJson === null ? null : body.packagesJson,
+        contractIntro: body.contractIntro,
+        contractClausesJson: body.contractClausesJson === null ? null : body.contractClausesJson,
+        checkoutTitle: body.checkoutTitle,
+        checkoutBody: body.checkoutBody,
+        checkoutPixKey: body.checkoutPixKey
+      }
+    });
+    return {
+      config: row,
+      public: funnelConfigPublicDto(row),
+      packages: resolveFunnelPackages(row)
     };
   });
 }

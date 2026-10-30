@@ -17,7 +17,7 @@ import { MoodSection } from "../components/landing/MoodSection";
 import { Reveal } from "../components/landing/Reveal";
 import { SectionHeader } from "../components/landing/SectionHeader";
 import { usePageMood } from "../hooks/usePageMood";
-import { apiPost } from "../api";
+import { apiGet, apiPost } from "../api";
 import { ThemeToggle } from "../components/theme/ThemeToggle";
 import { scrollToLandingTop } from "../lib/landing-scroll";
 
@@ -74,11 +74,22 @@ function SeedNav({ scrolled }: { scrolled: boolean }) {
   );
 }
 
+type PublicFunnelLive = {
+  live: {
+    title: string;
+    subtitle: string | null;
+    scheduledAt: string | null;
+    streamUrl: string | null;
+    replayUrl: string | null;
+  } | null;
+};
+
 export function SeedLaunchPage() {
   const [scrolled, setScrolled] = useState(false);
   const [consent, setConsent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [leadStatus, setLeadStatus] = useState<string | null>(null);
+  const [publishedLive, setPublishedLive] = useState<PublicFunnelLive["live"]>(null);
   usePageMood();
 
   useEffect(() => {
@@ -97,6 +108,12 @@ export function SeedLaunchPage() {
   useEffect(() => {
     document.body.classList.add("landing-active");
     return () => document.body.classList.remove("landing-active");
+  }, []);
+
+  useEffect(() => {
+    void apiGet<PublicFunnelLive>("/public/agency-funnel")
+      .then((res) => setPublishedLive(res.live))
+      .catch(() => setPublishedLive(null));
   }, []);
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -230,9 +247,24 @@ export function SeedLaunchPage() {
           <SectionHeader
             className="mt-16"
             label={copy.live.label}
-            title={copy.live.title}
-            description={copy.live.note}
+            title={publishedLive?.title?.trim() || copy.live.title}
+            description={publishedLive?.subtitle?.trim() || copy.live.note}
           />
+          {publishedLive?.scheduledAt ? (
+            <p className="mt-4 flex items-center gap-2 text-sm text-[var(--app-text-muted)]">
+              <Calendar className="h-4 w-4 shrink-0" aria-hidden />
+              {new Intl.DateTimeFormat("pt-BR", { dateStyle: "full", timeStyle: "short" }).format(
+                new Date(publishedLive.scheduledAt)
+              )}
+            </p>
+          ) : null}
+          {publishedLive?.streamUrl ? (
+            <p className="mt-3">
+              <a href={publishedLive.streamUrl} target="_blank" rel="noreferrer" className="btn-primary inline-flex text-sm">
+                Link da live
+              </a>
+            </p>
+          ) : null}
           <ul className="mt-8 space-y-3">
             {copy.live.bullets.map((line) => (
               <li

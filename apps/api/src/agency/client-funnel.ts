@@ -1,4 +1,6 @@
 import { prisma } from "../prisma.js";
+import { funnelConfigPublicDto, getAgencyFunnelConfigRow, resolveFunnelPackages } from "./funnel-config.js";
+import { listRecentNotifications, listUnreadNotifications } from "./notifications.js";
 import { projectInclude } from "../modules/agency-project.js";
 
 export async function linkLeadToUser(userId: string, email: string) {
@@ -33,14 +35,42 @@ export async function resolveClientFunnelState(userId: string, email: string) {
   });
 
   const pendingContract = projects.find((p) => p.contractStatus === "PENDING_SIGNATURE") ?? null;
+  const awaitingCheckout =
+    projects.find((p) => p.contractStatus === "SIGNED" && p.status === "AWAITING_CHECKOUT") ?? null;
   const activeProject =
     projects.find((p) => p.status === "ACTIVE" && p.contractStatus === "SIGNED") ?? null;
 
   const liveOk = Boolean(lead?.liveAttended);
-  const hasOpenProject = Boolean(pendingContract || activeProject);
-  const canSelectPackage = liveOk && !hasOpenProject;
+  const blockingProject = Boolean(pendingContract || awaitingCheckout || activeProject);
+  const canSelectPackage = liveOk && !blockingProject;
+
+  const configRow = await getAgencyFunnelConfigRow();
+  const config = funnelConfigPublicDto(configRow);
+  const tiers = resolveFunnelPackages(configRow);
+
+  let step:
+    | "register"
+    | "live"
+    | "package"
+    | "contract"
+    | "checkout"
+    | "delivery" = "register";
+  if (lead) {
+    if (activeProject) step = "delivery";
+    else if (awaitingCheckout) step = "checkout";
+    else if (pendingContract) step = "contract";
+    else if (liveOk) step = "package";
+    else step = "live";
+  }
+
+  const [unreadNotifications, notifications] = await Promise.all([
+    listUnreadNotifications(userId, 10),
+    listRecentNotifications(userId, 15)
+  ]);
 
   return {
+    config,
+    tiers,
     lead: lead
       ? {
           id: lead.id,
@@ -53,15 +83,24 @@ export async function resolveClientFunnelState(userId: string, email: string) {
     liveOk,
     canSelectPackage,
     pendingContractProject: pendingContract,
+    awaitingCheckoutProject: awaitingCheckout,
     activeProject,
-    step: !lead
-      ? ("register" as const)
-      : !liveOk
-        ? ("live" as const)
-        : pendingContract
-          ? ("contract" as const)
-          : activeProject
-            ? ("delivery" as const)
-            : ("package" as const)
+    deliveryProgress: activeProject
+      ? {
+          projectId: activeProject.id,
+          phases: activeProject.phases.map((ph) => ({
+            id: ph.id,
+            phaseKey: ph.phaseKey,
+            label: ph.label,
+            status: ph.status,
+            sortOrder: ph.sortOrder,
+            deliverablesDone: ph.deliverables.filter((d) => d.status === "DONE").length,
+            deliverablesTotal: ph.deliverables.length
+          }))
+        }
+      : null,
+    unreadNotificationCount: unreadNotifications.length,
+    notifications,
+    step
   };
 }

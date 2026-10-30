@@ -60,11 +60,34 @@ export async function createProjectFromPackage(
   });
 }
 
-export async function activateProjectAfterContract(projectId: string, acceptedName: string) {
-  const project = await prisma.project.findUnique({ where: { id: projectId }, include: { phases: true } });
+export async function recordContractSignature(projectId: string, acceptedName: string) {
+  const project = await prisma.project.findUnique({ where: { id: projectId } });
   if (!project) throw Object.assign(new Error("Projeto não encontrado."), { statusCode: 404 });
   if (project.contractStatus === "SIGNED") {
     throw Object.assign(new Error("Contrato já assinado."), { statusCode: 409 });
+  }
+
+  return prisma.project.update({
+    where: { id: projectId },
+    data: {
+      contractStatus: "SIGNED",
+      contractSignedAt: new Date(),
+      contractAcceptedName: acceptedName.trim(),
+      status: "AWAITING_CHECKOUT",
+      paymentStatus: "PENDING"
+    },
+    include: projectInclude
+  });
+}
+
+export async function activateProjectAfterCheckout(projectId: string) {
+  const project = await prisma.project.findUnique({ where: { id: projectId }, include: { phases: true } });
+  if (!project) throw Object.assign(new Error("Projeto não encontrado."), { statusCode: 404 });
+  if (project.contractStatus !== "SIGNED") {
+    throw Object.assign(new Error("Assine o contrato antes do checkout."), { statusCode: 400 });
+  }
+  if (project.status === "ACTIVE") {
+    throw Object.assign(new Error("Projeto já ativo."), { statusCode: 409 });
   }
 
   const firstPhase = project.phases.sort((a, b) => a.sortOrder - b.sortOrder)[0];
@@ -80,13 +103,17 @@ export async function activateProjectAfterContract(projectId: string, acceptedNa
       where: { id: projectId },
       data: {
         status: "ACTIVE",
-        contractStatus: "SIGNED",
-        contractSignedAt: new Date(),
-        contractAcceptedName: acceptedName.trim()
+        paymentStatus: "PARTIAL"
       },
       include: projectInclude
     });
   });
+}
+
+/** @deprecated use recordContractSignature + activateProjectAfterCheckout */
+export async function activateProjectAfterContract(projectId: string, acceptedName: string) {
+  await recordContractSignature(projectId, acceptedName);
+  return activateProjectAfterCheckout(projectId);
 }
 
 export const projectInclude = {
