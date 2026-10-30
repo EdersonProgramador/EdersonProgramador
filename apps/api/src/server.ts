@@ -85,6 +85,10 @@ app.get("/health", async () => {
   return {
     status: "ok",
     service: "ederson-agencia-api",
+    features: {
+      agencyFunnelAdmin: true,
+      seedLaunchSignup: true
+    },
     adminUsers,
     adminBootstrap: env.ADMIN_BOOTSTRAP,
     adminEnvReady: Boolean(env.ADMIN_EMAIL && env.ADMIN_PASSWORD)

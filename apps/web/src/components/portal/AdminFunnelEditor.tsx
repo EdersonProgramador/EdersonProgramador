@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import {
   AGENCY_FUNNEL_COPY,
+  institutionalFunnelDbDefaults,
+  PACKAGE_TIER_CONFIG,
   PACKAGE_TIER_IDS,
   type PackageTierId
 } from "@ederson-agencia/shared";
-import { apiGet, apiPatch, apiPost } from "../../api";
+import { ApiError, apiGet, apiPatch, apiPost } from "../../api";
 
 type FunnelConfigRow = {
   livePublished: boolean;
@@ -31,13 +33,32 @@ type TierForm = {
 
 function tierFormFromJson(packagesJson: Record<string, unknown> | null, id: PackageTierId): TierForm {
   const o = (packagesJson?.[id] ?? {}) as Record<string, unknown>;
-  const cents = typeof o.totalValueCents === "number" ? o.totalValueCents : null;
+  const cents =
+    typeof o.totalValueCents === "number" ? o.totalValueCents : PACKAGE_TIER_CONFIG[id].totalValueCents;
   return {
     enabled: o.enabled !== false,
-    name: typeof o.name === "string" ? o.name : "",
-    tagline: typeof o.tagline === "string" ? o.tagline : "",
-    priceReais: cents != null ? String(cents / 100) : "",
+    name: typeof o.name === "string" ? o.name : PACKAGE_TIER_CONFIG[id].name,
+    tagline: typeof o.tagline === "string" ? o.tagline : PACKAGE_TIER_CONFIG[id].tagline,
+    priceReais: String(cents / 100),
     bullets: Array.isArray(o.bullets) ? (o.bullets as string[]).join("\n") : ""
+  };
+}
+
+function institutionalDefaultsAsConfigRow(): FunnelConfigRow {
+  const d = institutionalFunnelDbDefaults();
+  return {
+    livePublished: d.livePublished,
+    liveTitle: d.liveTitle,
+    liveSubtitle: d.liveSubtitle,
+    liveScheduledAt: null,
+    liveStreamUrl: d.liveStreamUrl,
+    liveReplayUrl: d.liveReplayUrl,
+    packagesJson: d.packagesJson as Record<string, unknown>,
+    contractIntro: d.contractIntro,
+    contractClausesJson: d.contractClausesJson,
+    checkoutTitle: d.checkoutTitle,
+    checkoutBody: d.checkoutBody,
+    checkoutPixKey: d.checkoutPixKey
   };
 }
 
@@ -83,7 +104,19 @@ export function AdminFunnelEditor() {
   }
 
   useEffect(() => {
-    void apiGet<{ config: FunnelConfigRow }>("/agency/admin/funnel-config").then((res) => loadFromConfig(res.config));
+    void apiGet<{ config: FunnelConfigRow }>("/agency/admin/funnel-config")
+      .then((res) => loadFromConfig(res.config))
+      .catch((err) => {
+        if (err instanceof ApiError && err.status === 404) {
+          loadFromConfig(institutionalDefaultsAsConfigRow());
+          setStatus(
+            "A API em uso não expõe /agency/admin/funnel-config (404). Formulário carregado com dados institucionais. " +
+              "Use npm run dev na raiz (web + API) ou aguarde o deploy no Render."
+          );
+          return;
+        }
+        setStatus(err instanceof Error ? err.message : "Não foi possível carregar o funil.");
+      });
   }, []);
 
   async function applyInstitutional(force: boolean) {
