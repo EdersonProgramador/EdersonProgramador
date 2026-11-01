@@ -143,6 +143,7 @@ export { BRAND_IDENTITY } from "./brand.js";
 export { CONTRACT_COPY } from "./contract-copy.js";
 export { MARKETING_COPY } from "./marketing-copy.js";
 export { SEED_LAUNCH_COPY, SEED_LAUNCH_PATH } from "./seed-launch-copy.js";
+export { CADASTRO_COPY, CADASTRO_PATH } from "./cadastro-copy.js";
 export {
   AGENCY_CONTRACT_VERSION,
   AGENCY_FUNNEL_COPY,

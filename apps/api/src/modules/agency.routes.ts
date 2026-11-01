@@ -564,7 +564,12 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
 
     let lead = await ensureClientFunnelLead(user.id, user.email, user.name);
     const funnelConfig = await getAgencyFunnelConfigRow();
-    if (!funnelConfig.livePublished && lead.source !== "seed_launch" && lead.source !== "portal") {
+    if (
+      !funnelConfig.livePublished &&
+      lead.source !== "seed_launch" &&
+      lead.source !== "cadastro" &&
+      lead.source !== "portal"
+    ) {
       return reply.code(403).send({
         message: "A live ainda não foi publicada pelo administrador. Peça liberação ou aguarde a aula."
       });

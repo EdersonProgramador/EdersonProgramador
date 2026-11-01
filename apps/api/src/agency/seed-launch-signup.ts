@@ -10,6 +10,8 @@ export type SeedLaunchSignupInput = {
   phone: string;
   company?: string;
   message: string;
+  /** Origem do lead no funil (`cadastro`, `seed_launch`, etc.). */
+  leadSource?: string;
 };
 
 export async function registerSeedLaunchClient(input: SeedLaunchSignupInput) {
@@ -31,6 +33,8 @@ export async function registerSeedLaunchClient(input: SeedLaunchSignupInput) {
     }
   });
 
+  const leadSource = input.leadSource?.trim() || "seed_launch";
+
   await linkLeadToUser(user.id, email);
   const linked = await findLeadForClient(user.id, email);
   if (!linked) {
@@ -41,7 +45,7 @@ export async function registerSeedLaunchClient(input: SeedLaunchSignupInput) {
         phone: input.phone.trim(),
         company: input.company?.trim(),
         message: input.message.trim(),
-        source: "seed_launch",
+        source: leadSource,
         userId: user.id,
         status: "NEW"
       }
@@ -53,7 +57,7 @@ export async function registerSeedLaunchClient(input: SeedLaunchSignupInput) {
         phone: input.phone.trim(),
         company: input.company?.trim() || linked.company,
         message: input.message.trim(),
-        source: linked.source ?? "seed_launch"
+        source: linked.source ?? leadSource
       }
     });
   }

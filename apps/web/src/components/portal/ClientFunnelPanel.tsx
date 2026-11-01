@@ -557,7 +557,11 @@ export function ClientFunnelPanel() {
                 {ui.liveConfirmCta}
               </button>
             ) : null}
-            {!state.liveOk && attendedConfirm && !funnelConfig.live && state.lead?.source !== "seed_launch" ? (
+            {!state.liveOk &&
+            attendedConfirm &&
+            !funnelConfig.live &&
+            state.lead?.source !== "seed_launch" &&
+            state.lead?.source !== "cadastro" ? (
               <p className="text-xs text-[var(--app-text-muted)]">
                 Se a confirmação falhar, aguarde o admin publicar a live ou marcar sua participação.
               </p>

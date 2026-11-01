@@ -3,7 +3,8 @@
  * Página de captura + aquecimento; preços e pacotes ficam fora deste fluxo.
  */
 
-export const SEED_LAUNCH_PATH = "/lancamento";
+/** @deprecated Use CADASTRO_PATH — /lancamento redireciona para /cadastro */
+export const SEED_LAUNCH_PATH = "/cadastro";
 
 export const SEED_LAUNCH_COPY = {
   meta: {

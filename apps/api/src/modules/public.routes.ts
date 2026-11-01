@@ -26,7 +26,7 @@ const leadSchema = z.object({
   message: z.string().min(10),
   budgetHint: z.string().optional(),
   packageTier: z.enum(["essential", "professional", "advanced"]).optional(),
-  source: z.enum(["landing", "seed_launch", "portal"]).optional()
+  source: z.enum(["landing", "seed_launch", "cadastro", "portal"]).optional()
 });
 
 export async function registerPublicRoutes(app: FastifyInstance) {
@@ -225,23 +225,27 @@ export async function registerPublicRoutes(app: FastifyInstance) {
     });
   });
 
-  app.post("/public/seed-launch/signup", async (request, reply) => {
-    const body = z
-      .object({
-        name: z.string().min(2).max(120),
-        email: z.string().email(),
-        password: z.string().min(6).max(128),
-        phone: z.string().min(8).max(40),
-        company: z.string().max(200).optional(),
-        challenge: z.string().max(2000).optional(),
-        acceptTerms: z.literal(true, {
-          errorMap: () => ({ message: "Aceite os termos para continuar." })
-        })
-      })
-      .parse(request.body);
+  const clientSignupSchema = z.object({
+    name: z.string().min(2).max(120),
+    email: z.string().email(),
+    password: z.string().min(6).max(128),
+    phone: z.string().min(8).max(40),
+    company: z.string().max(200).optional(),
+    challenge: z.string().max(2000).optional(),
+    acceptTerms: z.literal(true, {
+      errorMap: () => ({ message: "Aceite os termos para continuar." })
+    })
+  });
+
+  async function handleClientPlatformSignup(
+    request: { body: unknown },
+    reply: import("fastify").FastifyReply,
+    opts: { leadSource: string; funnelLabel: string }
+  ) {
+    const body = clientSignupSchema.parse(request.body);
 
     const message = [
-      "[Funil: Lançamento Semente — App do Zero ao Lançamento]",
+      `[Funil: ${opts.funnelLabel}]`,
       "[Cadastro na plataforma + lista da aula]",
       body.challenge?.trim() ? `\nDesafio informado:\n${body.challenge.trim()}` : "",
       `\n[LGPD: consentimento em ${new Date().toISOString()}]`
@@ -256,7 +260,8 @@ export async function registerPublicRoutes(app: FastifyInstance) {
         password: body.password,
         phone: body.phone,
         company: body.company,
-        message
+        message,
+        leadSource: opts.leadSource
       });
       const token = await reply.jwtSign(authUser);
       return reply.code(201).send({
@@ -274,7 +279,21 @@ export async function registerPublicRoutes(app: FastifyInstance) {
       }
       throw error;
     }
-  });
+  }
+
+  app.post("/public/seed-launch/signup", async (request, reply) =>
+    handleClientPlatformSignup(request, reply, {
+      leadSource: "seed_launch",
+      funnelLabel: "Lançamento Semente — App do Zero ao Lançamento"
+    })
+  );
+
+  app.post("/public/cadastro/signup", async (request, reply) =>
+    handleClientPlatformSignup(request, reply, {
+      leadSource: "cadastro",
+      funnelLabel: "Cadastro — App do Zero ao Lançamento"
+    })
+  );
 
   app.post("/public/leads", async (request, reply) => {
     const body = leadSchema.parse(request.body);
