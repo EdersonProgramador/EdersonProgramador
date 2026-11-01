@@ -80,7 +80,7 @@ export const CADASTRO_COPY = {
     unmuteHint: "Assista à apresentação antes de se cadastrar",
     fallbackTitle: "App do Zero ao Lançamento — aula gratuita",
     explanatoryHeadline:
-      "Nesta apresentação você entende o caminho da ideia ao produto no ar: MVP, marcos de entrega, critérios de aceite e como evitar escopo infinito ou fornecedor errado.",
+      "Nesta apresentação você entende o caminho da ideia ao produto no ar: MVP, marcos de entrega, critérios de aceite e como evitar escopo infinito ou stack de desenvolvimento errada.",
     explanatorySupport:
       "Ao terminar, use o formulário abaixo para garantir sua vaga na live e criar acesso à Área do cliente (senha, confirmação e próximos passos do funil)."
   },
