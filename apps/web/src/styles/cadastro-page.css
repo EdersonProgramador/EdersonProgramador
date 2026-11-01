@@ -8,6 +8,11 @@
   --cad-green-hover: #16a34a;
   background: var(--cad-bg) !important;
   color: #e8eef9;
+  overflow-x: clip;
+}
+
+.cadastro-page > header {
+  padding-top: 2.75rem;
 }
 
 .cadastro-page .landing-container {
@@ -19,7 +24,11 @@
 }
 
 .cadastro-marquee {
-  overflow: hidden;
+  position: relative;
+  z-index: 5;
+  overflow-x: hidden;
+  overflow-y: visible;
+  height: 2.375rem;
   background: linear-gradient(90deg, #0d4fd8, var(--cad-blue));
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
@@ -27,10 +36,12 @@
 .cadastro-marquee__track {
   display: flex;
   align-items: center;
+  height: 2.375rem;
   width: max-content;
   animation: cadastro-marquee 28s linear infinite;
-  gap: 2.75rem;
-  padding: 0.5rem 0;
+  gap: 2.5rem;
+  padding: 0;
+  overflow: visible;
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.14em;
@@ -48,12 +59,15 @@
 }
 
 .cadastro-marquee-brand {
+  display: inline-flex;
+  align-items: center;
   padding: 0;
   background: none;
   border: none;
   box-shadow: none;
 }
 
+/* Logo no tamanho grande anterior; faixa azul permanece baixa (2.375rem) */
 .cadastro-marquee-brand__logo {
   display: block;
   height: clamp(3.85rem, 11.5vw, 5.35rem);
