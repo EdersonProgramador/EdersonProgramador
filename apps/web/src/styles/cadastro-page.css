@@ -26,10 +26,11 @@
 
 .cadastro-marquee__track {
   display: flex;
+  align-items: center;
   width: max-content;
   animation: cadastro-marquee 28s linear infinite;
-  gap: 2.5rem;
-  padding: 0.65rem 0;
+  gap: 2.75rem;
+  padding: 0.5rem 0;
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.14em;
@@ -38,8 +39,29 @@
   white-space: nowrap;
 }
 
-.cadastro-marquee__track span {
+.cadastro-marquee__item {
   opacity: 0.95;
+}
+
+.cadastro-marquee__item:has(.cadastro-marquee-brand) {
+  opacity: 1;
+}
+
+.cadastro-marquee-brand {
+  padding: 0;
+  background: none;
+  border: none;
+  box-shadow: none;
+}
+
+.cadastro-marquee-brand__logo {
+  display: block;
+  height: clamp(3.85rem, 11.5vw, 5.35rem);
+  width: auto;
+  max-width: min(22rem, 88vw);
+  object-fit: contain;
+  object-position: center;
+  filter: drop-shadow(0 2px 5px rgba(1, 8, 24, 0.95)) drop-shadow(0 8px 22px rgba(8, 32, 78, 0.92));
 }
 
 @keyframes cadastro-marquee {

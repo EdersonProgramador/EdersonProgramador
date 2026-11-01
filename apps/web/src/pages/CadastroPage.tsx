@@ -1,7 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Building2, Check, Eye, EyeOff, Lock, Mail, Phone, User, Users } from "lucide-react";
-import { CADASTRO_COPY, CADASTRO_PATH, LEGAL_NOTICES, MARKETING_COPY } from "@ederson-agencia/shared";
+import {
+  BRAND_IDENTITY,
+  CADASTRO_COPY,
+  CADASTRO_PATH,
+  LEGAL_NOTICES,
+  MARKETING_COPY
+} from "@ederson-agencia/shared";
 import { CadastroMediaSlot } from "../components/cadastro/CadastroMediaSlot";
 import { BrandLogo } from "../components/brand/BrandLogo";
 import { streamEmbedUrl } from "../components/portal/funnel-ui";
@@ -22,14 +28,33 @@ type PublicFunnelLive = {
   } | null;
 };
 
+const MARQUEE_BRAND_LABEL = copy.marquee[0];
+
+function MarqueeBrandLockup() {
+  return (
+    <span className="cadastro-marquee-brand inline-flex items-center">
+      <img
+        src={BRAND_IDENTITY.assets.logoHorizontal}
+        alt={BRAND_IDENTITY.name}
+        width={1280}
+        height={720}
+        className="cadastro-marquee-brand__logo"
+        decoding="async"
+        draggable={false}
+      />
+    </span>
+  );
+}
+
 function Marquee() {
   const items = [...copy.marquee, ...copy.marquee, ...copy.marquee];
   return (
     <div className="cadastro-marquee" aria-hidden>
       <div className="cadastro-marquee__track">
         {items.map((label, i) => (
-          <span key={`${label}-${i}`}>
-            {label} <span className="opacity-60">•</span>
+          <span key={`${label}-${i}`} className="cadastro-marquee__item inline-flex shrink-0 items-center">
+            {label === MARQUEE_BRAND_LABEL ? <MarqueeBrandLockup /> : label}
+            <span className="cadastro-marquee__sep opacity-60"> • </span>
           </span>
         ))}
       </div>
@@ -379,9 +404,6 @@ export function CadastroPage() {
       <Marquee />
 
       <header className="border-b border-white/10 px-4 py-6 text-center">
-        <Link to={CADASTRO_PATH} className="mb-6 inline-flex justify-center" aria-label={MARKETING_COPY.brand}>
-          <BrandLogo size="sm" />
-        </Link>
         <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-sky-400/90">{copy.workshop.badge}</p>
         <h1 className="cadastro-workshop-title mt-3">
           <span className="cadastro-workshop-title__line1 block">{copy.workshop.titleLine1}</span>
