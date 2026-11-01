@@ -9,6 +9,7 @@
   background: var(--cad-bg) !important;
   color: #e8eef9;
   overflow-x: clip;
+  overflow-y: visible;
 }
 
 .cadastro-page > header {
@@ -27,7 +28,7 @@
   position: relative;
   z-index: 5;
   overflow-x: hidden;
-  overflow-y: visible;
+  overflow-y: clip;
   height: 2.375rem;
   background: linear-gradient(90deg, #0d4fd8, var(--cad-blue));
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
@@ -41,7 +42,6 @@
   animation: cadastro-marquee 28s linear infinite;
   gap: 2.5rem;
   padding: 0;
-  overflow: visible;
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.14em;
@@ -67,7 +67,6 @@
   box-shadow: none;
 }
 
-/* Logo no tamanho grande anterior; faixa azul permanece baixa (2.375rem) */
 .cadastro-marquee-brand__logo {
   display: block;
   height: clamp(3.85rem, 11.5vw, 5.35rem);
