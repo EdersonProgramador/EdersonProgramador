@@ -4,6 +4,9 @@
 
 export const CADASTRO_PATH = "/cadastro";
 
+/** URL pública para QR code, cartão e campanhas. */
+export const CADASTRO_PUBLIC_URL = "https://www.edersonprogramador.com.br/cadastro";
+
 export const CADASTRO_COPY = {
   meta: {
     title: "Workshop App do Zero ao Lançamento | Ederson Programador",
