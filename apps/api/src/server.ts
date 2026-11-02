@@ -5,6 +5,7 @@ import rateLimit from "@fastify/rate-limit";
 import Fastify from "fastify";
 import { ZodError } from "zod";
 import { env } from "./env.js";
+import { isAllowedCorsOrigin, resolveAllowedOrigins } from "./cors-origins.js";
 import { registerAgencyRoutes } from "./modules/agency.routes.js";
 import { registerAuthRoutes } from "./modules/auth.routes.js";
 import { registerCoursesAdminContentRoutes } from "./modules/courses-admin-content.routes.js";
@@ -23,13 +24,11 @@ const app = Fastify({
   trustProxy: true
 });
 
-const allowedOrigins = env.WEB_ORIGIN.split(",")
-  .map((origin) => origin.trim())
-  .filter(Boolean);
+const allowedOrigins = resolveAllowedOrigins();
 
 await app.register(cors, {
   origin(origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (!origin || allowedOrigins.has(origin)) {
       callback(null, true);
       return;
     }
@@ -41,6 +40,17 @@ await app.register(cors, {
     callback(new Error("Origem não permitida pelo CORS"), false);
   },
   credentials: true
+});
+
+/** Respostas de erro/timeout às vezes perdem CORS — reforço para origens permitidas. */
+app.addHook("onSend", async (request, reply, payload) => {
+  const origin = request.headers.origin;
+  if (isAllowedCorsOrigin(origin, allowedOrigins) && !reply.getHeader("access-control-allow-origin")) {
+    reply.header("Access-Control-Allow-Origin", origin);
+    reply.header("Access-Control-Allow-Credentials", "true");
+    reply.header("Vary", "Origin");
+  }
+  return payload;
 });
 
 await app.register(rateLimit, { max: 120, timeWindow: "1 minute" });

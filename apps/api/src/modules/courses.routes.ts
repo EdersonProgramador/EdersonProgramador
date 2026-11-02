@@ -27,6 +27,7 @@ import {
   catalogVisibleInMineList,
   courseCardFields
 } from "../courses/course-catalog-list.js";
+import { getPortalLessonNote } from "../courses/portal-content.js";
 import { courseContentReady, resolveStudyPayload } from "../courses/resolve-study-payload.js";
 import { userCanAccessCourse } from "../courses/access.js";
 import { env } from "../env.js";
@@ -153,10 +154,15 @@ export async function registerCoursesRoutes(app: FastifyInstance) {
       orderBy: { sortOrder: "asc" },
       select: { id: true }
     });
-    for (let i = 0; i < moduleRows.length; i++) {
-      await recordModuleRepetitionIfComplete(course, user.id, i + 1);
-    }
     const moduleRepetitions = await getAllModuleRepetitionsDto(course, user.id);
+
+    void (async () => {
+      for (let i = 0; i < moduleRows.length; i++) {
+        await recordModuleRepetitionIfComplete(course, user.id, i + 1);
+      }
+    })().catch((err) => {
+      request.log.warn({ err, slug: course.slug }, "Sync de repetição por módulo (background)");
+    });
 
     return {
       course: {
@@ -180,6 +186,24 @@ export async function registerCoursesRoutes(app: FastifyInstance) {
       certificate,
       ...study
     };
+  });
+
+  app.get("/courses/:slug/lessons/:lessonSlug", async (request, reply) => {
+    const user = await requireAcademyUser(request, reply);
+    if (!user) return;
+
+    const params = z
+      .object({ slug: z.string().min(1), lessonSlug: z.string().min(1).max(120) })
+      .parse(request.params);
+    const course = await prisma.course.findUnique({ where: { slug: params.slug } });
+    if (!course) return reply.code(404).send({ message: "Curso não encontrado." });
+    if (!(await userCanAccessCourse(user.id, user.role, user.email, course))) {
+      return reply.code(403).send({ message: "Sem acesso." });
+    }
+
+    const note = await getPortalLessonNote(course.id, params.lessonSlug);
+    if (!note) return reply.code(404).send({ message: "Aula não encontrada." });
+    return note;
   });
 
   app.get("/courses/:slug/certificate", async (request, reply) => {

@@ -159,10 +159,8 @@ export async function buildPortalStudyPayload(
         const type = mapLessonType(lesson);
         const slug = lesson.slug;
 
-        const noteHtml = buildLessonNoteHtml(lesson);
-        if (noteHtml) {
-          lessonNotes[slug] = { html: noteHtml, displayTitle: lesson.title };
-        }
+        // HTML da aula é carregado sob demanda (GET …/lessons/:slug) — evita JSON gigante no ENEM.
+        lessonNotes[slug] = { displayTitle: lesson.title };
         if (lesson.videoUrl?.trim()) {
           files[id] = lesson.videoUrl.trim();
         }
@@ -228,5 +226,23 @@ export async function buildPortalStudyPayload(
     },
     telegramMessageMap: {} as Record<string, number>,
     completedSlugs
+  };
+}
+
+export async function getPortalLessonNote(courseId: string, lessonSlug: string) {
+  const lesson = await prisma.courseLesson.findFirst({
+    where: { slug: lessonSlug, module: { courseId } },
+    select: {
+      title: true,
+      bodyHtml: true,
+      documentUrl: true,
+      lessonType: true
+    }
+  });
+  if (!lesson) return null;
+  const html = buildLessonNoteHtml(lesson);
+  return {
+    displayTitle: lesson.title,
+    html: html ?? undefined
   };
 }

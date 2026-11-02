@@ -152,6 +152,10 @@ export function CourseStudyPage() {
     moduleNumber: number;
     cycleNumber: number;
   } | null>(null);
+  const [activeLessonNote, setActiveLessonNote] = useState<{
+    html?: string;
+    displayTitle?: string;
+  } | null>(null);
 
   const loadCoursePayload = useCallback(async (bustCache = false) => {
     if (!courseSlug) return;
@@ -201,6 +205,32 @@ export function CourseStudyPage() {
   const items = payload?.curriculum.items ?? [];
   const bySlug = useMemo(() => new Map(items.map((i) => [i.slug, i])), [items]);
   const activeItem = lessonSlug ? bySlug.get(lessonSlug) : undefined;
+  useEffect(() => {
+    if (!courseSlug || !activeItem || !payload) {
+      setActiveLessonNote(null);
+      return;
+    }
+    const bundled = payload.lessonNotes[activeItem.slug];
+    if (bundled?.html) {
+      setActiveLessonNote(bundled);
+      return;
+    }
+    let cancelled = false;
+    void apiGet<{ html?: string; displayTitle?: string }>(
+      `/courses/${courseSlug}/lessons/${encodeURIComponent(activeItem.slug)}`
+    )
+      .then((note) => {
+        if (!cancelled) setActiveLessonNote(note);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setActiveLessonNote(bundled ?? { displayTitle: activeItem.title });
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [courseSlug, activeItem?.slug, payload]);
   const activeBonus = isBonusPath
     ? payload?.bonusContent.find((b) => b.slug === subPath.replace(/^bonus\//, ""))
     : undefined;
@@ -610,7 +640,7 @@ export function CourseStudyPage() {
             <LessonPanel
               courseSlug={courseSlug}
               item={activeItem}
-              note={payload.lessonNotes[activeItem.slug]}
+              note={activeLessonNote ?? payload.lessonNotes[activeItem.slug]}
               documentBase={payload.curriculum.documentBase}
               mediaFiles={payload.videoManifest.files}
               videoSrc={videoFile(activeItem.id) ? apiAssetUrl(videoFile(activeItem.id)!) : null}
