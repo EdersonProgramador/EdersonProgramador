@@ -3,7 +3,7 @@ import { prisma } from "../prisma.js";
 
 export type StudyCurriculumItem = {
   order: number;
-  type: "document" | "video";
+  type: "document" | "video" | "article";
   id: string;
   slug: string;
   title: string;
@@ -18,10 +18,10 @@ export type StudyCurriculumItem = {
   next: string | null;
 };
 
-function mapLessonType(lessonType: string): "document" | "video" {
-  if (lessonType === "document") return "document";
-  if (lessonType === "article") return "document";
-  return "video";
+function mapLessonType(lesson: Pick<PublishedLesson, "lessonType" | "documentUrl" | "videoUrl">): "document" | "video" | "article" {
+  if (lesson.lessonType === "video" || lesson.videoUrl?.trim()) return "video";
+  if (lesson.lessonType === "document" && lesson.documentUrl?.trim()) return "document";
+  return "article";
 }
 
 function buildLessonNoteHtml(lesson: {
@@ -32,10 +32,7 @@ function buildLessonNoteHtml(lesson: {
   const parts: string[] = [];
   if (lesson.lessonType === "document" && lesson.documentUrl?.trim()) {
     const url = lesson.documentUrl.trim();
-    parts.push(
-      `<p><a href="${url}" target="_blank" rel="noopener noreferrer">Abrir documento</a></p>`,
-      `<iframe src="${url}" title="Documento" style="width:100%;height:50vh;border:0;border-radius:8px"></iframe>`
-    );
+    parts.push(`<p><a href="${url}" target="_blank" rel="noopener noreferrer">Abrir documento (PDF)</a></p>`);
   }
   if (lesson.bodyHtml?.trim()) parts.push(lesson.bodyHtml.trim());
   return parts.length ? parts.join("\n") : null;
@@ -159,7 +156,7 @@ export async function buildPortalStudyPayload(
 
       sectionLessons.forEach((lesson, li) => {
         const id = lesson.lessonKey?.trim() || lesson.slug.toUpperCase();
-        const type = mapLessonType(lesson.lessonType);
+        const type = mapLessonType(lesson);
         const slug = lesson.slug;
 
         const noteHtml = buildLessonNoteHtml(lesson);
@@ -168,6 +165,9 @@ export async function buildPortalStudyPayload(
         }
         if (lesson.videoUrl?.trim()) {
           files[id] = lesson.videoUrl.trim();
+        }
+        if (lesson.documentUrl?.trim()) {
+          files[id] = lesson.documentUrl.trim();
         }
 
         items.push({

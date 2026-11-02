@@ -48,7 +48,7 @@ import "../styles/fichamento-editor.css";
 
 type CurriculumItem = {
   order: number;
-  type: "document" | "video";
+  type: "document" | "video" | "article";
   id: string;
   slug: string;
   title: string;
@@ -612,6 +612,7 @@ export function CourseStudyPage() {
               item={activeItem}
               note={payload.lessonNotes[activeItem.slug]}
               documentBase={payload.curriculum.documentBase}
+              mediaFiles={payload.videoManifest.files}
               videoSrc={videoFile(activeItem.id) ? apiAssetUrl(videoFile(activeItem.id)!) : null}
               telegram={payload.telegram}
               telegramMessageMap={payload.telegramMessageMap}
@@ -670,6 +671,7 @@ function lessonKindLabel(
   isYoutube: boolean | undefined
 ) {
   if (item.type === "document") return COURSES_UI.study.lessonDocument;
+  if (item.type === "article") return COURSES_UI.study.lessonReading;
   if (isYoutube) return COURSES_UI.study.lessonYoutube;
   if (hasVideo) return COURSES_UI.study.lessonVideo;
   return COURSES_UI.study.lessonTelegram;
@@ -706,7 +708,7 @@ function TocLessonLink({
   const status = lessonStatusClass(isActive, isDone);
   const kind = lessonKindLabel(item, hasVideo, isYoutube);
   const showCode = /^F\d/i.test(item.id);
-  const TypeIcon = item.type === "document" ? FileText : PlayCircle;
+  const TypeIcon = item.type === "video" ? PlayCircle : FileText;
 
   return (
     <button type="button" className={`course-study__toc-link w-full ${status}`} onClick={onOpen}>
@@ -1135,11 +1137,28 @@ function TelegramPanel({
   );
 }
 
+function resolveCourseMediaUrl(url: string): string {
+  if (/^https?:\/\//i.test(url)) return url;
+  return apiAssetUrl(url.startsWith("/") ? url : `/${url}`);
+}
+
+function lessonPdfSrc(
+  item: CurriculumItem,
+  documentBase: string,
+  mediaFiles: Record<string, string>
+): string | null {
+  if (item.type !== "document") return null;
+  const fromManifest = mediaFiles[item.id]?.trim();
+  if (fromManifest) return resolveCourseMediaUrl(fromManifest);
+  return resolveCourseMediaUrl(`${documentBase}/${item.id}.pdf`);
+}
+
 function LessonPanel({
   courseSlug,
   item,
   note,
   documentBase,
+  mediaFiles,
   videoSrc,
   telegram,
   telegramMessageMap,
@@ -1151,6 +1170,7 @@ function LessonPanel({
   item: CurriculumItem;
   note?: { html?: string; displayTitle?: string };
   documentBase: string;
+  mediaFiles: Record<string, string>;
   videoSrc: string | null;
   telegram: TelegramConfig;
   telegramMessageMap: Record<string, number>;
@@ -1159,9 +1179,9 @@ function LessonPanel({
   fichamentoSlot?: ReactNode;
 }) {
   const title = note?.displayTitle ?? item.title;
-  const pdfUrl = `${documentBase}/${item.id}.pdf`;
+  const pdfSrc = lessonPdfSrc(item, documentBase, mediaFiles);
   const youtubeId = videoSrc ? parseYoutubeVideoId(videoSrc) : null;
-  const useTelegramPrimary = !videoSrc && telegram.enabled;
+  const useTelegramPrimary = item.type === "document" || (!videoSrc && telegram.enabled);
 
   return (
     <article className="panel p-4 sm:p-6 md:p-8">
@@ -1169,38 +1189,40 @@ function LessonPanel({
       <h2 className="mt-2 text-xl font-bold text-[var(--course-fg)]">{title}</h2>
       <p className="mt-1 font-mono text-sm text-brand-primary">{item.id}</p>
 
-      {item.type === "document" ? (
+      {pdfSrc || item.type === "video" ? (
         <div className="mt-6 space-y-4">
-          <object data={pdfUrl} type="application/pdf" className="h-[50vh] w-full rounded-lg bg-white/5">
-            <p className="course-text-muted text-sm">{COURSES_UI.study.pdfFallback}</p>
-          </object>
-          <TelegramPanel item={item} telegram={telegram} messageMap={telegramMessageMap} primary />
-        </div>
-      ) : (
-        <div className="mt-6 space-y-4">
-          {youtubeId ? (
-            <div className="aspect-video w-full overflow-hidden rounded-lg bg-black">
-              <iframe
-                title={title}
-                className="h-full w-full border-0"
-                src={youtubeEmbedUrl(youtubeId)}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-                referrerPolicy="strict-origin-when-cross-origin"
-              />
-            </div>
-          ) : videoSrc ? (
-            <video controls playsInline preload="metadata" className="w-full rounded-lg bg-black">
-              <source src={videoSrc} type="video/mp4" />
-            </video>
+          {pdfSrc ? (
+            <object data={pdfSrc} type="application/pdf" className="h-[50vh] w-full rounded-lg bg-white/5">
+              <p className="course-text-muted text-sm">{COURSES_UI.study.pdfFallback}</p>
+            </object>
           ) : null}
-          {useTelegramPrimary ? (
+          {item.type === "video" ? (
+            <>
+              {youtubeId ? (
+                <div className="aspect-video w-full overflow-hidden rounded-lg bg-black">
+                  <iframe
+                    title={title}
+                    className="h-full w-full border-0"
+                    src={youtubeEmbedUrl(youtubeId)}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                    referrerPolicy="strict-origin-when-cross-origin"
+                  />
+                </div>
+              ) : videoSrc ? (
+                <video controls playsInline preload="metadata" className="w-full rounded-lg bg-black">
+                  <source src={videoSrc} type="video/mp4" />
+                </video>
+              ) : null}
+            </>
+          ) : null}
+          {useTelegramPrimary && item.type !== "article" ? (
             <TelegramPanel item={item} telegram={telegram} messageMap={telegramMessageMap} primary />
-          ) : videoSrc ? (
+          ) : item.type === "video" && videoSrc ? (
             <TelegramPanel item={item} telegram={telegram} messageMap={telegramMessageMap} />
           ) : null}
         </div>
-      )}
+      ) : null}
 
       {note?.html ? (
         <div
