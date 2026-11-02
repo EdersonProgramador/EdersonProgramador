@@ -11,7 +11,14 @@ export {
   ACADEMY_DEMO_COUPONS,
   ACADEMY_STORE_PATHS
 } from "./academy-cart-copy.js";
-export { COURSE_COVER, COURSES_UI, FL_COURSE, resolveCourseCoverUrl, TANAR_COURSE } from "./courses-copy.js";
+export {
+  COURSE_COVER,
+  COURSES_UI,
+  ENEM_FELIPE_ARAUJO_COURSE,
+  FL_COURSE,
+  resolveCourseCoverUrl,
+  TANAR_COURSE
+} from "./courses-copy.js";
 export {
   applyTanarSalmosStudyFallback,
   applyTanarStudyFallback,

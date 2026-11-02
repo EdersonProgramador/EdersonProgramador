@@ -539,6 +539,7 @@ export const ENEM_FELIPE_ARAUJO_CATALOG: EnemCronogramaCatalog = {
   title: "ENEM — Cronograma Felipe Araújo",
   summary:
     "Trilha completa baseada no cronograma F3lipearaujo: metas e filmes, Ciências da Natureza, Matemática, Humanas, Linguagens, Redação, competências e temas de prática.",
+  coverUrl: "/course-covers/enem-cronograma-felipe-araujo.png",
   sortOrder: 5,
   catalogVersion: 1,
   modules: [

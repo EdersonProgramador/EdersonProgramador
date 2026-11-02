@@ -17,9 +17,19 @@ export const TANAR_COURSE = {
   coverUrl: "/course-covers/tanar-tanakh.jpg"
 } as const;
 
+export const ENEM_FELIPE_ARAUJO_COURSE = {
+  slug: "enem-cronograma-felipe-araujo",
+  title: "ENEM — Cronograma Felipe Araújo",
+  /** Primeira página do PDF 452378109 — 1280×720 em apps/web/public */
+  coverUrl: "/course-covers/enem-cronograma-felipe-araujo.png"
+} as const;
+
 /** Capa canônica no front enquanto a API/Render ainda devolve URL legada. */
 export function resolveCourseCoverUrl(slug: string, coverUrl?: string | null): string | null | undefined {
   if (slug === TANAR_COURSE.slug && TANAR_COURSE.coverUrl) return TANAR_COURSE.coverUrl;
+  if (slug === ENEM_FELIPE_ARAUJO_COURSE.slug && ENEM_FELIPE_ARAUJO_COURSE.coverUrl) {
+    return ENEM_FELIPE_ARAUJO_COURSE.coverUrl;
+  }
   return coverUrl;
 }
 
