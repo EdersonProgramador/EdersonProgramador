@@ -62,7 +62,7 @@ function institutionalDefaultsAsConfigRow(): FunnelConfigRow {
   };
 }
 
-export function AdminFunnelEditor() {
+export function AdminFunnelEditor({ showHeader = true }: { showHeader?: boolean }) {
   const ui = AGENCY_FUNNEL_COPY.admin;
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
@@ -185,10 +185,14 @@ export function AdminFunnelEditor() {
 
   return (
     <section className="panel space-y-6 p-6">
-      <div>
-        <h2 className="text-xl font-semibold text-[var(--app-text)]">{ui.funnelEditorTitle}</h2>
-        <p className="mt-1 text-sm text-[var(--app-text-muted)]">{ui.funnelEditorHint}</p>
-      </div>
+      {showHeader ? (
+        <div>
+          <h2 className="text-xl font-semibold text-[var(--app-text)]">{ui.funnelEditorTitle}</h2>
+          <p className="mt-1 text-sm text-[var(--app-text-muted)]">{ui.funnelEditorHint}</p>
+        </div>
+      ) : (
+        <p className="text-sm text-[var(--app-text-muted)]">{ui.funnelEditorHint}</p>
+      )}
 
       <fieldset className="space-y-3">
         <legend className="text-sm font-medium">Live / aula</legend>

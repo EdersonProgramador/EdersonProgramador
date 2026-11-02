@@ -1,13 +1,17 @@
 import { useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
-import { agencyHomePathForRole } from "@ederson-agencia/shared";
+import { AGENCY_APP_BASE, agencyHomePathForRole } from "@ederson-agencia/shared";
 import type { AuthUser } from "@ederson-agencia/shared";
 
 type NavLink = { to: string; label: string };
 
 function agencyLinks(user: AuthUser): NavLink[] {
-  return [{ to: agencyHomePathForRole(user.role), label: "Início" }];
+  const home = { to: agencyHomePathForRole(user.role), label: "Início" };
+  if (user.role === "ADMIN") {
+    return [home, { to: `${AGENCY_APP_BASE}/admin/projetos`, label: "Administração" }];
+  }
+  return [home];
 }
 
 function linkClass(pathname: string, path: string, block?: boolean) {

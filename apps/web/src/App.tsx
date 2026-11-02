@@ -26,7 +26,15 @@ import { AcademyStoreCheckoutPage } from "./pages/AcademyStoreCheckoutPage";
 import { CoursesCatalogPage } from "./pages/CoursesCatalogPage";
 import { AdminCourseContentPage } from "./pages/AdminCourseContentPage";
 import { AdminCoursesPage } from "./pages/AdminCoursesPage";
-import { AdminDashboard, ClientDashboard, FreelancerDashboard } from "./pages/DashboardPages";
+import {
+  AdminClientsPage,
+  AdminFunnelPage,
+  AdminLeadsPage,
+  AdminProjectsPage,
+  ClientDashboard,
+  FreelancerDashboard
+} from "./pages/DashboardPages";
+import { AdminOperationsLayout } from "./components/admin/AdminOperationsLayout";
 import { ProjectDetailPage } from "./pages/ProjectDetailPage";
 import { UserProfilePage } from "./pages/UserProfilePage";
 import { ThemeSync } from "./components/theme/ThemeSync";
@@ -64,7 +72,13 @@ export default function App() {
           <Route element={<AgencyShellLayout title="Operação" />}>
             <Route index element={<AgencyHomeRedirect />} />
             <Route element={<ProtectedRoute realm="agency" roles={["ADMIN"]} />}>
-              <Route path="admin" element={<AdminDashboard />} />
+              <Route path="admin" element={<AdminOperationsLayout />}>
+                <Route index element={<Navigate to="projetos" replace />} />
+                <Route path="projetos" element={<AdminProjectsPage />} />
+                <Route path="funil" element={<AdminFunnelPage />} />
+                <Route path="leads" element={<AdminLeadsPage />} />
+                <Route path="clientes" element={<AdminClientsPage />} />
+              </Route>
             </Route>
             <Route element={<ProtectedRoute realm="agency" roles={["CLIENT"]} />}>
               <Route path="cliente" element={<ClientDashboard />} />
@@ -92,7 +106,7 @@ export default function App() {
         <Route path="/app" element={<Navigate to={AGENCY_APP_BASE} replace />} />
         <Route path="/app/admin/cursos/*" element={<LegacyAcademyAdminCursosRedirect />} />
         <Route path="/agencia/admin/cursos/*" element={<LegacyAcademyAdminCursosRedirect />} />
-        <Route path="/app/admin/*" element={<Navigate to={`${AGENCY_APP_BASE}/admin`} replace />} />
+        <Route path="/app/admin/*" element={<Navigate to={`${AGENCY_APP_BASE}/admin/projetos`} replace />} />
         <Route path="/app/cliente" element={<Navigate to={`${AGENCY_APP_BASE}/cliente`} replace />} />
         <Route path="/app/freelancer" element={<Navigate to={`${AGENCY_APP_BASE}/freelancer`} replace />} />
         <Route path="/app/projetos/:projectId" element={<LegacyProjectRedirect />} />

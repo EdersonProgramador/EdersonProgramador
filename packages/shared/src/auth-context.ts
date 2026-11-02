@@ -62,7 +62,7 @@ export function loginPathForContext(context: AuthContext = "agency"): string {
 export function agencyHomePathForRole(role: AgencyRole): string {
   switch (role) {
     case "ADMIN":
-      return `${AGENCY_APP_BASE}/admin`;
+      return `${AGENCY_APP_BASE}/admin/projetos`;
     case "FREELANCER":
       return `${AGENCY_APP_BASE}/freelancer`;
     case "CLIENT":

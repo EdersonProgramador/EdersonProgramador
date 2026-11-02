@@ -1,0 +1,134 @@
+.agency-admin-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+@media (min-width: 1024px) {
+  .agency-admin-layout {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 1.75rem;
+  }
+}
+
+.agency-admin-sidebar {
+  flex-shrink: 0;
+  width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .agency-admin-sidebar {
+    position: sticky;
+    top: calc(var(--app-shell-header-h, 4.5rem) + 1rem);
+    width: 15.5rem;
+  }
+}
+
+.agency-admin-sidebar__panel {
+  border-radius: 0.875rem;
+  border: 1px solid var(--app-border);
+  background: var(--app-panel);
+  padding: 0.75rem;
+  box-shadow: 0 1px 0 rgb(15 23 42 / 0.04);
+}
+
+.agency-admin-sidebar__label {
+  padding: 0.35rem 0.65rem 0.5rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--app-text-subtle);
+}
+
+.agency-admin-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.625rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--app-text-muted);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.agency-admin-nav-link:hover {
+  background: var(--app-hover);
+  color: var(--app-text);
+}
+
+.agency-admin-nav-link.is-active {
+  background: rgb(14 165 233 / 0.12);
+  color: rgb(3 105 161);
+  font-weight: 600;
+}
+
+html[data-theme="dark"] .agency-admin-nav-link.is-active {
+  color: rgb(125 211 252);
+  background: rgb(14 165 233 / 0.18);
+}
+
+.agency-admin-nav-link svg {
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+.agency-admin-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.agency-admin-page-head {
+  margin-bottom: 1.5rem;
+}
+
+.agency-admin-page-head h1 {
+  font-size: 1.625rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--app-text);
+}
+
+.agency-admin-page-head p {
+  margin-top: 0.35rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--app-text-muted);
+}
+
+.agency-admin-mobile-nav {
+  display: flex;
+  gap: 0.35rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (min-width: 1024px) {
+  .agency-admin-mobile-nav {
+    display: none;
+  }
+}
+
+.agency-admin-mobile-nav .agency-admin-nav-link {
+  width: auto;
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-height: 2.5rem;
+  padding-inline: 0.85rem;
+  font-size: 0.8125rem;
+}
+
+.agency-admin-sidebar__desktop-nav {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .agency-admin-sidebar__desktop-nav {
+    display: block;
+  }
+}

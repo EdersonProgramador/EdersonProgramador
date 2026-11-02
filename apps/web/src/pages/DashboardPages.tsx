@@ -10,6 +10,7 @@ import {
 } from "@ederson-agencia/shared";
 import { AGENCY_FUNNEL_COPY } from "@ederson-agencia/shared";
 import { AdminFunnelEditor } from "../components/portal/AdminFunnelEditor";
+import "../styles/agency-admin.css";
 import { ClientFunnelPanel } from "../components/portal/ClientFunnelPanel";
 import { apiGet, apiPatch, apiPost } from "../api";
 
@@ -129,7 +130,7 @@ function ProjectCard({ project, role }: { project: Project; role: "ADMIN" | "CLI
   );
 }
 
-function ProjectsPanel({ role }: { role: "ADMIN" | "CLIENT" | "FREELANCER" }) {
+function ProjectsPanel({ role, hideTitle }: { role: "ADMIN" | "CLIENT" | "FREELANCER"; hideTitle?: boolean }) {
   const [projects, setProjects] = useState<Project[]>([]);
 
   useEffect(() => {
@@ -138,7 +139,9 @@ function ProjectsPanel({ role }: { role: "ADMIN" | "CLIENT" | "FREELANCER" }) {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold text-[var(--app-text)]">Projetos</h2>
+      {hideTitle ? null : (
+        <h2 className="text-xl font-semibold text-[var(--app-text)]">Projetos</h2>
+      )}
       {projects.length === 0 ? (
         <p className="text-[var(--app-text-muted)]">Nenhum projeto ainda.</p>
       ) : (
@@ -233,13 +236,26 @@ function useAdminDashboardPayload() {
   return { stats, clients, clientsError };
 }
 
-export function AdminDashboard() {
-  const { stats, clients, clientsError } = useAdminDashboardPayload();
+function AdminPageHead({ title, description }: { title: string; description: string }) {
+  return (
+    <header className="agency-admin-page-head">
+      <h1>{title}</h1>
+      <p>{description}</p>
+    </header>
+  );
+}
+
+function useAdminLeads() {
   const [leads, setLeads] = useState<Lead[]>([]);
 
   useEffect(() => {
     void apiGet<{ leads: Lead[] }>("/agency/leads").then((res) => setLeads(res.leads));
   }, []);
+
+  async function refreshLeads() {
+    const refreshed = await apiGet<{ leads: Lead[] }>("/agency/leads");
+    setLeads(refreshed.leads);
+  }
 
   async function convertLead(lead: Lead) {
     const clientEmail = window.prompt("E-mail do cliente (conta já cadastrada):", lead.email);
@@ -255,51 +271,85 @@ export function AdminDashboard() {
       projectTitle: `App do Zero ao Lançamento — ${lead.company ?? lead.name}`,
       packageTier
     });
-    const refreshed = await apiGet<{ leads: Lead[] }>("/agency/leads");
-    setLeads(refreshed.leads);
+    await refreshLeads();
   }
 
   async function setLeadTier(leadId: string, packageTier: PackageTierId) {
     await apiPatch(`/agency/leads/${leadId}`, { packageTier });
-    const refreshed = await apiGet<{ leads: Lead[] }>("/agency/leads");
-    setLeads(refreshed.leads);
+    await refreshLeads();
   }
 
   async function toggleLiveAttended(lead: Lead, liveAttended: boolean) {
     await apiPatch(`/agency/leads/${lead.id}`, { liveAttended });
-    const refreshed = await apiGet<{ leads: Lead[] }>("/agency/leads");
-    setLeads(refreshed.leads);
+    await refreshLeads();
   }
 
   async function setLeadStatus(leadId: string, status: string) {
     await apiPatch(`/agency/leads/${leadId}`, { status });
-    const refreshed = await apiGet<{ leads: Lead[] }>("/agency/leads");
-    setLeads(refreshed.leads);
+    await refreshLeads();
   }
 
+  return { leads, convertLead, setLeadTier, toggleLiveAttended, setLeadStatus };
+}
+
+/** Visão principal: métricas + projetos ativos. */
+export function AdminProjectsPage() {
+  const stats = useDashboard();
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold text-[var(--app-text)]">Administração</h1>
-        <p className="text-[var(--app-text-muted)]">Leads, pacotes e jornada dos projetos.</p>
-      </div>
+    <div className="space-y-6">
+      <AdminPageHead
+        title="Projetos"
+        description="Acompanhe entregas, contratos e checkout de cada cliente."
+      />
       <StatGrid stats={stats} />
-      <AdminFunnelEditor />
-      <section className="space-y-4">
-        <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="text-xl font-semibold text-[var(--app-text)]">Clientes cadastrados</h2>
-          {typeof stats.clients === "number" ? (
-            <p className="text-sm text-[var(--app-text-muted)]">
-              Total no contador: <strong>{stats.clients}</strong>
-            </p>
-          ) : null}
-        </div>
-        <AdminClientsList clients={clients} loadError={clientsError} />
-      </section>
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold text-[var(--app-text)]">Leads da landing</h2>
-        <div className="space-y-3">
-          {leads.map((lead) => (
+      <ProjectsPanel role="ADMIN" hideTitle />
+    </div>
+  );
+}
+
+export function AdminFunnelPage() {
+  return (
+    <div className="space-y-6">
+      <AdminPageHead
+        title="Funil comercial"
+        description="Live, pacotes, contrato e checkout — o que o cliente vê na Área do cliente."
+      />
+      <AdminFunnelEditor showHeader={false} />
+    </div>
+  );
+}
+
+export function AdminClientsPage() {
+  const { stats, clients, clientsError } = useAdminDashboardPayload();
+  return (
+    <div className="space-y-6">
+      <AdminPageHead
+        title="Clientes"
+        description="Contas com perfil CLIENT cadastradas na plataforma."
+      />
+      {typeof stats.clients === "number" ? (
+        <p className="text-sm text-[var(--app-text-muted)]">
+          Total no contador: <strong className="text-[var(--app-text)]">{stats.clients}</strong>
+        </p>
+      ) : null}
+      <AdminClientsList clients={clients} loadError={clientsError} />
+    </div>
+  );
+}
+
+export function AdminLeadsPage() {
+  const { leads, convertLead, setLeadTier, toggleLiveAttended, setLeadStatus } = useAdminLeads();
+  return (
+    <div className="space-y-6">
+      <AdminPageHead
+        title="Leads"
+        description="Cadastros da landing e do /cadastro — qualifique e converta em projeto."
+      />
+      <div className="space-y-3">
+        {leads.length === 0 ? (
+          <p className="text-sm text-[var(--app-text-muted)]">Nenhum lead ainda.</p>
+        ) : (
+          leads.map((lead) => (
             <div key={lead.id} className="panel flex flex-wrap items-start justify-between gap-3 p-4">
               <div className="min-w-0 flex-1">
                 <p className="font-medium text-[var(--app-text)]">
@@ -323,7 +373,7 @@ export function AdminDashboard() {
                 </p>
                 <p className="mt-2 text-sm text-[var(--app-text-muted)]">{lead.message}</p>
               </div>
-              <div className="flex flex-col gap-2">
+              <div className="flex w-full flex-col gap-2 sm:w-auto sm:min-w-[12rem]">
                 <select
                   className="input text-sm"
                   value={lead.status}
@@ -357,16 +407,20 @@ export function AdminDashboard() {
                   {AGENCY_FUNNEL_COPY.admin.liveToggle}
                 </label>
                 <button type="button" className="btn-secondary text-sm" onClick={() => void convertLead(lead)}>
-                  Converter em projeto (admin)
+                  Converter em projeto
                 </button>
               </div>
             </div>
-          ))}
-        </div>
-      </section>
-      <ProjectsPanel role="ADMIN" />
+          ))
+        )}
+      </div>
     </div>
   );
+}
+
+/** @deprecated Rotas usam AdminOperationsLayout + páginas dedicadas. */
+export function AdminDashboard() {
+  return <AdminProjectsPage />;
 }
 
 export function ClientDashboard() {
