@@ -6,8 +6,9 @@ import {
   COURSES_UI,
   isAcademyInternalAdmin
 } from "@ederson-agencia/shared";
-import { apiGet } from "../api";
 import { CourseCatalogCard, type CourseCatalogItem } from "../components/courses/CourseCatalogCard";
+import { CourseCatalogGridSkeleton } from "../components/courses/CourseCatalogCardSkeleton";
+import { fetchMyCourses } from "../courses/catalog-cache";
 import { useAcademySession } from "../stores/authStore";
 import "../styles/course-study.css";
 
@@ -18,25 +19,23 @@ export function CoursesCatalogPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
     void (async () => {
       try {
-        const data = await apiGet<{ courses: CourseCatalogItem[] }>("/courses");
-        setCourses(data.courses);
+        const list = await fetchMyCourses();
+        if (!cancelled) setCourses(list);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Erro ao carregar cursos.");
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "Erro ao carregar cursos.");
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
-
-  if (loading) {
-    return <p className="course-text-muted">{COURSES_UI.catalog.loading}</p>;
-  }
-
-  if (error) {
-    return <p className="text-red-300">{error}</p>;
-  }
 
   return (
     <div className="courses-academy space-y-6">
@@ -59,7 +58,11 @@ export function CoursesCatalogPage() {
         </div>
       </div>
 
-      {courses.length > 0 ? (
+      {error ? <p className="text-red-300">{error}</p> : null}
+
+      {loading ? (
+        <CourseCatalogGridSkeleton count={Math.max(courses.length, 3)} />
+      ) : courses.length > 0 ? (
         <ul className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
           {courses.map((course) => (
             <li key={course.id}>

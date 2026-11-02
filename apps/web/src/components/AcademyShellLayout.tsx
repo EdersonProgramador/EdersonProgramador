@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { ACADEMY_PROFILE_PATH, loginPathForContext } from "@ederson-agencia/shared";
 import { ProfileAvatarNavLink } from "./profile/ProfileAvatarCircle";
@@ -5,6 +6,7 @@ import { LogOut } from "lucide-react";
 import { AcademyNav } from "./portal/AcademyNav";
 import { BrandLogo } from "./brand/BrandLogo";
 import { ThemeToggle } from "./theme/ThemeToggle";
+import { prefetchMyCourses } from "../courses/catalog-cache";
 import { useAcademySession, useAuthStore } from "../stores/authStore";
 
 export function AcademyShellLayout({ title }: { title: string }) {
@@ -14,6 +16,10 @@ export function AcademyShellLayout({ title }: { title: string }) {
   const location = useLocation();
   const user = session?.user;
   const academyLogin = loginPathForContext("academy");
+
+  useEffect(() => {
+    if (session?.token) prefetchMyCourses();
+  }, [session?.token]);
 
   return (
     <div className="surface-light min-h-screen bg-[var(--app-bg-solid)] text-[var(--app-text)]">

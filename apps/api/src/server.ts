@@ -113,27 +113,29 @@ await registerCourseLibraryRoutes(app);
 await registerCoursesAdminRoutes(app);
 await registerCoursesAdminContentRoutes(app);
 
-try {
-  await ensureSeedAdmin(app.log);
-} catch (err) {
-  app.log.warn({ err }, "Bootstrap do admin não concluído (verifique ADMIN_EMAIL, ADMIN_PASSWORD e o banco)");
-}
-
-try {
-  await ensureSeedCourses(app.log);
-} catch (err) {
-  app.log.warn({ err }, "Seed de cursos não concluído");
-}
-
-if (env.ACADEMY_SYNC_TEST_ALUNO) {
-  try {
-    await ensureAcademyTestUser(app.log, env.ACADEMY_TEST_ALUNO_PASSWORD);
-  } catch (err) {
-    app.log.warn({ err }, "Sync da conta de teste aluno@gmail.com não concluído");
-  }
-}
-
 const port = env.API_PORT;
 const host = "0.0.0.0";
 await app.listen({ port, host });
 app.log.info(`API em http://${host}:${port}`);
+
+void (async () => {
+  try {
+    await ensureSeedAdmin(app.log);
+  } catch (err) {
+    app.log.warn({ err }, "Bootstrap do admin não concluído (verifique ADMIN_EMAIL, ADMIN_PASSWORD e o banco)");
+  }
+
+  try {
+    await ensureSeedCourses(app.log);
+  } catch (err) {
+    app.log.warn({ err }, "Seed de cursos não concluído");
+  }
+
+  if (env.ACADEMY_SYNC_TEST_ALUNO) {
+    try {
+      await ensureAcademyTestUser(app.log, env.ACADEMY_TEST_ALUNO_PASSWORD);
+    } catch (err) {
+      app.log.warn({ err }, "Sync da conta de teste aluno@gmail.com não concluído");
+    }
+  }
+})();

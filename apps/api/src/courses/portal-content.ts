@@ -89,6 +89,35 @@ export async function courseHasPortalContent(courseId: string) {
   return (await countPublishedPortalLessons(courseId)) > 0;
 }
 
+/** Uma query agregada para listagem de cursos (evita N counts sequenciais). */
+export async function publishedLessonCountsByCourseIds(courseIds: string[]) {
+  const counts = new Map<string, number>();
+  if (courseIds.length === 0) return counts;
+
+  const modules = await prisma.courseModule.findMany({
+    where: { courseId: { in: courseIds } },
+    select: { id: true, courseId: true }
+  });
+  if (modules.length === 0) return counts;
+
+  const moduleToCourse = new Map(modules.map((m) => [m.id, m.courseId]));
+  const grouped = await prisma.courseLesson.groupBy({
+    by: ["moduleId"],
+    where: {
+      status: "PUBLISHED",
+      moduleId: { in: modules.map((m) => m.id) }
+    },
+    _count: { _all: true }
+  });
+
+  for (const row of grouped) {
+    const courseId = moduleToCourse.get(row.moduleId);
+    if (!courseId) continue;
+    counts.set(courseId, (counts.get(courseId) ?? 0) + row._count._all);
+  }
+  return counts;
+}
+
 export async function buildPortalStudyPayload(
   course: Course,
   completedSlugs: string[]

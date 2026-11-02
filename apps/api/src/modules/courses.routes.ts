@@ -21,6 +21,12 @@ import {
   recordModuleRepetitionIfComplete,
   startNextModuleRepetition
 } from "../courses/course-module-repetitions.js";
+import {
+  buildCourseContentReadyMap,
+  catalogUserIsInternalAdmin,
+  catalogVisibleInMineList,
+  courseCardFields
+} from "../courses/course-catalog-list.js";
 import { courseContentReady, resolveStudyPayload } from "../courses/resolve-study-payload.js";
 import { userCanAccessCourse } from "../courses/access.js";
 import { env } from "../env.js";
@@ -39,64 +45,39 @@ function resolveMediaPath(relative: string) {
   return existsSync(full) ? full : null;
 }
 
-async function courseCardDto(
-  course: Awaited<ReturnType<typeof prisma.course.findMany>>[number],
-  user: { id: string; role: string; email: string }
-) {
-  const hasAccess = await userCanAccessCourse(user.id, user.role, user.email, course);
-  const purchasable =
-    course.visibility === "PUBLIC_SALE" && course.priceCents != null && course.priceCents > 0;
-  return {
-    id: course.id,
-    slug: course.slug,
-    title: course.title,
-    summary: course.summary,
-    visibility: course.visibility,
-    priceCents: course.priceCents,
-    currency: course.currency,
-    purchasable,
-    hasAccess,
-    locked: !hasAccess && purchasable,
-    contentReady: await courseContentReady(course),
-    coverUrl: course.coverUrl
-  };
-}
-
 export async function registerCoursesRoutes(app: FastifyInstance) {
   app.get("/courses", async (request, reply) => {
     const user = await requireAcademyUser(request, reply);
     if (!user) return;
 
-    const courses = await prisma.course.findMany({
-      where: { status: "PUBLISHED" },
-      orderBy: [{ sortOrder: "asc" }, { title: "asc" }]
-    });
+    const [courses, enrollments] = await Promise.all([
+      prisma.course.findMany({
+        where: { status: "PUBLISHED" },
+        orderBy: [{ sortOrder: "asc" }, { title: "asc" }]
+      }),
+      prisma.courseEnrollment.findMany({
+        where: { userId: user.id, status: "ACTIVE" },
+        select: { courseId: true }
+      })
+    ]);
 
-    const internalAdmin = isAcademyInternalAdmin({
-      role: user.role as AgencyRole,
-      email: user.email
-    });
+    const enrolledCourseIds = new Set(enrollments.map((e) => e.courseId));
+    const internalAdmin = catalogUserIsInternalAdmin(user);
+    const contentReadyMap = await buildCourseContentReadyMap(courses);
 
     const cards = [];
     for (const course of courses) {
-      if (!internalAdmin) {
-        if (course.visibility === "INTERNAL") continue;
-        if (course.visibility === "PUBLIC_SALE") {
-          const enrollment = await prisma.courseEnrollment.findUnique({
-            where: { userId_courseId: { userId: user.id, courseId: course.id } }
-          });
-          if (enrollment?.status !== "ACTIVE") continue;
-        }
-      }
+      if (!catalogVisibleInMineList(course, internalAdmin, enrolledCourseIds)) continue;
 
-      const card = await courseCardDto(course, user);
+      const card = courseCardFields(
+        course,
+        user,
+        internalAdmin,
+        enrolledCourseIds,
+        contentReadyMap.get(course.id) ?? false
+      );
       if (!card.hasAccess) continue;
-
-      if (!internalAdmin) {
-        cards.push({ ...card, purchasable: false, locked: false, priceCents: null });
-      } else {
-        cards.push(card);
-      }
+      cards.push(card);
     }
     return { courses: cards };
   });
@@ -105,19 +86,35 @@ export async function registerCoursesRoutes(app: FastifyInstance) {
     const user = await requireAcademyUser(request, reply);
     if (!user) return;
 
-    const courses = await prisma.course.findMany({
-      where: {
-        status: "PUBLISHED",
-        visibility: "PUBLIC_SALE",
-        priceCents: { gt: 0 }
-      },
-      orderBy: [{ sortOrder: "asc" }, { title: "asc" }]
-    });
+    const [courses, enrollments] = await Promise.all([
+      prisma.course.findMany({
+        where: {
+          status: "PUBLISHED",
+          visibility: "PUBLIC_SALE",
+          priceCents: { gt: 0 }
+        },
+        orderBy: [{ sortOrder: "asc" }, { title: "asc" }]
+      }),
+      prisma.courseEnrollment.findMany({
+        where: { userId: user.id, status: "ACTIVE" },
+        select: { courseId: true }
+      })
+    ]);
 
-    const cards = [];
-    for (const course of courses) {
-      cards.push(await courseCardDto(course, user));
-    }
+    const enrolledCourseIds = new Set(enrollments.map((e) => e.courseId));
+    const internalAdmin = catalogUserIsInternalAdmin(user);
+    const contentReadyMap = await buildCourseContentReadyMap(courses);
+
+    const cards = courses.map((course) =>
+      courseCardFields(
+        course,
+        user,
+        internalAdmin,
+        enrolledCourseIds,
+        contentReadyMap.get(course.id) ?? false,
+        { storeList: true }
+      )
+    );
     return { courses: cards };
   });
 

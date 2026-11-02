@@ -7,6 +7,7 @@ import {
   setAuthToken,
   type LoginResponse
 } from "../api";
+import { prefetchMyCourses } from "../courses/catalog-cache";
 
 type RealmSession = { user: AuthUser; token: string };
 
@@ -45,6 +46,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ agency: session, booting: false });
     } else {
       set({ academy: session, booting: false });
+      prefetchMyCourses();
     }
   },
   patchSession: (context, payload) => {
@@ -71,6 +73,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     migrateLegacyAuthToken();
     const [agency, academy] = await Promise.all([loadRealm("agency"), loadRealm("academy")]);
     set({ agency, academy, booting: false });
+    if (academy?.token) prefetchMyCourses();
   }
 }));
 
