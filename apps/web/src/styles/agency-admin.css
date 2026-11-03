@@ -132,3 +132,91 @@ html[data-theme="dark"] .agency-admin-nav-link.is-active {
     display: block;
   }
 }
+
+.agency-admin-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 1rem;
+  background: rgb(2 6 23 / 0.55);
+  backdrop-filter: blur(4px);
+}
+
+@media (min-width: 640px) {
+  .agency-admin-modal {
+    align-items: center;
+  }
+}
+
+.agency-admin-modal__panel {
+  width: 100%;
+  max-width: 28rem;
+  max-height: min(90vh, 40rem);
+  overflow: auto;
+  border-radius: 1rem;
+  border: 1px solid var(--app-border);
+  background: var(--app-panel);
+  box-shadow: 0 24px 48px rgb(15 23 42 / 0.18);
+}
+
+.agency-admin-modal__head {
+  position: relative;
+  padding: 1.25rem 1.25rem 0.75rem;
+  border-bottom: 1px solid var(--app-border);
+}
+
+.agency-admin-modal__title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--app-text);
+}
+
+.agency-admin-modal__desc {
+  margin-top: 0.35rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--app-text-muted);
+}
+
+.agency-admin-modal__close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+  color: var(--app-text-muted);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.agency-admin-modal__close:hover {
+  background: var(--app-hover);
+  color: var(--app-text);
+}
+
+.agency-admin-modal__body {
+  padding: 1.25rem;
+}
+
+.agency-admin-modal__foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem 1.25rem;
+  border-top: 1px solid var(--app-border);
+}
+
+.agency-admin-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}

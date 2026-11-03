@@ -9,10 +9,12 @@ import {
   type PackageTierId
 } from "@ederson-agencia/shared";
 import { AGENCY_FUNNEL_COPY } from "@ederson-agencia/shared";
+import { CreateProjectModal } from "../components/admin/CreateProjectModal";
+import { ConvertLeadModal } from "../components/admin/ConvertLeadModal";
 import { AdminFunnelEditor } from "../components/portal/AdminFunnelEditor";
 import "../styles/agency-admin.css";
 import { ClientFunnelPanel } from "../components/portal/ClientFunnelPanel";
-import { apiGet, apiPatch, apiPost } from "../api";
+import { apiGet, apiPatch } from "../api";
 
 type DashboardStats = Record<string, number>;
 
@@ -63,6 +65,7 @@ type Lead = {
   source?: string | null;
   liveAttended?: boolean;
   createdAt: string;
+  projectId?: string | null;
 };
 
 function StatGrid({ stats }: { stats: DashboardStats }) {
@@ -130,12 +133,20 @@ function ProjectCard({ project, role }: { project: Project; role: "ADMIN" | "CLI
   );
 }
 
-function ProjectsPanel({ role, hideTitle }: { role: "ADMIN" | "CLIENT" | "FREELANCER"; hideTitle?: boolean }) {
+function ProjectsPanel({
+  role,
+  hideTitle,
+  refreshToken
+}: {
+  role: "ADMIN" | "CLIENT" | "FREELANCER";
+  hideTitle?: boolean;
+  refreshToken?: number;
+}) {
   const [projects, setProjects] = useState<Project[]>([]);
 
   useEffect(() => {
     void apiGet<{ projects: Project[] }>("/agency/projects").then((res) => setProjects(res.projects));
-  }, []);
+  }, [refreshToken]);
 
   return (
     <div className="space-y-4">
@@ -247,6 +258,7 @@ function AdminPageHead({ title, description }: { title: string; description: str
 
 function useAdminLeads() {
   const [leads, setLeads] = useState<Lead[]>([]);
+  const [convertLeadTarget, setConvertLeadTarget] = useState<Lead | null>(null);
 
   useEffect(() => {
     void apiGet<{ leads: Lead[] }>("/agency/leads").then((res) => setLeads(res.leads));
@@ -255,23 +267,6 @@ function useAdminLeads() {
   async function refreshLeads() {
     const refreshed = await apiGet<{ leads: Lead[] }>("/agency/leads");
     setLeads(refreshed.leads);
-  }
-
-  async function convertLead(lead: Lead) {
-    const clientEmail = window.prompt("E-mail do cliente (conta já cadastrada):", lead.email);
-    if (!clientEmail) return;
-    const defaultTier = (parsePackageTier(lead.packageTier) ?? "professional") as PackageTierId;
-    const tierInput = window.prompt(
-      "Pacote (essential | professional | advanced):",
-      defaultTier
-    );
-    const packageTier = parsePackageTier(tierInput) ?? defaultTier;
-    await apiPost(`/agency/leads/${lead.id}/convert`, {
-      clientEmail,
-      projectTitle: `App do Zero ao Lançamento — ${lead.company ?? lead.name}`,
-      packageTier
-    });
-    await refreshLeads();
   }
 
   async function setLeadTier(leadId: string, packageTier: PackageTierId) {
@@ -289,20 +284,46 @@ function useAdminLeads() {
     await refreshLeads();
   }
 
-  return { leads, convertLead, setLeadTier, toggleLiveAttended, setLeadStatus };
+  return {
+    leads,
+    convertLeadTarget,
+    openConvertLead: setConvertLeadTarget,
+    closeConvertLead: () => setConvertLeadTarget(null),
+    refreshLeads,
+    setLeadTier,
+    toggleLiveAttended,
+    setLeadStatus
+  };
 }
 
 /** Visão principal: métricas + projetos ativos. */
 export function AdminProjectsPage() {
   const stats = useDashboard();
+  const [projectRefresh, setProjectRefresh] = useState(0);
+  const [createProjectOpen, setCreateProjectOpen] = useState(false);
+
   return (
     <div className="space-y-6">
-      <AdminPageHead
-        title="Projetos"
-        description="Acompanhe entregas, contratos e checkout de cada cliente."
-      />
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <AdminPageHead
+          title="Projetos"
+          description="Acompanhe entregas, contratos e checkout de cada cliente."
+        />
+        <div className="agency-admin-toolbar shrink-0">
+          <button type="button" className="btn-primary text-sm" onClick={() => setCreateProjectOpen(true)}>
+            Novo projeto
+          </button>
+        </div>
+      </div>
       <StatGrid stats={stats} />
-      <ProjectsPanel role="ADMIN" hideTitle />
+      <ProjectsPanel role="ADMIN" hideTitle refreshToken={projectRefresh} />
+      <CreateProjectModal
+        open={createProjectOpen}
+        onClose={() => setCreateProjectOpen(false)}
+        onCreated={async () => {
+          setProjectRefresh((n) => n + 1);
+        }}
+      />
     </div>
   );
 }
@@ -338,12 +359,26 @@ export function AdminClientsPage() {
 }
 
 export function AdminLeadsPage() {
-  const { leads, convertLead, setLeadTier, toggleLiveAttended, setLeadStatus } = useAdminLeads();
+  const {
+    leads,
+    convertLeadTarget,
+    openConvertLead,
+    closeConvertLead,
+    refreshLeads,
+    setLeadTier,
+    toggleLiveAttended,
+    setLeadStatus
+  } = useAdminLeads();
   return (
     <div className="space-y-6">
       <AdminPageHead
         title="Leads"
         description="Cadastros da landing e do /cadastro — qualifique e converta em projeto."
+      />
+      <ConvertLeadModal
+        lead={convertLeadTarget}
+        onClose={closeConvertLead}
+        onConverted={refreshLeads}
       />
       <div className="space-y-3">
         {leads.length === 0 ? (
@@ -406,9 +441,18 @@ export function AdminLeadsPage() {
                   />
                   {AGENCY_FUNNEL_COPY.admin.liveToggle}
                 </label>
-                <button type="button" className="btn-secondary text-sm" onClick={() => void convertLead(lead)}>
-                  Converter em projeto
-                </button>
+                {lead.projectId ? (
+                  <Link
+                    to={`${AGENCY_APP_BASE}/projetos/${lead.projectId}`}
+                    className="btn-secondary inline-flex justify-center text-sm"
+                  >
+                    Ver projeto
+                  </Link>
+                ) : (
+                  <button type="button" className="btn-secondary text-sm" onClick={() => openConvertLead(lead)}>
+                    Converter em projeto
+                  </button>
+                )}
               </div>
             </div>
           ))
