@@ -3,11 +3,14 @@ import { Link } from "react-router-dom";
 import {
   AGENCY_APP_BASE,
   formatBRL,
+  launchOperationProgress,
   packageTierLabel,
+  parseLaunchOpCheckedJson,
   parsePackageTier,
   projectProgressPercent,
   type PackageTierId
 } from "@ederson-agencia/shared";
+import { ADMIN_BASE } from "../components/admin/AdminOperationsLayout";
 import { AGENCY_FUNNEL_COPY } from "@ederson-agencia/shared";
 import { CreateProjectModal } from "../components/admin/CreateProjectModal";
 import { ConvertLeadModal } from "../components/admin/ConvertLeadModal";
@@ -43,6 +46,7 @@ type Project = {
   phases: Phase[];
   client?: { name: string; email: string; company?: string | null };
   freelancer?: { name: string; email: string } | null;
+  launchOpCheckedJson?: unknown;
 };
 
 type AgencyClient = {
@@ -93,6 +97,7 @@ function ProjectCard({ project, role }: { project: Project; role: "ADMIN" | "CLI
   const deliverables = project.phases.flatMap((p) => p.deliverables);
   const progress = projectProgressPercent(project.phases, deliverables);
   const tier = parsePackageTier(project.packageTier) ?? "professional";
+  const launchOp = launchOperationProgress(parseLaunchOpCheckedJson(project.launchOpCheckedJson));
 
   return (
     <article className="panel space-y-4 p-5">
@@ -126,9 +131,33 @@ function ProjectCard({ project, role }: { project: Project; role: "ADMIN" | "CLI
         </div>
       </div>
 
-      <Link to={`${AGENCY_APP_BASE}/projetos/${project.id}`} className="btn-primary inline-flex text-sm">
-        {role === "CLIENT" ? "Acompanhar etapas e entregas" : "Gerenciar jornada do projeto"}
-      </Link>
+      {role === "ADMIN" ? (
+        <div>
+          <div className="flex justify-between text-xs text-[var(--app-text-muted)]">
+            <span>Operação FL</span>
+            <span>
+              {launchOp.done}/{launchOp.total} ({launchOp.percent}%)
+            </span>
+          </div>
+          <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-[var(--app-hover)]">
+            <div className="h-full rounded-full bg-indigo-500/80 transition-all" style={{ width: `${launchOp.percent}%` }} />
+          </div>
+        </div>
+      ) : null}
+
+      <div className="flex flex-wrap gap-2">
+        <Link to={`${AGENCY_APP_BASE}/projetos/${project.id}`} className="btn-primary inline-flex text-sm">
+          {role === "CLIENT" ? "Acompanhar etapas e entregas" : "Gerenciar jornada do projeto"}
+        </Link>
+        {role === "ADMIN" ? (
+          <Link
+            to={`${ADMIN_BASE}/operacao/fase-1?project=${encodeURIComponent(project.id)}`}
+            className="btn-secondary inline-flex text-sm"
+          >
+            Operação FL
+          </Link>
+        ) : null}
+      </div>
     </article>
   );
 }

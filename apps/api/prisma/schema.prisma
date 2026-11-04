@@ -348,6 +348,7 @@ model Project {
   freelancerId    String?
   freelancer      User?    @relation("FreelancerProjects", fields: [freelancerId], references: [id])
   lead            Lead?
+  launchOpCheckedJson Json?
   phases           ProjectPhase[]
   upgradeRequests  ProjectUpgradeRequest[]
   notifications    AgencyNotification[]

@@ -1,14 +1,50 @@
 import { NavLink, Outlet } from "react-router-dom";
-import { AGENCY_APP_BASE } from "@ederson-agencia/shared";
-import { FolderKanban, Megaphone, UserRound, Users } from "lucide-react";
+import { AGENCY_APP_BASE, LAUNCH_OPERATION_PHASES } from "@ederson-agencia/shared";
+import {
+  BarChart3,
+  Compass,
+  FolderKanban,
+  Megaphone,
+  Palette,
+  Radio,
+  Rocket,
+  Server,
+  UserRound,
+  Users,
+  type LucideIcon
+} from "lucide-react";
 import "../../styles/agency-admin.css";
 
 const ADMIN_BASE = `${AGENCY_APP_BASE}/admin`;
 
-const NAV_GROUPS = [
+const PHASE_ICONS: Record<string, LucideIcon> = {
+  "fase-1": Compass,
+  "fase-2": Palette,
+  "fase-3": Server,
+  "fase-4": Radio,
+  "fase-5": Rocket,
+  "fase-6": BarChart3
+};
+
+type NavItem = {
+  to: string;
+  end: boolean;
+  label: string;
+  icon: LucideIcon;
+};
+
+const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
   {
     label: "Operação",
-    items: [{ to: `${ADMIN_BASE}/projetos`, end: true, label: "Projetos", icon: FolderKanban }]
+    items: [
+      { to: `${ADMIN_BASE}/projetos`, end: true, label: "Projetos", icon: FolderKanban },
+      ...LAUNCH_OPERATION_PHASES.map((phase) => ({
+        to: `${ADMIN_BASE}/operacao/${phase.id}`,
+        end: false,
+        label: phase.navLabel,
+        icon: PHASE_ICONS[phase.id] ?? Compass
+      }))
+    ]
   },
   {
     label: "Comercial & configuração",
@@ -18,27 +54,17 @@ const NAV_GROUPS = [
       { to: `${ADMIN_BASE}/clientes`, end: false, label: "Clientes", icon: UserRound }
     ]
   }
-] as const;
+];
 
-function AdminNavLink({
-  to,
-  end,
-  label,
-  icon: Icon
-}: {
-  to: string;
-  end: boolean;
-  label: string;
-  icon: typeof FolderKanban;
-}) {
+function AdminNavLink({ to, end, label, icon: Icon }: NavItem) {
   return (
     <NavLink
       to={to}
       end={end}
       className={({ isActive }) => `agency-admin-nav-link${isActive ? " is-active" : ""}`}
     >
-      <Icon className="h-4 w-4" strokeWidth={1.75} aria-hidden />
-      {label}
+      <Icon className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden />
+      <span className="agency-admin-nav-link__text">{label}</span>
     </NavLink>
   );
 }

@@ -21,7 +21,7 @@
   .agency-admin-sidebar {
     position: sticky;
     top: calc(var(--app-shell-header-h, 4.5rem) + 1rem);
-    width: 15.5rem;
+    width: 17.5rem;
   }
 }
 
@@ -75,6 +75,16 @@ html[data-theme="dark"] .agency-admin-nav-link.is-active {
 .agency-admin-nav-link svg {
   flex-shrink: 0;
   opacity: 0.85;
+}
+
+.agency-admin-nav-link__text {
+  line-height: 1.25;
+  font-size: 0.8125rem;
+}
+
+.agency-op-check input:focus-visible {
+  outline: 2px solid rgb(14 165 233 / 0.5);
+  outline-offset: 2px;
 }
 
 .agency-admin-main {

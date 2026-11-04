@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import type { PackageTierId } from "@ederson-agencia/shared";
 import { AGENCY_APP_BASE, agencyHomePathForRole } from "@ederson-agencia/shared";
+import { ADMIN_BASE } from "../components/admin/AdminOperationsLayout";
 import { apiGet, apiPatch, apiPost } from "../api";
 import {
   ProjectJourneyPanel,
@@ -71,12 +72,19 @@ export function ProjectDetailPage() {
 
   return (
     <div className="space-y-6">
-      <Link
-        to={agencyHomePathForRole(role)}
-        className="inline-flex text-sm text-brand-primary hover:underline"
-      >
-        ← Voltar ao painel
-      </Link>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Link to={agencyHomePathForRole(role)} className="inline-flex text-sm text-brand-primary hover:underline">
+          ← Voltar ao painel
+        </Link>
+        {role === "ADMIN" && projectId ? (
+          <Link
+            to={`${ADMIN_BASE}/operacao/fase-1?project=${encodeURIComponent(projectId)}`}
+            className="btn-secondary inline-flex text-sm"
+          >
+            Operação FL
+          </Link>
+        ) : null}
+      </div>
       <ProjectJourneyPanel
         project={project}
         role={role}

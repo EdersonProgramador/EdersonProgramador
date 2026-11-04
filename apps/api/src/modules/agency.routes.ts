@@ -34,6 +34,7 @@ import {
   tierPricingFromConfig
 } from "../agency/funnel-config.js";
 import { notifyAgencyUser } from "../agency/notifications.js";
+import { parseLaunchOpChecked } from "../agency/launch-operation.js";
 
 const leadStatusSchema = z.enum(["NEW", "CONTACTED", "QUALIFIED", "WON", "LOST"]);
 const phaseStatusSchema = z.enum(["PENDING", "IN_PROGRESS", "WAITING_APPROVAL", "APPROVED", "DONE"]);
@@ -254,6 +255,50 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
     });
     if (!project) throw Object.assign(new Error("Projeto não encontrado."), { statusCode: 404 });
     return { project };
+  });
+
+  app.get("/agency/projects/:id/launch-operation", async (request) => {
+    const user = request.agencyUser!;
+    const params = z.object({ id: z.string() }).parse(request.params);
+    await assertProjectAccess(user, params.id);
+    const project = await prisma.project.findUnique({
+      where: { id: params.id },
+      select: { id: true, title: true, launchOpCheckedJson: true }
+    });
+    if (!project) throw Object.assign(new Error("Projeto não encontrado."), { statusCode: 404 });
+    return {
+      projectId: project.id,
+      projectTitle: project.title,
+      checked: parseLaunchOpChecked(project.launchOpCheckedJson)
+    };
+  });
+
+  app.patch("/agency/projects/:id/launch-operation", async (request) => {
+    requireRole(request.agencyUser ?? null, ["ADMIN"]);
+    const params = z.object({ id: z.string() }).parse(request.params);
+    const body = z
+      .object({
+        taskId: z.string().min(3).max(120),
+        done: z.boolean()
+      })
+      .parse(request.body);
+    await assertProjectAccess(request.agencyUser!, params.id);
+    const project = await prisma.project.findUnique({ where: { id: params.id } });
+    if (!project) throw Object.assign(new Error("Projeto não encontrado."), { statusCode: 404 });
+
+    const checked = parseLaunchOpChecked(project.launchOpCheckedJson);
+    if (body.done) {
+      checked[body.taskId] = true;
+    } else {
+      delete checked[body.taskId];
+    }
+
+    await prisma.project.update({
+      where: { id: params.id },
+      data: { launchOpCheckedJson: checked as Prisma.InputJsonValue }
+    });
+
+    return { checked };
   });
 
   app.post("/agency/projects", async (request, reply) => {

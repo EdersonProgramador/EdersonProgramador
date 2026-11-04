@@ -34,6 +34,7 @@ import {
   ClientDashboard,
   FreelancerDashboard
 } from "./pages/DashboardPages";
+import { AdminLaunchPhasePage } from "./pages/AdminLaunchPhasePage";
 import { AdminOperationsLayout } from "./components/admin/AdminOperationsLayout";
 import { ProjectDetailPage } from "./pages/ProjectDetailPage";
 import { UserProfilePage } from "./pages/UserProfilePage";
@@ -75,6 +76,7 @@ export default function App() {
               <Route path="admin" element={<AdminOperationsLayout />}>
                 <Route index element={<Navigate to="projetos" replace />} />
                 <Route path="projetos" element={<AdminProjectsPage />} />
+                <Route path="operacao/:phaseId" element={<AdminLaunchPhasePage />} />
                 <Route path="funil" element={<AdminFunnelPage />} />
                 <Route path="leads" element={<AdminLeadsPage />} />
                 <Route path="clientes" element={<AdminClientsPage />} />

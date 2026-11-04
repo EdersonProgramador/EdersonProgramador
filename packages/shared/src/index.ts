@@ -202,6 +202,17 @@ export {
   type JourneyPhaseKey,
   type PackageTierId
 } from "./project-journey.js";
+export {
+  getLaunchOperationPhase,
+  LAUNCH_OPERATION_PHASES,
+  launchOperationAllTaskIds,
+  launchOperationPhaseProgress,
+  launchOperationProgress,
+  parseLaunchOpCheckedJson,
+  launchOperationTaskId,
+  type LaunchOperationPhase,
+  type LaunchOperationSection
+} from "./launch-operation-phases.js";
 export { LEGAL_NOTICES } from "./legal-notices.js";
 
 export {
