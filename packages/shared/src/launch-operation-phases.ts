@@ -1,8 +1,49 @@
-/** Playbook operacional — Fórmula de Lançamento (6 fases) no admin da agência. */
+/** Playbook operacional — 6 fases FL encaixadas nos Três Pilares (admin da agência). */
+
+export type LaunchOperationPillarId = "branding" | "marketing-tech" | "formula";
+
+export type LaunchOperationPillar = {
+  id: LaunchOperationPillarId;
+  shortLabel: string;
+  title: string;
+  description: string;
+};
+
+export const LAUNCH_OPERATION_PILLARS: Record<LaunchOperationPillarId, LaunchOperationPillar> = {
+  branding: {
+    id: "branding",
+    shortLabel: "Branding",
+    title: "Pilar Branding",
+    description:
+      "Quando o especialista abrir a boca no CPL 1, o público precisa sentir autoridade confiável e íntegra — base para cobrar High Ticket com legitimidade."
+  },
+  "marketing-tech": {
+    id: "marketing-tech",
+    shortLabel: "Marketing & Tech",
+    title: "Pilar Marketing Digital e Tecnologia",
+    description:
+      "Suporte operacional: site estável sob pico de tráfego, e-mails na caixa de entrada (não no spam) e mídia paga encontrando o avatar certo."
+  },
+  formula: {
+    id: "formula",
+    shortLabel: "Fórmula de Lançamento",
+    title: "Pilar Fórmula de Lançamento",
+    description:
+      "Ritmo psicológico e roteiro persuasivo (CPLs, escassez, abertura de carrinho) que gera o pico de faturamento para financiar o crescimento contínuo."
+  }
+};
+
+export const LAUNCH_OPERATION_PILLAR_ORDER: LaunchOperationPillarId[] = ["branding", "marketing-tech", "formula"];
+
+export type LaunchOperationChecklistItem = {
+  text: string;
+  pillars: LaunchOperationPillarId[];
+};
 
 export type LaunchOperationSection = {
   heading: string;
-  items: string[];
+  primaryPillar: LaunchOperationPillarId;
+  items: LaunchOperationChecklistItem[];
 };
 
 export type LaunchOperationPhase = {
@@ -12,6 +53,9 @@ export type LaunchOperationPhase = {
   navLabel: string;
   title: string;
   subtitle: string;
+  /** Pilares dominantes nesta fase (encaixe estratégico). */
+  pillarFocus: LaunchOperationPillarId[];
+  pillarBridge: string;
   sections: LaunchOperationSection[];
   relatedAdminPaths?: { label: string; pathSuffix: string }[];
 };
@@ -24,40 +68,75 @@ export const LAUNCH_OPERATION_PHASES: readonly LaunchOperationPhase[] = [
     navLabel: "Fase 1 — Fundação",
     title: "Fase 1: Fundação, posicionamento e estratégia do lançamento",
     subtitle:
-      "Branding, planejamento de marketing e arquitetura do lançamento — produto, oferta irrecusável e desenho do funil.",
+      "O encontro dos três pilares: marca (autoridade), oferta FL (promessa e funil) e desenho técnico da jornada rastreável.",
+    pillarFocus: ["branding", "formula", "marketing-tech"],
+    pillarBridge:
+      "Branding define quem fala; a Fórmula define o que vender e em que ordem; Marketing & Tech desenham como o lead percorre do anúncio ao obrigado.",
     sections: [
       {
         heading: "Alinhamento e diagnóstico da marca",
+        primaryPillar: "branding",
         items: [
-          "Entrevistas de imersão para extrair a história do especialista ou da empresa.",
-          "Definir propósito, missão, visão e valores (branding)."
+          {
+            text: "Entrevistas de imersão para extrair a história do especialista ou da empresa (voz autêntica para o CPL 1).",
+            pillars: ["branding"]
+          },
+          {
+            text: "Definir propósito, missão, visão e valores — critérios de integridade para promessas e preço premium.",
+            pillars: ["branding"]
+          }
         ]
       },
       {
         heading: "Persona e transformação",
+        primaryPillar: "branding",
         items: [
-          "Mapear dores e desejos do avatar.",
-          "Formular a promessa: qual transformação o produto ou infoproduto gera?"
+          {
+            text: "Mapear dores e desejos do avatar (linguagem que o tráfego e os CPLs vão espelhar).",
+            pillars: ["branding", "marketing-tech"]
+          },
+          {
+            text: "Formular a promessa FL: qual transformação gera reciprocidade e justifica High Ticket?",
+            pillars: ["branding", "formula"]
+          }
         ]
       },
       {
         heading: "Arquitetura do produto e oferta",
+        primaryPillar: "formula",
         items: [
-          "Estruturar o que será vendido (curso, mentoria, software, comunidade).",
-          "Definir preço, bônus exclusivos, ancoragem de preço e garantias."
+          {
+            text: "Estruturar o produto (curso, mentoria, software, comunidade) alinhado à autoridade da marca.",
+            pillars: ["branding", "formula"]
+          },
+          {
+            text: "Preço, bônus, ancoragem e garantias — roteiro de valor da abertura de carrinho.",
+            pillars: ["formula", "branding"]
+          }
         ]
       },
       {
         heading: "Tipo de lançamento",
+        primaryPillar: "formula",
         items: [
-          "Decidir se o primeiro tiro será Lançamento Semente (validar oferta antes de gravar) ou Lançamento Interno (base já validada)."
+          {
+            text: "Lançamento Semente (validar antes de gravar) ou Interno (base validada) — ritmo FL adequado ao estágio.",
+            pillars: ["formula"]
+          }
         ]
       },
       {
         heading: "Desenho do funil de lançamento",
+        primaryPillar: "marketing-tech",
         items: [
-          "Mapear a jornada do lead: anúncio de captação até página de obrigado.",
-          "Planejar grupos de WhatsApp, CPLs (conteúdos pré-lançamento) e página de vendas."
+          {
+            text: "Jornada do lead: captação → obrigado → grupos → CPLs → vendas (mapa para páginas e automação).",
+            pillars: ["marketing-tech", "formula"]
+          },
+          {
+            text: "Pontos de rastreamento (pixels, UTMs) previstos desde o desenho — remarketing e públicos quentes.",
+            pillars: ["marketing-tech"]
+          }
         ]
       }
     ],
@@ -69,24 +148,47 @@ export const LAUNCH_OPERATION_PHASES: readonly LaunchOperationPhase[] = [
     emoji: "🎨",
     navLabel: "Fase 2 — Identidade",
     title: "Fase 2: Identidade, conceito verbal e linha editorial teaser",
-    subtitle: "A marca ganha forma visual e o conteúdo orgânico prepara o terreno antes do evento.",
+    subtitle: "Branding visível + conteúdo orgânico que aquece antes do PPL — autoridade antes do microfone ligado.",
+    pillarFocus: ["branding", "marketing-tech"],
+    pillarBridge:
+      "Branding materializa confiança (visual + manifesto); Marketing & Tech distribui teaser e SEO para o avatar certo encontrar a marca.",
     sections: [
       {
         heading: "Identidade visual e verbal",
+        primaryPillar: "branding",
         items: [
-          "Logotipo, paleta, tipografias e manifesto da marca.",
-          "Identidade visual do evento de lançamento (ex.: “Semana da Evolução Digital”)."
+          {
+            text: "Logotipo, paleta, tipografias e manifesto — coerência em LP, CPLs e checkout (High Ticket exige polish).",
+            pillars: ["branding", "marketing-tech"]
+          },
+          {
+            text: "Identidade do evento de lançamento (ex.: “Semana da Evolução Digital”) alinhada ao roteiro FL.",
+            pillars: ["branding", "formula"]
+          }
         ]
       },
       {
         heading: "Palavras-chave e SEO inicial",
-        items: ["Mapear termos relacionados à promessa para blog, YouTube e conteúdos."]
+        primaryPillar: "marketing-tech",
+        items: [
+          {
+            text: "Mapear termos da promessa para blog/YouTube — tráfego orgânico e remarketing futuro mais baratos.",
+            pillars: ["marketing-tech", "branding"]
+          }
+        ]
       },
       {
         heading: "Aquecimento orgânico",
+        primaryPillar: "branding",
         items: [
-          "Produzir conteúdo de topo e meio de funil nas redes.",
-          "Gerar autoridade, quebrar objeções iniciais e aumentar engajamento antes do evento."
+          {
+            text: "Conteúdo topo/meio de funil: quebrar objeções e provar autoridade antes do CPL 1.",
+            pillars: ["branding", "formula"]
+          },
+          {
+            text: "Calendário editorial integrado às datas do evento (ritmo FL no orgânico).",
+            pillars: ["formula", "marketing-tech"]
+          }
         ]
       }
     ]
@@ -97,34 +199,65 @@ export const LAUNCH_OPERATION_PHASES: readonly LaunchOperationPhase[] = [
     emoji: "💻",
     navLabel: "Fase 3 — Infra PPL",
     title: "Fase 3: Infraestrutura digital, automação e tráfego de captação (PPL)",
-    subtitle: "Pré-pré-lançamento: ativos digitais, automação, pixels e tráfego para captar leads.",
+    subtitle: "Marketing & Tech em produção: páginas que aguentam pico, e-mails que entregam, tráfego que captura.",
+    pillarFocus: ["marketing-tech", "formula"],
+    pillarBridge:
+      "Tecnologia e mídia sustentam o PPL; Branding aparece na consistência visual das LPs; a FL marca o timing da captação em massa.",
     sections: [
       {
         heading: "Ativos do lançamento",
+        primaryPillar: "marketing-tech",
         items: [
-          "Landing page de captação (inscrição no evento).",
-          "Páginas dos CPLs/aulas e página de vendas final."
+          {
+            text: "Landing de captação responsiva, rápida e com identidade de marca (CDN/hosting para milhares de acessos).",
+            pillars: ["marketing-tech", "branding"]
+          },
+          {
+            text: "Páginas dos CPLs e página de vendas (estrutura FL pronta antes do PL).",
+            pillars: ["marketing-tech", "formula"]
+          }
         ]
       },
       {
         heading: "Automação de inbound",
+        primaryPillar: "marketing-tech",
         items: [
-          "Integrar e-mail marketing (RD Station, ActiveCampaign ou similar).",
-          "Fluxos: confirmação de inscrição, alertas de aulas e direcionamento a grupos VIP de WhatsApp."
+          {
+            text: "E-mail marketing (RD Station, ActiveCampaign, etc.) com SPF/DKIM/DMARC revisados — caixa de entrada, não spam.",
+            pillars: ["marketing-tech"]
+          },
+          {
+            text: "Fluxos: confirmação, lembretes de aula e direcionamento a grupos VIP (ritmo FL automatizado).",
+            pillars: ["marketing-tech", "formula"]
+          }
         ]
       },
       {
         heading: "Rastreamento",
+        primaryPillar: "marketing-tech",
         items: [
-          "Pixels e tags (Meta, Google) em todas as páginas.",
-          "Criar públicos de remarketing a partir de inscritos."
+          {
+            text: "Pixels e tags (Meta, Google) em todas as páginas; eventos de lead e view content.",
+            pillars: ["marketing-tech"]
+          },
+          {
+            text: "Públicos de remarketing a partir de inscritos (base para fases 4 e 5).",
+            pillars: ["marketing-tech", "formula"]
+          }
         ]
       },
       {
         heading: "Tráfego pago — captação (PPL)",
+        primaryPillar: "marketing-tech",
         items: [
-          "Campanhas Meta Ads e Google Ads para o evento gratuito.",
-          "Otimizar custo por lead (CPL)."
+          {
+            text: "Campanhas Meta/Google com criativos alinhados ao branding e copy da promessa FL.",
+            pillars: ["marketing-tech", "branding", "formula"]
+          },
+          {
+            text: "Otimizar CPL: segmentação do avatar, não só volume (pessoas certas na lista).",
+            pillars: ["marketing-tech", "branding"]
+          }
         ]
       }
     ],
@@ -139,25 +272,51 @@ export const LAUNCH_OPERATION_PHASES: readonly LaunchOperationPhase[] = [
     emoji: "⚙️",
     navLabel: "Fase 4 — Pré-lançamento",
     title: "Fase 4: Pré-lançamento (PL) — gatilhos mentais",
-    subtitle: "Entrega dos CPLs estratégicos, tráfego de consumo e nutrição da comunidade.",
+    subtitle: "Coração da FL: CPLs no ritmo psicológico, com marca forte no CPL 1 e tech garantindo consumo.",
+    pillarFocus: ["formula", "branding", "marketing-tech"],
+    pillarBridge:
+      "Branding faz o especialista soar íntegro no CPL 1; a FL conduz oportunidade → transformação → virada; Tech empurra consumo (e-mail, ads, grupos).",
     sections: [
       {
         heading: "Execução dos CPLs",
+        primaryPillar: "formula",
         items: [
-          "CPL 1 — A oportunidade: problema ou oportunidade que o lead não via; urgência.",
-          "CPL 2 — A transformação/atalho: resultado é possível; ganho prático; eliminar caminhos errados.",
-          "CPL 3 — O evento/a virada: o “como”; comunidade; plot twist antes da abertura de vagas."
+          {
+            text: "CPL 1 — Oportunidade: problema/oportunidade + autoridade de marca (tom confiável, High Ticket).",
+            pillars: ["formula", "branding"]
+          },
+          {
+            text: "CPL 2 — Transformação/atalho: prova de que o resultado é possível; eliminar caminhos errados.",
+            pillars: ["formula", "branding"]
+          },
+          {
+            text: "CPL 3 — Virada: o “como”, comunidade, plot twist antes da abertura de vagas.",
+            pillars: ["formula"]
+          }
         ]
       },
       {
         heading: "Tráfego pago — consumo",
-        items: ['Anúncios para quem se inscreveu assistir (“Aula 1 no ar”, “Não perca o CPL 2”).']
+        primaryPillar: "marketing-tech",
+        items: [
+          {
+            text: "Anúncios para inscritos assistirem (“Aula 1 no ar”, “Não perca o CPL 2”) — infra aguentando pico.",
+            pillars: ["marketing-tech", "formula"]
+          }
+        ]
       },
       {
         heading: "Nutrição e comunidade",
+        primaryPillar: "formula",
         items: [
-          "E-mails e WhatsApp diários com resumos, iscas e PDFs.",
-          "Gestão de grupos (Facebook/WhatsApp) para depoimentos e prova social."
+          {
+            text: "E-mails e WhatsApp diários (resumos, PDFs) — reciprocidade e prova social alinhadas à marca.",
+            pillars: ["formula", "branding", "marketing-tech"]
+          },
+          {
+            text: "Moderação de grupos para depoimentos e engajamento (comunidade FL).",
+            pillars: ["formula", "branding"]
+          }
         ]
       }
     ],
@@ -169,33 +328,57 @@ export const LAUNCH_OPERATION_PHASES: readonly LaunchOperationPhase[] = [
     emoji: "🚀",
     navLabel: "Fase 5 — Lançamento",
     title: "Fase 5: Lançamento (L) — carrinho e oferta irrecusável",
-    subtitle: "Abertura de vagas, checkout, tráfego de conversão e inbound de vendas.",
+    subtitle: "Pico de faturamento FL com marca que sustenta preço, tech que não quebra checkout e ads de conversão.",
+    pillarFocus: ["formula", "branding", "marketing-tech"],
+    pillarBridge:
+      "A FL executa escassez e roteiro de vendas; Branding valida o ticket alto; Marketing & Tech converte tráfego e recupera carrinho.",
     sections: [
       {
         heading: "CPL 4 / live de abertura",
+        primaryPillar: "formula",
         items: [
-          "Roteiro FL: produto, preço, bônus para primeiros compradores (escassez) e abertura oficial."
+          {
+            text: "Roteiro FL ao vivo: produto, preço, bônus escassez — especialista como autoridade (Branding).",
+            pillars: ["formula", "branding"]
+          }
         ]
       },
       {
         heading: "Página de vendas e checkout",
+        primaryPillar: "marketing-tech",
         items: [
-          "Liberar vendas integradas ao gateway (Hotmart, Kiwify, Eduzz, PIX no funil, etc.).",
-          "UX do checkout para reduzir desistência."
+          {
+            text: "Gateway integrado (Hotmart, Kiwify, Eduzz, PIX no funil) com UX testada sob carga.",
+            pillars: ["marketing-tech"]
+          },
+          {
+            text: "Prova social, garantia e identidade visual reforçando confiança no ticket.",
+            pillars: ["marketing-tech", "branding"]
+          }
         ]
       },
       {
         heading: "Tráfego pago — vendas",
+        primaryPillar: "marketing-tech",
         items: [
-          "Público geral: “Inscrições abertas”.",
-          "Remarketing: garantia, acesso imediato, iniciantes, contagem regressiva e últimas vagas."
+          {
+            text: "Campanhas “Inscrições abertas” + remarketing quebrando objeções (garantia, iniciantes, prazo).",
+            pillars: ["marketing-tech", "formula", "branding"]
+          }
         ]
       },
       {
         heading: "Inbound de vendas",
+        primaryPillar: "formula",
         items: [
-          "Régua de escassez, bônus expirando, depoimentos e suporte chat/WhatsApp.",
-          "Recuperação de carrinhos abandonados."
+          {
+            text: "Régua de escassez, bônus expirando e depoimentos — ritmo psicológico até fechar carrinho.",
+            pillars: ["formula", "branding"]
+          },
+          {
+            text: "Suporte chat/WhatsApp e recuperação de carrinho (entrega técnica + persuasão).",
+            pillars: ["marketing-tech", "formula"]
+          }
         ]
       }
     ],
@@ -210,30 +393,57 @@ export const LAUNCH_OPERATION_PHASES: readonly LaunchOperationPhase[] = [
     emoji: "📊",
     navLabel: "Fase 6 — Pós-lançamento",
     title: "Fase 6: Pós-lançamento, fechamento e debriefing",
-    subtitle: "Escassez real, onboarding, métricas e transição para perpetuo ou SEO.",
+    subtitle: "Integridade de marca no fechamento, onboarding tech e debriefing FL para o próximo ciclo.",
+    pillarFocus: ["branding", "formula", "marketing-tech"],
+    pillarBridge:
+      "Branding fecha com escassez real; FL mede o ciclo e planeja o próximo; Tech entrega onboarding e nutre a base (perpetuo/SEO).",
     sections: [
       {
         heading: "Fechamento de carrinho",
-        items: ["Encerrar inscrições no horário prometido; reforçar integridade da marca."]
+        primaryPillar: "branding",
+        items: [
+          {
+            text: "Encerrar vagas no horário prometido — integridade que sustenta o próximo High Ticket.",
+            pillars: ["branding", "formula"]
+          }
+        ]
       },
       {
         heading: "Onboarding e entrega",
+        primaryPillar: "marketing-tech",
         items: [
-          "Fluxo de boas-vindas para novos alunos.",
-          "Acelerar consumo do produto e reduzir churn/reembolso."
+          {
+            text: "Fluxo automático de boas-vindas (e-mail/WhatsApp) — experiência de marca pós-compra.",
+            pillars: ["marketing-tech", "branding"]
+          },
+          {
+            text: "Reduzir churn/reembolso com consumo rápido do produto (protege o faturamento do pico).",
+            pillars: ["formula", "branding"]
+          }
         ]
       },
       {
         heading: "Debriefing",
+        primaryPillar: "formula",
         items: [
-          "Analisar ROI, ROAS, CPL, taxa de conversão da página de vendas e faturamento.",
-          "Reunião estratégica para o próximo ciclo."
+          {
+            text: "ROI, ROAS, CPL, conversão da PV e faturamento — matemática FL para financiar crescimento.",
+            pillars: ["formula", "marketing-tech"]
+          },
+          {
+            text: "Reunião estratégica: o que repetir nos três pilares no próximo lançamento.",
+            pillars: ["branding", "marketing-tech", "formula"]
+          }
         ]
       },
       {
         heading: "Perpetuo e SEO",
+        primaryPillar: "marketing-tech",
         items: [
-          "Leads que não compraram seguem na base com conteúdo orgânico e SEO até o próximo lançamento."
+          {
+            text: "Leads que não compraram: conteúdo orgânico, SEO e redes até o próximo evento FL.",
+            pillars: ["marketing-tech", "branding", "formula"]
+          }
         ]
       }
     ],
@@ -259,12 +469,23 @@ export function parseLaunchOpCheckedJson(value: unknown): Record<string, boolean
   return out;
 }
 
+function iterPhaseTasks(
+  phase: LaunchOperationPhase,
+  fn: (phaseId: string, sectionIndex: number, itemIndex: number, item: LaunchOperationChecklistItem) => void
+) {
+  phase.sections.forEach((section, sectionIndex) => {
+    section.items.forEach((item, itemIndex) => fn(phase.id, sectionIndex, itemIndex, item));
+  });
+}
+
 export function launchOperationAllTaskIds(): string[] {
-  return LAUNCH_OPERATION_PHASES.flatMap((phase) =>
-    phase.sections.flatMap((section, sectionIndex) =>
-      section.items.map((_item, itemIndex) => launchOperationTaskId(phase.id, sectionIndex, itemIndex))
-    )
-  );
+  return LAUNCH_OPERATION_PHASES.flatMap((phase) => {
+    const ids: string[] = [];
+    iterPhaseTasks(phase, (phaseId, si, ii) => {
+      ids.push(launchOperationTaskId(phaseId, si, ii));
+    });
+    return ids;
+  });
 }
 
 export function launchOperationProgress(checked: Record<string, boolean>): {
@@ -284,12 +505,27 @@ export function launchOperationPhaseProgress(
 ): { total: number; done: number; percent: number } {
   let total = 0;
   let done = 0;
-  phase.sections.forEach((section, sectionIndex) => {
-    section.items.forEach((_item, itemIndex) => {
+  iterPhaseTasks(phase, (phaseId, si, ii) => {
+    total += 1;
+    const id = launchOperationTaskId(phaseId, si, ii);
+    if (checked[id]) done += 1;
+  });
+  return { total, done, percent: total === 0 ? 0 : Math.round((done / total) * 100) };
+}
+
+export function launchOperationPillarProgress(
+  pillarId: LaunchOperationPillarId,
+  checked: Record<string, boolean>
+): { total: number; done: number; percent: number } {
+  let total = 0;
+  let done = 0;
+  for (const phase of LAUNCH_OPERATION_PHASES) {
+    iterPhaseTasks(phase, (phaseId, si, ii, item) => {
+      if (!item.pillars.includes(pillarId)) return;
       total += 1;
-      const id = launchOperationTaskId(phase.id, sectionIndex, itemIndex);
+      const id = launchOperationTaskId(phaseId, si, ii);
       if (checked[id]) done += 1;
     });
-  });
+  }
   return { total, done, percent: total === 0 ? 0 : Math.round((done / total) * 100) };
 }

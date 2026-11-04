@@ -87,6 +87,150 @@ html[data-theme="dark"] .agency-admin-nav-link.is-active {
   outline-offset: 2px;
 }
 
+.agency-op-pillars {
+  display: grid;
+  gap: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .agency-op-pillars {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.agency-op-pillar {
+  border-radius: 0.875rem;
+  border: 1px solid var(--app-border);
+  padding: 1rem 1.1rem;
+  background: var(--app-panel);
+}
+
+.agency-op-pillar--branding {
+  border-top: 3px solid rgb(168 85 247 / 0.85);
+}
+
+.agency-op-pillar--tech {
+  border-top: 3px solid rgb(14 165 233 / 0.85);
+}
+
+.agency-op-pillar--formula {
+  border-top: 3px solid rgb(245 158 11 / 0.9);
+}
+
+.agency-op-pillar__label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--app-text-subtle);
+}
+
+.agency-op-pillar__title {
+  margin-top: 0.25rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--app-text);
+}
+
+.agency-op-pillar__desc {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--app-text-muted);
+}
+
+.agency-op-pillar__stat {
+  margin-top: 0.65rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--app-text-muted);
+}
+
+.agency-op-pillar__bar {
+  margin-top: 0.35rem;
+  height: 0.35rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--app-hover);
+}
+
+.agency-op-pillar--branding .agency-op-pillar__bar-fill {
+  background: rgb(168 85 247 / 0.85);
+}
+
+.agency-op-pillar--tech .agency-op-pillar__bar-fill {
+  background: rgb(14 165 233 / 0.85);
+}
+
+.agency-op-pillar--formula .agency-op-pillar__bar-fill {
+  background: rgb(245 158 11 / 0.9);
+}
+
+.agency-op-pillar__bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.2s ease;
+}
+
+.agency-op-pillar-chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.1rem 0.45rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border: 1px solid var(--app-border);
+}
+
+.agency-op-pillar-chip.agency-op-pillar--branding {
+  color: rgb(126 34 206);
+  background: rgb(168 85 247 / 0.12);
+  border-color: rgb(168 85 247 / 0.25);
+}
+
+html[data-theme="dark"] .agency-op-pillar-chip.agency-op-pillar--branding {
+  color: rgb(216 180 254);
+}
+
+.agency-op-pillar-chip.agency-op-pillar--tech {
+  color: rgb(3 105 161);
+  background: rgb(14 165 233 / 0.12);
+  border-color: rgb(14 165 233 / 0.25);
+}
+
+html[data-theme="dark"] .agency-op-pillar-chip.agency-op-pillar--tech {
+  color: rgb(125 211 252);
+}
+
+.agency-op-pillar-chip.agency-op-pillar--formula {
+  color: rgb(180 83 9);
+  background: rgb(245 158 11 / 0.12);
+  border-color: rgb(245 158 11 / 0.28);
+}
+
+html[data-theme="dark"] .agency-op-pillar-chip.agency-op-pillar--formula {
+  color: rgb(253 230 138);
+}
+
+.agency-op-pillars-row {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.agency-op-pillars-row__item {
+  font-size: 0.625rem;
+  color: var(--app-text-muted);
+}
+
+.agency-op-pillars-row__item strong {
+  display: block;
+  font-size: 0.6875rem;
+  color: var(--app-text);
+}
+
 .agency-admin-main {
   min-width: 0;
   flex: 1;

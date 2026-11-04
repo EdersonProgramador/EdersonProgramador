@@ -205,12 +205,18 @@ export {
 export {
   getLaunchOperationPhase,
   LAUNCH_OPERATION_PHASES,
+  LAUNCH_OPERATION_PILLAR_ORDER,
+  LAUNCH_OPERATION_PILLARS,
   launchOperationAllTaskIds,
+  launchOperationPillarProgress,
   launchOperationPhaseProgress,
   launchOperationProgress,
   parseLaunchOpCheckedJson,
   launchOperationTaskId,
+  type LaunchOperationChecklistItem,
   type LaunchOperationPhase,
+  type LaunchOperationPillar,
+  type LaunchOperationPillarId,
   type LaunchOperationSection
 } from "./launch-operation-phases.js";
 export { LEGAL_NOTICES } from "./legal-notices.js";

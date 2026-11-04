@@ -3,6 +3,9 @@ import { Link } from "react-router-dom";
 import {
   AGENCY_APP_BASE,
   formatBRL,
+  LAUNCH_OPERATION_PILLAR_ORDER,
+  LAUNCH_OPERATION_PILLARS,
+  launchOperationPillarProgress,
   launchOperationProgress,
   packageTierLabel,
   parseLaunchOpCheckedJson,
@@ -97,7 +100,8 @@ function ProjectCard({ project, role }: { project: Project; role: "ADMIN" | "CLI
   const deliverables = project.phases.flatMap((p) => p.deliverables);
   const progress = projectProgressPercent(project.phases, deliverables);
   const tier = parsePackageTier(project.packageTier) ?? "professional";
-  const launchOp = launchOperationProgress(parseLaunchOpCheckedJson(project.launchOpCheckedJson));
+  const launchOpChecked = parseLaunchOpCheckedJson(project.launchOpCheckedJson);
+  const launchOp = launchOperationProgress(launchOpChecked);
 
   return (
     <article className="panel space-y-4 p-5">
@@ -141,6 +145,17 @@ function ProjectCard({ project, role }: { project: Project; role: "ADMIN" | "CLI
           </div>
           <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-[var(--app-hover)]">
             <div className="h-full rounded-full bg-indigo-500/80 transition-all" style={{ width: `${launchOp.percent}%` }} />
+          </div>
+          <div className="agency-op-pillars-row mt-2">
+            {LAUNCH_OPERATION_PILLAR_ORDER.map((pillarId) => {
+              const p = launchOperationPillarProgress(pillarId, launchOpChecked);
+              return (
+                <div key={pillarId} className="agency-op-pillars-row__item">
+                  <strong>{LAUNCH_OPERATION_PILLARS[pillarId].shortLabel}</strong>
+                  {p.percent}%
+                </div>
+              );
+            })}
           </div>
         </div>
       ) : null}

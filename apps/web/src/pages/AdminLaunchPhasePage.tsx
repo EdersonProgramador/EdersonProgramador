@@ -4,6 +4,7 @@ import {
   AGENCY_APP_BASE,
   getLaunchOperationPhase,
   LAUNCH_OPERATION_PHASES,
+  LAUNCH_OPERATION_PILLARS,
   launchOperationPhaseProgress,
   launchOperationProgress,
   launchOperationTaskId,
@@ -12,6 +13,11 @@ import {
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ApiError, apiGet, apiPatch } from "../api";
 import { ADMIN_BASE } from "../components/admin/AdminOperationsLayout";
+import {
+  LaunchOperationPhasePillarFocus,
+  LaunchOperationPillarBadges,
+  LaunchOperationPillarsOverview
+} from "../components/admin/LaunchOperationPillars";
 
 const STORAGE_KEY = "ederson-agencia.launch-op.v1";
 
@@ -138,6 +144,10 @@ export function AdminLaunchPhasePage() {
         <p>{phase.subtitle}</p>
       </header>
 
+      <LaunchOperationPillarsOverview checked={checked} />
+
+      <LaunchOperationPhasePillarFocus phase={phase} />
+
       <div className="panel space-y-3 p-4 sm:p-5">
         <label className="block space-y-1.5 text-sm">
           <span className="font-medium text-[var(--app-text)]">Projeto (checklist salvo na nuvem)</span>
@@ -246,7 +256,15 @@ function PhaseChecklist({
     <div className="space-y-5">
       {phase.sections.map((section, sectionIndex) => (
         <section key={section.heading} className="panel p-4 sm:p-5">
-          <h2 className="text-base font-semibold text-[var(--app-text)]">{section.heading}</h2>
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <h2 className="text-base font-semibold text-[var(--app-text)]">{section.heading}</h2>
+            <span className="text-xs text-[var(--app-text-muted)]">
+              Pilar líder:{" "}
+              <strong className="text-[var(--app-text)]">
+                {LAUNCH_OPERATION_PILLARS[section.primaryPillar].shortLabel}
+              </strong>
+            </span>
+          </div>
           <ul className="mt-3 space-y-2">
             {section.items.map((item, itemIndex) => {
               const taskId = launchOperationTaskId(phase.id, sectionIndex, itemIndex);
@@ -262,10 +280,13 @@ function PhaseChecklist({
                       disabled={disabled || isSaving}
                       onChange={(e) => onToggle(taskId, e.target.checked)}
                     />
-                    <span
-                      className={`text-sm leading-relaxed ${isChecked ? "text-[var(--app-text-muted)] line-through" : "text-[var(--app-text)]"}`}
-                    >
-                      {item}
+                    <span className="min-w-0 flex-1 space-y-1.5">
+                      <span
+                        className={`block text-sm leading-relaxed ${isChecked ? "text-[var(--app-text-muted)] line-through" : "text-[var(--app-text)]"}`}
+                      >
+                        {item.text}
+                      </span>
+                      <LaunchOperationPillarBadges ids={item.pillars} />
                     </span>
                   </label>
                 </li>
