@@ -14,6 +14,7 @@ import { registerCoursesRoutes } from "./modules/courses.routes.js";
 import { registerCourseLibraryRoutes } from "./modules/course-library.routes.js";
 import { registerFichamentoRoutes } from "./modules/fichamento.routes.js";
 import { registerPublicRoutes } from "./modules/public.routes.js";
+import { registerInboundWebhookRoutes } from "./modules/webhooks.routes.js";
 import { ensureSeedCourses } from "./seed-courses.js";
 import { prisma } from "./prisma.js";
 import { ensureAcademyTestUser } from "./seed-academy-test-user.js";
@@ -115,6 +116,7 @@ app.get("/health", async () => {
 });
 
 await registerPublicRoutes(app);
+await registerInboundWebhookRoutes(app);
 await registerAuthRoutes(app);
 await registerAgencyRoutes(app);
 await registerCoursesRoutes(app);

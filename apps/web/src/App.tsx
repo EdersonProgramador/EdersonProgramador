@@ -1,6 +1,14 @@
 import { useEffect } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
-import { ACADEMY_APP_BASE, ACADEMY_STORE_BASE, AGENCY_APP_BASE } from "@ederson-agencia/shared";
+import {
+  ACADEMY_APP_BASE,
+  ACADEMY_STORE_BASE,
+  AGENCY_APP_BASE,
+  DEVELOPMENT_LEGACY_PATH_ALIASES,
+  developmentNavFlatItems,
+  formulaNavFlatItems,
+  marketingNavFlatItems
+} from "@ederson-agencia/shared";
 import { AuthSessionBridge } from "./auth/AuthSessionBridge";
 import { AcademyShellLayout } from "./components/AcademyShellLayout";
 import { AgencyShellLayout } from "./components/AgencyShellLayout";
@@ -13,6 +21,7 @@ import {
 } from "./components/ProtectedRoute";
 import { ShellLayout } from "./components/ShellLayout";
 import { LandingPage } from "./pages/LandingPage";
+import { LaunchPublicPage } from "./pages/LaunchPublicPage";
 import { CadastroPage } from "./pages/CadastroPage";
 import { AgencyLoginPage } from "./pages/LoginPage";
 import { AcademyLoginPage } from "./pages/AcademyLoginPage";
@@ -34,8 +43,17 @@ import {
   ClientDashboard,
   FreelancerDashboard
 } from "./pages/DashboardPages";
+import { AdminBrandingEtapaPage } from "./pages/AdminBrandingEtapaPage";
+import { AdminProductOfferPage } from "./pages/AdminProductOfferPage";
+import { AdminLaunchKitPage } from "./pages/AdminLaunchKitPage";
 import { AdminLaunchPhasePage } from "./pages/AdminLaunchPhasePage";
+import { AdminMarketingDevPage } from "./pages/AdminMarketingDevPage";
+import { AdminMarketingHubPage } from "./pages/AdminMarketingHubPage";
+import { AdminBrandingHubPage } from "./pages/AdminBrandingHubPage";
+import { AdminDevelopmentHubPage } from "./pages/AdminDevelopmentHubPage";
+import { AdminFormulaHubPage } from "./pages/AdminFormulaHubPage";
 import { AdminOperationsLayout } from "./components/admin/AdminOperationsLayout";
+import { LegacyMarketingStackRoute } from "./components/admin/LegacyMarketingStackRoute";
 import { ProjectDetailPage } from "./pages/ProjectDetailPage";
 import { UserProfilePage } from "./pages/UserProfilePage";
 import { ThemeSync } from "./components/theme/ThemeSync";
@@ -54,6 +72,7 @@ export default function App() {
       <ThemeSync />
       <Routes>
         <Route index element={<LandingPage />} />
+        <Route path="l/:slug" element={<LaunchPublicPage />} />
         <Route path="cadastro" element={<CadastroPage />} />
         <Route path="lancamento" element={<Navigate to="/cadastro" replace />} />
         <Route path="cursos" element={<AcademyPublicSalesPage />} />
@@ -76,6 +95,27 @@ export default function App() {
               <Route path="admin" element={<AdminOperationsLayout />}>
                 <Route index element={<Navigate to="projetos" replace />} />
                 <Route path="projetos" element={<AdminProjectsPage />} />
+                {marketingNavFlatItems().map((item) => (
+                  <Route key={item.id} path={item.adminPath} element={<AdminMarketingHubPage />} />
+                ))}
+                <Route path="operacao/branding/estatistica" element={<AdminBrandingHubPage />} />
+                <Route path="operacao/branding/:etapaId" element={<AdminBrandingEtapaPage />} />
+                <Route path="operacao/desenvolvimento/estatistica" element={<AdminDevelopmentHubPage />} />
+                <Route path="operacao/desenvolvimento/infra" element={<AdminDevelopmentHubPage />} />
+                <Route path="operacao/desenvolvimento/:stackId" element={<AdminMarketingDevPage />} />
+                {Object.entries(DEVELOPMENT_LEGACY_PATH_ALIASES).map(([legacy, canonical]) => (
+                  <Route
+                    key={legacy}
+                    path={legacy}
+                    element={<Navigate to={`${AGENCY_APP_BASE}/admin/${canonical}`} replace />}
+                  />
+                ))}
+                <Route path="operacao/marketing/:stackId" element={<LegacyMarketingStackRoute />} />
+                {formulaNavFlatItems().map((item) => (
+                  <Route key={item.id} path={item.adminPath} element={<AdminFormulaHubPage />} />
+                ))}
+                <Route path="operacao/produto-oferta" element={<AdminProductOfferPage />} />
+                <Route path="operacao/launch-kit" element={<AdminLaunchKitPage />} />
                 <Route path="operacao/:phaseId" element={<AdminLaunchPhasePage />} />
                 <Route path="funil" element={<AdminFunnelPage />} />
                 <Route path="leads" element={<AdminLeadsPage />} />

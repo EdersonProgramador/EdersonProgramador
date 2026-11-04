@@ -3,12 +3,7 @@ import { Link } from "react-router-dom";
 import {
   AGENCY_APP_BASE,
   formatBRL,
-  LAUNCH_OPERATION_PILLAR_ORDER,
-  LAUNCH_OPERATION_PILLARS,
-  launchOperationPillarProgress,
-  launchOperationProgress,
   packageTierLabel,
-  parseLaunchOpCheckedJson,
   parsePackageTier,
   projectProgressPercent,
   type PackageTierId
@@ -50,6 +45,30 @@ type Project = {
   client?: { name: string; email: string; company?: string | null };
   freelancer?: { name: string; email: string } | null;
   launchOpCheckedJson?: unknown;
+  operationSummary?: {
+    overall: { total: number; done: number; percent: number };
+    branding: { total: number; done: number; percent: number };
+    marketing: { total: number; done: number; percent: number };
+    development: { total: number; done: number; percent: number };
+    formula: { total: number; done: number; percent: number };
+  };
+};
+
+const OPERATION_NAV_LABELS: Record<string, string> = {
+  branding: "Branding",
+  marketing: "Marketing",
+  development: "Desenvolvimento",
+  formula: "Fórmula L."
+};
+
+const PILLAR_ESTATISTICA_ADMIN_PATH: Record<
+  "branding" | "marketing" | "development" | "formula",
+  string
+> = {
+  branding: "operacao/branding/estatistica",
+  marketing: "operacao/marketing/estatistica",
+  development: "operacao/desenvolvimento/estatistica",
+  formula: "operacao/formula-lancamento/estatistica"
 };
 
 type AgencyClient = {
@@ -100,8 +119,7 @@ function ProjectCard({ project, role }: { project: Project; role: "ADMIN" | "CLI
   const deliverables = project.phases.flatMap((p) => p.deliverables);
   const progress = projectProgressPercent(project.phases, deliverables);
   const tier = parsePackageTier(project.packageTier) ?? "professional";
-  const launchOpChecked = parseLaunchOpCheckedJson(project.launchOpCheckedJson);
-  const launchOp = launchOperationProgress(launchOpChecked);
+  const op = project.operationSummary;
 
   return (
     <article className="panel space-y-4 p-5">
@@ -135,27 +153,31 @@ function ProjectCard({ project, role }: { project: Project; role: "ADMIN" | "CLI
         </div>
       </div>
 
-      {role === "ADMIN" ? (
+      {role === "ADMIN" && op ? (
         <div>
           <div className="flex justify-between text-xs text-[var(--app-text-muted)]">
-            <span>Operação FL</span>
+            <span>Operação (workspace)</span>
             <span>
-              {launchOp.done}/{launchOp.total} ({launchOp.percent}%)
+              {op.overall.done}/{op.overall.total} ({op.overall.percent}%)
             </span>
           </div>
           <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-[var(--app-hover)]">
-            <div className="h-full rounded-full bg-indigo-500/80 transition-all" style={{ width: `${launchOp.percent}%` }} />
+            <div
+              className="h-full rounded-full bg-indigo-500/80 transition-all"
+              style={{ width: `${op.overall.percent}%` }}
+            />
           </div>
           <div className="agency-op-pillars-row mt-2">
-            {LAUNCH_OPERATION_PILLAR_ORDER.map((pillarId) => {
-              const p = launchOperationPillarProgress(pillarId, launchOpChecked);
-              return (
-                <div key={pillarId} className="agency-op-pillars-row__item">
-                  <strong>{LAUNCH_OPERATION_PILLARS[pillarId].shortLabel}</strong>
-                  {p.percent}%
-                </div>
-              );
-            })}
+            {(["branding", "marketing", "development", "formula"] as const).map((key) => (
+              <Link
+                key={key}
+                to={`${ADMIN_BASE}/${PILLAR_ESTATISTICA_ADMIN_PATH[key]}?project=${encodeURIComponent(project.id)}`}
+                className="agency-op-pillars-row__item hover:opacity-90"
+              >
+                <strong>{OPERATION_NAV_LABELS[key]}</strong>
+                {op[key].percent}%
+              </Link>
+            ))}
           </div>
         </div>
       ) : null}
@@ -166,10 +188,10 @@ function ProjectCard({ project, role }: { project: Project; role: "ADMIN" | "CLI
         </Link>
         {role === "ADMIN" ? (
           <Link
-            to={`${ADMIN_BASE}/operacao/fase-1?project=${encodeURIComponent(project.id)}`}
+            to={`${ADMIN_BASE}/operacao/marketing/estatistica?project=${encodeURIComponent(project.id)}`}
             className="btn-secondary inline-flex text-sm"
           >
-            Operação FL
+            Operação
           </Link>
         ) : null}
       </div>

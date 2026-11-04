@@ -34,7 +34,27 @@ import {
   tierPricingFromConfig
 } from "../agency/funnel-config.js";
 import { notifyAgencyUser } from "../agency/notifications.js";
-import { parseLaunchOpChecked } from "../agency/launch-operation.js";
+import {
+  loadProjectWorkspace,
+  patchProjectWorkspaceField,
+  patchProjectWorkspaceTask
+} from "../agency/project-workspace-persist.js";
+import { saveBrandingUpload } from "../uploads/project-branding-storage.js";
+import { ensureProjectWebhookToken } from "../agency/webhook-ingress.js";
+import {
+  extractBrandingFields,
+  projectWorkspaceFeedProjections,
+  projectWorkspaceSummary,
+  buildLaunchKitExport,
+  buildLeadloversBlueprint,
+  buildHotmartProductDraft,
+  renderAllLaunchTemplates
+} from "@ederson-agencia/shared";
+import { env } from "../env.js";
+import { buildLaunchPageSnapshot, slugifyLaunchTitle } from "../agency/launch-page.js";
+import { sendLaunchTemplateEmail } from "../mail/send-launch-template-email.js";
+import { pushHotmartProductDraft } from "../agency/hotmart-sync.js";
+import type { LaunchTemplateId } from "@ederson-agencia/shared";
 
 const leadStatusSchema = z.enum(["NEW", "CONTACTED", "QUALIFIED", "WON", "LOST"]);
 const phaseStatusSchema = z.enum(["PENDING", "IN_PROGRESS", "WAITING_APPROVAL", "APPROVED", "DONE"]);
@@ -242,7 +262,15 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
       orderBy: { updatedAt: "desc" },
       include: projectInclude
     });
-    return { projects };
+    if (user.role !== "ADMIN") {
+      return { projects };
+    }
+    return {
+      projects: projects.map((project) => ({
+        ...project,
+        operationSummary: projectWorkspaceSummary(loadProjectWorkspace(project))
+      }))
+    };
   });
 
   app.get("/agency/projects/:id", async (request) => {
@@ -263,13 +291,20 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
     await assertProjectAccess(user, params.id);
     const project = await prisma.project.findUnique({
       where: { id: params.id },
-      select: { id: true, title: true, launchOpCheckedJson: true }
+      select: {
+        id: true,
+        title: true,
+        projectWorkspaceJson: true,
+        brandingWorkspaceJson: true,
+        launchOpCheckedJson: true
+      }
     });
     if (!project) throw Object.assign(new Error("Projeto não encontrado."), { statusCode: 404 });
+    const workspace = loadProjectWorkspace(project);
     return {
       projectId: project.id,
       projectTitle: project.title,
-      checked: parseLaunchOpChecked(project.launchOpCheckedJson)
+      checked: workspace.checklist
     };
   });
 
@@ -283,22 +318,368 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
       })
       .parse(request.body);
     await assertProjectAccess(request.agencyUser!, params.id);
-    const project = await prisma.project.findUnique({ where: { id: params.id } });
+    const workspace = await patchProjectWorkspaceTask(params.id, body.taskId, body.done);
+    return { checked: workspace.checklist };
+  });
+
+  app.get("/agency/projects/:id/workspace", async (request) => {
+    const user = request.agencyUser!;
+    const params = z.object({ id: z.string() }).parse(request.params);
+    await assertProjectAccess(user, params.id);
+    const project = await prisma.project.findUnique({
+      where: { id: params.id },
+      select: {
+        id: true,
+        title: true,
+        projectWorkspaceJson: true,
+        brandingWorkspaceJson: true,
+        launchOpCheckedJson: true
+      }
+    });
+    if (!project) throw Object.assign(new Error("Projeto não encontrado."), { statusCode: 404 });
+    const workspace = loadProjectWorkspace(project);
+    return {
+      projectId: project.id,
+      projectTitle: project.title,
+      workspace,
+      summary: projectWorkspaceSummary(workspace),
+      projections: projectWorkspaceFeedProjections(workspace.fields)
+    };
+  });
+
+  app.patch("/agency/projects/:id/workspace", async (request) => {
+    requireRole(request.agencyUser ?? null, ["ADMIN"]);
+    const params = z.object({ id: z.string() }).parse(request.params);
+    const body = z
+      .object({
+        fieldId: z.string().regex(/^(branding|product|integration):[a-z0-9:-]+$/i).max(120).optional(),
+        value: z.unknown().optional(),
+        taskId: z.string().min(3).max(120).optional(),
+        done: z.boolean().optional()
+      })
+      .refine(
+        (b) =>
+          (b.fieldId != null && b.value !== undefined) ||
+          (b.taskId != null && typeof b.done === "boolean"),
+        { message: "Informe fieldId+value ou taskId+done." }
+      )
+      .parse(request.body);
+    await assertProjectAccess(request.agencyUser!, params.id);
+
+    let workspace;
+    if (body.fieldId != null) {
+      workspace = await patchProjectWorkspaceField(
+        params.id,
+        body.fieldId,
+        body.value === undefined ? null : (body.value as import("@ederson-agencia/shared").BrandingFieldValue)
+      );
+    } else {
+      workspace = await patchProjectWorkspaceTask(params.id, body.taskId!, body.done!);
+    }
+
+    return {
+      workspace,
+      summary: projectWorkspaceSummary(workspace),
+      projections: projectWorkspaceFeedProjections(workspace.fields),
+      data: extractBrandingFields(workspace),
+      checked: workspace.checklist
+    };
+  });
+
+  app.get("/agency/projects/:id/integrations", async (request) => {
+    requireRole(request.agencyUser ?? null, ["ADMIN"]);
+    const params = z.object({ id: z.string() }).parse(request.params);
+    await assertProjectAccess(request.agencyUser!, params.id);
+    const token = await ensureProjectWebhookToken(params.id);
+    const proto = String(request.headers["x-forwarded-proto"] ?? request.protocol ?? "https");
+    const host = String(request.headers["x-forwarded-host"] ?? request.hostname);
+    const baseUrl = `${proto}://${host}`.replace(/\/$/, "");
+    const providers = ["hotmart", "kiwify", "monetizze", "leadlovers"] as const;
+    const webhooks = Object.fromEntries(
+      providers.map((provider) => [provider, `${baseUrl}/public/webhooks/${provider}/${token}`])
+    ) as Record<(typeof providers)[number], string>;
+    return { ingressToken: token, webhooks };
+  });
+
+  app.get("/agency/projects/:id/external-events", async (request) => {
+    requireRole(request.agencyUser ?? null, ["ADMIN"]);
+    const params = z.object({ id: z.string() }).parse(request.params);
+    const query = z.object({ limit: z.coerce.number().min(1).max(50).default(20) }).parse(request.query);
+    await assertProjectAccess(request.agencyUser!, params.id);
+    const events = await prisma.projectExternalEvent.findMany({
+      where: { projectId: params.id },
+      orderBy: { createdAt: "desc" },
+      take: query.limit,
+      select: { id: true, provider: true, eventType: true, createdAt: true }
+    });
+    return { events };
+  });
+
+  app.get("/agency/projects/:id/launch-kit", async (request) => {
+    requireRole(request.agencyUser ?? null, ["ADMIN"]);
+    const params = z.object({ id: z.string() }).parse(request.params);
+    await assertProjectAccess(request.agencyUser!, params.id);
+    const project = await prisma.project.findUnique({
+      where: { id: params.id },
+      select: {
+        id: true,
+        title: true,
+        projectWorkspaceJson: true,
+        brandingWorkspaceJson: true,
+        launchOpCheckedJson: true
+      }
+    });
+    if (!project) throw Object.assign(new Error("Projeto não encontrado."), { statusCode: 404 });
+    const workspace = loadProjectWorkspace(project);
+    return {
+      projectId: project.id,
+      projectTitle: project.title,
+      export: buildLaunchKitExport(workspace, project.title),
+      templates: renderAllLaunchTemplates(workspace.fields),
+      leadlovers: buildLeadloversBlueprint(workspace.fields),
+      hotmart: buildHotmartProductDraft(workspace.fields)
+    };
+  });
+
+  app.post("/agency/projects/:id/launch-page/publish", async (request) => {
+    requireRole(request.agencyUser ?? null, ["ADMIN"]);
+    const params = z.object({ id: z.string() }).parse(request.params);
+    const body = z
+      .object({
+        slug: z.string().min(3).max(80).regex(/^[a-z0-9-]+$/).optional(),
+        unpublish: z.boolean().optional()
+      })
+      .parse(request.body ?? {});
+    await assertProjectAccess(request.agencyUser!, params.id);
+
+    const project = await prisma.project.findUnique({
+      where: { id: params.id },
+      select: {
+        id: true,
+        title: true,
+        launchPublicSlug: true,
+        projectWorkspaceJson: true,
+        brandingWorkspaceJson: true,
+        launchOpCheckedJson: true
+      }
+    });
     if (!project) throw Object.assign(new Error("Projeto não encontrado."), { statusCode: 404 });
 
-    const checked = parseLaunchOpChecked(project.launchOpCheckedJson);
-    if (body.done) {
-      checked[body.taskId] = true;
-    } else {
-      delete checked[body.taskId];
+    if (body.unpublish) {
+      await prisma.project.update({
+        where: { id: params.id },
+        data: { launchPagePublished: false }
+      });
+      return { published: false, slug: project.launchPublicSlug };
+    }
+
+    const workspace = loadProjectWorkspace(project);
+    const snapshot = buildLaunchPageSnapshot(workspace);
+    const slug = body.slug ?? project.launchPublicSlug ?? slugifyLaunchTitle(project.title, project.id);
+
+    const clash = await prisma.project.findFirst({
+      where: { launchPublicSlug: slug, NOT: { id: params.id } }
+    });
+    if (clash) {
+      throw Object.assign(new Error("Slug já em uso por outro projeto."), { statusCode: 409 });
     }
 
     await prisma.project.update({
       where: { id: params.id },
-      data: { launchOpCheckedJson: checked as Prisma.InputJsonValue }
+      data: {
+        launchPublicSlug: slug,
+        launchPagePublished: true,
+        launchPageJson: snapshot as Prisma.InputJsonValue
+      }
     });
 
-    return { checked };
+    const origin = env.WEB_ORIGIN.split(",")[0]?.trim() || "http://localhost:5174";
+    return {
+      published: true,
+      slug,
+      publicPath: `/l/${slug}`,
+      publicUrl: `${origin.replace(/\/$/, "")}/l/${slug}`,
+      snapshot
+    };
+  });
+
+  app.post("/agency/projects/:id/launch-kit/send-email", async (request, reply) => {
+    requireRole(request.agencyUser ?? null, ["ADMIN"]);
+    const params = z.object({ id: z.string() }).parse(request.params);
+    const body = z
+      .object({
+        templateId: z.enum(["email-ppl-confirm", "email-cpl1-invite", "email-cart-open"]),
+        to: z.string().email()
+      })
+      .parse(request.body);
+    await assertProjectAccess(request.agencyUser!, params.id);
+    const project = await prisma.project.findUnique({
+      where: { id: params.id },
+      select: { projectWorkspaceJson: true, brandingWorkspaceJson: true, launchOpCheckedJson: true }
+    });
+    if (!project) throw Object.assign(new Error("Projeto não encontrado."), { statusCode: 404 });
+    const workspace = loadProjectWorkspace(project);
+    const result = await sendLaunchTemplateEmail({
+      to: body.to,
+      templateId: body.templateId as LaunchTemplateId,
+      fields: workspace.fields,
+      log: request.log
+    });
+    return reply.send(result);
+  });
+
+  app.post("/agency/projects/:id/sync/hotmart", async (request, reply) => {
+    requireRole(request.agencyUser ?? null, ["ADMIN"]);
+    const params = z.object({ id: z.string() }).parse(request.params);
+    await assertProjectAccess(request.agencyUser!, params.id);
+    const project = await prisma.project.findUnique({
+      where: { id: params.id },
+      select: { projectWorkspaceJson: true, brandingWorkspaceJson: true, launchOpCheckedJson: true }
+    });
+    if (!project) throw Object.assign(new Error("Projeto não encontrado."), { statusCode: 404 });
+    const workspace = loadProjectWorkspace(project);
+    try {
+      const result = await pushHotmartProductDraft(workspace.fields);
+      return result;
+    } catch (err) {
+      const statusCode = (err as { statusCode?: number }).statusCode ?? 502;
+      return reply.code(statusCode).send({ message: (err as Error).message });
+    }
+  });
+
+  app.post("/agency/projects/:id/sync/leadlovers", async (request, reply) => {
+    requireRole(request.agencyUser ?? null, ["ADMIN"]);
+    const params = z.object({ id: z.string() }).parse(request.params);
+    await assertProjectAccess(request.agencyUser!, params.id);
+    const project = await prisma.project.findUnique({
+      where: { id: params.id },
+      select: {
+        id: true,
+        title: true,
+        projectWorkspaceJson: true,
+        brandingWorkspaceJson: true,
+        launchOpCheckedJson: true
+      }
+    });
+    if (!project) throw Object.assign(new Error("Projeto não encontrado."), { statusCode: 404 });
+    const workspace = loadProjectWorkspace(project);
+    const blueprint = buildLeadloversBlueprint(workspace.fields);
+    const token =
+      typeof workspace.fields["integration:leadlovers:api-token"] === "string"
+        ? workspace.fields["integration:leadlovers:api-token"].trim()
+        : "";
+
+    const apiUrl = env.LEADLOVERS_API_URL?.trim();
+    if (!apiUrl || !token) {
+      return {
+        mode: "dry_run" as const,
+        message:
+          "Configure integration:leadlovers:api-token no workspace e LEADLOVERS_API_URL no servidor para push real.",
+        blueprint
+      };
+    }
+
+    try {
+      const res = await fetch(`${apiUrl.replace(/\/$/, "")}/automations/import`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(blueprint)
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        return reply.code(502).send({
+          message: "Leadlovers recusou o sync.",
+          status: res.status,
+          body: text.slice(0, 500)
+        });
+      }
+      const data = await res.json().catch(() => ({}));
+      return { mode: "pushed" as const, blueprint, response: data };
+    } catch (err) {
+      return reply.code(502).send({ message: (err as Error).message });
+    }
+  });
+
+  app.get("/agency/projects/:id/branding-workspace", async (request) => {
+    const user = request.agencyUser!;
+    const params = z.object({ id: z.string() }).parse(request.params);
+    await assertProjectAccess(user, params.id);
+    const project = await prisma.project.findUnique({
+      where: { id: params.id },
+      select: {
+        id: true,
+        title: true,
+        projectWorkspaceJson: true,
+        brandingWorkspaceJson: true,
+        launchOpCheckedJson: true
+      }
+    });
+    if (!project) throw Object.assign(new Error("Projeto não encontrado."), { statusCode: 404 });
+    const workspace = loadProjectWorkspace(project);
+    return {
+      projectId: project.id,
+      projectTitle: project.title,
+      data: extractBrandingFields(workspace)
+    };
+  });
+
+  app.patch("/agency/projects/:id/branding-workspace", async (request) => {
+    requireRole(request.agencyUser ?? null, ["ADMIN"]);
+    const params = z.object({ id: z.string() }).parse(request.params);
+    const body = z
+      .object({
+        fieldId: z.string().regex(/^(branding|product|integration):[a-z0-9:-]+$/i).max(120),
+        value: z.unknown()
+      })
+      .parse(request.body);
+    await assertProjectAccess(request.agencyUser!, params.id);
+    const workspace = await patchProjectWorkspaceField(
+      params.id,
+      body.fieldId,
+      body.value === null ? null : (body.value as import("@ederson-agencia/shared").BrandingFieldValue)
+    );
+    return { data: extractBrandingFields(workspace) };
+  });
+
+  app.post("/agency/projects/:id/branding-workspace/upload", async (request, reply) => {
+    requireRole(request.agencyUser ?? null, ["ADMIN"]);
+    const params = z.object({ id: z.string() }).parse(request.params);
+    await assertProjectAccess(request.agencyUser!, params.id);
+
+    let fieldId = "";
+    let filePart: Awaited<ReturnType<typeof request.file>> | null = null;
+
+    for await (const part of request.parts()) {
+      if (part.type === "file" && part.fieldname === "file") {
+        filePart = part;
+      } else if (part.type === "field" && part.fieldname === "fieldId") {
+        fieldId = String(part.value ?? "");
+      }
+    }
+
+    if (!filePart) {
+      return reply.code(400).send({ message: "Envie um arquivo (campo file)." });
+    }
+    if (!/^branding:[a-z0-9:-]+$/i.test(fieldId)) {
+      return reply.code(400).send({ message: "fieldId inválido." });
+    }
+
+    try {
+      const asset = await saveBrandingUpload(
+        params.id,
+        fieldId,
+        filePart.mimetype,
+        filePart.filename,
+        filePart.file
+      );
+      return { asset };
+    } catch (error) {
+      const statusCode = (error as { statusCode?: number }).statusCode ?? 400;
+      return reply.code(statusCode).send({ message: (error as Error).message });
+    }
   });
 
   app.post("/agency/projects", async (request, reply) => {

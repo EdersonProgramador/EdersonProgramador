@@ -1,5 +1,7 @@
 /** Playbook operacional — 6 fases FL encaixadas nos Três Pilares (admin da agência). */
 
+import { MARKETING_DEV_STACKS, marketingDevAllTaskIds, marketingDevTaskId } from "./launch-operation-marketing-dev.js";
+
 export type LaunchOperationPillarId = "branding" | "marketing-tech" | "formula";
 
 export type LaunchOperationPillar = {
@@ -455,6 +457,16 @@ export function getLaunchOperationPhase(id: string): LaunchOperationPhase | unde
   return LAUNCH_OPERATION_PHASES.find((p) => p.id === id);
 }
 
+export function adjacentLaunchOperationPhase(
+  phaseId: string,
+  direction: "prev" | "next"
+): LaunchOperationPhase | undefined {
+  const index = LAUNCH_OPERATION_PHASES.findIndex((p) => p.id === phaseId);
+  if (index === -1) return undefined;
+  const nextIndex = direction === "prev" ? index - 1 : index + 1;
+  return LAUNCH_OPERATION_PHASES[nextIndex];
+}
+
 export function launchOperationTaskId(phaseId: string, sectionIndex: number, itemIndex: number): string {
   return `${phaseId}:s${sectionIndex}:i${itemIndex}`;
 }
@@ -479,13 +491,14 @@ function iterPhaseTasks(
 }
 
 export function launchOperationAllTaskIds(): string[] {
-  return LAUNCH_OPERATION_PHASES.flatMap((phase) => {
+  const phaseIds = LAUNCH_OPERATION_PHASES.flatMap((phase) => {
     const ids: string[] = [];
     iterPhaseTasks(phase, (phaseId, si, ii) => {
       ids.push(launchOperationTaskId(phaseId, si, ii));
     });
     return ids;
   });
+  return [...phaseIds, ...marketingDevAllTaskIds()];
 }
 
 export function launchOperationProgress(checked: Record<string, boolean>): {
@@ -524,6 +537,14 @@ export function launchOperationPillarProgress(
       if (!item.pillars.includes(pillarId)) return;
       total += 1;
       const id = launchOperationTaskId(phaseId, si, ii);
+      if (checked[id]) done += 1;
+    });
+  }
+  for (const stack of MARKETING_DEV_STACKS) {
+    stack.items.forEach((item, index) => {
+      if (!item.pillars.includes(pillarId)) return;
+      total += 1;
+      const id = marketingDevTaskId(stack.id, index);
       if (checked[id]) done += 1;
     });
   }

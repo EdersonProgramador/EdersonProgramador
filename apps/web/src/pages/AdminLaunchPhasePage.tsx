@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, Navigate, useParams, useSearchParams } from "react-router-dom";
 import {
-  AGENCY_APP_BASE,
+  adjacentLaunchOperationPhase,
+  findDevelopmentOperationNavContext,
+  findFormulaOperationNavContext,
   getLaunchOperationPhase,
-  LAUNCH_OPERATION_PHASES,
   LAUNCH_OPERATION_PILLARS,
   launchOperationPhaseProgress,
   launchOperationProgress,
@@ -11,15 +12,21 @@ import {
   type LaunchOperationPhase
 } from "@ederson-agencia/shared";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { ApiError, apiGet, apiPatch } from "../api";
+import { ApiError, apiGet } from "../api";
+import { getProjectWorkspace, patchProjectWorkspace } from "../api/project-workspace-api";
 import { ADMIN_BASE } from "../components/admin/AdminOperationsLayout";
 import {
   LaunchOperationPhasePillarFocus,
   LaunchOperationPillarBadges,
   LaunchOperationPillarsOverview
 } from "../components/admin/LaunchOperationPillars";
+import {
+  LAUNCH_PROJECTION_TARGETS,
+  WorkspaceProjectionsPanel
+} from "../components/admin/WorkspaceProjectionsPanel";
+import type { BrandingWorkspaceData } from "@ederson-agencia/shared";
 
-const STORAGE_KEY = "ederson-agencia.launch-op.v1";
+const STORAGE_KEY = "ederson-agencia.project-workspace.v1";
 
 type ProjectOption = { id: string; title: string };
 
@@ -27,8 +34,8 @@ function readLocalChecked(): Record<string, boolean> {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return {};
-    const parsed = JSON.parse(raw) as unknown;
-    if (!parsed || typeof parsed !== "object") return {};
+    const parsed = JSON.parse(raw) as { checklist?: Record<string, boolean> };
+    if (parsed.checklist) return parsed.checklist;
     return parsed as Record<string, boolean>;
   } catch {
     return {};
@@ -36,7 +43,17 @@ function readLocalChecked(): Record<string, boolean> {
 }
 
 function writeLocalChecked(map: Record<string, boolean>) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(map));
+  let fields = {};
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as { fields?: Record<string, unknown> };
+      fields = parsed.fields ?? {};
+    }
+  } catch {
+    /* ignore */
+  }
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ fields, checklist: map }));
 }
 
 export function AdminLaunchPhasePage() {
@@ -47,6 +64,7 @@ export function AdminLaunchPhasePage() {
   const phase = phaseId ? getLaunchOperationPhase(phaseId) : undefined;
   const [projects, setProjects] = useState<ProjectOption[]>([]);
   const [checked, setChecked] = useState<Record<string, boolean>>({});
+  const [workspaceFields, setWorkspaceFields] = useState<BrandingWorkspaceData>({});
   const [loadingChecked, setLoadingChecked] = useState(false);
   const [syncError, setSyncError] = useState<string | null>(null);
   const [savingTaskId, setSavingTaskId] = useState<string | null>(null);
@@ -61,8 +79,11 @@ export function AdminLaunchPhasePage() {
     if (projectId) {
       setLoadingChecked(true);
       setSyncError(null);
-      void apiGet<{ checked: Record<string, boolean> }>(`/agency/projects/${projectId}/launch-operation`)
-        .then((res) => setChecked(res.checked))
+      void getProjectWorkspace(projectId)
+        .then((res) => {
+          setChecked(res.workspace.checklist);
+          setWorkspaceFields(res.workspace.fields);
+        })
         .catch((err) => {
           setChecked({});
           setSyncError(err instanceof ApiError ? err.message : "Não foi possível carregar o checklist do projeto.");
@@ -88,11 +109,8 @@ export function AdminLaunchPhasePage() {
       if (persistMode === "project") {
         setSavingTaskId(taskId);
         setSyncError(null);
-        void apiPatch<{ checked: Record<string, boolean> }>(`/agency/projects/${projectId}/launch-operation`, {
-          taskId,
-          done: value
-        })
-          .then((res) => setChecked(res.checked))
+        void patchProjectWorkspace(projectId, { taskId, done: value })
+          .then((res) => setChecked(res.checked ?? {}))
           .catch((err) => {
             setSyncError(err instanceof ApiError ? err.message : "Falha ao salvar no projeto.");
           })
@@ -109,9 +127,9 @@ export function AdminLaunchPhasePage() {
 
   const overallProgress = useMemo(() => launchOperationProgress(checked), [checked]);
 
-  function operacaoHref(id: string) {
+  function adminPathHref(adminPath: string) {
     const q = projectId ? `?project=${encodeURIComponent(projectId)}` : "";
-    return `${ADMIN_BASE}/operacao/${id}${q}`;
+    return `${ADMIN_BASE}/${adminPath}${q}`;
   }
 
   function onProjectChange(nextId: string) {
@@ -126,14 +144,35 @@ export function AdminLaunchPhasePage() {
     return <Navigate to={`${ADMIN_BASE}/operacao/fase-1${q}`} replace />;
   }
 
-  const prev = LAUNCH_OPERATION_PHASES.find((p) => p.order === phase.order - 1);
-  const next = LAUNCH_OPERATION_PHASES.find((p) => p.order === phase.order + 1);
+  const currentAdminPath = `operacao/${phaseId}`;
+  const formulaCtx = findFormulaOperationNavContext(currentAdminPath);
+  const devCtx = findDevelopmentOperationNavContext(currentAdminPath);
+  const prevPhase = adjacentLaunchOperationPhase(phaseId, "prev");
+  const nextPhase = adjacentLaunchOperationPhase(phaseId, "next");
 
   return (
     <div className="space-y-6">
       <header className="agency-admin-page-head">
-        <p className="text-xs font-semibold uppercase tracking-wide text-sky-600 dark:text-sky-300">
-          Operação · Fórmula de Lançamento
+        <p
+          className={`text-xs font-semibold uppercase tracking-wide ${
+            formulaCtx
+              ? "text-amber-700 dark:text-amber-200"
+              : devCtx
+                ? "text-sky-600 dark:text-sky-300"
+                : "text-[var(--app-text-muted)]"
+          }`}
+        >
+          {formulaCtx ? (
+            <>
+              {formulaCtx.pillarLabel} · {formulaCtx.sectionLabel} · {formulaCtx.itemLabel}
+            </>
+          ) : devCtx ? (
+            <>
+              {devCtx.pillarLabel} · {devCtx.sectionLabel} · {devCtx.itemLabel}
+            </>
+          ) : (
+            "Operação · Fórmula de Lançamento"
+          )}
         </p>
         <h1>
           <span className="mr-2" aria-hidden>
@@ -145,6 +184,15 @@ export function AdminLaunchPhasePage() {
       </header>
 
       <LaunchOperationPillarsOverview checked={checked} />
+
+      {projectId ? (
+        <WorkspaceProjectionsPanel
+          fields={workspaceFields}
+          title="Copy do lançamento (sincronizada)"
+          targetIds={[...LAUNCH_PROJECTION_TARGETS]}
+          compact
+        />
+      ) : null}
 
       <LaunchOperationPhasePillarFocus phase={phase} />
 
@@ -214,25 +262,23 @@ export function AdminLaunchPhasePage() {
       ) : null}
 
       <nav className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--app-border)] pt-4">
-        {prev ? (
-          <Link to={operacaoHref(prev.id)} className="btn-secondary inline-flex items-center gap-1 text-sm">
+        {prevPhase ? (
+          <Link to={adminPathHref(`operacao/${prevPhase.id}`)} className="btn-secondary inline-flex items-center gap-1 text-sm">
             <ChevronLeft className="h-4 w-4" aria-hidden />
-            {prev.navLabel}
+            {prevPhase.navLabel}
           </Link>
         ) : (
           <Link to={`${ADMIN_BASE}/projetos`} className="text-sm text-brand-primary hover:underline">
             ← Projetos
           </Link>
         )}
-        {next ? (
-          <Link to={operacaoHref(next.id)} className="btn-primary inline-flex items-center gap-1 text-sm">
-            {next.navLabel}
+        {nextPhase ? (
+          <Link to={adminPathHref(`operacao/${nextPhase.id}`)} className="btn-primary inline-flex items-center gap-1 text-sm">
+            {nextPhase.navLabel}
             <ChevronRight className="h-4 w-4" aria-hidden />
           </Link>
         ) : (
-          <Link to={`${AGENCY_APP_BASE}/cliente`} className="text-sm text-[var(--app-text-muted)] hover:text-[var(--app-text)]">
-            Ver funil do cliente →
-          </Link>
+          <span className="text-sm text-[var(--app-text-muted)]">Última fase da jornada FL</span>
         )}
       </nav>
     </div>

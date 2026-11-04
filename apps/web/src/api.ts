@@ -117,7 +117,14 @@ client.interceptors.response.use(
   (response) => response,
   (error) => {
     const status = error.response?.status ?? 500;
-    const message = error.response?.data?.message ?? "Erro de comunicação com a API.";
+    const data = error.response?.data;
+    const message =
+      (typeof data === "object" && data !== null && "message" in data && typeof data.message === "string"
+        ? data.message
+        : null) ??
+      (typeof data === "string" ? data : null) ??
+      error.message ??
+      "Erro de comunicação com a API.";
     const path = String(error.config?.url ?? "");
     const isAuthAttempt = path.includes("/auth/login") || path.includes("/auth/register");
     if (status === 401 && !isAuthAttempt && typeof window !== "undefined") {

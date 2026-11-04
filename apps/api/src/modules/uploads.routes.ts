@@ -6,6 +6,7 @@ import { homePathAfterLogin } from "@ederson-agencia/shared";
 import { getAuthUser, toAuthUser } from "../auth.js";
 import { prisma } from "../prisma.js";
 import { removeAvatarFilesForUser, resolveAvatarFile, saveAvatarUpload } from "../uploads/avatar-storage.js";
+import { resolveBrandingFile } from "../uploads/project-branding-storage.js";
 
 const avatarFileParam = z
   .string()
@@ -28,6 +29,21 @@ function contentTypeForExt(filename: string): string {
 }
 
 export async function registerUploadRoutes(app: FastifyInstance) {
+  app.get("/uploads/branding/:projectId/:filename", async (request, reply) => {
+    const params = z
+      .object({
+        projectId: z.string().regex(/^[a-z0-9]{10,40}$/i),
+        filename: z.string().regex(/^[a-z0-9_-]{8,120}\.[a-z0-9]{2,5}$/i)
+      })
+      .parse(request.params);
+    const full = resolveBrandingFile(params.projectId, params.filename);
+    if (!full) {
+      return reply.code(404).send({ message: "Arquivo não encontrado." });
+    }
+    reply.header("Cache-Control", "private, max-age=3600");
+    return reply.send(createReadStream(full));
+  });
+
   app.get("/uploads/avatars/:filename", async (request, reply) => {
     const { filename } = z.object({ filename: avatarFileParam }).parse(request.params);
     const full = resolveAvatarFile(`/uploads/avatars/${filename}`);

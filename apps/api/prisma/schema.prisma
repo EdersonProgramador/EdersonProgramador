@@ -349,7 +349,14 @@ model Project {
   freelancer      User?    @relation("FreelancerProjects", fields: [freelancerId], references: [id])
   lead            Lead?
   launchOpCheckedJson Json?
+  brandingWorkspaceJson Json?
+  projectWorkspaceJson Json?
+  webhookIngressToken String? @unique
+  launchPublicSlug    String?  @unique
+  launchPagePublished Boolean  @default(false)
+  launchPageJson      Json?
   phases           ProjectPhase[]
+  externalEvents   ProjectExternalEvent[]
   upgradeRequests  ProjectUpgradeRequest[]
   notifications    AgencyNotification[]
   createdAt        DateTime @default(now())
@@ -402,6 +409,18 @@ model ProjectUpgradeRequest {
   updatedAt     DateTime @updatedAt
 
   @@index([projectId, status])
+}
+
+model ProjectExternalEvent {
+  id          String   @id @default(cuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  provider    String
+  eventType   String
+  payloadJson Json
+  createdAt   DateTime @default(now())
+
+  @@index([projectId, createdAt])
 }
 
 model ProjectPhase {

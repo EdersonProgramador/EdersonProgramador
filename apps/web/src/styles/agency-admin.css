@@ -21,7 +21,7 @@
   .agency-admin-sidebar {
     position: sticky;
     top: calc(var(--app-shell-header-h, 4.5rem) + 1rem);
-    width: 17.5rem;
+    width: 18.5rem;
   }
 }
 
@@ -41,6 +41,150 @@
   text-transform: uppercase;
   color: var(--app-text-subtle);
 }
+
+.agency-admin-sidebar__pillar-block {
+  margin-top: 0.85rem;
+  padding-top: 0.15rem;
+  border-top: 1px solid var(--app-border);
+}
+
+.agency-admin-sidebar__pillar-block:first-of-type {
+  margin-top: 0.65rem;
+}
+
+.agency-admin-sidebar__pillar {
+  margin: 0.35rem 0.35rem 0.4rem;
+  padding: 0.35rem 0.55rem;
+  border-radius: 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.3;
+}
+
+.agency-admin-sidebar__pillar-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: calc(100% - 0.7rem);
+  margin: 0.35rem 0.35rem 0.25rem;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.agency-admin-sidebar__pillar-toggle:hover {
+  filter: brightness(0.97);
+}
+
+.agency-admin-sidebar__pillar-toggle:focus-visible {
+  outline: 2px solid rgb(14 165 233 / 0.55);
+  outline-offset: 2px;
+}
+
+.agency-admin-sidebar__pillar-toggle-label {
+  flex: 1;
+  min-width: 0;
+}
+
+.agency-admin-sidebar__pillar-chevron {
+  opacity: 0.75;
+  transition: transform 0.2s ease;
+}
+
+.agency-admin-sidebar__pillar-section.is-expanded .agency-admin-sidebar__pillar-chevron {
+  transform: rotate(0deg);
+}
+
+.agency-admin-sidebar__pillar-section.is-collapsed .agency-admin-sidebar__pillar-chevron {
+  transform: rotate(-90deg);
+}
+
+.agency-admin-sidebar__pillar-section.is-expanded.is-active-pillar .agency-admin-sidebar__pillar-toggle {
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.04);
+}
+
+.agency-admin-sidebar__pillar-section.is-expanded.is-active-pillar.agency-admin-sidebar__pillar-section--branding
+  .agency-admin-sidebar__pillar-toggle {
+  border-color: rgb(168 85 247 / 0.35);
+  background: rgb(168 85 247 / 0.16);
+}
+
+.agency-admin-sidebar__pillar-section.is-expanded.is-active-pillar.agency-admin-sidebar__pillar-section--marketing
+  .agency-admin-sidebar__pillar-toggle {
+  border-color: rgb(244 63 94 / 0.35);
+  background: rgb(244 63 94 / 0.16);
+}
+
+.agency-admin-sidebar__pillar-section.is-expanded.is-active-pillar.agency-admin-sidebar__pillar-section--tech
+  .agency-admin-sidebar__pillar-toggle {
+  border-color: rgb(14 165 233 / 0.35);
+  background: rgb(14 165 233 / 0.14);
+}
+
+.agency-admin-sidebar__pillar-section.is-expanded.is-active-pillar.agency-admin-sidebar__pillar-section--formula
+  .agency-admin-sidebar__pillar-toggle {
+  border-color: rgb(245 158 11 / 0.4);
+  background: rgb(245 158 11 / 0.18);
+}
+
+.agency-admin-sidebar__pillar-body {
+  overflow: hidden;
+}
+
+.agency-admin-sidebar__pillar-section.is-collapsed .agency-admin-sidebar__pillar-body {
+  display: none;
+}
+
+.agency-admin-sidebar__pillar-section {
+  padding-bottom: 0.15rem;
+  border-top: 1px solid var(--app-border);
+}
+
+.agency-admin-sidebar__pillar-section:first-of-type {
+  margin-top: 0.65rem;
+}
+
+.agency-admin-sidebar__pillar--branding {
+  color: rgb(126 34 206);
+  background: rgb(168 85 247 / 0.1);
+}
+
+.agency-admin-sidebar__pillar--marketing {
+  color: rgb(190 24 93);
+  background: rgb(244 63 94 / 0.1);
+}
+
+.agency-admin-sidebar__pillar--tech {
+  color: rgb(3 105 161);
+  background: rgb(14 165 233 / 0.1);
+}
+
+.agency-admin-sidebar__pillar--formula {
+  color: rgb(180 83 9);
+  background: rgb(245 158 11 / 0.12);
+}
+
+html[data-theme="dark"] .agency-admin-sidebar__pillar--branding {
+  color: rgb(216 180 254);
+}
+
+html[data-theme="dark"] .agency-admin-sidebar__pillar--marketing {
+  color: rgb(251 207 232);
+}
+
+html[data-theme="dark"] .agency-admin-sidebar__pillar--tech {
+  color: rgb(125 211 252);
+}
+
+html[data-theme="dark"] .agency-admin-sidebar__pillar--formula {
+  color: rgb(253 230 138);
+}
+
 
 .agency-admin-nav-link {
   display: flex;
@@ -70,6 +214,67 @@
 html[data-theme="dark"] .agency-admin-nav-link.is-active {
   color: rgb(125 211 252);
   background: rgb(14 165 233 / 0.18);
+}
+
+.agency-admin-sidebar__pillar-section {
+  margin-top: 0.35rem;
+}
+
+.agency-admin-sidebar__pillar-section-group {
+  margin-top: 0.65rem;
+}
+
+.agency-admin-sidebar__pillar-section-label {
+  margin: 0.25rem 0.35rem 0.35rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--app-text-subtle);
+}
+
+.agency-admin-nav-link--branding.is-active {
+  background: rgb(168 85 247 / 0.14);
+  color: rgb(126 34 206);
+  font-weight: 600;
+}
+
+html[data-theme="dark"] .agency-admin-nav-link--branding.is-active {
+  background: rgb(168 85 247 / 0.22);
+  color: rgb(216 180 254);
+}
+
+.agency-admin-nav-link--marketing.is-active {
+  background: rgb(244 63 94 / 0.14);
+  color: rgb(190 24 93);
+  font-weight: 600;
+}
+
+html[data-theme="dark"] .agency-admin-nav-link--marketing.is-active {
+  background: rgb(244 63 94 / 0.22);
+  color: rgb(251 207 232);
+}
+
+.agency-admin-nav-link--tech.is-active {
+  background: rgb(14 165 233 / 0.14);
+  color: rgb(3 105 161);
+  font-weight: 600;
+}
+
+html[data-theme="dark"] .agency-admin-nav-link--tech.is-active {
+  background: rgb(14 165 233 / 0.22);
+  color: rgb(125 211 252);
+}
+
+.agency-admin-nav-link--formula.is-active {
+  background: rgb(245 158 11 / 0.16);
+  color: rgb(180 83 9);
+  font-weight: 600;
+}
+
+html[data-theme="dark"] .agency-admin-nav-link--formula.is-active {
+  background: rgb(245 158 11 / 0.22);
+  color: rgb(253 230 138);
 }
 
 .agency-admin-nav-link svg {
@@ -217,12 +422,26 @@ html[data-theme="dark"] .agency-op-pillar-chip.agency-op-pillar--formula {
 .agency-op-pillars-row {
   display: grid;
   gap: 0.5rem;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 640px) {
+  .agency-op-pillars-row {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
 
 .agency-op-pillars-row__item {
   font-size: 0.625rem;
   color: var(--app-text-muted);
+  border-radius: 0.5rem;
+  padding: 0.35rem 0.4rem;
+  transition: background 0.15s ease;
+}
+
+.agency-op-pillars-row__item:hover {
+  background: var(--app-hover);
+  color: var(--app-text);
 }
 
 .agency-op-pillars-row__item strong {
@@ -373,4 +592,24 @@ html[data-theme="dark"] .agency-op-pillar-chip.agency-op-pillar--formula {
   align-items: center;
   justify-content: flex-end;
   gap: 0.5rem;
+}
+
+.agency-branding-field-block + .agency-branding-field-block {
+  padding-top: 1rem;
+  border-top: 1px solid var(--app-border);
+}
+
+.agency-branding-media-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--app-border);
+  background: var(--app-hover);
+}
+
+.agency-branding-repeater-row {
+  border: 1px dashed var(--app-border);
+  background: rgb(139 92 246 / 0.04);
 }

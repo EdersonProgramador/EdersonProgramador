@@ -203,6 +203,151 @@ export {
   type PackageTierId
 } from "./project-journey.js";
 export {
+  adjacentOperationProductionPhase,
+  findBrandingOperationNavContext,
+  findDevelopmentOperationNavContext,
+  findFormulaOperationNavContext,
+  findMarketingOperationNavContext,
+  findOperationNavByAdminPath,
+  OPERATION_PILLAR_NAV,
+  operationPhaseNavLabel,
+  type OperationPillarNav,
+  type OperationPillarTone,
+  type OperationProductionPhaseNav
+} from "./launch-operation-nav.js";
+export {
+  findMarketingNavByAdminPath,
+  MARKETING_LEGACY_PATH_ALIASES,
+  MARKETING_OPERATION_NAV,
+  marketingNavFlatItems,
+  type MarketingNavItem,
+  type MarketingNavSection
+} from "./marketing-operation-nav.js";
+export {
+  BRANDING_LEGACY_PATH_ALIASES,
+  BRANDING_OPERATION_NAV,
+  brandingNavFlatItems,
+  findBrandingNavByAdminPath,
+  type BrandingNavItem,
+  type BrandingNavSection
+} from "./branding-operation-nav.js";
+export {
+  DEVELOPMENT_LEGACY_PATH_ALIASES,
+  DEVELOPMENT_OPERATION_NAV,
+  developmentNavFlatItems,
+  developmentStackIdFromAdminPath,
+  findDevelopmentNavByAdminPath,
+  type DevelopmentNavItem,
+  type DevelopmentNavSection
+} from "./development-operation-nav.js";
+export {
+  findFormulaNavByAdminPath,
+  FORMULA_HUB_REDIRECT_TO_PHASE,
+  FORMULA_LEGACY_PATH_ALIASES,
+  FORMULA_OPERATION_NAV,
+  formulaLaunchPhaseIdFromHubView,
+  formulaNavFlatItems,
+  type FormulaNavItem,
+  type FormulaNavSection
+} from "./formula-operation-nav.js";
+export {
+  findOperationSectionNavByAdminPath,
+  findOperationSectionNavContext,
+  operationSectionNavFlatItems,
+  operationSectionNavItemActive,
+  type OperationSectionNav,
+  type OperationSectionNavItem
+} from "./operation-pillar-section-nav.js";
+export {
+  adjacentBrandingEtapa,
+  BRANDING_ETAPAS,
+  brandingEtapaAdminPath,
+  brandingEtapaProgress,
+  brandingWorkspaceProgress,
+  getBrandingEtapa,
+  isBrandingFieldValueEmpty,
+  parseBrandingWorkspaceJson,
+  type BrandingEtapaDef,
+  type BrandingEtapaId,
+  type BrandingFieldDef,
+  type BrandingFieldType,
+  type BrandingFieldValue,
+  type BrandingMediaAsset,
+  type BrandingRepeaterColumn,
+  type BrandingRepeaterValue,
+  type BrandingSectionDef,
+  type BrandingWorkspaceData
+} from "./branding-workspace.js";
+export {
+  PROJECT_WORKSPACE_FEED_RULES,
+  PROJECT_WORKSPACE_VERSION,
+  brandingFieldIdValid,
+  workspaceFieldIdValid,
+  checklistTaskIdValid,
+  extractBrandingFields,
+  hydrateProjectWorkspace,
+  emptyProjectWorkspace,
+  parseProjectWorkspaceJson,
+  projectWorkspaceFeedProjections,
+  projectWorkspaceNavPillarProgress,
+  projectWorkspaceSummary,
+  projectWorkspaceToLegacyColumns,
+  resolveWorkspaceFeed,
+  type OperationNavPillarId,
+  type ProgressSlice,
+  type ProjectWorkspaceDocument,
+  type ProjectWorkspaceLegacySources
+} from "./project-workspace.js";
+export type { ProjectWorkspaceFeedRule } from "./project-workspace-feeds.js";
+export {
+  extractProductFields,
+  PRODUCT_OFFER_FIELDS,
+  productOfferProgress,
+  productOfferSnapshot,
+  type ProductOfferSnapshot
+} from "./project-product-offer.js";
+export {
+  INTEGRATION_SECRET_FIELDS,
+  integrationSecretFieldId
+} from "./project-integration-fields.js";
+export {
+  buildLaunchLandingDocument,
+  buildLaunchTemplateContext,
+  getLaunchTemplateById,
+  LAUNCH_TEMPLATES,
+  parseEmailTemplateContent,
+  renderAllLaunchTemplates,
+  renderLaunchTemplate,
+  type LaunchTemplateContext,
+  type LaunchTemplateDef,
+  type LaunchTemplateId
+} from "./project-launch-templates.js";
+export {
+  buildHotmartProductDraft,
+  buildLaunchKitExport,
+  buildLeadloversBlueprint,
+  type HotmartProductDraft,
+  type LaunchKitExport,
+  type LeadloversAutomationBlueprint
+} from "./project-sync-export.js";
+export {
+  getMarketingDevStack,
+  MARKETING_DEV_STACKS,
+  marketingDevAllTaskIds,
+  marketingDevTaskId,
+  type MarketingDevStack,
+  type MarketingDevStackId
+} from "./launch-operation-marketing-dev.js";
+export {
+  getMarketingOperationPage,
+  getMarketingProductionView,
+  marketingProductionResolvedItems,
+  MARKETING_PRODUCTION_VIEWS,
+  type MarketingProductionView,
+  type MarketingProductionViewId
+} from "./launch-operation-marketing-production.js";
+export {
+  adjacentLaunchOperationPhase,
   getLaunchOperationPhase,
   LAUNCH_OPERATION_PHASES,
   LAUNCH_OPERATION_PILLAR_ORDER,

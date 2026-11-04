@@ -17,6 +17,7 @@ import {
   type PackageTierId
 } from "@ederson-agencia/shared";
 import { prisma } from "../prisma.js";
+import { generateWebhookIngressToken } from "../agency/webhook-ingress.js";
 
 export function resolvePackageTier(value: unknown, fallback: PackageTierId = "professional"): PackageTierId {
   return parsePackageTier(value) ?? fallback;
@@ -63,6 +64,7 @@ export async function createProjectFromPackage(
       contractVersion: "app-zero-v1",
       totalValueCents: cfg.totalValueCents,
       entryValueCents: entryValueCentsForTier(tier),
+      webhookIngressToken: generateWebhookIngressToken(),
       phases: { create: phasesData }
     },
     include: projectInclude

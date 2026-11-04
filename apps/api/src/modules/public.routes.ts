@@ -315,4 +315,70 @@ export async function registerPublicRoutes(app: FastifyInstance) {
       message: "Recebemos sua solicitação. Entraremos em contato em breve."
     });
   });
+
+  app.get("/public/launch/:slug", async (request, reply) => {
+    const { slug } = z.object({ slug: z.string().min(3).max(80) }).parse(request.params);
+    const query = z.object({ format: z.enum(["json", "html"]).default("json") }).parse(request.query);
+
+    const project = await prisma.project.findFirst({
+      where: { launchPublicSlug: slug, launchPagePublished: true },
+      select: { id: true, title: true, launchPageJson: true }
+    });
+    if (!project?.launchPageJson || typeof project.launchPageJson !== "object") {
+      return reply.code(404).send({ message: "Página de captação não encontrada." });
+    }
+    const page = project.launchPageJson as {
+      documentHtml?: string;
+      heroHtml?: string;
+      captureHtml?: string;
+    };
+
+    if (query.format === "html" && page.documentHtml) {
+      reply.header("Cache-Control", "public, max-age=60");
+      return reply.type("text/html; charset=utf-8").send(page.documentHtml);
+    }
+
+    return {
+      slug,
+      projectId: project.id,
+      title: project.title,
+      heroHtml: page.heroHtml ?? "",
+      captureHtml: page.captureHtml ?? ""
+    };
+  });
+
+  app.post("/public/launch/:slug/capture", async (request, reply) => {
+    const { slug } = z.object({ slug: z.string().min(3).max(80) }).parse(request.params);
+    const body = z
+      .object({
+        name: z.string().min(2).max(120),
+        email: z.string().email(),
+        phone: z.string().max(40).optional()
+      })
+      .parse(request.body);
+
+    const project = await prisma.project.findFirst({
+      where: { launchPublicSlug: slug, launchPagePublished: true },
+      select: { id: true, title: true }
+    });
+    if (!project) {
+      return reply.code(404).send({ message: "Lançamento não encontrado." });
+    }
+
+    await prisma.lead.create({
+      data: {
+        name: body.name.trim(),
+        email: body.email.trim().toLowerCase(),
+        phone: body.phone?.trim(),
+        message: `[LP PPL] Inscrição no lançamento "${project.title}" (slug: ${slug}).`,
+        source: "launch_lp",
+        projectId: undefined
+      }
+    });
+
+    return reply.code(201).send({
+      ok: true,
+      message: "Inscrição registrada. Verifique seu e-mail."
+    });
+  });
 }

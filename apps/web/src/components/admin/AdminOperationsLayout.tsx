@@ -1,30 +1,32 @@
 import { NavLink, Outlet } from "react-router-dom";
-import { AGENCY_APP_BASE, LAUNCH_OPERATION_PHASES } from "@ederson-agencia/shared";
 import {
-  BarChart3,
-  Compass,
-  FolderKanban,
-  Megaphone,
-  Palette,
-  Radio,
-  Rocket,
-  Server,
-  UserRound,
-  Users,
-  type LucideIcon
-} from "lucide-react";
+  AGENCY_APP_BASE,
+  BRANDING_LEGACY_PATH_ALIASES,
+  BRANDING_OPERATION_NAV,
+  brandingNavFlatItems,
+  DEVELOPMENT_LEGACY_PATH_ALIASES,
+  DEVELOPMENT_OPERATION_NAV,
+  developmentNavFlatItems,
+  FORMULA_LEGACY_PATH_ALIASES,
+  FORMULA_OPERATION_NAV,
+  formulaNavFlatItems,
+  MARKETING_LEGACY_PATH_ALIASES,
+  MARKETING_OPERATION_NAV,
+  marketingNavFlatItems,
+  OPERATION_PILLAR_NAV,
+  type OperationPillarNav
+} from "@ederson-agencia/shared";
+import { FolderKanban, Megaphone, Monitor, UserRound, Users, type LucideIcon } from "lucide-react";
+import { PillarSidebarNav } from "./PillarSidebarNav";
+import {
+  BRANDING_SIDEBAR_ICONS,
+  DEVELOPMENT_SIDEBAR_ICONS,
+  FORMULA_SIDEBAR_ICONS,
+  MARKETING_SIDEBAR_ICONS
+} from "./pillar-sidebar-icons";
 import "../../styles/agency-admin.css";
 
 const ADMIN_BASE = `${AGENCY_APP_BASE}/admin`;
-
-const PHASE_ICONS: Record<string, LucideIcon> = {
-  "fase-1": Compass,
-  "fase-2": Palette,
-  "fase-3": Server,
-  "fase-4": Radio,
-  "fase-5": Rocket,
-  "fase-6": BarChart3
-};
 
 type NavItem = {
   to: string;
@@ -33,28 +35,93 @@ type NavItem = {
   icon: LucideIcon;
 };
 
-const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
-  {
-    label: "Operação",
-    items: [
-      { to: `${ADMIN_BASE}/projetos`, end: true, label: "Projetos", icon: FolderKanban },
-      ...LAUNCH_OPERATION_PHASES.map((phase) => ({
-        to: `${ADMIN_BASE}/operacao/${phase.id}`,
-        end: false,
-        label: phase.navLabel,
-        icon: PHASE_ICONS[phase.id] ?? Compass
-      }))
-    ]
-  },
-  {
-    label: "Comercial & configuração",
-    items: [
-      { to: `${ADMIN_BASE}/funil`, end: false, label: "Funil comercial", icon: Megaphone },
-      { to: `${ADMIN_BASE}/leads`, end: false, label: "Leads", icon: Users },
-      { to: `${ADMIN_BASE}/clientes`, end: false, label: "Clientes", icon: UserRound }
-    ]
-  }
+const PROJECTS_ITEM: NavItem = {
+  to: `${ADMIN_BASE}/projetos`,
+  end: true,
+  label: "Projetos",
+  icon: FolderKanban
+};
+
+const COMMERCIAL_ITEMS: NavItem[] = [
+  { to: `${ADMIN_BASE}/funil`, end: false, label: "Funil comercial", icon: Megaphone },
+  { to: `${ADMIN_BASE}/leads`, end: false, label: "Leads", icon: Users },
+  { to: `${ADMIN_BASE}/clientes`, end: false, label: "Clientes", icon: UserRound }
 ];
+
+function pillarFlatMobileItems(pillarLabel: string, items: ReturnType<typeof marketingNavFlatItems>, icon: LucideIcon): NavItem[] {
+  return items.map((item) => ({
+    to: `${ADMIN_BASE}/${item.adminPath}`,
+    end: false,
+    label: `${pillarLabel} · ${item.label}`,
+    icon: icon
+  }));
+}
+
+function flatMobileItems(): NavItem[] {
+  return [
+    PROJECTS_ITEM,
+    ...pillarFlatMobileItems("Branding", brandingNavFlatItems(), Monitor),
+    ...pillarFlatMobileItems("Marketing", marketingNavFlatItems(), Megaphone),
+    ...pillarFlatMobileItems("Desenvolvimento", developmentNavFlatItems(), Monitor),
+    ...pillarFlatMobileItems("Fórmula L.", formulaNavFlatItems(), Monitor),
+    ...COMMERCIAL_ITEMS
+  ];
+}
+
+function PillarSidebarFor({ pillar }: { pillar: OperationPillarNav }) {
+  switch (pillar.id) {
+    case "branding":
+      return (
+        <PillarSidebarNav
+          pillarId={pillar.id}
+          pillarLabel={pillar.pillarLabel}
+          tone="branding"
+          sections={BRANDING_OPERATION_NAV}
+          legacyAliases={BRANDING_LEGACY_PATH_ALIASES}
+          iconById={BRANDING_SIDEBAR_ICONS}
+          defaultIcon={Monitor}
+        />
+      );
+    case "marketing":
+      return (
+        <PillarSidebarNav
+          pillarId={pillar.id}
+          pillarLabel={pillar.pillarLabel}
+          tone="marketing"
+          sections={MARKETING_OPERATION_NAV}
+          legacyAliases={MARKETING_LEGACY_PATH_ALIASES}
+          iconById={MARKETING_SIDEBAR_ICONS}
+          defaultIcon={Megaphone}
+        />
+      );
+    case "desenvolvimento":
+      return (
+        <PillarSidebarNav
+          pillarId={pillar.id}
+          pillarLabel={pillar.pillarLabel}
+          tone="tech"
+          sections={DEVELOPMENT_OPERATION_NAV}
+          legacyAliases={DEVELOPMENT_LEGACY_PATH_ALIASES}
+          iconById={DEVELOPMENT_SIDEBAR_ICONS}
+          defaultIcon={Monitor}
+        />
+      );
+    case "formula-lancamento":
+      return (
+        <PillarSidebarNav
+          pillarId={pillar.id}
+          pillarLabel={pillar.pillarLabel}
+          tone="formula"
+          sections={FORMULA_OPERATION_NAV}
+          legacyAliases={FORMULA_LEGACY_PATH_ALIASES}
+          iconById={FORMULA_SIDEBAR_ICONS}
+          defaultIcon={Monitor}
+        />
+      );
+    default:
+      return null;
+  }
+}
 
 function AdminNavLink({ to, end, label, icon: Icon }: NavItem) {
   return (
@@ -70,7 +137,7 @@ function AdminNavLink({ to, end, label, icon: Icon }: NavItem) {
 }
 
 export function AdminOperationsLayout() {
-  const flatItems = NAV_GROUPS.flatMap((g) => g.items);
+  const flatItems = flatMobileItems();
 
   return (
     <div className="agency-admin-layout">
@@ -81,16 +148,23 @@ export function AdminOperationsLayout() {
           ))}
         </div>
         <div className="agency-admin-sidebar__panel agency-admin-sidebar__desktop-nav">
-          {NAV_GROUPS.map((group) => (
-            <div key={group.label} className="mb-2 last:mb-0">
-              <p className="agency-admin-sidebar__label">{group.label}</p>
-              <nav className="flex flex-col gap-0.5">
-                {group.items.map((item) => (
-                  <AdminNavLink key={item.to} {...item} />
-                ))}
-              </nav>
-            </div>
-          ))}
+          <div className="mb-2">
+            <p className="agency-admin-sidebar__label">Operação</p>
+            <nav className="flex flex-col gap-0.5">
+              <AdminNavLink {...PROJECTS_ITEM} />
+            </nav>
+            {OPERATION_PILLAR_NAV.map((pillar) => (
+              <PillarSidebarFor key={pillar.id} pillar={pillar} />
+            ))}
+          </div>
+          <div className="mb-2 last:mb-0">
+            <p className="agency-admin-sidebar__label">Comercial & configuração</p>
+            <nav className="flex flex-col gap-0.5">
+              {COMMERCIAL_ITEMS.map((item) => (
+                <AdminNavLink key={item.to} {...item} />
+              ))}
+            </nav>
+          </div>
         </div>
       </aside>
       <div className="agency-admin-main">

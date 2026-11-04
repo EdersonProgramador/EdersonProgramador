@@ -88,6 +88,19 @@ const envSchema = z
       (value) => (typeof value === "string" && value.trim() ? value.trim() : undefined),
       z.string().min(6).optional()
     ),
+    /** URL base da API Leadlovers para push de blueprint (opcional). */
+    LEADLOVERS_API_URL: z.preprocess(
+      (value) => (typeof value === "string" && value.trim() ? value.trim().replace(/\/$/, "") : undefined),
+      z.string().min(8).optional()
+    ),
+    HOTMART_API_URL: z.preprocess(
+      (value) => (typeof value === "string" && value.trim() ? value.trim().replace(/\/$/, "") : undefined),
+      z.string().min(8).optional()
+    ),
+    HOTMART_API_TOKEN: z.preprocess(
+      (value) => (typeof value === "string" && value.trim() ? value.trim() : undefined),
+      z.string().min(8).optional()
+    ),
     UPLOAD_ROOT: z.preprocess(
       (value) => (typeof value === "string" && value.trim() ? value.trim() : undefined),
       z.string().optional()
