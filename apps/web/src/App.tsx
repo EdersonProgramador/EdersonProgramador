@@ -100,6 +100,14 @@ export default function App() {
                 ))}
                 <Route path="operacao/branding/estatistica" element={<AdminBrandingHubPage />} />
                 <Route path="operacao/branding/:etapaId" element={<AdminBrandingEtapaPage />} />
+                <Route path="operacao/desenvolvimento/stack" element={<AdminDevelopmentHubPage />} />
+                <Route path="operacao/desenvolvimento/stack-front-end" element={<AdminDevelopmentHubPage />} />
+                <Route path="operacao/desenvolvimento/stack-back-end" element={<AdminDevelopmentHubPage />} />
+                <Route path="operacao/desenvolvimento/stack-dados" element={<AdminDevelopmentHubPage />} />
+                <Route path="operacao/desenvolvimento/stack-infra" element={<AdminDevelopmentHubPage />} />
+                <Route path="operacao/desenvolvimento/stack-automacao" element={<AdminDevelopmentHubPage />} />
+                <Route path="operacao/desenvolvimento/stack-pagamentos" element={<AdminDevelopmentHubPage />} />
+                <Route path="operacao/desenvolvimento/stack-email" element={<AdminDevelopmentHubPage />} />
                 <Route path="operacao/desenvolvimento/estatistica" element={<AdminDevelopmentHubPage />} />
                 <Route path="operacao/desenvolvimento/infra" element={<AdminDevelopmentHubPage />} />
                 <Route path="operacao/desenvolvimento/:stackId" element={<AdminMarketingDevPage />} />

@@ -241,6 +241,24 @@ export {
   type DevelopmentNavSection
 } from "./development-operation-nav.js";
 export {
+  DEVELOPMENT_TECH_STACK_CATEGORIES,
+  devTechStackCategoryByAdminSegment,
+  devTechStackFieldIds,
+  devTechOptionsByGroup,
+  findDevTechOptionByStoredValue,
+  devTechStackCategoryByNavItemId,
+  type DevTechOption,
+  type DevTechStackCategory
+} from "./development-tech-stack.js";
+export { DEV_TECH_BRAND_SLUG, devTechBrandSlug } from "./development-tech-brand-slugs.js";
+export {
+  DEV_TECH_BRAND_LOCAL_ICON,
+  DEV_TECH_SI_JSDELIVR_SLUGS,
+  devTechBrandIconCandidates,
+  simpleIconsCdnUrl,
+  simpleIconsJsdelivrUrl
+} from "./development-tech-brand-icons.js";
+export {
   findFormulaNavByAdminPath,
   FORMULA_HUB_REDIRECT_TO_PHASE,
   FORMULA_LEGACY_PATH_ALIASES,

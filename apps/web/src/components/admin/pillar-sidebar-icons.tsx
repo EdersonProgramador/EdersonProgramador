@@ -35,6 +35,14 @@ export const BRANDING_SIDEBAR_ICONS: Record<string, LucideIcon> = {
 };
 
 export const DEVELOPMENT_SIDEBAR_ICONS: Record<string, LucideIcon> = {
+  "stack-visao": Monitor,
+  "stack-front-end": Monitor,
+  "stack-back-end": Workflow,
+  "stack-dados": Database,
+  "stack-infra": Server,
+  "stack-automacao": Workflow,
+  "stack-pagamentos": Target,
+  "stack-email": Radio,
   estatistica: BarChart3,
   "front-end": Monitor,
   "back-end": Workflow,

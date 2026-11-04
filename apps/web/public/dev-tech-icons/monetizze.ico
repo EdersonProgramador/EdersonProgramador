@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/images/monetizze_logo_icon.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <meta name="keywords" content="vender online monetizze">
+  <meta name="description" content="É empreendedor e quer vender milhões na internet? Monetizze e escale seu faturamento no digital.">
+  <title>Home - Monetizze</title>
+  <script type="module" crossorigin src="/assets/main-057a7971.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/scroll_effect-9e4e5b5c.js">
+  <link rel="modulepreload" crossorigin href="/assets/modal-90291eac.js">
+  <link rel="stylesheet" href="/assets/index-9ef1d5d2.css">
+  <link rel="canonical" href="https://www.monetizze.com.br/" />
+  <style>
+    @media (max-width: 1024px){ 
+      header .header__content .header__content_item .header__content_item_link-box {
+        pointer-events: auto;
+      }
+    }
+  </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-NHGWR2E3R4"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-NHGWR2E3R4');
+  </script>
+  <!-- Facebook Pixel Code -->
+  <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '271646718863241');
+    fbq('track', 'PageView');
+  </script>
+  <noscript>
+    <img height="1" width="1" style="display:none" 
+        src="https://www.facebook.com/tr?id={your-pixel-id-goes-here}&ev=PageView&noscript=1"/>
+  </noscript>
+  <!-- End Facebook Pixel Code -->
+</head>
+
+<body>
+  <header class="w-full z-50">
+    <div class="container mx-auto flex items-center justify-between gap-4 px-0 lg:px-10">
+      <div id="hamburger-menu" class="lg:hidden relative z-10 cursor-pointer">
+        <span class="hamburger-bar"></span>
+        <span class="hamburger-bar"></span>
+        <span class="hamburger-bar"></span>
+      </div>
+      <a href="/" class="ml-auto lg:ml-0">
+        <img src="/images/monetizze_logo.svg" alt="Monetizze" lazy="loading" class="object-contain max-w-[180px]" />
+      </a>
+      <div id="header__content" class="header__content flex flex-col lg:flex-row px-6 gap-6 items-center">
+        <div class="header__content_item">
+          <span class="header__content_link_text">Soluções</span>
+          <div class="header__content_item_link-box">
+            <a href="/produtos-fisicos/" class="flex gap-1 items-center">
+              <div class="icon w-6">
+                <img class="object-contain" src="images/icons/bowl.svg" lazy="loading" width="15.99px" height="19.88px">
+              </div>
+              Produto físico
+            </a>
+            <a href="/produtos-digitais/" class="flex gap-1 items-center">
+              <div class="icon w-6">
+                <img class="w-5 h-4 object-contain" src="images/icons/video.svg" lazy="loading" width="20px"
+                  height="16px">
+              </div>
+              Produto digital
+            </a>
+            <!-- <a href="/eventos/" class="flex gap-1 items-center">
+              <div class="icon w-6">
+                <img class="w-5 h-5 object-contain" src="images/icons/ticket.svg" lazy="loading" width="26.27px"
+                  height="20.43px">
+              </div>
+              Eventos
+            </a> -->
+            <a href="/loja-virtual/" class="flex gap-1 items-center">
+              <div class="icon w-6">
+                <img class="w-5 h-5 object-contain" src="images/icons/basket.svg" lazy="loading" width="25.18px"
+                  height="20.43px">
+              </div>
+              Loja virtual
+            </a>
+          </div>
+        </div>
+
+        <div class="header__content_item with-border">
+          <a href="/afiliados/" class="header__content_link_text">Afiliado</a>
+        </div>
+
+        <div class="header__content_item with-border">
+          <a href="/influenciadores-digitais/" class="header__content_link_text">Influencer</a>
+        </div>
+
+        <div class="header__content_item with-border">
+          <a href="/taxas/" class="header__content_link_text">Taxas</a>
+        </div>
+
+        <div class="header__content_item with-border">
+          <a href="https://blog.monetizze.com.br/" class="header__content_link_text">Blog</a>
+        </div>
+
+        <div class="header__content_item with-border">
+          <a href="https://help.monetizze.com.br/s/?language=pt_BR" class="header__content_link_text">Suporte</a>
+        </div>
+        <div id="auth_buttons_container" class="flex lg:flex-col lg:mt-3">
+          <a href="https://app.monetizze.com.br/login" class="login_button flex items-center gap-1">
+            Login
+            <i class="fa-solid fa-arrow-right hidden lg:inline-block mt-[3px]"></i>
+          </a>
+          <a href="https://app.monetizze.com.br/cadastro" class="register_button">Cadastre-se</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main id="awaken-your-potential" class="main-container">
+    <div class="container">
+      <h1 class="main-title font-neue fade-in" data-delay=".2">Monetizze seu propósito transformando ideias em lucro
+      </h1>
+      <p class="main-description fade-in" data-delay=".4">Tudo para você vender mais na internet e faturar milhões.</p>
+      <div id="marketing-box" class="marketing-box fade-in" data-delay=".4">
+        <span class="marketing-text font-neue">Venda tudo na internet, Monetizze.</span>
+        <a href="https://app.monetizze.com.br/cadastro" class="base-button mt-2">Cadastre agora <i
+            class="fa-solid fa-arrow-right"></i></a>
+      </div>
+    </div>
+  </main>
+
+  <section id="sell_whatever_you_want_on_digital" class="py-10 md:py-48">
+    <div class="container flex flex-col-reverse md:flex-row gap-8 items-center justify-center">
+      <div class="grid grid-cols-2 gap-4 w-full h-[300px] md:h-auto md:w-auto">
+        <a href="/produtos-fisicos/" class="product-card flex items-center justify-center fade-in"
+          data-delay=".2">
+          <div class="product-icon relative">
+            <img src="/assets/bowl-603c795b.svg" alt="Produto Físico" class="absolute w-full product-icon_active"
+              lazy="loading">
+            <img src="/assets/bowl_white-d209f1cd.svg" alt="Produto Físico" class="w-full" lazy="loading">
+          </div>
+          <span class="product-text">Produtos físicos</span>
+        </a>
+        <a href="/produtos-digitais/" class="product-card flex items-center justify-center fade-in"
+          data-delay=".4">
+          <div class="product-icon relative">
+            <img src="/assets/video-2edbc14f.svg" alt="Produto Digital" class="absolute w-full product-icon_active"
+              lazy="loading">
+            <img src="/assets/video_white-f2adc2d8.svg" alt="Produto Digital" class="w-full" lazy="loading">
+          </div>
+          <span class="product-text">Produtos digitais</span>
+        </a>
+        <a href="/loja-virtual/" class="product-card flex items-center justify-center fade-in"
+          data-delay=".6">
+          <div class="product-icon relative">
+            <img src="/assets/basket-12f81dc4.svg" alt="Loja Virtual" class="absolute w-full product-icon_active"
+              lazy="loading">
+            <img src="/assets/basket_white-04f66484.svg" alt="Loja Virtual" class="w-full" lazy="loading">
+          </div>
+          <span class="product-text">Loja virtual</span>
+        </a>
+        <!-- <a href="/eventos/" class="product-card flex items-center justify-center fade-in"
+          data-delay=".8">
+          <div class="product-icon relative">
+            <img src="/assets/ticket-ab468a3d.svg" alt="Eventos" class="absolute w-full product-icon_active"
+              lazy="loading">
+            <img src="/assets/ticket_white-28f785b3.svg" alt="Eventos" class="w-full" lazy="loading">
+          </div>
+          <span class="product-text">Eventos</span>
+        </a> -->
+      </div>
+      <div class="product-description">
+        <h3 class="product-title font-neue fade-in" data-delay=".2">Venda o que quiser no digital</h3>
+        <p class="product-paragraph hidden md:inline-block fade-in" data-delay=".4">Seja você produtor, coprodutor ou
+          gerente de afiliados,
+          nossa plataforma oferece infinitas oportunidades para monetizar seus produtos e serviços.</p>
+      </div>
+    </div>
+    <div class="container fade-in" data-delay=".6">
+      <div class="product-affiliate flex mx-auto mt-10 w-full md:w-auto">
+        <div class="product-logo">
+          <img src="/images/monetizze_logo_icon.svg" alt="Monetizze" class="product-logo-icon" lazy="loading">
+        </div>
+        <div class="product-affiliate-text w-full md:w-auto">
+          <span class="product-affiliate-description">Não tem produto? <a href="/afiliados/"
+              class="font-bold">Afilie-se</a> e
+            receba comissões</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="technology-that-makes-you-sell-more" class="text-white py-10 md:py-28">
+    <div class="container flex flex-col justify-center">
+      <h3 class="title font-neue fade-in" data-delay=".2">Tecnologia que te faz vender mais</h3>
+      <p class="subtitle fade-in" data-delay=".4">Do primeiro passo ao sucesso milionário.</p>
+
+      <div class="grid grid-cols-2 md:flex justify-end gap-4 md:gap-8">
+        <div class="marketing-box fade-in" data-delay=".2">
+          <span>Maior <b>conversão</b>, Maior <b>faturamento</b></span>
+        </div>
+        <div class="marketing-box fade-in" data-delay=".4">
+          <span>Escala e <b>recuperação de vendas</b></span>
+        </div>
+        <div class="marketing-box fade-in" data-delay=".6">
+          <span>Mais vendas com a <b>rede de afiliados e influencers</b></span>
+        </div>
+        <a href="https://app.monetizze.com.br/cadastro"
+          class="marketing-box fade-in marketing-box_start-now transition-colors" data-delay=".8">
+          <span>Comece <br> <span class="flex items-center">agora <i
+                class="ml-2 mt-1 fa-solid fa-arrow-right"></i></span></span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section id="just-like-a-click" class="text-white py-10 md:py-28 flex items-center">
+    <div class="container flex flex-col justify-between md:justify-center h-full">
+      <h3 class="title font-neue fade-in" data-delay=".2">Como um clique, tenha tudo na palma da mão</h3>
+      <p class="subtitle hidden md:inline-block fade-in" data-delay=".4">Para garantir uma jornada de milhões, integre
+        processos e ferramentas,
+        <b>gerencie resultados em tempo real por meio de Dashboard, Painéis personalizados e Relatórios.</b>
+      </p>
+      <p class="subtitle inline-block md:hidden fade-in" data-delay=".4">Integre processos e ferramentas, gerencie
+        resultados em tempo real por
+        meio de Dashboard, Painéis personalizados e Relatórios.</p>
+      <a href="https://app.monetizze.com.br/cadastro" class="!hidden md:!flex base-button w-fit fade-in"
+        data-delay=".6">Inicie agora sua migração
+        monitorada <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+  </section>
+
+  <section id="we_are_thrilled_with_your_achievements" class="py-10 md:py-28">
+    <div class="container text-white">
+      <div class="flex gap-14 w-full">
+        <div class="flex flex-col w-full md:w-auto">
+          <h3 class="title font-neue fade-in" data-delay=".2">Vibramos com suas conquistas</h3>
+          <p class="subtitle hidden md:inline-block fade-in" data-delay=".4">Estamos ao seu lado para te apoiar na rota
+            dos milhões. <b>Na Monetizze, quanto mais faturamento, maior seu reconhecimento.</b> Do bronze ao martelo,
+            nós
+            valorizamos suas
+            conquistas.</p>
+
+          <div class="flex gap-4 md:hidden items-start justify-end -mb-24 z-10 pr-8 fade-in" data-delay=".4">
+            <img src="/assets/dollars-9b627daa.svg" class="object-contain mt-8" lazy="loading">
+            <img id="slider_person-imagem-mobile" src="/assets/boy_with_phone-debde6f1.png"
+              class="object-contain select-none" width="177" height="185" lazy="loading">
+
+          </div>
+          <div class="depoiment_box fade-in relative" data-delay=".6">
+            <span id="slider_person-name" class="depoiment_box_person-name">Luan Aires</span>
+            <span id="slider_achievement" class="depoiment_box_achievement">Produtor fatura + de R$ 3 mi em 1 ano</span>
+            <span class="depoiment_box_line"></span>
+            <span id="slider_depoiment-text" class="depoiment_box_text">“Eu já recebi convite de várias plataformas, mas
+              ninguém tem o atendimento
+              da Monetizze. Sempre tem
+              uma solução para qualquer coisa e eu sinto uma evolução mensal no atendimento”</span>
+
+            <i
+              class="fa-solid fa-arrow-left fa-xl slider_left_arrow md:hidden bg-[#0030FF] w-[43px] h-[43px] flex items-center justify-center rounded-full !-left-3"></i>
+            <i
+              class="fa-solid fa-arrow-right fa-xl slider_right_arrow md:hidden bg-[#0030FF] w-[43px] h-[43px] flex items-center justify-center rounded-full !-right-3"></i>
+
+            <div class="slider_points md:!hidden">
+            </div>
+          </div>
+        </div>
+        <div class="depoiment_box_person_image relative h-fit fade-in hidden md:block" data-delay=".6">
+          <i class="fa-solid fa-arrow-left fa-2xl slider_left_arrow"></i>
+          <img id="slider_person-imagem" src="/assets/boy_with_phone-debde6f1.png" class="object-cover select-none"
+            lazy="loading" width="556" height="585">
+          <i class="fa-solid fa-arrow-right fa-2xl slider_right_arrow"></i>
+
+          <div class="slider_points">
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="together_we_are_millions" class="h-[406px] md:h-[434px]">
+    <div class="container text-white">
+      <h5 class="title fade-in" data-delay=".2">Juntos, somos <br>Milhões!</h5>
+      <img src="/assets/hammer-68b97b08.svg" class="hammer fade-in" data-delay=".4" lazy="loading"
+        title="MJOLNIR, premiação da Monetizze que recompensa produtores que já tenham sacado R$ 30 milhões na plataforma"
+        alt="MJOLNIR, premiação de R$ 30 milhões da Monetizze">
+      <span class="subtitle fade-in" data-delay=".6">
+        <b>+20 Milhões</b> de usuários.
+      </span>
+    </div>
+  </section>
+
+  <footer class="py-14">
+    <div class="container">
+      <div class="sub_container">
+        <div class="company flex flex-col gap-1">
+          <b class="mb-2">MONETIZZE</b>
+          <a href="/monetizze/">A empresa</a>
+          <!-- <a href="#">Venda seus produtos</a> -->
+          <a href="/afiliados/">Seja um Afiliado</a>
+          <a href="/influenciadores-digitais/">Seja um Influencer</a>
+          <a href="/parceiros/">Seja um Parceiro</a>
+          <a href="/taxas/">Taxas</a>
+          <a href="https://help.monetizze.com.br/">Suporte</a>
+          <a href="https://www.linkedin.com/company/monetizze/">Trabalhe conosco</a>
+        </div>
+        <div class="solutions flex flex-col gap-1">
+          <b class="mb-2">SOLUÇÕES</b>
+          <a href="/produtos-fisicos/">Produto Físico</a>
+          <a href="/produtos-digitais/">Produto Digital</a>
+          <a href="/loja-virtual/">Loja Virtual</a>
+          <!-- <a href="/eventos/">Eventos</a> -->
+          <b class="mb-2 mt-6">POLÍTICA E TERMOS</b>
+          <a href="/politica-cookies/">Política de cookies</a>
+          <a href="/politica-privacidade/">Política de privacidade</a>
+          <a href="/politica-resolucao-disputa/">Política de resolução de disputa</a>
+          <a href="/produtos-proibidos/">Política de produtos proibidos</a>
+          <a href="/termos-compra/">Termos de compra</a>
+          <a href="/termos-uso/">Termos e condições de uso</a>
+        </div>
+        <div class="follow_our_channels flex flex-col gap-1">
+          <b class="mb-2">Acompanhe nossos canais</b>
+          <div class="flex flex-wrap gap-2">
+            <a href="https://www.instagram.com/monetizze/?hl=pt-br" target="_blank" rel="noopener noreferrer">
+              <img src="/images/icons/instagram.svg" alt="Instagram" lazy="loading">
+            </a>
+            <a href="https://www.facebook.com/monetizzeafiliados" target="_blank" rel="noopener noreferrer">
+              <img src="/images/icons/facebook.svg" alt="Facebook" lazy="loading">
+            </a>
+            <a href="https://www.youtube.com/monetizze" target="_blank" rel="noopener noreferrer">
+              <img src="/images/icons/youtube.svg" alt="YouTube" lazy="loading">
+            </a>
+            <a href="https://help.monetizze.com.br/" target="_blank" rel="noopener noreferrer">
+              <img src="/images/icons/call.svg" alt="Call" lazy="loading">
+            </a>
+          </div>
+        </div>
+        <div>
+          <div id="sell-everything" class="hidden lg:block">
+            <span class="font-neue font-extrabold text-[27px] leading-[125%]">Venda tudo na internet, Monetizze.</span>
+            <a href="https://app.monetizze.com.br/cadastro" class="base-button mt-4">Cadastre agora
+              <i class="fa-solid fa-arrow-right"></i>
+            </a>
+          </div>
+          <div class="flex flex-col mt-4">
+            <span class="text-[14px] lg:text-[18px] font-bold text-[#6D6C6C] lg:text-center lg:ml-10">Baixe nosso
+              aplicativo:</span>
+            <div class="flex flex-col lg:flex-row justify-center gap-2 items-center">
+              <a href="https://play.google.com/store/apps/details?id=com.monetizzeapp" class="w-full" target="_blank"
+                rel="noopener noreferrer">
+                <img src="/images/play_store.svg" alt="Play Store" class="w-full" lazy="loading">
+              </a>
+              <a href="https://apps.apple.com/br/app/monetizze/id1237819055" class="w-full" target="_blank"
+                rel="noopener noreferrer">
+                <img src="/images/app_store.svg" alt="App Store" class="w-full" lazy="loading">
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="flex items-center gap-4 justify-center mt-10">
+        <img src="/images/monetizze_logo_icon_blue.svg" alt="Monetizze" lazy="loading">
+        <span class="font-medium text-[10px] lg:text-[16px]">
+          © 2023 Monetizze Impulsionadora de Vendas Online - 23.055.665/0001-06. <br> Belo Horizonte - MG.
+        </span>
+      </div>
+    </div>
+  </footer>
+
+  
+</body>
+
+</html>

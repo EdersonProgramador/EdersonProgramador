@@ -266,6 +266,11 @@ html[data-theme="dark"] .agency-admin-nav-link--tech.is-active {
   color: rgb(125 211 252);
 }
 
+html[data-theme="dark"] .dev-tech-brand-icon img,
+html[data-theme="dark"] img.dev-tech-brand-icon {
+  filter: brightness(1.15) contrast(1.05);
+}
+
 .agency-admin-nav-link--formula.is-active {
   background: rgb(245 158 11 / 0.16);
   color: rgb(180 83 9);

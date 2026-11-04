@@ -12,6 +12,60 @@ export type DevelopmentNavSection = OperationSectionNav;
 
 export const DEVELOPMENT_OPERATION_NAV: readonly DevelopmentNavSection[] = [
   {
+    id: "stack",
+    sectionLabel: "Stack",
+    items: [
+      {
+        id: "stack-visao",
+        label: "Visão geral",
+        adminPath: "operacao/desenvolvimento/stack",
+        description: "Panorama e notas da decisão técnica antes do build."
+      },
+      {
+        id: "stack-front-end",
+        label: "Front-end",
+        adminPath: "operacao/desenvolvimento/stack-front-end",
+        description: "Framework e entrega da interface (LP, checkout, área de membros)."
+      },
+      {
+        id: "stack-back-end",
+        label: "Back-end",
+        adminPath: "operacao/desenvolvimento/stack-back-end",
+        description: "Runtime da API, auth e integrações."
+      },
+      {
+        id: "stack-dados",
+        label: "Dados & cache",
+        adminPath: "operacao/desenvolvimento/stack-dados",
+        description: "Banco principal, cache e filas."
+      },
+      {
+        id: "stack-infra",
+        label: "Infra & deploy",
+        adminPath: "operacao/desenvolvimento/stack-infra",
+        description: "Hospedagem, CDN e pipeline de deploy."
+      },
+      {
+        id: "stack-automacao",
+        label: "Automação & filas",
+        adminPath: "operacao/desenvolvimento/stack-automacao",
+        description: "Webhooks, jobs e orquestração."
+      },
+      {
+        id: "stack-pagamentos",
+        label: "Pagamentos",
+        adminPath: "operacao/desenvolvimento/stack-pagamentos",
+        description: "Gateway e checkout do lançamento."
+      },
+      {
+        id: "stack-email",
+        label: "E-mail transacional",
+        adminPath: "operacao/desenvolvimento/stack-email",
+        description: "Provedor de envio PPL/CPL/carrinho."
+      }
+    ]
+  },
+  {
     id: "analisar",
     sectionLabel: "Analisar",
     items: [
@@ -98,6 +152,6 @@ export function developmentStackIdFromAdminPath(adminPath: string): string | nul
   const prefix = "operacao/desenvolvimento/";
   if (!canonical.startsWith(prefix)) return null;
   const id = canonical.slice(prefix.length);
-  if (id === "estatistica" || id === "infra") return null;
+  if (id === "estatistica" || id === "infra" || id === "stack" || id.startsWith("stack-")) return null;
   return id;
 }

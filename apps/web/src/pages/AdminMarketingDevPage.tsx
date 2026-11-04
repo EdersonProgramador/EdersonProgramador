@@ -178,8 +178,25 @@ export function AdminMarketingDevPage() {
 
   const projectQ = projectId ? `?project=${encodeURIComponent(projectId)}` : "";
 
+  const stackChoicePath =
+    page.kind === "dev" && stackId
+      ? ({
+          "front-end": "operacao/desenvolvimento/stack-front-end",
+          "back-end": "operacao/desenvolvimento/stack-back-end",
+          "banco-de-dados": "operacao/desenvolvimento/stack-dados"
+        }[stackId] ?? null)
+      : null;
+
   return (
     <div className="space-y-6">
+      {stackChoicePath && projectId ? (
+        <p className="panel border-sky-500/30 bg-sky-500/5 px-4 py-3 text-sm text-[var(--app-text-muted)]">
+          Defina a stack antes do checklist:{" "}
+          <Link to={`${ADMIN_BASE}/${stackChoicePath}${projectQ}`} className="font-medium text-sky-700 hover:underline dark:text-sky-200">
+            escolher tecnologias →
+          </Link>
+        </p>
+      ) : null}
       <header className="agency-admin-page-head">
         <p className={`text-xs font-semibold uppercase tracking-wide ${headAccent}`}>
           {devCtx ? (

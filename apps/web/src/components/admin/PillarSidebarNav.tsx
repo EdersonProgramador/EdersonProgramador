@@ -1,6 +1,11 @@
-import { useCallback, useEffect, useId, useMemo, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useState, type ReactNode } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { AGENCY_APP_BASE, type OperationPillarTone, type OperationSectionNav } from "@ederson-agencia/shared";
+import {
+  AGENCY_APP_BASE,
+  type OperationPillarTone,
+  type OperationSectionNav,
+  type OperationSectionNavItem
+} from "@ederson-agencia/shared";
 import { ChevronDown, type LucideIcon } from "lucide-react";
 
 const ADMIN_BASE = `${AGENCY_APP_BASE}/admin`;
@@ -14,6 +19,8 @@ export type PillarSidebarNavProps = {
   legacyAliases: Record<string, string>;
   iconById: Record<string, LucideIcon>;
   defaultIcon: LucideIcon;
+  /** Se retornar um nó, substitui o ícone Lucide do item (ex.: logo da tech escolhida). */
+  renderItemLeading?: (item: OperationSectionNavItem) => ReactNode | null | undefined;
 };
 
 function adminPathFromLocation(pathname: string): string {
@@ -75,11 +82,16 @@ export function PillarSidebarNav({
   sections,
   legacyAliases,
   iconById,
-  defaultIcon: DefaultIcon
+  defaultIcon: DefaultIcon,
+  renderItemLeading
 }: PillarSidebarNavProps) {
   const location = useLocation();
   const bodyId = useId();
   const currentAdminPath = adminPathFromLocation(location.pathname);
+  const projectQuery = useMemo(() => {
+    const id = new URLSearchParams(location.search).get("project")?.trim();
+    return id ? `?project=${encodeURIComponent(id)}` : "";
+  }, [location.search]);
   const toneClass =
     tone === "marketing"
       ? "marketing"
@@ -147,16 +159,17 @@ export function PillarSidebarNav({
             <nav className="flex flex-col gap-0.5" aria-label={`${pillarLabel} — ${section.sectionLabel}`}>
               {section.items.map((item) => {
                 const Icon = iconById[item.id] ?? DefaultIcon;
+                const leading = renderItemLeading?.(item);
                 return (
                   <NavLink
                     key={item.adminPath}
-                    to={`${ADMIN_BASE}/${item.adminPath}`}
+                    to={`${ADMIN_BASE}/${item.adminPath}${projectQuery}`}
                     className={() => {
                       const active = navItemActive(currentAdminPath, item.adminPath, legacyAliases);
                       return `agency-admin-nav-link agency-admin-nav-link--${toneClass}${active ? " is-active" : ""}`;
                     }}
                   >
-                    <Icon className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden />
+                    {leading ?? <Icon className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden />}
                     <span className="agency-admin-nav-link__text">{item.label}</span>
                   </NavLink>
                 );

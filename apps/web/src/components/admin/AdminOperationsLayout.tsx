@@ -4,8 +4,6 @@ import {
   BRANDING_LEGACY_PATH_ALIASES,
   BRANDING_OPERATION_NAV,
   brandingNavFlatItems,
-  DEVELOPMENT_LEGACY_PATH_ALIASES,
-  DEVELOPMENT_OPERATION_NAV,
   developmentNavFlatItems,
   FORMULA_LEGACY_PATH_ALIASES,
   FORMULA_OPERATION_NAV,
@@ -17,10 +15,10 @@ import {
   type OperationPillarNav
 } from "@ederson-agencia/shared";
 import { FolderKanban, Megaphone, Monitor, UserRound, Users, type LucideIcon } from "lucide-react";
+import { DevelopmentPillarSidebarNav } from "./DevelopmentPillarSidebarNav";
 import { PillarSidebarNav } from "./PillarSidebarNav";
 import {
   BRANDING_SIDEBAR_ICONS,
-  DEVELOPMENT_SIDEBAR_ICONS,
   FORMULA_SIDEBAR_ICONS,
   MARKETING_SIDEBAR_ICONS
 } from "./pillar-sidebar-icons";
@@ -95,17 +93,7 @@ function PillarSidebarFor({ pillar }: { pillar: OperationPillarNav }) {
         />
       );
     case "desenvolvimento":
-      return (
-        <PillarSidebarNav
-          pillarId={pillar.id}
-          pillarLabel={pillar.pillarLabel}
-          tone="tech"
-          sections={DEVELOPMENT_OPERATION_NAV}
-          legacyAliases={DEVELOPMENT_LEGACY_PATH_ALIASES}
-          iconById={DEVELOPMENT_SIDEBAR_ICONS}
-          defaultIcon={Monitor}
-        />
-      );
+      return <DevelopmentPillarSidebarNav />;
     case "formula-lancamento":
       return (
         <PillarSidebarNav
