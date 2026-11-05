@@ -66,6 +66,18 @@ export const DEVELOPMENT_OPERATION_NAV: readonly DevelopmentNavSection[] = [
     ]
   },
   {
+    id: "codificar",
+    sectionLabel: "Codificar",
+    items: [
+      {
+        id: "editor",
+        label: "Studio de código",
+        adminPath: "operacao/desenvolvimento/editor",
+        description: "Editor Monaco (mesmo motor do VS Code) para protótipos, rotas, webhooks e snippets do lançamento."
+      }
+    ]
+  },
+  {
     id: "analisar",
     sectionLabel: "Analisar",
     items: [
@@ -152,6 +164,8 @@ export function developmentStackIdFromAdminPath(adminPath: string): string | nul
   const prefix = "operacao/desenvolvimento/";
   if (!canonical.startsWith(prefix)) return null;
   const id = canonical.slice(prefix.length);
-  if (id === "estatistica" || id === "infra" || id === "stack" || id.startsWith("stack-")) return null;
+  if (id === "estatistica" || id === "infra" || id === "editor" || id === "stack" || id.startsWith("stack-")) {
+    return null;
+  }
   return id;
 }

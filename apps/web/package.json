@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@ederson-agencia/shared": "*",
+    "@monaco-editor/react": "^4.7.0",
     "@tiptap/core": "^3.32.0",
     "@tiptap/extension-color": "^3.32.0",
     "@tiptap/extension-font-family": "^3.32.0",
@@ -30,6 +31,7 @@
     "@vitejs/plugin-react": "^4.3.1",
     "axios": "^1.19.0",
     "lucide-react": "^0.468.0",
+    "monaco-editor": "^0.57.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-pdf": "^9.2.1",

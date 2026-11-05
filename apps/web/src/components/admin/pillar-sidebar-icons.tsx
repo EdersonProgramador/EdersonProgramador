@@ -1,6 +1,7 @@
 import {
   BarChart3,
   ClipboardList,
+  Code2,
   Database,
   Monitor,
   Package,
@@ -43,6 +44,7 @@ export const DEVELOPMENT_SIDEBAR_ICONS: Record<string, LucideIcon> = {
   "stack-automacao": Workflow,
   "stack-pagamentos": Target,
   "stack-email": Radio,
+  editor: Code2,
   estatistica: BarChart3,
   "front-end": Monitor,
   "back-end": Workflow,

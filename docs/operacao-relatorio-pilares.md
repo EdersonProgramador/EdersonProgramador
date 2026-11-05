@@ -103,6 +103,7 @@ Documento de referência dos quatro pilares da **Operação Ederson Programador*
 | Seção | Item | Rota |
 |-------|------|------|
 | **Stack** | Visão geral, Front-end, Back-end, Dados & cache, Infra, Automação, Pagamentos, E-mail | `operacao/desenvolvimento/stack*` |
+| **Codificar** | Studio de código (Monaco) | `operacao/desenvolvimento/editor` |
 | Analisar | Estatística | `operacao/desenvolvimento/estatistica` |
 | Interface | Front-end | `operacao/desenvolvimento/front-end` |
 | Serviços | Back-end | `operacao/desenvolvimento/back-end` |

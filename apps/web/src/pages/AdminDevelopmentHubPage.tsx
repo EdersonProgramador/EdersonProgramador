@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Navigate, useLocation, useSearchParams } from "react-router-dom";
 import {
+  DEV_CODE_STUDIO_FIELD_ID,
   DEVELOPMENT_OPERATION_NAV,
   devTechStackCategoryByAdminSegment,
   findDevelopmentOperationNavContext,
@@ -9,6 +10,7 @@ import {
 import { ApiError, apiGet } from "../api";
 import { getProjectWorkspace } from "../api/project-workspace-api";
 import { ADMIN_BASE } from "../components/admin/AdminOperationsLayout";
+import { DevelopmentCodeStudio } from "../components/admin/DevelopmentCodeStudio";
 import { DevelopmentStackPicker } from "../components/admin/DevelopmentStackPicker";
 import { AdminPillarStatsHubPage } from "./AdminPillarStatsHubPage";
 
@@ -58,7 +60,7 @@ export function AdminDevelopmentHubPage() {
   }, []);
 
   useEffect(() => {
-    if (projectId && (view === "estatistica" || isStackView(view))) void loadFields(projectId);
+    if (projectId && (view === "estatistica" || view === "editor" || isStackView(view))) void loadFields(projectId);
     else setFields({});
   }, [projectId, view, loadFields]);
 
@@ -77,6 +79,57 @@ export function AdminDevelopmentHubPage() {
   const adminPath = view ? `operacao/desenvolvimento/${view}` : "";
   const navCtx = adminPath ? findDevelopmentOperationNavContext(adminPath) : null;
   const navItem = DEVELOPMENT_OPERATION_NAV.flatMap((s) => s.items).find((i) => i.adminPath === adminPath);
+
+  if (view === "editor" && navItem) {
+    const studioRaw = typeof fields[DEV_CODE_STUDIO_FIELD_ID] === "string" ? fields[DEV_CODE_STUDIO_FIELD_ID] : undefined;
+    return (
+      <div className="space-y-6">
+        <header className="agency-admin-page-head">
+          <p className="text-xs font-semibold uppercase tracking-wide text-sky-600 dark:text-sky-300">
+            {navCtx ? (
+              <>
+                {navCtx.pillarLabel} · {navCtx.sectionLabel} · {navCtx.itemLabel}
+              </>
+            ) : (
+              "Desenvolvimento"
+            )}
+          </p>
+          <h1>{navItem.label}</h1>
+          <p>{navItem.description}</p>
+        </header>
+
+        <div className="panel space-y-3 p-4 sm:p-5">
+          <label className="block space-y-1.5 text-sm">
+            <span className="font-medium text-[var(--app-text)]">Projeto</span>
+            <select className="input w-full max-w-xl" value={projectId} onChange={(e) => onProjectChange(e.target.value)}>
+              <option value="">Selecione um projeto…</option>
+              {projects.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.title}
+                </option>
+              ))}
+            </select>
+          </label>
+          {loading ? <p className="text-xs text-[var(--app-text-muted)]">Carregando…</p> : null}
+          {error ? <p className="text-sm text-red-500">{error}</p> : null}
+          {saving ? <p className="text-xs text-[var(--app-text-muted)]">Salvando…</p> : null}
+        </div>
+
+        {!projectId ? (
+          <p className="text-sm text-[var(--app-text-muted)]">Selecione um projeto para abrir o studio e salvar snippets no workspace.</p>
+        ) : (
+          <DevelopmentCodeStudio
+            key={projectId}
+            projectId={projectId}
+            storedRaw={studioRaw}
+            onStoredChange={(raw) => setFields((prev) => ({ ...prev, [DEV_CODE_STUDIO_FIELD_ID]: raw }))}
+            onError={setError}
+            onSavingChange={setSaving}
+          />
+        )}
+      </div>
+    );
+  }
 
   if (isStackView(view) && stackCategory && navItem) {
     return (

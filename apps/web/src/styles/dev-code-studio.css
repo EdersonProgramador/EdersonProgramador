@@ -1,0 +1,233 @@
+.dev-code-studio {
+  --dcs-bg: #1e1e1e;
+  --dcs-panel: #252526;
+  --dcs-border: #3c3c3c;
+  --dcs-tab: #2d2d2d;
+  --dcs-tab-active: #1e1e1e;
+  --dcs-text: #cccccc;
+  --dcs-muted: #858585;
+  --dcs-accent: #3794ff;
+
+  display: flex;
+  flex-direction: column;
+  min-height: min(72vh, 720px);
+  border: 1px solid var(--dcs-border);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background: var(--dcs-bg);
+  color: var(--dcs-text);
+  box-shadow: 0 12px 40px rgb(0 0 0 / 0.18);
+}
+
+.dev-code-studio[data-theme="light"] {
+  --dcs-bg: #ffffff;
+  --dcs-panel: #f3f3f3;
+  --dcs-border: #e5e5e5;
+  --dcs-tab: #ececec;
+  --dcs-tab-active: #ffffff;
+  --dcs-text: #333333;
+  --dcs-muted: #6b6b6b;
+  --dcs-accent: #0078d4;
+}
+
+.dev-code-studio__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.5rem;
+  background: var(--dcs-panel);
+  border-bottom: 1px solid var(--dcs-border);
+}
+
+.dev-code-studio__toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.dev-code-studio__toolbar-group--grow {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.dev-code-studio__toolbar-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--dcs-muted);
+  padding: 0 0.35rem;
+}
+
+.dev-code-studio__icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.35rem;
+  color: var(--dcs-muted);
+  transition: background 0.15s, color 0.15s;
+}
+
+.dev-code-studio__icon-btn:hover,
+.dev-code-studio__icon-btn.is-active {
+  background: rgb(55 148 255 / 0.15);
+  color: var(--dcs-accent);
+}
+
+.dev-code-studio__tab {
+  max-width: 11rem;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.75rem;
+  border-radius: 0.35rem 0.35rem 0 0;
+  background: var(--dcs-tab);
+  color: var(--dcs-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border: 1px solid transparent;
+  border-bottom: none;
+}
+
+.dev-code-studio__tab.is-active {
+  background: var(--dcs-tab-active);
+  color: var(--dcs-text);
+  border-color: var(--dcs-border);
+}
+
+.dev-code-studio__tab--add {
+  min-width: 1.75rem;
+  text-align: center;
+  font-weight: 600;
+}
+
+.dev-code-studio__lang {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.6875rem;
+  color: var(--dcs-muted);
+}
+
+.dev-code-studio__lang select {
+  background: var(--dcs-bg);
+  color: var(--dcs-text);
+  border: 1px solid var(--dcs-border);
+  border-radius: 0.25rem;
+  padding: 0.15rem 0.35rem;
+  font-size: 0.6875rem;
+}
+
+.dev-code-studio__body {
+  display: flex;
+  flex: 1;
+  min-height: 420px;
+}
+
+.dev-code-studio__explorer {
+  width: 11.5rem;
+  flex-shrink: 0;
+  background: var(--dcs-panel);
+  border-right: 1px solid var(--dcs-border);
+  padding: 0.5rem 0;
+  font-size: 0.75rem;
+}
+
+.dev-code-studio__explorer-label {
+  padding: 0 0.75rem 0.35rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--dcs-muted);
+}
+
+.dev-code-studio__explorer ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.dev-code-studio__explorer button {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.75rem;
+  text-align: left;
+  color: var(--dcs-text);
+}
+
+.dev-code-studio__explorer button:hover,
+.dev-code-studio__explorer button.is-active {
+  background: rgb(55 148 255 / 0.12);
+  color: var(--dcs-accent);
+}
+
+.dev-code-studio__editor-wrap {
+  flex: 1;
+  min-width: 0;
+  min-height: 420px;
+}
+
+.dev-code-studio__loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: 100%;
+  min-height: 320px;
+  color: var(--dcs-muted);
+  font-size: 0.8125rem;
+}
+
+.dev-code-studio__loading-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: var(--dcs-accent);
+  animation: devCodeStudioPulse 1s ease-in-out infinite;
+}
+
+@keyframes devCodeStudioPulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.dev-code-studio__status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.6875rem;
+  background: var(--dcs-accent);
+  color: #fff;
+}
+
+.dev-code-studio[data-theme="light"] .dev-code-studio__status {
+  background: #0078d4;
+}
+
+.dev-code-studio__status-grow {
+  flex: 1;
+  text-align: right;
+  min-width: 6rem;
+}
+
+@media (max-width: 640px) {
+  .dev-code-studio__explorer {
+    display: none;
+  }
+}

@@ -259,6 +259,14 @@ export {
   simpleIconsJsdelivrUrl
 } from "./development-tech-brand-icons.js";
 export {
+  DEV_CODE_STUDIO_FIELD_ID,
+  defaultDevCodeStudioSnapshot,
+  parseDevCodeStudioSnapshot,
+  serializeDevCodeStudioSnapshot,
+  type DevCodeStudioFile,
+  type DevCodeStudioSnapshot
+} from "./development-code-studio.js";
+export {
   findFormulaNavByAdminPath,
   FORMULA_HUB_REDIRECT_TO_PHASE,
   FORMULA_LEGACY_PATH_ALIASES,

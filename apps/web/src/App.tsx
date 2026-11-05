@@ -108,6 +108,7 @@ export default function App() {
                 <Route path="operacao/desenvolvimento/stack-automacao" element={<AdminDevelopmentHubPage />} />
                 <Route path="operacao/desenvolvimento/stack-pagamentos" element={<AdminDevelopmentHubPage />} />
                 <Route path="operacao/desenvolvimento/stack-email" element={<AdminDevelopmentHubPage />} />
+                <Route path="operacao/desenvolvimento/editor" element={<AdminDevelopmentHubPage />} />
                 <Route path="operacao/desenvolvimento/estatistica" element={<AdminDevelopmentHubPage />} />
                 <Route path="operacao/desenvolvimento/infra" element={<AdminDevelopmentHubPage />} />
                 <Route path="operacao/desenvolvimento/:stackId" element={<AdminMarketingDevPage />} />
