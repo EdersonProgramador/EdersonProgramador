@@ -1,6 +1,7 @@
 import Editor, { type OnMount } from "@monaco-editor/react";
 import type { editor as MonacoEditor } from "monaco-editor";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { setupMonaco } from "../../monaco/setupMonaco";
 import {
   DEV_CODE_STUDIO_FIELD_ID,
   defaultDevCodeStudioSnapshot,
@@ -24,12 +25,16 @@ import {
 import "../../styles/dev-code-studio.css";
 
 type DevelopmentCodeStudioProps = {
-  projectId: string;
+  projectId?: string;
   storedRaw: string | undefined;
   onStoredChange: (raw: string) => void;
   onError: (message: string) => void;
   onSavingChange?: (saving: boolean) => void;
 };
+
+setupMonaco();
+
+const EDITOR_MIN_PX = 480;
 
 const LANGUAGE_OPTIONS: { id: string; label: string }[] = [
   { id: "typescript", label: "TypeScript" },
@@ -73,7 +78,9 @@ export function DevelopmentCodeStudio({
 }: DevelopmentCodeStudioProps) {
   const theme = useMonacoTheme();
   const editorRef = useRef<MonacoEditor.IStandaloneCodeEditor | null>(null);
+  const paneRef = useRef<HTMLDivElement | null>(null);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [editorHeightPx, setEditorHeightPx] = useState(EDITOR_MIN_PX);
 
   const initial = useMemo(
     () => parseDevCodeStudioSnapshot(storedRaw) ?? defaultDevCodeStudioSnapshot(),
@@ -90,6 +97,19 @@ export function DevelopmentCodeStudio({
     setSnapshot(parseDevCodeStudioSnapshot(storedRaw) ?? defaultDevCodeStudioSnapshot());
   }, [projectId, storedRaw]);
 
+  useLayoutEffect(() => {
+    const el = paneRef.current;
+    if (!el) return;
+    const measure = () => {
+      const h = el.clientHeight;
+      setEditorHeightPx(Math.max(h, EDITOR_MIN_PX));
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [explorerOpen]);
+
   const activeFile = snapshot.files.find((f) => f.id === snapshot.openFileId) ?? snapshot.files[0];
 
   const persist = useCallback(
@@ -97,6 +117,7 @@ export function DevelopmentCodeStudio({
       const raw = serializeDevCodeStudioSnapshot(next);
       onStoredChange(raw);
       if (saveTimer.current) clearTimeout(saveTimer.current);
+      if (!projectId) return;
       saveTimer.current = setTimeout(() => {
         onSavingChange?.(true);
         void patchProjectWorkspace(projectId, { fieldId: DEV_CODE_STUDIO_FIELD_ID, value: raw })
@@ -262,10 +283,10 @@ export function DevelopmentCodeStudio({
           </aside>
         ) : null}
 
-        <div className="dev-code-studio__editor-wrap">
+        <div ref={paneRef} className="dev-code-studio__editor-wrap">
           <Editor
             key={`${activeFile?.id}-${theme}`}
-            height="100%"
+            height={editorHeightPx}
             language={activeFile?.language ?? "typescript"}
             value={activeFile?.content ?? ""}
             theme={theme}

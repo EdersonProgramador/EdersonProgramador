@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { Navigate, useLocation, useSearchParams } from "react-router-dom";
 import {
   DEV_CODE_STUDIO_FIELD_ID,
@@ -10,8 +10,11 @@ import {
 import { ApiError, apiGet } from "../api";
 import { getProjectWorkspace } from "../api/project-workspace-api";
 import { ADMIN_BASE } from "../components/admin/AdminOperationsLayout";
-import { DevelopmentCodeStudio } from "../components/admin/DevelopmentCodeStudio";
 import { DevelopmentStackPicker } from "../components/admin/DevelopmentStackPicker";
+
+const DevelopmentCodeStudio = lazy(() =>
+  import("../components/admin/DevelopmentCodeStudio").then((m) => ({ default: m.DevelopmentCodeStudio }))
+);
 import { AdminPillarStatsHubPage } from "./AdminPillarStatsHubPage";
 
 type ProjectOption = { id: string; title: string };
@@ -80,8 +83,12 @@ export function AdminDevelopmentHubPage() {
   const navCtx = adminPath ? findDevelopmentOperationNavContext(adminPath) : null;
   const navItem = DEVELOPMENT_OPERATION_NAV.flatMap((s) => s.items).find((i) => i.adminPath === adminPath);
 
-  if (view === "editor" && navItem) {
+  if (view === "editor") {
     const studioRaw = typeof fields[DEV_CODE_STUDIO_FIELD_ID] === "string" ? fields[DEV_CODE_STUDIO_FIELD_ID] : undefined;
+    const editorNav = navItem ?? {
+      label: "Studio de código",
+      description: "Editor Monaco (motor VS Code) para protótipos e snippets do lançamento."
+    };
     return (
       <div className="space-y-6">
         <header className="agency-admin-page-head">
@@ -94,15 +101,15 @@ export function AdminDevelopmentHubPage() {
               "Desenvolvimento"
             )}
           </p>
-          <h1>{navItem.label}</h1>
-          <p>{navItem.description}</p>
+          <h1>{editorNav.label}</h1>
+          <p>{editorNav.description}</p>
         </header>
 
         <div className="panel space-y-3 p-4 sm:p-5">
           <label className="block space-y-1.5 text-sm">
-            <span className="font-medium text-[var(--app-text)]">Projeto</span>
+            <span className="font-medium text-[var(--app-text)]">Projeto (opcional — para salvar no workspace)</span>
             <select className="input w-full max-w-xl" value={projectId} onChange={(e) => onProjectChange(e.target.value)}>
-              <option value="">Selecione um projeto…</option>
+              <option value="">Sem projeto — só visualizar/editar localmente</option>
               {projects.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.title}
@@ -110,23 +117,32 @@ export function AdminDevelopmentHubPage() {
               ))}
             </select>
           </label>
+          {!projectId ? (
+            <p className="text-xs text-amber-700 dark:text-amber-200">
+              O editor abre abaixo; escolha um projeto para persistir arquivos na operação.
+            </p>
+          ) : null}
           {loading ? <p className="text-xs text-[var(--app-text-muted)]">Carregando…</p> : null}
           {error ? <p className="text-sm text-red-500">{error}</p> : null}
           {saving ? <p className="text-xs text-[var(--app-text-muted)]">Salvando…</p> : null}
         </div>
 
-        {!projectId ? (
-          <p className="text-sm text-[var(--app-text-muted)]">Selecione um projeto para abrir o studio e salvar snippets no workspace.</p>
-        ) : (
+        <Suspense
+          fallback={
+            <div className="panel flex min-h-[480px] items-center justify-center p-8 text-sm text-[var(--app-text-muted)]">
+              Carregando editor Monaco…
+            </div>
+          }
+        >
           <DevelopmentCodeStudio
-            key={projectId}
-            projectId={projectId}
+            key={projectId || "local"}
+            projectId={projectId || undefined}
             storedRaw={studioRaw}
             onStoredChange={(raw) => setFields((prev) => ({ ...prev, [DEV_CODE_STUDIO_FIELD_ID]: raw }))}
             onError={setError}
             onSavingChange={setSaving}
           />
-        )}
+        </Suspense>
       </div>
     );
   }
