@@ -264,8 +264,21 @@ export {
   parseDevCodeStudioSnapshot,
   serializeDevCodeStudioSnapshot,
   type DevCodeStudioFile,
+  type DevCodeStudioFolder,
   type DevCodeStudioSnapshot
 } from "./development-code-studio.js";
+export {
+  buildCodeStudioTree,
+  createFileInSnapshot,
+  createFolderInSnapshot,
+  deleteFileFromSnapshot,
+  deleteFolderFromSnapshot,
+  fileBaseName,
+  joinPath,
+  languageFromPath,
+  renamePathInSnapshot,
+  type CodeStudioTreeNode
+} from "./development-code-studio-fs.js";
 export {
   findFormulaNavByAdminPath,
   FORMULA_HUB_REDIRECT_TO_PHASE,

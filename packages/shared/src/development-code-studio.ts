@@ -1,28 +1,42 @@
 /** Workspace — editor de código do pilar Desenvolvimento. */
 
+import { migrateSnapshotToV2 } from "./development-code-studio-fs.js";
+
 export const DEV_CODE_STUDIO_FIELD_ID = "product:dev:code-studio";
+
+export type DevCodeStudioFolder = {
+  id: string;
+  path: string;
+};
 
 export type DevCodeStudioFile = {
   id: string;
-  name: string;
+  path: string;
   language: string;
   content: string;
 };
 
 export type DevCodeStudioSnapshot = {
-  version: 1;
+  version: 2;
   openFileId: string;
+  folders: DevCodeStudioFolder[];
   files: DevCodeStudioFile[];
 };
 
 export function defaultDevCodeStudioSnapshot(): DevCodeStudioSnapshot {
   return {
-    version: 1,
+    version: 2,
     openFileId: "main-tsx",
+    folders: [
+      { id: "folder-src", path: "src" },
+      { id: "folder-api--routes", path: "api/routes" },
+      { id: "folder-prisma", path: "prisma" },
+      { id: "folder-webhooks", path: "webhooks" }
+    ],
     files: [
       {
         id: "main-tsx",
-        name: "App.tsx",
+        path: "src/App.tsx",
         language: "typescript",
         content: `import { useState } from "react";
 
@@ -56,7 +70,7 @@ export function LaunchApp() {
       },
       {
         id: "api-route",
-        name: "routes/leads.ts",
+        path: "api/routes/leads.ts",
         language: "typescript",
         content: `import type { FastifyInstance } from "fastify";
 
@@ -66,7 +80,6 @@ export async function registerLeadRoutes(app: FastifyInstance) {
     if (!body.email?.includes("@")) {
       return reply.code(400).send({ error: "E-mail inválido" });
     }
-    // persist + webhook Leadlovers / ActiveCampaign
     return reply.send({ ok: true });
   });
 }
@@ -74,45 +87,31 @@ export async function registerLeadRoutes(app: FastifyInstance) {
       },
       {
         id: "schema",
-        name: "schema.prisma",
+        path: "prisma/schema.prisma",
         language: "sql",
-        content: `// Modelo mínimo — funil + pedidos do lançamento
-
-model Lead {
+        content: `model Lead {
   id        String   @id @default(cuid())
   email     String   @unique
   source    String
   createdAt DateTime @default(now())
 }
-
-model Order {
-  id         String   @id @default(cuid())
-  gateway    String
-  externalId String
-  status     String
-  createdAt  DateTime @default(now())
-}
 `
       },
       {
         id: "webhook",
-        name: "webhooks/hotmart.ts",
+        path: "webhooks/hotmart.ts",
         language: "typescript",
-        content: `/** Valida assinatura e normaliza payload Hotmart → CRM */
-export function parseHotmartWebhook(payload: unknown) {
-  // TODO: HMAC + map plan / offer / buyer email
+        content: `export function parseHotmartWebhook(payload: unknown) {
   return payload;
 }
 `
       },
       {
         id: "env",
-        name: ".env.example",
+        path: ".env.example",
         language: "plaintext",
         content: `DATABASE_URL=postgresql://user:pass@host:5432/db
 REDIS_URL=redis://localhost:6379
-RESEND_API_KEY=
-HOTMART_WEBHOOK_SECRET=
 `
       }
     ]
@@ -122,12 +121,8 @@ HOTMART_WEBHOOK_SECRET=
 export function parseDevCodeStudioSnapshot(raw: unknown): DevCodeStudioSnapshot | null {
   if (!raw || typeof raw !== "string" || !raw.trim()) return null;
   try {
-    const parsed = JSON.parse(raw) as DevCodeStudioSnapshot;
-    if (parsed.version !== 1 || !Array.isArray(parsed.files) || parsed.files.length === 0) return null;
-    const openFileId = parsed.files.some((f) => f.id === parsed.openFileId)
-      ? parsed.openFileId
-      : parsed.files[0].id;
-    return { ...parsed, openFileId };
+    const migrated = migrateSnapshotToV2(JSON.parse(raw));
+    return migrated;
   } catch {
     return null;
   }
