@@ -6,11 +6,11 @@ import {
   type CodeStudioTreeNode,
   type DevCodeStudioSnapshot
 } from "@ederson-agencia/shared";
+import { FolderChevron } from "./CodeStudioMenuBar";
+import { materialFileSlot, materialFolderSlot } from "./fileMaterialIcon";
 
 /** Alinhado à validação em DevelopmentCodeStudio (criação/renomeação). */
 const INVALID_PATH_NAME_MESSAGE = "O nome não pode conter barras (/ ou \\).";
-import { FolderChevron } from "./CodeStudioMenuBar";
-import { materialFileSlot, materialFolderSlot } from "./fileMaterialIcon";
 
 export type ExplorerTreeSelection =
   | { kind: "folder"; path: string }
@@ -39,6 +39,9 @@ type CodeStudioExplorerProps = {
   onCreateValidationError?: (message: string) => void;
   /** Enter no input ou blur: aplica rename. */
   onRenameCommit: (path: string, isFolder: boolean, newName: string) => void;
+  /** Remoção visível na barra do explorador (atalho Del continua no shell). */
+  deleteEnabled: boolean;
+  onDeleteSelection: () => void;
 };
 
 function collectFolderPaths(snapshot: DevCodeStudioSnapshot): string[] {
@@ -68,7 +71,9 @@ export const CodeStudioExplorer = forwardRef<CodeStudioExplorerHandle, CodeStudi
     onCommitNewFile,
     onCommitNewFolder,
     onCreateValidationError,
-    onRenameCommit
+    onRenameCommit,
+    deleteEnabled,
+    onDeleteSelection
   },
   ref
 ) {
@@ -369,6 +374,17 @@ export const CodeStudioExplorer = forwardRef<CodeStudioExplorerHandle, CodeStudi
               create_new_folder
             </span>
           </button>
+          <button
+            type="button"
+            title="Remover seleção do workspace"
+            disabled={!deleteEnabled}
+            aria-label="Remover seleção do workspace"
+            onClick={() => onDeleteSelection()}
+          >
+            <span className="dev-code-studio__mi-toolbar material-icons-round" aria-hidden>
+              delete_outline
+            </span>
+          </button>
         </div>
       </div>
       <p className="dev-code-studio__workspace-name">WORKSPACE-LANCAMENTO</p>
@@ -377,6 +393,7 @@ export const CodeStudioExplorer = forwardRef<CodeStudioExplorerHandle, CodeStudi
           <div className="dev-code-studio__create-hint">
             {createInput.mode === "file" ? "Arquivo (destino)" : "Pasta (destino)"}:{" "}
             <code className="dev-code-studio__create-path">{createInput.parentDir.replace(/\\/g, "/") || "raiz do workspace"}</code>
+            <span className="dev-code-studio__create-hint-actions"> · Enter confirma · Esc cancela</span>
           </div>
         ) : null}
         {createInput ? (
@@ -400,7 +417,6 @@ export const CodeStudioExplorer = forwardRef<CodeStudioExplorerHandle, CodeStudi
                     cancelCreate();
                   }
                 }}
-                onBlur={commitCreate}
               />
             </div>
           </div>

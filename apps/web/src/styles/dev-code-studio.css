@@ -692,6 +692,15 @@
   word-break: break-all;
 }
 
+.dev-code-studio__create-hint-actions {
+  color: var(--dcs-muted);
+  font-size: 0.625rem;
+}
+
+.dev-code-studio__explorer-actions button:disabled .dev-code-studio__mi-toolbar {
+  opacity: 0.35;
+}
+
 .dev-code-studio__create-row {
   margin-bottom: 0.15rem;
 }

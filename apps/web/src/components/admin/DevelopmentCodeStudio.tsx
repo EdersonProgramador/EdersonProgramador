@@ -210,6 +210,11 @@ export function DevelopmentCodeStudio({
     return selectedDir;
   }, [treeSelection, selectedDir]);
 
+  const explorerDeleteEnabled = useMemo(
+    () => Boolean(treeSelection || selectedDir || activeFile),
+    [treeSelection, selectedDir, activeFile]
+  );
+
   const htmlPreviewSrcDoc = useMemo(() => {
     if (!activeFile || activeFile.language !== "html") return "";
     try {
@@ -924,6 +929,8 @@ export function DevelopmentCodeStudio({
             onCommitNewFolder={onCommitNewFolder}
             onCreateValidationError={onError}
             onRenameCommit={onRenameCommit}
+            deleteEnabled={explorerDeleteEnabled}
+            onDeleteSelection={onDeleteSelection}
           />
         ) : null}
 
