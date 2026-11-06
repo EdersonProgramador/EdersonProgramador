@@ -62,6 +62,8 @@ type DevelopmentCodeStudioProps = {
 setupMonaco();
 
 const EDITOR_MIN_PX = 480;
+/** Mensagem única para nomes com barra em criar/renomear. */
+const INVALID_PATH_NAME_MESSAGE = "O nome não pode conter barras (/ ou \\).";
 /** Texto — limite por arquivo. */
 const LOCAL_FILE_MAX_BYTES = 5 * 1024 * 1024;
 /** Limite total para importação em lote / pasta. */
@@ -260,7 +262,7 @@ export function DevelopmentCodeStudio({
       const trimmed = rawName.trim();
       if (!trimmed) return;
       if (/[/\\]/.test(trimmed)) {
-        onError("Nome inválido: não use barras.");
+        onError(INVALID_PATH_NAME_MESSAGE);
         return;
       }
       updateSnapshot((prev) => {
@@ -276,7 +278,7 @@ export function DevelopmentCodeStudio({
       const trimmed = rawName.trim();
       if (!trimmed) return;
       if (/[/\\]/.test(trimmed)) {
-        onError("Nome inválido: não use barras.");
+        onError(INVALID_PATH_NAME_MESSAGE);
         return;
       }
       updateSnapshot((prev) => {
@@ -404,7 +406,7 @@ export function DevelopmentCodeStudio({
       if (!trimmed) return;
       const slash = /[/\\]/;
       if (slash.test(trimmed)) {
-        onError("Nome inválido: não use barras.");
+        onError(INVALID_PATH_NAME_MESSAGE);
         return;
       }
       const baseOld = fileBaseName(oldPath);
@@ -509,8 +511,8 @@ export function DevelopmentCodeStudio({
         id: "file",
         label: "Arquivo",
         items: [
-          { id: "new-file", label: "Novo arquivo", shortcut: "Ctrl+N", onClick: () => startCreateFileFlow() },
-          { id: "new-folder", label: "Nova pasta", shortcut: "Ctrl+Shift+N", onClick: () => startCreateFolderFlow() },
+          { id: "new-file", label: "Criar arquivo…", shortcut: "Ctrl+N", onClick: () => startCreateFileFlow() },
+          { id: "new-folder", label: "Criar pasta…", shortcut: "Ctrl+Shift+N", onClick: () => startCreateFolderFlow() },
           {
             id: "open-file",
             label: "Abrir arquivo do computador…",
@@ -575,7 +577,7 @@ export function DevelopmentCodeStudio({
           },
           {
             id: "delete-explorer",
-            label: "Excluir arquivo ou pasta",
+            label: "Remover do workspace",
             shortcut: "Del",
             disabled: !treeSelection && !selectedDir && !activeFile,
             onClick: () => onDeleteSelection()
@@ -1006,7 +1008,7 @@ Terminal integrado em breve — use o editor para snippets do lançamento`}
 
       <footer className="dev-code-studio__status">
         <span>{activeFile?.language ?? "—"}</span>
-        <span className="min-w-0 truncate">{activeFile?.path ?? "Bem-vindo — crie um arquivo"}</span>
+        <span className="min-w-0 truncate">{activeFile?.path ?? "Nenhum arquivo aberto — crie ou importe um arquivo"}</span>
         <span>UTF-8</span>
         <span>Spaces: 2</span>
         <span className="dev-code-studio__status-grow">{cursor}</span>

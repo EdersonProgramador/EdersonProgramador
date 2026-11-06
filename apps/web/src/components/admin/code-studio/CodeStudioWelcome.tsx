@@ -34,14 +34,14 @@ export function CodeStudioWelcome({
             <li>
               <button type="button" onClick={onNewFile}>
                 <FilePlus2 className="h-4 w-4" aria-hidden />
-                <span>Novo arquivo…</span>
+                <span>Criar arquivo…</span>
                 <kbd>Ctrl+N</kbd>
               </button>
             </li>
             <li>
               <button type="button" onClick={onNewFolder}>
                 <FolderPlus className="h-4 w-4" aria-hidden />
-                <span>Nova pasta…</span>
+                <span>Criar pasta…</span>
                 <kbd>Ctrl+Shift+N</kbd>
               </button>
             </li>
@@ -83,7 +83,7 @@ export function CodeStudioWelcome({
               <span>Renomear item selecionado no explorador</span> <kbd>F2</kbd>
             </li>
             <li>
-              <span>Excluir item selecionado no explorador</span> <kbd>Delete</kbd>
+              <span>Remover item selecionado no explorador</span> <kbd>Delete</kbd>
             </li>
             <li>
               <span>Salvar no projeto</span> <kbd>Ctrl+S</kbd>

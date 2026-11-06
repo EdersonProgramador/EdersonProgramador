@@ -3,10 +3,12 @@ import {
   buildCodeStudioTree,
   fileBaseName,
   folderParentPath,
-  joinPath,
   type CodeStudioTreeNode,
   type DevCodeStudioSnapshot
 } from "@ederson-agencia/shared";
+
+/** Alinhado à validação em DevelopmentCodeStudio (criação/renomeação). */
+const INVALID_PATH_NAME_MESSAGE = "O nome não pode conter barras (/ ou \\).";
 import { FolderChevron } from "./CodeStudioMenuBar";
 import { materialFileSlot, materialFolderSlot } from "./fileMaterialIcon";
 
@@ -24,7 +26,7 @@ type CodeStudioExplorerProps = {
   snapshot: DevCodeStudioSnapshot;
   activeFileId?: string;
   selectedDir: string;
-  /** Pasta pai para Novo arquivo / Nova pasta (atalhos e barra do explorador). */
+  /** Pasta de destino para criar arquivo ou pasta (atalhos e barra do explorador). */
   parentDirForCreate: string;
   treeSelection: ExplorerTreeSelection | null;
   onTreeSelectionChange: (sel: ExplorerTreeSelection | null) => void;
@@ -160,7 +162,7 @@ export const CodeStudioExplorer = forwardRef<CodeStudioExplorerHandle, CodeStudi
       return;
     }
     if (/[/\\]/.test(name)) {
-      onCreateValidationError?.("Nome inválido: não use barras.");
+      onCreateValidationError?.(INVALID_PATH_NAME_MESSAGE);
       cancelCreate();
       return;
     }
@@ -345,7 +347,7 @@ export const CodeStudioExplorer = forwardRef<CodeStudioExplorerHandle, CodeStudi
         <div className="dev-code-studio__explorer-actions">
           <button
             type="button"
-            title="Novo arquivo — digite o nome em seguida"
+            title="Criar arquivo — informe o nome no campo abaixo"
             onClick={() => {
               setRenameTarget(null);
               setCreateInput({ mode: "file", parentDir: parentDirForCreate, draft: "" });
@@ -357,7 +359,7 @@ export const CodeStudioExplorer = forwardRef<CodeStudioExplorerHandle, CodeStudi
           </button>
           <button
             type="button"
-            title="Nova pasta — digite o nome em seguida"
+            title="Criar pasta — informe o nome no campo abaixo"
             onClick={() => {
               setRenameTarget(null);
               setCreateInput({ mode: "folder", parentDir: parentDirForCreate, draft: "" });
@@ -373,8 +375,8 @@ export const CodeStudioExplorer = forwardRef<CodeStudioExplorerHandle, CodeStudi
       <div className="dev-code-studio__tree-scroll">
         {createInput ? (
           <div className="dev-code-studio__create-hint">
-            {createInput.mode === "file" ? "Novo arquivo em" : "Nova pasta em"}{" "}
-            <code className="dev-code-studio__create-path">{createInput.parentDir.replace(/\\/g, "/") || "raiz"}</code>
+            {createInput.mode === "file" ? "Arquivo (destino)" : "Pasta (destino)"}:{" "}
+            <code className="dev-code-studio__create-path">{createInput.parentDir.replace(/\\/g, "/") || "raiz do workspace"}</code>
           </div>
         ) : null}
         {createInput ? (
@@ -385,7 +387,7 @@ export const CodeStudioExplorer = forwardRef<CodeStudioExplorerHandle, CodeStudi
                 ref={createInputRef}
                 className="dev-code-studio__tree-rename-input"
                 value={createInput.draft}
-                aria-label={createInput.mode === "file" ? "Nome do novo arquivo" : "Nome da nova pasta"}
+                aria-label={createInput.mode === "file" ? "Nome do arquivo" : "Nome da pasta"}
                 placeholder={createInput.mode === "file" ? "ex.: index.ts" : "ex.: components"}
                 onChange={(e) => setCreateInput((c) => (c ? { ...c, draft: e.target.value } : c))}
                 onKeyDown={(e) => {
@@ -405,7 +407,9 @@ export const CodeStudioExplorer = forwardRef<CodeStudioExplorerHandle, CodeStudi
         ) : null}
         <ul className="dev-code-studio__tree">{tree.map((node) => renderNode(node, 0))}</ul>
         {snapshot.files.length === 0 ? (
-          <p className="dev-code-studio__explorer-empty">Nenhum arquivo. Use o botão acima ou Arquivo → Novo arquivo e digite o nome.</p>
+          <p className="dev-code-studio__explorer-empty">
+            Workspace vazio. Crie um arquivo pela barra de ações acima ou pelo menu Arquivo → Criar arquivo… e informe o nome.
+          </p>
         ) : null}
       </div>
     </aside>
