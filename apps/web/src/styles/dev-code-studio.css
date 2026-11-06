@@ -679,6 +679,27 @@
   background: rgb(55 148 255 / 0.08);
 }
 
+.dev-code-studio__create-hint {
+  padding: 0.35rem 0.65rem 0.25rem;
+  font-size: 0.625rem;
+  color: var(--dcs-muted);
+  line-height: 1.35;
+}
+
+.dev-code-studio__create-path {
+  font-size: 0.6875rem;
+  color: var(--dcs-text);
+  word-break: break-all;
+}
+
+.dev-code-studio__create-row {
+  margin-bottom: 0.15rem;
+}
+
+.dev-code-studio__tree-create {
+  flex: 1;
+}
+
 .dev-code-studio__explorer-empty {
   padding: 0.5rem 0.75rem;
   font-size: 0.6875rem;

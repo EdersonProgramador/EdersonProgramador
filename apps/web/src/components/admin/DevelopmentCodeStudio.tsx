@@ -255,25 +255,48 @@ export function DevelopmentCodeStudio({
     void action?.run();
   };
 
-  const onNewFile = useCallback(
-    (dir: string) => {
+  const onCommitNewFile = useCallback(
+    (parentDir: string, rawName: string) => {
+      const trimmed = rawName.trim();
+      if (!trimmed) return;
+      if (/[/\\]/.test(trimmed)) {
+        onError("Nome inválido: não use barras.");
+        return;
+      }
       updateSnapshot((prev) => {
-        const name = uniqueFileNameInDirectory(prev, dir, "untitled.ts");
-        return createFileInSnapshot(prev, dir, name);
+        const name = uniqueFileNameInDirectory(prev, parentDir, trimmed);
+        return createFileInSnapshot(prev, parentDir, name);
       });
     },
-    [updateSnapshot]
+    [onError, updateSnapshot]
   );
 
-  const onNewFolder = useCallback(
-    (parentDir: string) => {
+  const onCommitNewFolder = useCallback(
+    (parentDir: string, rawName: string) => {
+      const trimmed = rawName.trim();
+      if (!trimmed) return;
+      if (/[/\\]/.test(trimmed)) {
+        onError("Nome inválido: não use barras.");
+        return;
+      }
       updateSnapshot((prev) => {
-        const name = uniqueFolderNameInDirectory(prev, parentDir, "nova-pasta");
+        const name = uniqueFolderNameInDirectory(prev, parentDir, trimmed);
         return createFolderInSnapshot(prev, parentDir, name);
       });
     },
-    [updateSnapshot]
+    [onError, updateSnapshot]
   );
+
+  /** Abre o explorador e foca o campo de nome (atalhos / tela inicial). */
+  const startCreateFileFlow = useCallback(() => {
+    setExplorerOpen(true);
+    setTimeout(() => explorerRef.current?.startCreateFile(), 0);
+  }, []);
+
+  const startCreateFolderFlow = useCallback(() => {
+    setExplorerOpen(true);
+    setTimeout(() => explorerRef.current?.startCreateFolder(), 0);
+  }, []);
 
   const triggerOpenLocalFile = useCallback(() => {
     const el = fileInputRef.current;
@@ -486,8 +509,8 @@ export function DevelopmentCodeStudio({
         id: "file",
         label: "Arquivo",
         items: [
-          { id: "new-file", label: "Novo arquivo", shortcut: "Ctrl+N", onClick: () => onNewFile(parentDirForCreate) },
-          { id: "new-folder", label: "Nova pasta", shortcut: "Ctrl+Shift+N", onClick: () => onNewFolder(parentDirForCreate) },
+          { id: "new-file", label: "Novo arquivo", shortcut: "Ctrl+N", onClick: () => startCreateFileFlow() },
+          { id: "new-folder", label: "Nova pasta", shortcut: "Ctrl+Shift+N", onClick: () => startCreateFolderFlow() },
           {
             id: "open-file",
             label: "Abrir arquivo do computador…",
@@ -644,9 +667,8 @@ export function DevelopmentCodeStudio({
       activeFile?.language,
       expandIdeUrl,
       onDeleteSelection,
-      onNewFile,
-      onNewFolder,
-      parentDirForCreate,
+      startCreateFileFlow,
+      startCreateFolderFlow,
       persist,
       projectId,
       runEditorAction,
@@ -685,11 +707,11 @@ export function DevelopmentCodeStudio({
       }
       if (e.ctrlKey && e.shiftKey && e.key === "N") {
         e.preventDefault();
-        onNewFolder(parentDirForCreate);
+        startCreateFolderFlow();
       }
       if (e.ctrlKey && !e.shiftKey && e.key === "n") {
         e.preventDefault();
-        onNewFile(parentDirForCreate);
+        startCreateFileFlow();
       }
       if (e.ctrlKey && !e.shiftKey && e.key.toLowerCase() === "o") {
         e.preventDefault();
@@ -715,9 +737,8 @@ export function DevelopmentCodeStudio({
     activeFile,
     explorerOpen,
     onDeleteSelection,
-    onNewFile,
-    onNewFolder,
-    parentDirForCreate,
+    startCreateFileFlow,
+    startCreateFolderFlow,
     persist,
     selectedDir,
     studio,
@@ -897,8 +918,9 @@ export function DevelopmentCodeStudio({
             onTreeSelectionChange={setTreeSelection}
             onSelectDir={setSelectedDir}
             onOpenFile={openExplorerFile}
-            onNewFile={onNewFile}
-            onNewFolder={onNewFolder}
+            onCommitNewFile={onCommitNewFile}
+            onCommitNewFolder={onCommitNewFolder}
+            onCreateValidationError={onError}
             onRenameCommit={onRenameCommit}
           />
         ) : null}
@@ -910,8 +932,8 @@ export function DevelopmentCodeStudio({
           >
             {!activeFile ? (
               <CodeStudioWelcome
-                onNewFile={() => onNewFile(parentDirForCreate)}
-                onNewFolder={() => onNewFolder(parentDirForCreate)}
+                onNewFile={startCreateFileFlow}
+                onNewFolder={startCreateFolderFlow}
                 onImportFile={triggerOpenLocalFile}
                 onImportFiles={triggerOpenLocalFiles}
                 onImportFolder={triggerOpenFolder}

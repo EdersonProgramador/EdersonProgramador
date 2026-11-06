@@ -3,6 +3,7 @@ import {
   buildCodeStudioTree,
   fileBaseName,
   folderParentPath,
+  joinPath,
   type CodeStudioTreeNode,
   type DevCodeStudioSnapshot
 } from "@ederson-agencia/shared";
@@ -15,6 +16,8 @@ export type ExplorerTreeSelection =
 
 export type CodeStudioExplorerHandle = {
   startRenameSelection: () => void;
+  startCreateFile: () => void;
+  startCreateFolder: () => void;
 };
 
 type CodeStudioExplorerProps = {
@@ -28,8 +31,10 @@ type CodeStudioExplorerProps = {
   onSelectDir: (dir: string) => void;
   /** Clique simples = preview; duplo clique = fixar aba (vscode.dev). F2 renomeia. */
   onOpenFile: (fileId: string, mode: "preview" | "pin") => void;
-  onNewFile: (dir: string) => void;
-  onNewFolder: (parentDir: string) => void;
+  onCommitNewFile: (parentDir: string, fileName: string) => void;
+  onCommitNewFolder: (parentDir: string, folderName: string) => void;
+  /** Aviso ao confirmar nome inválido na criação (ex.: barras). */
+  onCreateValidationError?: (message: string) => void;
   /** Enter no input ou blur: aplica rename. */
   onRenameCommit: (path: string, isFolder: boolean, newName: string) => void;
 };
@@ -58,8 +63,9 @@ export const CodeStudioExplorer = forwardRef<CodeStudioExplorerHandle, CodeStudi
     onTreeSelectionChange,
     onSelectDir,
     onOpenFile,
-    onNewFile,
-    onNewFolder,
+    onCommitNewFile,
+    onCommitNewFolder,
+    onCreateValidationError,
     onRenameCommit
   },
   ref
@@ -68,8 +74,10 @@ export const CodeStudioExplorer = forwardRef<CodeStudioExplorerHandle, CodeStudi
   const allFolders = useMemo(() => collectFolderPaths(snapshot), [snapshot]);
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set(allFolders));
   const renameInputRef = useRef<HTMLInputElement>(null);
+  const createInputRef = useRef<HTMLInputElement>(null);
   const [renameTarget, setRenameTarget] = useState<{ kind: "folder" | "file"; path: string } | null>(null);
   const [renameDraft, setRenameDraft] = useState("");
+  const [createInput, setCreateInput] = useState<{ mode: "file" | "folder"; parentDir: string; draft: string } | null>(null);
 
   useEffect(() => {
     if (!renameTarget) return;
@@ -82,11 +90,37 @@ export const CodeStudioExplorer = forwardRef<CodeStudioExplorerHandle, CodeStudi
     return () => cancelAnimationFrame(t);
   }, [renameTarget]);
 
+  useEffect(() => {
+    if (!createInput) return;
+    const t = requestAnimationFrame(() => {
+      const el = createInputRef.current;
+      if (!el) return;
+      el.focus();
+      el.select();
+    });
+    return () => cancelAnimationFrame(t);
+  }, [createInput]);
+
+  /** Mostrar a pasta alvo ao criar (expandir ancestors). */
+  useEffect(() => {
+    if (!createInput?.parentDir) return;
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      let p = createInput.parentDir.replace(/\\/g, "/").replace(/\/+$/, "");
+      while (p) {
+        next.add(p);
+        const i = p.lastIndexOf("/");
+        p = i === -1 ? "" : p.slice(0, i);
+      }
+      return next;
+    });
+  }, [createInput?.parentDir]);
+
   useImperativeHandle(
     ref,
     () => ({
       startRenameSelection: () => {
-        if (!treeSelection || renameTarget) return;
+        if (!treeSelection || renameTarget || createInput) return;
         if (treeSelection.kind === "folder") {
           setRenameTarget({ kind: "folder", path: treeSelection.path });
           setRenameDraft(fileBaseName(treeSelection.path));
@@ -94,14 +128,48 @@ export const CodeStudioExplorer = forwardRef<CodeStudioExplorerHandle, CodeStudi
           setRenameTarget({ kind: "file", path: treeSelection.path });
           setRenameDraft(fileBaseName(treeSelection.path));
         }
+      },
+      startCreateFile: () => {
+        setRenameTarget(null);
+        setRenameDraft("");
+        setCreateInput({ mode: "file", parentDir: parentDirForCreate, draft: "" });
+      },
+      startCreateFolder: () => {
+        setRenameTarget(null);
+        setRenameDraft("");
+        setCreateInput({ mode: "folder", parentDir: parentDirForCreate, draft: "" });
       }
     }),
-    [renameTarget, treeSelection]
+    [createInput, parentDirForCreate, renameTarget, treeSelection]
   );
 
   const cancelRename = () => {
     setRenameTarget(null);
     setRenameDraft("");
+  };
+
+  const cancelCreate = () => {
+    setCreateInput(null);
+  };
+
+  const commitCreate = () => {
+    if (!createInput) return;
+    const name = createInput.draft.trim();
+    if (!name) {
+      cancelCreate();
+      return;
+    }
+    if (/[/\\]/.test(name)) {
+      onCreateValidationError?.("Nome inválido: não use barras.");
+      cancelCreate();
+      return;
+    }
+    if (createInput.mode === "file") {
+      onCommitNewFile(createInput.parentDir, name);
+    } else {
+      onCommitNewFolder(createInput.parentDir, name);
+    }
+    cancelCreate();
   };
 
   const commitRename = () => {
@@ -275,12 +343,26 @@ export const CodeStudioExplorer = forwardRef<CodeStudioExplorerHandle, CodeStudi
       <div className="dev-code-studio__explorer-head">
         <p className="dev-code-studio__explorer-label">EXPLORADOR</p>
         <div className="dev-code-studio__explorer-actions">
-          <button type="button" title="Novo arquivo" onClick={() => onNewFile(parentDirForCreate)}>
+          <button
+            type="button"
+            title="Novo arquivo — digite o nome em seguida"
+            onClick={() => {
+              setRenameTarget(null);
+              setCreateInput({ mode: "file", parentDir: parentDirForCreate, draft: "" });
+            }}
+          >
             <span className="dev-code-studio__mi-toolbar material-icons-round" aria-hidden>
               note_add
             </span>
           </button>
-          <button type="button" title="Nova pasta" onClick={() => onNewFolder(parentDirForCreate)}>
+          <button
+            type="button"
+            title="Nova pasta — digite o nome em seguida"
+            onClick={() => {
+              setRenameTarget(null);
+              setCreateInput({ mode: "folder", parentDir: parentDirForCreate, draft: "" });
+            }}
+          >
             <span className="dev-code-studio__mi-toolbar material-icons-round" aria-hidden>
               create_new_folder
             </span>
@@ -289,9 +371,41 @@ export const CodeStudioExplorer = forwardRef<CodeStudioExplorerHandle, CodeStudi
       </div>
       <p className="dev-code-studio__workspace-name">WORKSPACE-LANCAMENTO</p>
       <div className="dev-code-studio__tree-scroll">
+        {createInput ? (
+          <div className="dev-code-studio__create-hint">
+            {createInput.mode === "file" ? "Novo arquivo em" : "Nova pasta em"}{" "}
+            <code className="dev-code-studio__create-path">{createInput.parentDir.replace(/\\/g, "/") || "raiz"}</code>
+          </div>
+        ) : null}
+        {createInput ? (
+          <div className="dev-code-studio__tree-row dev-code-studio__create-row" style={{ paddingLeft: "8px" }}>
+            <span className="dev-code-studio__tree-chevron-spacer" />
+            <div className="dev-code-studio__tree-rename dev-code-studio__tree-create">
+              <input
+                ref={createInputRef}
+                className="dev-code-studio__tree-rename-input"
+                value={createInput.draft}
+                aria-label={createInput.mode === "file" ? "Nome do novo arquivo" : "Nome da nova pasta"}
+                placeholder={createInput.mode === "file" ? "ex.: index.ts" : "ex.: components"}
+                onChange={(e) => setCreateInput((c) => (c ? { ...c, draft: e.target.value } : c))}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    commitCreate();
+                  }
+                  if (e.key === "Escape") {
+                    e.preventDefault();
+                    cancelCreate();
+                  }
+                }}
+                onBlur={commitCreate}
+              />
+            </div>
+          </div>
+        ) : null}
         <ul className="dev-code-studio__tree">{tree.map((node) => renderNode(node, 0))}</ul>
         {snapshot.files.length === 0 ? (
-          <p className="dev-code-studio__explorer-empty">Nenhum arquivo. Use Arquivo → Novo arquivo.</p>
+          <p className="dev-code-studio__explorer-empty">Nenhum arquivo. Use o botão acima ou Arquivo → Novo arquivo e digite o nome.</p>
         ) : null}
       </div>
     </aside>
