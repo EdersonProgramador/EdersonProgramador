@@ -1,25 +1,37 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import {
   buildCodeStudioTree,
   fileBaseName,
+  folderParentPath,
   type CodeStudioTreeNode,
   type DevCodeStudioSnapshot
 } from "@ederson-agencia/shared";
 import { FolderChevron } from "./CodeStudioMenuBar";
 import { materialFileSlot, materialFolderSlot } from "./fileMaterialIcon";
 
+export type ExplorerTreeSelection =
+  | { kind: "folder"; path: string }
+  | { kind: "file"; id: string; path: string };
+
+export type CodeStudioExplorerHandle = {
+  startRenameSelection: () => void;
+};
+
 type CodeStudioExplorerProps = {
   snapshot: DevCodeStudioSnapshot;
   activeFileId?: string;
   selectedDir: string;
+  /** Pasta pai para Novo arquivo / Nova pasta (atalhos e barra do explorador). */
+  parentDirForCreate: string;
+  treeSelection: ExplorerTreeSelection | null;
+  onTreeSelectionChange: (sel: ExplorerTreeSelection | null) => void;
   onSelectDir: (dir: string) => void;
-  /** Clique simples = preview (VS Code); duplo clique = aba fixa. */
+  /** Clique simples = preview; duplo clique = fixar aba (vscode.dev). F2 renomeia. */
   onOpenFile: (fileId: string, mode: "preview" | "pin") => void;
   onNewFile: (dir: string) => void;
   onNewFolder: (parentDir: string) => void;
-  /** Duplo clique no nome: renomear inline (sem prompt). */
+  /** Enter no input ou blur: aplica rename. */
   onRenameCommit: (path: string, isFolder: boolean, newName: string) => void;
-  onDeleteSelection: () => void;
 };
 
 function collectFolderPaths(snapshot: DevCodeStudioSnapshot): string[] {
@@ -36,17 +48,22 @@ function collectFolderPaths(snapshot: DevCodeStudioSnapshot): string[] {
   return Array.from(set);
 }
 
-export function CodeStudioExplorer({
-  snapshot,
-  activeFileId,
-  selectedDir,
-  onSelectDir,
-  onOpenFile,
-  onNewFile,
-  onNewFolder,
-  onRenameCommit,
-  onDeleteSelection
-}: CodeStudioExplorerProps) {
+export const CodeStudioExplorer = forwardRef<CodeStudioExplorerHandle, CodeStudioExplorerProps>(function CodeStudioExplorer(
+  {
+    snapshot,
+    activeFileId,
+    selectedDir,
+    parentDirForCreate,
+    treeSelection,
+    onTreeSelectionChange,
+    onSelectDir,
+    onOpenFile,
+    onNewFile,
+    onNewFolder,
+    onRenameCommit
+  },
+  ref
+) {
   const tree = useMemo(() => buildCodeStudioTree(snapshot), [snapshot]);
   const allFolders = useMemo(() => collectFolderPaths(snapshot), [snapshot]);
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set(allFolders));
@@ -64,6 +81,23 @@ export function CodeStudioExplorer({
     });
     return () => cancelAnimationFrame(t);
   }, [renameTarget]);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      startRenameSelection: () => {
+        if (!treeSelection || renameTarget) return;
+        if (treeSelection.kind === "folder") {
+          setRenameTarget({ kind: "folder", path: treeSelection.path });
+          setRenameDraft(fileBaseName(treeSelection.path));
+        } else {
+          setRenameTarget({ kind: "file", path: treeSelection.path });
+          setRenameDraft(fileBaseName(treeSelection.path));
+        }
+      }
+    }),
+    [renameTarget, treeSelection]
+  );
 
   const cancelRename = () => {
     setRenameTarget(null);
@@ -95,10 +129,11 @@ export function CodeStudioExplorer({
       const open = expanded.has(node.path);
       const folderSlot = materialFolderSlot(node.name, open);
       const isRenamingFolder = renameTarget?.kind === "folder" && renameTarget.path === node.path;
+      const folderSelected = treeSelection?.kind === "folder" && treeSelection.path === node.path;
       return (
         <li key={node.id}>
           <div
-            className={`dev-code-studio__tree-row${selectedDir === node.path ? " is-selected-dir" : ""}`}
+            className={`dev-code-studio__tree-row${folderSelected || selectedDir === node.path ? " is-selected-dir" : ""}`}
             style={{ paddingLeft: `${8 + depth * 12}px` }}
           >
             <button type="button" className="dev-code-studio__tree-chevron" onClick={() => toggleFolder(node.path)} aria-label={open ? "Recolher" : "Expandir"}>
@@ -137,7 +172,10 @@ export function CodeStudioExplorer({
               <button
                 type="button"
                 className="dev-code-studio__tree-label"
-                onClick={() => onSelectDir(node.path)}
+                onClick={() => {
+                  onTreeSelectionChange({ kind: "folder", path: node.path });
+                  onSelectDir(node.path);
+                }}
                 onDoubleClick={(e) => {
                   e.preventDefault();
                   setRenameTarget({ kind: "folder", path: node.path });
@@ -164,9 +202,13 @@ export function CodeStudioExplorer({
     const active = activeFileId === node.id;
     const fileSlot = materialFileSlot(node.name);
     const isRenamingFile = renameTarget?.kind === "file" && renameTarget.path === node.path;
+    const fileSelected = treeSelection?.kind === "file" && treeSelection.id === node.id;
     return (
       <li key={node.id}>
-        <div className="dev-code-studio__tree-row" style={{ paddingLeft: `${8 + depth * 12}px` }}>
+        <div
+          className={`dev-code-studio__tree-row${fileSelected ? " is-tree-file-selected" : ""}`}
+          style={{ paddingLeft: `${8 + depth * 12}px` }}
+        >
           <span className="dev-code-studio__tree-chevron-spacer" />
           {isRenamingFile ? (
             <div className={`dev-code-studio__tree-rename dev-code-studio__tree-file${active ? " is-active" : ""}`}>
@@ -201,11 +243,16 @@ export function CodeStudioExplorer({
             <button
               type="button"
               className={`dev-code-studio__tree-label dev-code-studio__tree-file${active ? " is-active" : ""}`}
-              onClick={() => onOpenFile(node.id, "preview")}
+              onClick={() => {
+                onTreeSelectionChange({ kind: "file", id: node.id, path: node.path });
+                onSelectDir(folderParentPath(node.path));
+                onOpenFile(node.id, "preview");
+              }}
               onDoubleClick={(e) => {
                 e.preventDefault();
-                setRenameTarget({ kind: "file", path: node.path });
-                setRenameDraft(node.name);
+                onTreeSelectionChange({ kind: "file", id: node.id, path: node.path });
+                onSelectDir(folderParentPath(node.path));
+                onOpenFile(node.id, "pin");
               }}
             >
               <span
@@ -228,19 +275,14 @@ export function CodeStudioExplorer({
       <div className="dev-code-studio__explorer-head">
         <p className="dev-code-studio__explorer-label">EXPLORADOR</p>
         <div className="dev-code-studio__explorer-actions">
-          <button type="button" title="Novo arquivo" onClick={() => onNewFile(selectedDir)}>
+          <button type="button" title="Novo arquivo" onClick={() => onNewFile(parentDirForCreate)}>
             <span className="dev-code-studio__mi-toolbar material-icons-round" aria-hidden>
               note_add
             </span>
           </button>
-          <button type="button" title="Nova pasta" onClick={() => onNewFolder(selectedDir)}>
+          <button type="button" title="Nova pasta" onClick={() => onNewFolder(parentDirForCreate)}>
             <span className="dev-code-studio__mi-toolbar material-icons-round" aria-hidden>
               create_new_folder
-            </span>
-          </button>
-          <button type="button" title="Excluir pasta selecionada ou arquivo aberto" onClick={onDeleteSelection}>
-            <span className="dev-code-studio__mi-toolbar material-icons-round" aria-hidden>
-              delete
             </span>
           </button>
         </div>
@@ -254,4 +296,4 @@ export function CodeStudioExplorer({
       </div>
     </aside>
   );
-}
+});

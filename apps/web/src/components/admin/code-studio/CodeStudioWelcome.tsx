@@ -80,6 +80,12 @@ export function CodeStudioWelcome({
               <span>Fechar aba</span> <kbd>Ctrl+W</kbd>
             </li>
             <li>
+              <span>Renomear item selecionado no explorador</span> <kbd>F2</kbd>
+            </li>
+            <li>
+              <span>Excluir item selecionado no explorador</span> <kbd>Delete</kbd>
+            </li>
+            <li>
               <span>Salvar no projeto</span> <kbd>Ctrl+S</kbd>
             </li>
             <li>

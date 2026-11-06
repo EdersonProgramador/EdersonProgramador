@@ -675,6 +675,10 @@
   background: rgb(55 148 255 / 0.08);
 }
 
+.dev-code-studio__tree-row.is-tree-file-selected {
+  background: rgb(55 148 255 / 0.08);
+}
+
 .dev-code-studio__explorer-empty {
   padding: 0.5rem 0.75rem;
   font-size: 0.6875rem;

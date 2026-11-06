@@ -41,7 +41,11 @@ import {
 } from "@ederson-agencia/shared";
 import { patchProjectWorkspace } from "../../api/project-workspace-api";
 import { Braces, Copy, Eye, Maximize2, Minimize2, Monitor, Sparkles, WrapText, X } from "lucide-react";
-import { CodeStudioExplorer } from "./code-studio/CodeStudioExplorer";
+import {
+  CodeStudioExplorer,
+  type CodeStudioExplorerHandle,
+  type ExplorerTreeSelection
+} from "./code-studio/CodeStudioExplorer";
 import { CodeStudioHtmlPreview } from "./code-studio/CodeStudioHtmlPreview";
 import { CodeStudioMenuBar, type CodeStudioMenu } from "./code-studio/CodeStudioMenuBar";
 import { CodeStudioWelcome } from "./code-studio/CodeStudioWelcome";
@@ -121,6 +125,12 @@ function cursorLabel(editor: MonacoEditor.IStandaloneCodeEditor | null): string 
 
 const EDITOR_THEME_KEY = "dev-code-studio-editor-theme";
 
+function keyTargetIsMonacoEditor(): boolean {
+  const el = document.activeElement;
+  if (!el || !(el instanceof Element)) return false;
+  return el.closest(".monaco-editor") !== null;
+}
+
 export function DevelopmentCodeStudio({
   projectId,
   storedRaw,
@@ -146,6 +156,7 @@ export function DevelopmentCodeStudio({
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const multiFileInputRef = useRef<HTMLInputElement | null>(null);
   const folderInputRef = useRef<HTMLInputElement | null>(null);
+  const explorerRef = useRef<CodeStudioExplorerHandle | null>(null);
   const [editorHeightPx, setEditorHeightPx] = useState(EDITOR_MIN_PX);
 
   const initial = useMemo(
@@ -161,6 +172,7 @@ export function DevelopmentCodeStudio({
   const [terminalOpen, setTerminalOpen] = useState(false);
   const [htmlPreviewOpen, setHtmlPreviewOpen] = useState(false);
   const [selectedDir, setSelectedDir] = useState("");
+  const [treeSelection, setTreeSelection] = useState<ExplorerTreeSelection | null>(null);
 
   useEffect(() => {
     try {
@@ -189,6 +201,12 @@ export function DevelopmentCodeStudio({
   const activeFile = studio.openFileId ? studio.files.find((f) => f.id === studio.openFileId) ?? null : null;
 
   const openTabs = studio.openTabs?.tabs ?? [];
+
+  const parentDirForCreate = useMemo(() => {
+    if (treeSelection?.kind === "folder") return treeSelection.path;
+    if (treeSelection?.kind === "file") return folderParentPath(treeSelection.path);
+    return selectedDir;
+  }, [treeSelection, selectedDir]);
 
   const htmlPreviewSrcDoc = useMemo(() => {
     if (!activeFile || activeFile.language !== "html") return "";
@@ -309,9 +327,9 @@ export function DevelopmentCodeStudio({
         }
       }
       if (specs.length === 0) return;
-      updateSnapshot((prev) => importFilesIntoSnapshot(prev, selectedDir, specs));
+      updateSnapshot((prev) => importFilesIntoSnapshot(prev, parentDirForCreate, specs));
     },
-    [onError, selectedDir, updateSnapshot]
+    [onError, parentDirForCreate, updateSnapshot]
   );
 
   const onLocalFilePicked = useCallback(
@@ -325,12 +343,12 @@ export function DevelopmentCodeStudio({
       const reader = new FileReader();
       reader.onload = () => {
         const text = typeof reader.result === "string" ? reader.result : "";
-        updateSnapshot((prev) => importFileIntoSnapshot(prev, selectedDir, file.name, text));
+        updateSnapshot((prev) => importFileIntoSnapshot(prev, parentDirForCreate, file.name, text));
       };
       reader.onerror = () => onError("Não foi possível ler o arquivo.");
       reader.readAsText(file);
     },
-    [onError, selectedDir, updateSnapshot]
+    [onError, parentDirForCreate, updateSnapshot]
   );
 
   const onMultiLocalFilesPicked = useCallback(
@@ -370,21 +388,38 @@ export function DevelopmentCodeStudio({
       if (trimmed === baseOld) return;
       const parent = folderParentPath(oldPath);
       const newPath = isFolder ? (parent ? joinPath(parent, trimmed) : trimmed) : joinPath(parent, trimmed);
+      const oldN = oldPath.replace(/\\/g, "/");
+      const newN = newPath.replace(/\\/g, "/");
+      const prefix = oldN + "/";
 
       updateSnapshot((prev) => {
-        const p = oldPath.replace(/\\/g, "/");
-        const np = newPath.replace(/\\/g, "/");
         if (isFolder) {
-          const exists = prev.folders.some((f) => f.path.replace(/\\/g, "/") === np);
+          const exists = prev.folders.some((f) => f.path.replace(/\\/g, "/") === newN);
           if (exists) return prev;
         } else {
-          const exists = prev.files.some((f) => f.path.replace(/\\/g, "/") === np);
+          const exists = prev.files.some((f) => f.path.replace(/\\/g, "/") === newN);
           if (exists) return prev;
         }
-        return renamePathInSnapshot(prev, p, np);
+        return renamePathInSnapshot(prev, oldN, newN);
       });
 
-      setSelectedDir((dir) => (dir.replace(/\\/g, "/") === oldPath.replace(/\\/g, "/") ? newPath.replace(/\\/g, "/") : dir));
+      setSelectedDir((dir) => {
+        const d = dir.replace(/\\/g, "/");
+        if (d === oldN) return newN;
+        if (d.startsWith(prefix)) return newN + d.slice(oldN.length);
+        return dir;
+      });
+      setTreeSelection((sel) => {
+        if (!sel) return sel;
+        if (isFolder && sel.kind === "folder" && sel.path.replace(/\\/g, "/") === oldN) {
+          return { kind: "folder", path: newN };
+        }
+        if (!isFolder && sel.kind === "file") {
+          const p = sel.path.replace(/\\/g, "/");
+          if (p === oldN) return { kind: "file", id: sel.id, path: newN };
+        }
+        return sel;
+      });
     },
     [onError, updateSnapshot]
   );
@@ -401,14 +436,28 @@ export function DevelopmentCodeStudio({
   );
 
   const onDeleteSelection = useCallback(() => {
+    if (treeSelection?.kind === "folder") {
+      onDelete(treeSelection.path, true);
+      const tp = treeSelection.path.replace(/\\/g, "/");
+      const sd = selectedDir.replace(/\\/g, "/");
+      if (sd === tp || sd.startsWith(`${tp}/`)) setSelectedDir("");
+      setTreeSelection(null);
+      return;
+    }
+    if (treeSelection?.kind === "file") {
+      onDelete(treeSelection.path, false);
+      setTreeSelection(null);
+      return;
+    }
     if (selectedDir) {
       onDelete(selectedDir, true);
       setSelectedDir("");
+      setTreeSelection(null);
       return;
     }
     const af = studio.files.find((f) => f.id === studio.openFileId);
     if (af) onDelete(af.path, false);
-  }, [onDelete, selectedDir, studio.files, studio.openFileId]);
+  }, [onDelete, selectedDir, studio.files, studio.openFileId, treeSelection]);
 
   const openExplorerFile = useCallback(
     (fileId: string, mode: "preview" | "pin") => {
@@ -437,8 +486,8 @@ export function DevelopmentCodeStudio({
         id: "file",
         label: "Arquivo",
         items: [
-          { id: "new-file", label: "Novo arquivo", shortcut: "Ctrl+N", onClick: () => onNewFile(selectedDir) },
-          { id: "new-folder", label: "Nova pasta", shortcut: "Ctrl+Shift+N", onClick: () => onNewFolder(selectedDir) },
+          { id: "new-file", label: "Novo arquivo", shortcut: "Ctrl+N", onClick: () => onNewFile(parentDirForCreate) },
+          { id: "new-folder", label: "Nova pasta", shortcut: "Ctrl+Shift+N", onClick: () => onNewFolder(parentDirForCreate) },
           {
             id: "open-file",
             label: "Abrir arquivo do computador…",
@@ -477,6 +526,7 @@ export function DevelopmentCodeStudio({
             disabled: studio.files.length === 0,
             onClick: () => {
               setSelectedDir("");
+              setTreeSelection(null);
               updateSnapshot(() => defaultDevCodeStudioSnapshot());
             }
           }
@@ -492,7 +542,21 @@ export function DevelopmentCodeStudio({
           { id: "copy", label: "Copiar", shortcut: "Ctrl+C", onClick: () => runEditorAction("editor.action.clipboardCopyAction") },
           { id: "paste", label: "Colar", shortcut: "Ctrl+V", onClick: () => runEditorAction("editor.action.clipboardPasteAction") },
           { id: "select-all", label: "Selecionar tudo", shortcut: "Ctrl+A", onClick: () => runEditorAction("editor.action.selectAll") },
-          { id: "format", label: "Formatar documento", shortcut: "Shift+Alt+F", onClick: () => runEditorAction("editor.action.formatDocument") }
+          { id: "format", label: "Formatar documento", shortcut: "Shift+Alt+F", onClick: () => runEditorAction("editor.action.formatDocument") },
+          {
+            id: "rename-explorer",
+            label: "Renomear no explorador",
+            shortcut: "F2",
+            disabled: !treeSelection,
+            onClick: () => explorerRef.current?.startRenameSelection()
+          },
+          {
+            id: "delete-explorer",
+            label: "Excluir arquivo ou pasta",
+            shortcut: "Del",
+            disabled: !treeSelection && !selectedDir && !activeFile,
+            onClick: () => onDeleteSelection()
+          }
         ]
       },
       {
@@ -577,15 +641,20 @@ export function DevelopmentCodeStudio({
     ],
     [
       activeFile,
+      activeFile?.language,
       expandIdeUrl,
+      onDeleteSelection,
       onNewFile,
       onNewFolder,
+      parentDirForCreate,
       persist,
       projectId,
+      runEditorAction,
       selectedDir,
-      activeFile?.language,
-      studio.files.length,
+      setExplorerOpen,
       studio,
+      studio.files.length,
+      treeSelection,
       triggerOpenFolder,
       triggerOpenLocalFile,
       triggerOpenLocalFiles,
@@ -595,6 +664,13 @@ export function DevelopmentCodeStudio({
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      const skipWhenMonaco = keyTargetIsMonacoEditor();
+      const key = e.key;
+      const t = e.target;
+      if (t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement) {
+        if (key === "F2" || key === "Delete" || key === "Backspace") return;
+      }
+
       if (e.ctrlKey && e.key === "s") {
         e.preventDefault();
         persist(studio);
@@ -609,11 +685,11 @@ export function DevelopmentCodeStudio({
       }
       if (e.ctrlKey && e.shiftKey && e.key === "N") {
         e.preventDefault();
-        onNewFolder(selectedDir);
+        onNewFolder(parentDirForCreate);
       }
       if (e.ctrlKey && !e.shiftKey && e.key === "n") {
         e.preventDefault();
-        onNewFile(selectedDir);
+        onNewFile(parentDirForCreate);
       }
       if (e.ctrlKey && !e.shiftKey && e.key.toLowerCase() === "o") {
         e.preventDefault();
@@ -623,10 +699,32 @@ export function DevelopmentCodeStudio({
         e.preventDefault();
         setTerminalOpen((v) => !v);
       }
+
+      if (key === "F2" && explorerOpen && treeSelection && !skipWhenMonaco) {
+        e.preventDefault();
+        explorerRef.current?.startRenameSelection();
+      }
+      if ((key === "Delete" || key === "Backspace") && explorerOpen && (treeSelection || selectedDir || activeFile) && !skipWhenMonaco) {
+        e.preventDefault();
+        onDeleteSelection();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [onNewFile, onNewFolder, persist, selectedDir, studio, triggerOpenLocalFile, updateSnapshot]);
+  }, [
+    activeFile,
+    explorerOpen,
+    onDeleteSelection,
+    onNewFile,
+    onNewFolder,
+    parentDirForCreate,
+    persist,
+    selectedDir,
+    studio,
+    treeSelection,
+    triggerOpenLocalFile,
+    updateSnapshot
+  ]);
 
   const onEditorMount: OnMount = (editor) => {
     editorRef.current = editor;
@@ -711,7 +809,11 @@ export function DevelopmentCodeStudio({
                   <button
                     type="button"
                     className="dev-code-studio__tab-label"
-                    onClick={() => updateSnapshot((prev) => setActiveOpenFile(prev, tab.fileId))}
+                    onClick={() => {
+                      setTreeSelection({ kind: "file", id: tab.fileId, path: file.path });
+                      setSelectedDir(folderParentPath(file.path));
+                      updateSnapshot((prev) => setActiveOpenFile(prev, tab.fileId));
+                    }}
                     title={file.path}
                   >
                     {fileBaseName(file.path)}
@@ -786,15 +888,18 @@ export function DevelopmentCodeStudio({
       <div className="dev-code-studio__body">
         {explorerOpen ? (
           <CodeStudioExplorer
+            ref={explorerRef}
             snapshot={studio}
             activeFileId={studio.openFileId}
             selectedDir={selectedDir}
+            parentDirForCreate={parentDirForCreate}
+            treeSelection={treeSelection}
+            onTreeSelectionChange={setTreeSelection}
             onSelectDir={setSelectedDir}
             onOpenFile={openExplorerFile}
             onNewFile={onNewFile}
             onNewFolder={onNewFolder}
             onRenameCommit={onRenameCommit}
-            onDeleteSelection={onDeleteSelection}
           />
         ) : null}
 
@@ -805,8 +910,8 @@ export function DevelopmentCodeStudio({
           >
             {!activeFile ? (
               <CodeStudioWelcome
-                onNewFile={() => onNewFile(selectedDir)}
-                onNewFolder={() => onNewFolder(selectedDir)}
+                onNewFile={() => onNewFile(parentDirForCreate)}
+                onNewFolder={() => onNewFolder(parentDirForCreate)}
                 onImportFile={triggerOpenLocalFile}
                 onImportFiles={triggerOpenLocalFiles}
                 onImportFolder={triggerOpenFolder}
