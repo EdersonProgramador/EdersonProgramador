@@ -278,6 +278,7 @@ export {
   deleteFolderFromSnapshot,
   ensureOpenTabs,
   fileBaseName,
+  folderParentPath,
   importFileIntoSnapshot,
   importFilesIntoSnapshot,
   joinPath,
@@ -286,6 +287,8 @@ export {
   pinTabForFile,
   renamePathInSnapshot,
   setActiveOpenFile,
+  uniqueFileNameInDirectory,
+  uniqueFolderNameInDirectory,
   type CodeStudioTreeNode,
   type ImportLocalFileSpec
 } from "./development-code-studio-fs.js";

@@ -24,6 +24,7 @@ import {
   deleteFolderFromSnapshot,
   ensureOpenTabs,
   fileBaseName,
+  folderParentPath,
   importFileIntoSnapshot,
   importFilesIntoSnapshot,
   joinPath,
@@ -33,6 +34,8 @@ import {
   renamePathInSnapshot,
   serializeDevCodeStudioSnapshot,
   setActiveOpenFile,
+  uniqueFileNameInDirectory,
+  uniqueFolderNameInDirectory,
   type DevCodeStudioSnapshot,
   type ImportLocalFileSpec
 } from "@ederson-agencia/shared";
@@ -114,13 +117,6 @@ function cursorLabel(editor: MonacoEditor.IStandaloneCodeEditor | null): string 
   const pos = editor.getPosition();
   if (!pos) return "Ln 1, Col 1";
   return `Ln ${pos.lineNumber}, Col ${pos.column}`;
-}
-
-function promptName(title: string, defaultValue = ""): string | null {
-  const v = window.prompt(title, defaultValue);
-  if (v === null) return null;
-  const trimmed = v.trim();
-  return trimmed || null;
 }
 
 const EDITOR_THEME_KEY = "dev-code-studio-editor-theme";
@@ -243,18 +239,20 @@ export function DevelopmentCodeStudio({
 
   const onNewFile = useCallback(
     (dir: string) => {
-      const name = promptName("Nome do arquivo (ex.: index.ts)", "untitled.ts");
-      if (!name) return;
-      updateSnapshot((prev) => createFileInSnapshot(prev, dir, name));
+      updateSnapshot((prev) => {
+        const name = uniqueFileNameInDirectory(prev, dir, "untitled.ts");
+        return createFileInSnapshot(prev, dir, name);
+      });
     },
     [updateSnapshot]
   );
 
   const onNewFolder = useCallback(
     (parentDir: string) => {
-      const name = promptName("Nome da pasta", "nova-pasta");
-      if (!name) return;
-      updateSnapshot((prev) => createFolderInSnapshot(prev, parentDir, name));
+      updateSnapshot((prev) => {
+        const name = uniqueFolderNameInDirectory(prev, parentDir, "nova-pasta");
+        return createFolderInSnapshot(prev, parentDir, name);
+      });
     },
     [updateSnapshot]
   );
@@ -359,15 +357,36 @@ export function DevelopmentCodeStudio({
     [importSpecsFromFiles]
   );
 
-  const onRename = useCallback(
-    (path: string, isFolder: boolean) => {
-      const next = promptName(isFolder ? "Renomear pasta" : "Renomear arquivo", fileBaseName(path));
-      if (!next) return;
-      const parent = path.includes("/") ? path.slice(0, path.lastIndexOf("/")) : "";
-      const newPath = isFolder ? (parent ? `${parent}/${next}` : next) : joinPath(parent, next);
-      updateSnapshot((prev) => renamePathInSnapshot(prev, path, newPath));
+  const onRenameCommit = useCallback(
+    (oldPath: string, isFolder: boolean, rawNewName: string) => {
+      const trimmed = rawNewName.trim();
+      if (!trimmed) return;
+      const slash = /[/\\]/;
+      if (slash.test(trimmed)) {
+        onError("Nome inválido: não use barras.");
+        return;
+      }
+      const baseOld = fileBaseName(oldPath);
+      if (trimmed === baseOld) return;
+      const parent = folderParentPath(oldPath);
+      const newPath = isFolder ? (parent ? joinPath(parent, trimmed) : trimmed) : joinPath(parent, trimmed);
+
+      updateSnapshot((prev) => {
+        const p = oldPath.replace(/\\/g, "/");
+        const np = newPath.replace(/\\/g, "/");
+        if (isFolder) {
+          const exists = prev.folders.some((f) => f.path.replace(/\\/g, "/") === np);
+          if (exists) return prev;
+        } else {
+          const exists = prev.files.some((f) => f.path.replace(/\\/g, "/") === np);
+          if (exists) return prev;
+        }
+        return renamePathInSnapshot(prev, p, np);
+      });
+
+      setSelectedDir((dir) => (dir.replace(/\\/g, "/") === oldPath.replace(/\\/g, "/") ? newPath.replace(/\\/g, "/") : dir));
     },
-    [updateSnapshot]
+    [onError, updateSnapshot]
   );
 
   const onDelete = useCallback(
@@ -774,7 +793,7 @@ export function DevelopmentCodeStudio({
             onOpenFile={openExplorerFile}
             onNewFile={onNewFile}
             onNewFolder={onNewFolder}
-            onRename={onRename}
+            onRenameCommit={onRenameCommit}
             onDeleteSelection={onDeleteSelection}
           />
         ) : null}

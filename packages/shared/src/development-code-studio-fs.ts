@@ -190,6 +190,42 @@ function normalizedFilePath(path: string): string {
   return path.replace(/\\/g, "/");
 }
 
+/**
+ * Nome de arquivo único dentro de `dir` (ex.: `untitled.ts`, `untitled-2.ts`).
+ * Usa apenas o snapshot atual — chame de dentro de `updateSnapshot` com o estado mais recente.
+ */
+export function uniqueFileNameInDirectory(snapshot: DevCodeStudioSnapshot, dir: string, rawFileName: string): string {
+  const safeName = fileBaseName(rawFileName.replace(/\\/g, "/").replace(/^\/+/, ""));
+  const base = safeName || "untitled.ts";
+  const dot = base.lastIndexOf(".");
+  const stem = dot === -1 ? base : base.slice(0, dot);
+  const ext = dot === -1 ? ".ts" : base.slice(dot);
+  const stemSafe = stem.trim() || "untitled";
+  for (let n = 0; n < 500; n++) {
+    const name = n === 0 ? `${stemSafe}${ext}` : `${stemSafe}-${n}${ext}`;
+    const path = joinPath(dir, name);
+    const norm = normalizedFilePath(path);
+    if (!snapshot.files.some((f) => normalizedFilePath(f.path) === norm)) return name;
+  }
+  return `${stemSafe}-${Date.now()}${ext}`;
+}
+
+/**
+ * Nome de pasta único em `parentDir` (ex.: `nova-pasta`, `nova-pasta-2`).
+ */
+export function uniqueFolderNameInDirectory(snapshot: DevCodeStudioSnapshot, parentDir: string, rawStem: string): string {
+  const stem = rawStem.replace(/[/\\]+/g, "-").trim() || "nova-pasta";
+  for (let n = 0; n < 500; n++) {
+    const name = n === 0 ? stem : `${stem}-${n}`;
+    const path = joinPath(parentDir, name);
+    const norm = normalizedFilePath(path);
+    const folderTaken = snapshot.folders.some((f) => normalizedFilePath(f.path) === norm);
+    const fileTaken = snapshot.files.some((f) => normalizedFilePath(f.path) === norm);
+    if (!folderTaken && !fileTaken) return name;
+  }
+  return `${stem}-${Date.now()}`;
+}
+
 /** Evita sobrescrever: `arquivo.ts` → `arquivo-import.ts` → `arquivo-import-2.ts` … */
 function uniquePathForNewFile(snapshot: DevCodeStudioSnapshot, dir: string, rawFileName: string): string {
   const safeName = fileBaseName(rawFileName.replace(/\\/g, "/").replace(/^\/+/, ""));
