@@ -6,7 +6,7 @@ import {
   type DevCodeStudioSnapshot
 } from "@ederson-agencia/shared";
 import { FolderChevron } from "./CodeStudioMenuBar";
-import { materialFileIcon, materialFolderIconOpen } from "./fileMaterialIcon";
+import { materialFileSlot, materialFolderSlot } from "./fileMaterialIcon";
 
 type CodeStudioExplorerProps = {
   snapshot: DevCodeStudioSnapshot;
@@ -62,6 +62,7 @@ export function CodeStudioExplorer({
   const renderNode = (node: CodeStudioTreeNode, depth: number) => {
     if (node.kind === "folder") {
       const open = expanded.has(node.path);
+      const folderSlot = materialFolderSlot(node.name, open);
       return (
         <li key={node.id}>
           <div
@@ -80,8 +81,12 @@ export function CodeStudioExplorer({
               }}
               onDoubleClick={() => onRename(node.path, true)}
             >
-              <span className="dev-code-studio__mi dev-code-studio__mi--folder material-icons-round" aria-hidden>
-                {materialFolderIconOpen(open)}
+              <span
+                className="dev-code-studio__mi dev-code-studio__mi--folder material-icons-round"
+                data-mi-key={folderSlot.key}
+                aria-hidden
+              >
+                {folderSlot.icon}
               </span>
               <span className="dev-code-studio__tree-folder-name">{node.name}</span>
             </button>
@@ -93,6 +98,7 @@ export function CodeStudioExplorer({
       );
     }
     const active = activeFileId === node.id;
+    const fileSlot = materialFileSlot(node.name);
     return (
       <li key={node.id}>
         <div className="dev-code-studio__tree-row" style={{ paddingLeft: `${8 + depth * 12}px` }}>
@@ -106,8 +112,12 @@ export function CodeStudioExplorer({
               onOpenFile(node.id, "pin");
             }}
           >
-            <span className="dev-code-studio__mi dev-code-studio__mi--file material-icons-round" aria-hidden>
-              {materialFileIcon(node.name)}
+            <span
+              className="dev-code-studio__mi dev-code-studio__mi--file material-icons-round"
+              data-mi-key={fileSlot.key}
+              aria-hidden
+            >
+              {fileSlot.icon}
             </span>
             <span className="dev-code-studio__tree-file-name">{node.name}</span>
           </button>

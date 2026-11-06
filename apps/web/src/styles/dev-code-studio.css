@@ -208,18 +208,395 @@
 .dev-code-studio__mi--folder {
   flex-shrink: 0;
   width: 1.125rem;
-  color: #90a4ae;
+  color: #dcb67a;
 }
 
 .dev-code-studio[data-theme="dark"] .dev-code-studio__mi--folder {
-  color: #b0bec5;
+  color: #e8c077;
 }
 
 .dev-code-studio__mi--file {
   flex-shrink: 0;
   width: 1.125rem;
   font-size: 1rem;
-  opacity: 0.92;
+  opacity: 0.95;
+}
+
+/**
+ * Cores estilo Material Icon Theme (explorador).
+ * data-mi-key vem de fileMaterialIcon.ts
+ */
+.dev-code-studio__mi--folder[data-mi-key="folder-default"],
+.dev-code-studio__mi--folder[data-mi-key="folder-workspace"] {
+  color: #dcb67a;
+}
+.dev-code-studio[data-theme="dark"] .dev-code-studio__mi--folder[data-mi-key="folder-default"],
+.dev-code-studio[data-theme="dark"] .dev-code-studio__mi--folder[data-mi-key="folder-workspace"] {
+  color: #e8c077;
+}
+
+.dev-code-studio__mi--folder[data-mi-key="folder-src"],
+.dev-code-studio__mi--folder[data-mi-key="folder-pages"],
+.dev-code-studio__mi--folder[data-mi-key="folder-hooks"] {
+  color: #42a5f5;
+}
+.dev-code-studio[data-theme="dark"] .dev-code-studio__mi--folder[data-mi-key="folder-src"],
+.dev-code-studio[data-theme="dark"] .dev-code-studio__mi--folder[data-mi-key="folder-pages"],
+.dev-code-studio[data-theme="dark"] .dev-code-studio__mi--folder[data-mi-key="folder-hooks"] {
+  color: #64b5f6;
+}
+
+.dev-code-studio__mi--folder[data-mi-key="folder-components"] {
+  color: #ab47bc;
+}
+.dev-code-studio[data-theme="dark"] .dev-code-studio__mi--folder[data-mi-key="folder-components"] {
+  color: #ce93d8;
+}
+
+.dev-code-studio__mi--folder[data-mi-key="folder-utils"] {
+  color: #78909c;
+}
+.dev-code-studio[data-theme="dark"] .dev-code-studio__mi--folder[data-mi-key="folder-utils"] {
+  color: #b0bec5;
+}
+
+.dev-code-studio__mi--folder[data-mi-key="folder-assets"] {
+  color: #66bb6a;
+}
+.dev-code-studio[data-theme="dark"] .dev-code-studio__mi--folder[data-mi-key="folder-assets"] {
+  color: #81c784;
+}
+
+.dev-code-studio__mi--folder[data-mi-key="folder-styles"] {
+  color: #42a5f5;
+}
+.dev-code-studio[data-theme="dark"] .dev-code-studio__mi--folder[data-mi-key="folder-styles"] {
+  color: #42a5f5;
+}
+
+.dev-code-studio__mi--folder[data-mi-key="folder-api"] {
+  color: #8bc34a;
+}
+.dev-code-studio[data-theme="dark"] .dev-code-studio__mi--folder[data-mi-key="folder-api"] {
+  color: #9ccc65;
+}
+
+.dev-code-studio__mi--folder[data-mi-key="folder-test"] {
+  color: #7e57c2;
+}
+.dev-code-studio[data-theme="dark"] .dev-code-studio__mi--folder[data-mi-key="folder-test"] {
+  color: #b39ddb;
+}
+
+.dev-code-studio__mi--folder[data-mi-key="folder-docs"] {
+  color: #42a5f5;
+}
+.dev-code-studio[data-theme="dark"] .dev-code-studio__mi--folder[data-mi-key="folder-docs"] {
+  color: #90caf9;
+}
+
+.dev-code-studio__mi--folder[data-mi-key="folder-config"] {
+  color: #78909c;
+}
+.dev-code-studio[data-theme="dark"] .dev-code-studio__mi--folder[data-mi-key="folder-config"] {
+  color: #b0bec5;
+}
+
+.dev-code-studio__mi--folder[data-mi-key="folder-github"] {
+  color: #5c6bc0;
+}
+.dev-code-studio[data-theme="dark"] .dev-code-studio__mi--folder[data-mi-key="folder-github"] {
+  color: #9fa8da;
+}
+
+.dev-code-studio__mi--folder[data-mi-key="folder-vscode"] {
+  color: #29b6f6;
+}
+.dev-code-studio[data-theme="dark"] .dev-code-studio__mi--folder[data-mi-key="folder-vscode"] {
+  color: #4fc3f7;
+}
+
+.dev-code-studio__mi--folder[data-mi-key="folder-node"] {
+  color: #43a047;
+}
+.dev-code-studio[data-theme="dark"] .dev-code-studio__mi--folder[data-mi-key="folder-node"] {
+  color: #66bb6a;
+}
+
+.dev-code-studio__mi--folder[data-mi-key="folder-dist"] {
+  color: #ffb300;
+}
+.dev-code-studio[data-theme="dark"] .dev-code-studio__mi--folder[data-mi-key="folder-dist"] {
+  color: #ffca28;
+}
+
+.dev-code-studio__mi--folder[data-mi-key="folder-db"] {
+  color: #0097a7;
+}
+.dev-code-studio[data-theme="dark"] .dev-code-studio__mi--folder[data-mi-key="folder-db"] {
+  color: #26c6da;
+}
+
+.dev-code-studio__mi--folder[data-mi-key="folder-scripts"] {
+  color: #ffca28;
+}
+.dev-code-studio[data-theme="dark"] .dev-code-studio__mi--folder[data-mi-key="folder-scripts"] {
+  color: #ffd54f;
+}
+
+.dev-code-studio__mi--folder[data-mi-key="folder-i18n"] {
+  color: #29b6f6;
+}
+.dev-code-studio[data-theme="dark"] .dev-code-studio__mi--folder[data-mi-key="folder-i18n"] {
+  color: #4dd0e1;
+}
+
+.dev-code-studio__mi--folder[data-mi-key="folder-packages"] {
+  color: #78909c;
+}
+.dev-code-studio[data-theme="dark"] .dev-code-studio__mi--folder[data-mi-key="folder-packages"] {
+  color: #b0bec5;
+}
+
+.dev-code-studio__mi--folder[data-mi-key="folder-shared"] {
+  color: #9575cd;
+}
+.dev-code-studio[data-theme="dark"] .dev-code-studio__mi--folder[data-mi-key="folder-shared"] {
+  color: #b39ddb;
+}
+
+.dev-code-studio__mi--folder[data-mi-key="folder-types"] {
+  color: #3178c6;
+}
+.dev-code-studio[data-theme="dark"] .dev-code-studio__mi--folder[data-mi-key="folder-types"] {
+  color: #64b5f6;
+}
+
+.dev-code-studio__mi--folder[data-mi-key="folder-git"] {
+  color: #ef5350;
+}
+.dev-code-studio[data-theme="dark"] .dev-code-studio__mi--folder[data-mi-key="folder-git"] {
+  color: #e57373;
+}
+
+/* Arquivos — linguagens & tipos */
+.dev-code-studio__mi--file[data-mi-key="ext-ts"],
+.dev-code-studio__mi--file[data-mi-key="file-tsconfig"] {
+  color: #3178c6;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-tsx"] {
+  color: #26a69a;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-js"],
+.dev-code-studio__mi--file[data-mi-key="ext-jsx"],
+.dev-code-studio__mi--file[data-mi-key="file-jsconfig"] {
+  color: #e8c84a;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-json"],
+.dev-code-studio__mi--file[data-mi-key="ext-jsonc"] {
+  color: #fbc02d;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-html"] {
+  color: #e44d26;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-css"] {
+  color: #42a5f5;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-scss"],
+.dev-code-studio__mi--file[data-mi-key="ext-sass"] {
+  color: #ec407a;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-less"] {
+  color: #2962ff;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-md"],
+.dev-code-studio__mi--file[data-mi-key="ext-mdx"],
+.dev-code-studio__mi--file[data-mi-key="ext-readme"] {
+  color: #42a5f5;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-yaml"],
+.dev-code-studio__mi--file[data-mi-key="ext-toml"] {
+  color: #ff7043;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-xml"] {
+  color: #ff7043;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-vue"] {
+  color: #42b883;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-svelte"] {
+  color: #ff3e00;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-svg"] {
+  color: #ffb300;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-image"] {
+  color: #ab47bc;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-sql"],
+.dev-code-studio__mi--file[data-mi-key="ext-prisma"] {
+  color: #0097a7;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-python"] {
+  color: #448aff;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-ruby"] {
+  color: #ef5350;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-rust"] {
+  color: #8d6e63;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-go"] {
+  color: #29b6f6;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-php"] {
+  color: #7986cb;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-swift"] {
+  color: #ff7043;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-kotlin"] {
+  color: #7e57c2;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-java"] {
+  color: #ef5350;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-scala"] {
+  color: #d32f2f;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-dart"] {
+  color: #42a5f5;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-lua"] {
+  color: #5c6bc0;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-shell"] {
+  color: #4caf50;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-docker"] {
+  color: #29b6f6;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-tf"] {
+  color: #5c6bc0;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-cpp"] {
+  color: #78909c;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-h"] {
+  color: #66bb6a;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-c"] {
+  color: #1976d2;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-csharp"] {
+  color: #9575cd;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-fsharp"] {
+  color: #5c6bc0;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-vb"] {
+  color: #5c6bc0;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-perl"] {
+  color: #5c6bc0;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-r"] {
+  color: #1976d2;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-elixir"] {
+  color: #7e57c2;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-erlang"] {
+  color: #ef5350;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-haskell"] {
+  color: #5c6bc0;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-clojure"] {
+  color: #66bb6a;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-graphql"] {
+  color: #e91e63;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-proto"] {
+  color: #fbc02d;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-tex"],
+.dev-code-studio__mi--file[data-mi-key="ext-rst"] {
+  color: #42a5f5;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-settings"],
+.dev-code-studio__mi--file[data-mi-key="ext-git"] {
+  color: #78909c;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-env"] {
+  color: #fbc02d;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-lock"],
+.dev-code-studio__mi--file[data-mi-key="file-package-lock"],
+.dev-code-studio__mi--file[data-mi-key="file-pnpm-lock"],
+.dev-code-studio__mi--file[data-mi-key="file-yarn-lock"],
+.dev-code-studio__mi--file[data-mi-key="file-bun-lock"] {
+  color: #9ccc65;
+}
+.dev-code-studio__mi--file[data-mi-key="file-package-json"] {
+  color: #7cb342;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-log"] {
+  color: #90a4ae;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-wgsl"],
+.dev-code-studio__mi--file[data-mi-key="ext-glsl"],
+.dev-code-studio__mi--file[data-mi-key="ext-wasm"] {
+  color: #7e57c2;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-font"] {
+  color: #f06292;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-pdf"] {
+  color: #e53935;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-zip"] {
+  color: #ffb300;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-video"] {
+  color: #ab47bc;
+}
+.dev-code-studio__mi--file[data-mi-key="ext-audio"] {
+  color: #5c6bc0;
+}
+.dev-code-studio__mi--file[data-mi-key="file-vite"] {
+  color: #7c3aed;
+}
+.dev-code-studio__mi--file[data-mi-key="file-tailwind"],
+.dev-code-studio__mi--file[data-mi-key="file-postcss"] {
+  color: #26a69a;
+}
+.dev-code-studio__mi--file[data-mi-key="file-next"] {
+  color: #eceff1;
+}
+.dev-code-studio[data-theme="light"] .dev-code-studio__mi--file[data-mi-key="file-next"] {
+  color: #37474f;
+}
+.dev-code-studio__mi--file[data-mi-key="file-vercel"],
+.dev-code-studio__mi--file[data-mi-key="file-netlify"] {
+  color: #eceff1;
+}
+.dev-code-studio[data-theme="light"] .dev-code-studio__mi--file[data-mi-key="file-vercel"],
+.dev-code-studio[data-theme="light"] .dev-code-studio__mi--file[data-mi-key="file-netlify"] {
+  color: #37474f;
+}
+.dev-code-studio__mi--file[data-mi-key="file-license"] {
+  color: #fbc02d;
+}
+.dev-code-studio__mi--file[data-mi-key="file-default"] {
+  color: #78909c;
+}
+
+.dev-code-studio[data-theme="dark"] .dev-code-studio__mi--file[data-mi-key="file-next"],
+.dev-code-studio[data-theme="dark"] .dev-code-studio__mi--file[data-mi-key="file-vercel"],
+.dev-code-studio[data-theme="dark"] .dev-code-studio__mi--file[data-mi-key="file-netlify"] {
+  color: #b0bec5;
 }
 
 .dev-code-studio__mi-toolbar {

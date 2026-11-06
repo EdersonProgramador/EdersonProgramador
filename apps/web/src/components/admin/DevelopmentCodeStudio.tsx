@@ -372,7 +372,6 @@ export function DevelopmentCodeStudio({
 
   const onDelete = useCallback(
     (path: string, isFolder: boolean) => {
-      if (!window.confirm(isFolder ? `Excluir pasta "${path}" e todo o conteúdo?` : `Excluir "${path}"?`)) return;
       updateSnapshot((prev) => {
         if (isFolder) return deleteFolderFromSnapshot(prev, path);
         const file = prev.files.find((f) => f.path === path);
@@ -458,7 +457,6 @@ export function DevelopmentCodeStudio({
             label: "Esvaziar workspace",
             disabled: studio.files.length === 0,
             onClick: () => {
-              if (!window.confirm("Remover todos os arquivos e pastas deste workspace?")) return;
               setSelectedDir("");
               updateSnapshot(() => defaultDevCodeStudioSnapshot());
             }
@@ -538,6 +536,22 @@ export function DevelopmentCodeStudio({
             id: "vscode",
             label: "Referência vscode.dev",
             onClick: () => window.open("https://vscode.dev/?vscode-lang=pt-br", "_blank", "noopener,noreferrer")
+          },
+          {
+            id: "extensions-note",
+            label: "— Este editor (Monaco) não instala extensões do VS Code —",
+            disabled: true,
+            onClick: () => undefined
+          },
+          {
+            id: "extensions-vscode-dev",
+            label: "Extensões no navegador (vscode.dev)",
+            onClick: () => window.open("https://vscode.dev/?vscode-lang=pt-br", "_blank", "noopener,noreferrer")
+          },
+          {
+            id: "extensions-marketplace",
+            label: "Marketplace de extensões VS Code",
+            onClick: () => window.open("https://marketplace.visualstudio.com/vscode", "_blank", "noopener,noreferrer")
           }
         ]
       }
