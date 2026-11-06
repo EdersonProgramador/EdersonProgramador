@@ -329,7 +329,8 @@ export function importFilesIntoSnapshot(
 
 export function createFolderInSnapshot(snapshot: DevCodeStudioSnapshot, parentDir: string, folderName: string): DevCodeStudioSnapshot {
   const path = joinPath(parentDir, folderName.replace(/\/+$/, ""));
-  if (snapshot.folders.some((f) => f.path === path)) return snapshot;
+  const pathN = normalizedFilePath(path);
+  if (snapshot.folders.some((f) => normalizedFilePath(f.path) === pathN)) return snapshot;
   return {
     ...snapshot,
     folders: ensureFolderChain(snapshot, path)
@@ -342,18 +343,22 @@ export function deleteFileFromSnapshot(snapshot: DevCodeStudioSnapshot, fileId: 
 }
 
 export function deleteFolderFromSnapshot(snapshot: DevCodeStudioSnapshot, folderPath: string): DevCodeStudioSnapshot {
-  const prefix = folderPath.replace(/\\/g, "/").replace(/\/+$/, "") + "/";
+  const folderPathN = folderPath.replace(/\\/g, "/").replace(/\/+$/, "");
+  const prefix = folderPathN + "/";
   const removedIds = new Set(
     snapshot.files.filter((f) => {
       const p = f.path.replace(/\\/g, "/");
-      return p === folderPath || p.startsWith(prefix);
+      return p === folderPathN || p.startsWith(prefix);
     }).map((f) => f.id)
   );
   const files = snapshot.files.filter((f) => {
     const p = f.path.replace(/\\/g, "/");
-    return p !== folderPath && !p.startsWith(prefix);
+    return p !== folderPathN && !p.startsWith(prefix);
   });
-  const folders = snapshot.folders.filter((f) => f.path !== folderPath && !f.path.startsWith(prefix));
+  const folders = snapshot.folders.filter((f) => {
+    const fp = f.path.replace(/\\/g, "/");
+    return fp !== folderPathN && !fp.startsWith(prefix);
+  });
   const s = ensureOpenTabs(snapshot);
   const tabs = (s.openTabs?.tabs ?? []).filter((t) => !removedIds.has(t.fileId));
   let active = s.openTabs!.activeFileId;
@@ -364,13 +369,14 @@ export function deleteFolderFromSnapshot(snapshot: DevCodeStudioSnapshot, folder
 export function renamePathInSnapshot(snapshot: DevCodeStudioSnapshot, oldPath: string, newPath: string): DevCodeStudioSnapshot {
   const oldP = oldPath.replace(/\\/g, "/");
   const newP = newPath.replace(/\\/g, "/");
-  const isFolder = snapshot.folders.some((f) => f.path === oldP);
+  const isFolder = snapshot.folders.some((f) => f.path.replace(/\\/g, "/") === oldP);
   if (isFolder) {
     const prefix = oldP + "/";
     const folders = snapshot.folders
       .map((f) => {
-        if (f.path === oldP) return { ...f, id: folderIdForPath(newP), path: newP };
-        if (f.path.startsWith(prefix)) return { ...f, id: folderIdForPath(newP + f.path.slice(oldP.length)), path: newP + f.path.slice(oldP.length) };
+        const fp = f.path.replace(/\\/g, "/");
+        if (fp === oldP) return { ...f, id: folderIdForPath(newP), path: newP };
+        if (fp.startsWith(prefix)) return { ...f, id: folderIdForPath(newP + fp.slice(oldP.length)), path: newP + fp.slice(oldP.length) };
         return f;
       })
       .sort((a, b) => a.path.localeCompare(b.path));

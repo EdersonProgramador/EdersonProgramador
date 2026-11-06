@@ -456,9 +456,10 @@ export function DevelopmentCodeStudio({
 
   const onDelete = useCallback(
     (path: string, isFolder: boolean) => {
+      const pathN = path.replace(/\\/g, "/");
       updateSnapshot((prev) => {
-        if (isFolder) return deleteFolderFromSnapshot(prev, path);
-        const file = prev.files.find((f) => f.path === path);
+        if (isFolder) return deleteFolderFromSnapshot(prev, pathN);
+        const file = prev.files.find((f) => f.path.replace(/\\/g, "/") === pathN);
         return file ? deleteFileFromSnapshot(prev, file.id) : prev;
       });
     },
