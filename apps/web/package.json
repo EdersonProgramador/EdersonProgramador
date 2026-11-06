@@ -12,6 +12,10 @@
   },
   "dependencies": {
     "@ederson-agencia/shared": "*",
+    "@fontsource/dm-sans": "^5.3.0",
+    "@fontsource/ibm-plex-mono": "^5.3.0",
+    "@fontsource/material-icons-round": "^5.3.0",
+    "@fontsource/syne": "^5.3.0",
     "@monaco-editor/react": "^4.7.0",
     "@tiptap/core": "^3.32.0",
     "@tiptap/extension-color": "^3.32.0",

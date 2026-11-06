@@ -1,7 +1,8 @@
 import { loader } from "@monaco-editor/react";
 import * as monaco from "monaco-editor";
 /** Registra todas as linguagens built-in (Python, Go, Rust, C#, PHP, etc.). */
-import "monaco-editor/esm/vs/basic-languages/monaco.contribution.js";
+/** Use o subpath export do pacote (não `esm/vs/...` — quebra o build com exports do monaco-editor ≥0.57). */
+import "monaco-editor/basic-languages/monaco.contribution.js";
 import { defineDraculaTheme } from "./draculaTheme";
 
 let configured = false;

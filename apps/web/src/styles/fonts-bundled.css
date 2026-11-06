@@ -1,0 +1,31 @@
+/**
+ * Self-hosted fonts (avoids Google Fonts CSS 429 during dev / high request rates).
+ * Subsets match prior index.html Google Fonts request weights.
+ */
+@import "@fontsource/dm-sans/latin-400.css";
+@import "@fontsource/dm-sans/latin-400-italic.css";
+@import "@fontsource/dm-sans/latin-500.css";
+@import "@fontsource/dm-sans/latin-500-italic.css";
+@import "@fontsource/dm-sans/latin-600.css";
+@import "@fontsource/dm-sans/latin-600-italic.css";
+@import "@fontsource/dm-sans/latin-700.css";
+@import "@fontsource/dm-sans/latin-700-italic.css";
+@import "@fontsource/dm-sans/latin-ext-400.css";
+@import "@fontsource/dm-sans/latin-ext-400-italic.css";
+@import "@fontsource/dm-sans/latin-ext-500.css";
+@import "@fontsource/dm-sans/latin-ext-500-italic.css";
+@import "@fontsource/dm-sans/latin-ext-600.css";
+@import "@fontsource/dm-sans/latin-ext-600-italic.css";
+@import "@fontsource/dm-sans/latin-ext-700.css";
+@import "@fontsource/dm-sans/latin-ext-700-italic.css";
+
+@import "@fontsource/ibm-plex-mono/latin-400.css";
+@import "@fontsource/ibm-plex-mono/latin-500.css";
+
+@import "@fontsource/syne/latin-400.css";
+@import "@fontsource/syne/latin-500.css";
+@import "@fontsource/syne/latin-600.css";
+@import "@fontsource/syne/latin-700.css";
+@import "@fontsource/syne/latin-800.css";
+
+@import "@fontsource/material-icons-round";
