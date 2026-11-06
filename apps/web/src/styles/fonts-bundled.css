@@ -29,3 +29,23 @@
 @import "@fontsource/syne/latin-800.css";
 
 @import "@fontsource/material-icons-round";
+
+/**
+ * Google’s class name + Fontsource’s actual family name must match; otherwise ligatures (icon names) render as text.
+ * @see https://github.com/fontsource/font-files/tree/main/fonts/google/material-icons-round
+ */
+.material-icons-round {
+  font-family: "Material Icons Round", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 1.25rem;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-feature-settings: "liga";
+  -webkit-font-smoothing: antialiased;
+}

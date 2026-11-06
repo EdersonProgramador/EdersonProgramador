@@ -109,7 +109,7 @@ export function CodeStudioExplorer({
             <span className="dev-code-studio__mi dev-code-studio__mi--file material-icons-round" aria-hidden>
               {materialFileIcon(node.name)}
             </span>
-            <span className="truncate">{node.name}</span>
+            <span className="dev-code-studio__tree-file-name">{node.name}</span>
           </button>
         </div>
       </li>
@@ -139,10 +139,12 @@ export function CodeStudioExplorer({
         </div>
       </div>
       <p className="dev-code-studio__workspace-name">WORKSPACE-LANCAMENTO</p>
-      <ul className="dev-code-studio__tree">{tree.map((node) => renderNode(node, 0))}</ul>
-      {snapshot.files.length === 0 ? (
-        <p className="dev-code-studio__explorer-empty">Nenhum arquivo. Use Arquivo → Novo arquivo.</p>
-      ) : null}
+      <div className="dev-code-studio__tree-scroll">
+        <ul className="dev-code-studio__tree">{tree.map((node) => renderNode(node, 0))}</ul>
+        {snapshot.files.length === 0 ? (
+          <p className="dev-code-studio__explorer-empty">Nenhum arquivo. Use Arquivo → Novo arquivo.</p>
+        ) : null}
+      </div>
     </aside>
   );
 }

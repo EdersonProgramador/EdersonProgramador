@@ -697,7 +697,7 @@ export function DevelopmentCodeStudio({
             })
           )}
         </div>
-        <div className="dev-code-studio__toolbar-group">
+        <div className="dev-code-studio__toolbar-group dev-code-studio__toolbar-group--actions">
           <label className="dev-code-studio__theme">
             <Monitor className="h-3.5 w-3.5 opacity-70" aria-hidden />
             <select
