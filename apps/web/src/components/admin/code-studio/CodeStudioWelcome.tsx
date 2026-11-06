@@ -1,11 +1,20 @@
-import { FilePlus2, FolderPlus, Keyboard, Sparkles } from "lucide-react";
+import { FilePlus2, FileStack, FolderPlus, FolderSymlink, Keyboard, Sparkles, Upload } from "lucide-react";
 
 type CodeStudioWelcomeProps = {
   onNewFile: () => void;
   onNewFolder: () => void;
+  onImportFile: () => void;
+  onImportFiles: () => void;
+  onImportFolder: () => void;
 };
 
-export function CodeStudioWelcome({ onNewFile, onNewFolder }: CodeStudioWelcomeProps) {
+export function CodeStudioWelcome({
+  onNewFile,
+  onNewFolder,
+  onImportFile,
+  onImportFiles,
+  onImportFolder
+}: CodeStudioWelcomeProps) {
   return (
     <div className="dev-code-studio__welcome">
       <div className="dev-code-studio__welcome-inner">
@@ -13,7 +22,9 @@ export function CodeStudioWelcome({ onNewFile, onNewFolder }: CodeStudioWelcomeP
           <Sparkles className="h-10 w-10 text-sky-400" aria-hidden />
           <div>
             <h2 className="dev-code-studio__welcome-title">Bem-vindo</h2>
-            <p className="dev-code-studio__welcome-sub">Ederson Studio · escreva snippets e código do lançamento sem arquivos de exemplo.</p>
+            <p className="dev-code-studio__welcome-sub">
+              Ederson Studio · importe arquivo(s) ou uma pasta para montar o projeto; com projeto selecionado, o workspace é salvo na operação (Ctrl+S).
+            </p>
           </div>
         </div>
 
@@ -34,6 +45,25 @@ export function CodeStudioWelcome({ onNewFile, onNewFolder }: CodeStudioWelcomeP
                 <kbd>Ctrl+Shift+N</kbd>
               </button>
             </li>
+            <li>
+              <button type="button" onClick={onImportFile}>
+                <Upload className="h-4 w-4" aria-hidden />
+                <span>Abrir arquivo do computador…</span>
+                <kbd>Ctrl+O</kbd>
+              </button>
+            </li>
+            <li>
+              <button type="button" onClick={onImportFiles}>
+                <FileStack className="h-4 w-4" aria-hidden />
+                <span>Importar vários arquivos…</span>
+              </button>
+            </li>
+            <li>
+              <button type="button" onClick={onImportFolder}>
+                <FolderSymlink className="h-4 w-4" aria-hidden />
+                <span>Importar pasta do projeto…</span>
+              </button>
+            </li>
           </ul>
         </section>
 
@@ -43,6 +73,9 @@ export function CodeStudioWelcome({ onNewFile, onNewFolder }: CodeStudioWelcomeP
             Atalhos úteis
           </h3>
           <ul className="dev-code-studio__welcome-shortcuts">
+            <li>
+              <span>Abrir arquivo local</span> <kbd>Ctrl+O</kbd>
+            </li>
             <li>
               <span>Salvar no projeto</span> <kbd>Ctrl+S</kbd>
             </li>

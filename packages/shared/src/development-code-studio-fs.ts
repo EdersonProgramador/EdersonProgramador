@@ -106,6 +106,27 @@ export function buildCodeStudioTree(snapshot: DevCodeStudioSnapshot): CodeStudio
   return buildLevel(snapshot, folderPaths, "");
 }
 
+function normalizedFilePath(path: string): string {
+  return path.replace(/\\/g, "/");
+}
+
+/** Evita sobrescrever: `arquivo.ts` → `arquivo-import.ts` → `arquivo-import-2.ts` … */
+function uniquePathForNewFile(snapshot: DevCodeStudioSnapshot, dir: string, rawFileName: string): string {
+  const safeName = fileBaseName(rawFileName.replace(/\\/g, "/").replace(/^\/+/, ""));
+  if (!safeName) return joinPath(dir, `importado-${Date.now()}.txt`);
+  const dot = safeName.lastIndexOf(".");
+  const stem = dot === -1 ? safeName : safeName.slice(0, dot);
+  const ext = dot === -1 ? "" : safeName.slice(dot);
+  for (let n = 0; n < 200; n++) {
+    const name =
+      n === 0 ? safeName : n === 1 ? `${stem}-import${ext}` : `${stem}-import-${n}${ext}`;
+    const path = joinPath(dir, name);
+    const norm = normalizedFilePath(path);
+    if (!snapshot.files.some((f) => normalizedFilePath(f.path) === norm)) return path;
+  }
+  return joinPath(dir, `${stem}-import-${Date.now()}${ext}`);
+}
+
 export function createFileInSnapshot(
   snapshot: DevCodeStudioSnapshot,
   dir: string,
@@ -126,6 +147,68 @@ export function createFileInSnapshot(
     folders: ensureFolderChain(snapshot, dir),
     files: [...snapshot.files, file]
   };
+}
+
+/** Importa conteúdo de um arquivo local (nome seguro + caminho único). Último arquivo importado fica aberto. */
+export function importFileIntoSnapshot(
+  snapshot: DevCodeStudioSnapshot,
+  dir: string,
+  fileName: string,
+  content: string
+): DevCodeStudioSnapshot {
+  const path = uniquePathForNewFile(snapshot, dir, fileName);
+  const id = `file-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+  const file: DevCodeStudioFile = {
+    id,
+    path,
+    language: languageFromPath(path),
+    content
+  };
+  const parent = folderParentPath(path);
+  return {
+    ...snapshot,
+    openFileId: id,
+    folders: ensureFolderChain(snapshot, parent),
+    files: [...snapshot.files, file]
+  };
+}
+
+export type ImportLocalFileSpec = { relativePath: string; content: string };
+
+/**
+ * Importa vários arquivos locais de uma vez (ex.: multi-seleção ou pasta com `webkitRelativePath`).
+ * `relativePath` é relativo a `baseDir` no workspace (use `""` na raiz do workspace + caminhos como `src/a.ts`).
+ * O último arquivo da lista fica aberto.
+ */
+export function importFilesIntoSnapshot(
+  snapshot: DevCodeStudioSnapshot,
+  baseDir: string,
+  files: ImportLocalFileSpec[]
+): DevCodeStudioSnapshot {
+  if (files.length === 0) return snapshot;
+  let next: DevCodeStudioSnapshot = snapshot;
+  for (const { relativePath, content } of files) {
+    const rel = relativePath.replace(/\\/g, "/").replace(/^\/+/, "");
+    if (!rel) continue;
+    const rawFull = joinPath(baseDir, rel);
+    const parent = folderParentPath(rawFull);
+    const name = fileBaseName(rel);
+    const path = uniquePathForNewFile(next, parent, name);
+    const id = `file-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+    const file: DevCodeStudioFile = {
+      id,
+      path,
+      language: languageFromPath(path),
+      content
+    };
+    next = {
+      ...next,
+      openFileId: id,
+      folders: ensureFolderChain(next, folderParentPath(path)),
+      files: [...next.files, file]
+    };
+  }
+  return next;
 }
 
 export function createFolderInSnapshot(snapshot: DevCodeStudioSnapshot, parentDir: string, folderName: string): DevCodeStudioSnapshot {

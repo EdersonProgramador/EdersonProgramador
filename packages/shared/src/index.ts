@@ -274,10 +274,13 @@ export {
   deleteFileFromSnapshot,
   deleteFolderFromSnapshot,
   fileBaseName,
+  importFileIntoSnapshot,
+  importFilesIntoSnapshot,
   joinPath,
   languageFromPath,
   renamePathInSnapshot,
-  type CodeStudioTreeNode
+  type CodeStudioTreeNode,
+  type ImportLocalFileSpec
 } from "./development-code-studio-fs.js";
 export {
   findFormulaNavByAdminPath,

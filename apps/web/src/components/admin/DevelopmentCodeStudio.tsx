@@ -1,6 +1,15 @@
 import Editor, { type OnMount } from "@monaco-editor/react";
 import type { editor as MonacoEditor } from "monaco-editor";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import {
+  type ChangeEvent,
+  type InputHTMLAttributes,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState
+} from "react";
 import { setupMonaco } from "../../monaco/setupMonaco";
 import {
   AGENCY_APP_BASE,
@@ -11,11 +20,14 @@ import {
   deleteFileFromSnapshot,
   deleteFolderFromSnapshot,
   fileBaseName,
+  importFileIntoSnapshot,
+  importFilesIntoSnapshot,
   joinPath,
   parseDevCodeStudioSnapshot,
   renamePathInSnapshot,
   serializeDevCodeStudioSnapshot,
-  type DevCodeStudioSnapshot
+  type DevCodeStudioSnapshot,
+  type ImportLocalFileSpec
 } from "@ederson-agencia/shared";
 import { patchProjectWorkspace } from "../../api/project-workspace-api";
 import { Braces, Copy, Maximize2, Minimize2, Sparkles, WrapText } from "lucide-react";
@@ -35,6 +47,31 @@ type DevelopmentCodeStudioProps = {
 setupMonaco();
 
 const EDITOR_MIN_PX = 480;
+/** Texto — limite por arquivo. */
+const LOCAL_FILE_MAX_BYTES = 5 * 1024 * 1024;
+/** Limite total para importação em lote / pasta. */
+const LOCAL_BATCH_MAX_TOTAL_BYTES = 20 * 1024 * 1024;
+
+function shouldSkipImportedPath(relativePath: string): boolean {
+  const norm = relativePath.replace(/\\/g, "/");
+  return (
+    norm.includes("/node_modules/") ||
+    norm.startsWith("node_modules/") ||
+    norm.includes("/.git/") ||
+    norm.startsWith(".git/") ||
+    norm.includes("/.next/") ||
+    norm.startsWith(".next/")
+  );
+}
+
+function readFileAsText(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : "");
+    reader.onerror = () => reject(new Error("read"));
+    reader.readAsText(file);
+  });
+}
 
 const LANGUAGE_OPTIONS: { id: string; label: string }[] = [
   { id: "typescript", label: "TypeScript" },
@@ -87,6 +124,9 @@ export function DevelopmentCodeStudio({
   const editorRef = useRef<MonacoEditor.IStandaloneCodeEditor | null>(null);
   const paneRef = useRef<HTMLDivElement | null>(null);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const multiFileInputRef = useRef<HTMLInputElement | null>(null);
+  const folderInputRef = useRef<HTMLInputElement | null>(null);
   const [editorHeightPx, setEditorHeightPx] = useState(EDITOR_MIN_PX);
 
   const initial = useMemo(
@@ -172,6 +212,106 @@ export function DevelopmentCodeStudio({
     [updateSnapshot]
   );
 
+  const triggerOpenLocalFile = useCallback(() => {
+    const el = fileInputRef.current;
+    if (el) el.value = "";
+    el?.click();
+  }, []);
+
+  const triggerOpenLocalFiles = useCallback(() => {
+    const el = multiFileInputRef.current;
+    if (el) el.value = "";
+    el?.click();
+  }, []);
+
+  const triggerOpenFolder = useCallback(() => {
+    const el = folderInputRef.current;
+    if (el) el.value = "";
+    el?.click();
+  }, []);
+
+  const importSpecsFromFiles = useCallback(
+    async (fileList: FileList | File[], resolveRelative: (f: File) => string | null) => {
+      const files = Array.from(fileList);
+      type Planned = { file: File; relativePath: string };
+      const planned: Planned[] = [];
+      let total = 0;
+      for (const file of files) {
+        const rel = resolveRelative(file);
+        if (rel === null) continue;
+        if (shouldSkipImportedPath(rel)) continue;
+        if (file.size > LOCAL_FILE_MAX_BYTES) {
+          onError(`Ignorado (muito grande): ${rel} — máx. ${LOCAL_FILE_MAX_BYTES / (1024 * 1024)} MB por arquivo.`);
+          continue;
+        }
+        total += file.size;
+        if (total > LOCAL_BATCH_MAX_TOTAL_BYTES) {
+          onError(
+            `Limite total de importação (${LOCAL_BATCH_MAX_TOTAL_BYTES / (1024 * 1024)} MB) excedido. Reduza a seleção ou exclua pastas pesadas (ex.: node_modules).`
+          );
+          return;
+        }
+        planned.push({ file, relativePath: rel });
+      }
+      if (planned.length === 0) return;
+      const specs: ImportLocalFileSpec[] = [];
+      for (const { file, relativePath } of planned) {
+        try {
+          const content = await readFileAsText(file);
+          specs.push({ relativePath, content });
+        } catch {
+          onError(`Não foi possível ler: ${relativePath}`);
+        }
+      }
+      if (specs.length === 0) return;
+      updateSnapshot((prev) => importFilesIntoSnapshot(prev, selectedDir, specs));
+    },
+    [onError, selectedDir, updateSnapshot]
+  );
+
+  const onLocalFilePicked = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      if (file.size > LOCAL_FILE_MAX_BYTES) {
+        onError(`Arquivo muito grande (máximo ${LOCAL_FILE_MAX_BYTES / (1024 * 1024)} MB para importação).`);
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        const text = typeof reader.result === "string" ? reader.result : "";
+        updateSnapshot((prev) => importFileIntoSnapshot(prev, selectedDir, file.name, text));
+      };
+      reader.onerror = () => onError("Não foi possível ler o arquivo.");
+      reader.readAsText(file);
+    },
+    [onError, selectedDir, updateSnapshot]
+  );
+
+  const onMultiLocalFilesPicked = useCallback(
+    async (e: ChangeEvent<HTMLInputElement>) => {
+      const list = e.target.files;
+      if (!list?.length) return;
+      await importSpecsFromFiles(list, (f) => f.name);
+    },
+    [importSpecsFromFiles]
+  );
+
+  const onLocalFolderPicked = useCallback(
+    async (e: ChangeEvent<HTMLInputElement>) => {
+      const list = e.target.files;
+      if (!list?.length) return;
+      await importSpecsFromFiles(list, (f) => {
+        const wrp = (f as File & { webkitRelativePath?: string }).webkitRelativePath;
+        if (!wrp) return f.name;
+        const parts = wrp.replace(/\\/g, "/").split("/").filter(Boolean);
+        if (parts.length <= 1) return fileBaseName(wrp);
+        return parts.slice(1).join("/");
+      });
+    },
+    [importSpecsFromFiles]
+  );
+
   const onRename = useCallback(
     (path: string, isFolder: boolean) => {
       const next = promptName(isFolder ? "Renomear pasta" : "Renomear arquivo", fileBaseName(path));
@@ -219,6 +359,22 @@ export function DevelopmentCodeStudio({
         items: [
           { id: "new-file", label: "Novo arquivo", shortcut: "Ctrl+N", onClick: () => onNewFile(selectedDir) },
           { id: "new-folder", label: "Nova pasta", shortcut: "Ctrl+Shift+N", onClick: () => onNewFolder(selectedDir) },
+          {
+            id: "open-file",
+            label: "Abrir arquivo do computador…",
+            shortcut: "Ctrl+O",
+            onClick: () => triggerOpenLocalFile()
+          },
+          {
+            id: "open-files",
+            label: "Importar vários arquivos…",
+            onClick: () => triggerOpenLocalFiles()
+          },
+          {
+            id: "open-folder",
+            label: "Importar pasta do projeto…",
+            onClick: () => triggerOpenFolder()
+          },
           {
             id: "save",
             label: "Salvar",
@@ -318,7 +474,21 @@ export function DevelopmentCodeStudio({
         ]
       }
     ],
-    [activeFile, expandIdeUrl, onNewFile, onNewFolder, persist, projectId, selectedDir, snapshot.files.length, snapshot, updateSnapshot]
+    [
+      activeFile,
+      expandIdeUrl,
+      onNewFile,
+      onNewFolder,
+      persist,
+      projectId,
+      selectedDir,
+      snapshot.files.length,
+      snapshot,
+      triggerOpenFolder,
+      triggerOpenLocalFile,
+      triggerOpenLocalFiles,
+      updateSnapshot
+    ]
   );
 
   useEffect(() => {
@@ -335,6 +505,10 @@ export function DevelopmentCodeStudio({
         e.preventDefault();
         onNewFile(selectedDir);
       }
+      if (e.ctrlKey && !e.shiftKey && e.key.toLowerCase() === "o") {
+        e.preventDefault();
+        triggerOpenLocalFile();
+      }
       if (e.ctrlKey && e.key === "`") {
         e.preventDefault();
         setTerminalOpen((v) => !v);
@@ -342,7 +516,7 @@ export function DevelopmentCodeStudio({
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [onNewFile, onNewFolder, persist, selectedDir, snapshot]);
+  }, [onNewFile, onNewFolder, persist, selectedDir, snapshot, triggerOpenLocalFile]);
 
   const onEditorMount: OnMount = (editor) => {
     editorRef.current = editor;
@@ -369,6 +543,33 @@ export function DevelopmentCodeStudio({
 
   return (
     <div className="dev-code-studio" data-theme={theme === "vs-dark" ? "dark" : "light"}>
+      <input
+        ref={fileInputRef}
+        type="file"
+        className="sr-only pointer-events-none absolute h-0 w-0 opacity-0"
+        tabIndex={-1}
+        aria-hidden
+        onChange={onLocalFilePicked}
+      />
+      <input
+        ref={multiFileInputRef}
+        type="file"
+        multiple
+        className="sr-only pointer-events-none absolute h-0 w-0 opacity-0"
+        tabIndex={-1}
+        aria-hidden
+        onChange={onMultiLocalFilesPicked}
+      />
+      <input
+        ref={folderInputRef}
+        type="file"
+        multiple
+        className="sr-only pointer-events-none absolute h-0 w-0 opacity-0"
+        tabIndex={-1}
+        aria-hidden
+        {...({ webkitdirectory: "" } as InputHTMLAttributes<HTMLInputElement>)}
+        onChange={onLocalFolderPicked}
+      />
       <CodeStudioMenuBar menus={menus} />
 
       <div className="dev-code-studio__toolbar">
@@ -436,7 +637,13 @@ export function DevelopmentCodeStudio({
         <div className="dev-code-studio__editor-column">
           <div ref={paneRef} className="dev-code-studio__editor-wrap">
             {!activeFile ? (
-              <CodeStudioWelcome onNewFile={() => onNewFile(selectedDir)} onNewFolder={() => onNewFolder(selectedDir)} />
+              <CodeStudioWelcome
+                onNewFile={() => onNewFile(selectedDir)}
+                onNewFolder={() => onNewFolder(selectedDir)}
+                onImportFile={triggerOpenLocalFile}
+                onImportFiles={triggerOpenLocalFiles}
+                onImportFolder={triggerOpenFolder}
+              />
             ) : (
               <Editor
                 key={`${activeFile.id}-${theme}`}
