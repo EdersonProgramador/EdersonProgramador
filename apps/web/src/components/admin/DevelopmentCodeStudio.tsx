@@ -3,6 +3,7 @@ import type { editor as MonacoEditor } from "monaco-editor";
 import {
   type ChangeEvent,
   type InputHTMLAttributes,
+  type MouseEvent,
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -11,27 +12,34 @@ import {
   useState
 } from "react";
 import { setupMonaco } from "../../monaco/setupMonaco";
+import { buildHtmlPreviewSrcDoc } from "../../monaco/htmlPreviewDocument";
 import {
   AGENCY_APP_BASE,
   createFileInSnapshot,
   createFolderInSnapshot,
   defaultDevCodeStudioSnapshot,
   DEV_CODE_STUDIO_FIELD_ID,
+  closeTabInSnapshot,
   deleteFileFromSnapshot,
   deleteFolderFromSnapshot,
+  ensureOpenTabs,
   fileBaseName,
   importFileIntoSnapshot,
   importFilesIntoSnapshot,
   joinPath,
+  openFileInTab,
   parseDevCodeStudioSnapshot,
+  pinTabForFile,
   renamePathInSnapshot,
   serializeDevCodeStudioSnapshot,
+  setActiveOpenFile,
   type DevCodeStudioSnapshot,
   type ImportLocalFileSpec
 } from "@ederson-agencia/shared";
 import { patchProjectWorkspace } from "../../api/project-workspace-api";
-import { Braces, Copy, Maximize2, Minimize2, Sparkles, WrapText } from "lucide-react";
+import { Braces, Copy, Eye, Maximize2, Minimize2, Monitor, Sparkles, WrapText, X } from "lucide-react";
 import { CodeStudioExplorer } from "./code-studio/CodeStudioExplorer";
+import { CodeStudioHtmlPreview } from "./code-studio/CodeStudioHtmlPreview";
 import { CodeStudioMenuBar, type CodeStudioMenu } from "./code-studio/CodeStudioMenuBar";
 import { CodeStudioWelcome } from "./code-studio/CodeStudioWelcome";
 import "../../styles/dev-code-studio.css";
@@ -85,18 +93,20 @@ const LANGUAGE_OPTIONS: { id: string; label: string }[] = [
   { id: "plaintext", label: "Texto" }
 ];
 
-function useMonacoTheme(): "vs" | "vs-dark" {
-  const [theme, setTheme] = useState<"vs" | "vs-dark">(() =>
-    document.documentElement.getAttribute("data-theme") === "dark" ? "vs-dark" : "vs"
-  );
+type MonacoColorThemeId = "vs" | "vs-dark" | "dracula";
+
+type EditorThemeChoice = "auto" | MonacoColorThemeId;
+
+function useUiThemeNight(): boolean {
+  const [night, setNight] = useState(() => document.documentElement.getAttribute("data-theme") === "dark");
   useEffect(() => {
     const el = document.documentElement;
-    const sync = () => setTheme(el.getAttribute("data-theme") === "dark" ? "vs-dark" : "vs");
+    const sync = () => setNight(el.getAttribute("data-theme") === "dark");
     const obs = new MutationObserver(sync);
     obs.observe(el, { attributes: true, attributeFilter: ["data-theme"] });
     return () => obs.disconnect();
   }, []);
-  return theme;
+  return night;
 }
 
 function cursorLabel(editor: MonacoEditor.IStandaloneCodeEditor | null): string {
@@ -113,6 +123,8 @@ function promptName(title: string, defaultValue = ""): string | null {
   return trimmed || null;
 }
 
+const EDITOR_THEME_KEY = "dev-code-studio-editor-theme";
+
 export function DevelopmentCodeStudio({
   projectId,
   storedRaw,
@@ -120,7 +132,18 @@ export function DevelopmentCodeStudio({
   onError,
   onSavingChange
 }: DevelopmentCodeStudioProps) {
-  const theme = useMonacoTheme();
+  const uiNight = useUiThemeNight();
+  const [editorThemeChoice, setEditorThemeChoice] = useState<EditorThemeChoice>(() => {
+    try {
+      const v = localStorage.getItem(EDITOR_THEME_KEY) as EditorThemeChoice | null;
+      if (v === "vs" || v === "vs-dark" || v === "dracula" || v === "auto") return v;
+    } catch {
+      /* ignore */
+    }
+    return "auto";
+  });
+  const monacoTheme: MonacoColorThemeId = editorThemeChoice === "auto" ? (uiNight ? "vs-dark" : "vs") : editorThemeChoice;
+  const shellUi: "light" | "dark" = monacoTheme === "vs" ? "light" : "dark";
   const editorRef = useRef<MonacoEditor.IStandaloneCodeEditor | null>(null);
   const paneRef = useRef<HTMLDivElement | null>(null);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -130,7 +153,7 @@ export function DevelopmentCodeStudio({
   const [editorHeightPx, setEditorHeightPx] = useState(EDITOR_MIN_PX);
 
   const initial = useMemo(
-    () => parseDevCodeStudioSnapshot(storedRaw) ?? defaultDevCodeStudioSnapshot(),
+    () => ensureOpenTabs(parseDevCodeStudioSnapshot(storedRaw) ?? defaultDevCodeStudioSnapshot()),
     [storedRaw]
   );
 
@@ -140,10 +163,19 @@ export function DevelopmentCodeStudio({
   const [minimap, setMinimap] = useState(true);
   const [explorerOpen, setExplorerOpen] = useState(true);
   const [terminalOpen, setTerminalOpen] = useState(false);
+  const [htmlPreviewOpen, setHtmlPreviewOpen] = useState(false);
   const [selectedDir, setSelectedDir] = useState("");
 
   useEffect(() => {
-    setSnapshot(parseDevCodeStudioSnapshot(storedRaw) ?? defaultDevCodeStudioSnapshot());
+    try {
+      localStorage.setItem(EDITOR_THEME_KEY, editorThemeChoice);
+    } catch {
+      /* ignore */
+    }
+  }, [editorThemeChoice]);
+
+  useEffect(() => {
+    setSnapshot(ensureOpenTabs(parseDevCodeStudioSnapshot(storedRaw) ?? defaultDevCodeStudioSnapshot()));
   }, [projectId, storedRaw]);
 
   useLayoutEffect(() => {
@@ -154,15 +186,30 @@ export function DevelopmentCodeStudio({
     const ro = new ResizeObserver(measure);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [explorerOpen, terminalOpen]);
+  }, [explorerOpen, terminalOpen, htmlPreviewOpen]);
 
-  const activeFile = snapshot.openFileId
-    ? snapshot.files.find((f) => f.id === snapshot.openFileId) ?? null
-    : null;
+  const studio = useMemo(() => ensureOpenTabs(snapshot), [snapshot]);
+
+  const activeFile = studio.openFileId ? studio.files.find((f) => f.id === studio.openFileId) ?? null : null;
+
+  const openTabs = studio.openTabs?.tabs ?? [];
+
+  const htmlPreviewSrcDoc = useMemo(() => {
+    if (!activeFile || activeFile.language !== "html") return "";
+    try {
+      return buildHtmlPreviewSrcDoc(activeFile.content, activeFile.path, studio.files);
+    } catch {
+      return `<!DOCTYPE html><html><body><pre>Erro ao montar o preview.</pre></body></html>`;
+    }
+  }, [activeFile, studio.files]);
+
+  useEffect(() => {
+    if (activeFile?.language !== "html") setHtmlPreviewOpen(false);
+  }, [activeFile?.language, activeFile?.id]);
 
   const persist = useCallback(
     (next: DevCodeStudioSnapshot) => {
-      const raw = serializeDevCodeStudioSnapshot(next);
+      const raw = serializeDevCodeStudioSnapshot(ensureOpenTabs(next));
       onStoredChange(raw);
       if (saveTimer.current) clearTimeout(saveTimer.current);
       if (!projectId) return;
@@ -179,7 +226,7 @@ export function DevelopmentCodeStudio({
   const updateSnapshot = useCallback(
     (updater: (prev: DevCodeStudioSnapshot) => DevCodeStudioSnapshot) => {
       setSnapshot((prev) => {
-        const next = updater(prev);
+        const next = ensureOpenTabs(updater(ensureOpenTabs(prev)));
         persist(next);
         return next;
       });
@@ -341,9 +388,24 @@ export function DevelopmentCodeStudio({
       setSelectedDir("");
       return;
     }
-    const af = snapshot.files.find((f) => f.id === snapshot.openFileId);
+    const af = studio.files.find((f) => f.id === studio.openFileId);
     if (af) onDelete(af.path, false);
-  }, [onDelete, selectedDir, snapshot.files, snapshot.openFileId]);
+  }, [onDelete, selectedDir, studio.files, studio.openFileId]);
+
+  const openExplorerFile = useCallback(
+    (fileId: string, mode: "preview" | "pin") => {
+      updateSnapshot((prev) => openFileInTab(prev, fileId, mode));
+    },
+    [updateSnapshot]
+  );
+
+  const closeEditorTab = useCallback(
+    (fileId: string, e?: MouseEvent<HTMLButtonElement>) => {
+      e?.stopPropagation();
+      updateSnapshot((prev) => closeTabInSnapshot(prev, fileId));
+    },
+    [updateSnapshot]
+  );
 
   const expandIdeUrl = useMemo(() => {
     const path = `${AGENCY_APP_BASE}/studio/desenvolvimento`;
@@ -380,21 +442,21 @@ export function DevelopmentCodeStudio({
             label: "Salvar",
             shortcut: "Ctrl+S",
             disabled: !projectId,
-            onClick: () => persist(snapshot)
+            onClick: () => persist(studio)
           },
           {
             id: "close",
-            label: "Fechar editor",
+            label: "Fechar aba do editor",
             disabled: !activeFile,
             onClick: () => {
               if (!activeFile) return;
-              updateSnapshot((prev) => deleteFileFromSnapshot(prev, activeFile.id));
+              updateSnapshot((prev) => closeTabInSnapshot(prev, activeFile.id));
             }
           },
           {
             id: "clear-ws",
             label: "Esvaziar workspace",
-            disabled: snapshot.files.length === 0,
+            disabled: studio.files.length === 0,
             onClick: () => {
               if (!window.confirm("Remover todos os arquivos e pastas deste workspace?")) return;
               setSelectedDir("");
@@ -429,6 +491,12 @@ export function DevelopmentCodeStudio({
         label: "Exibir",
         items: [
           { id: "explorer", label: "Explorador", onClick: () => setExplorerOpen((v) => !v) },
+          {
+            id: "html-preview",
+            label: "Preview HTML (navegador interno)",
+            disabled: activeFile?.language !== "html",
+            onClick: () => setHtmlPreviewOpen((v) => !v)
+          },
           { id: "terminal", label: "Terminal", shortcut: "Ctrl+`", onClick: () => setTerminalOpen((v) => !v) },
           { id: "minimap", label: "Minimap", onClick: () => setMinimap((v) => !v) },
           { id: "wordwrap", label: "Quebra de linha", onClick: () => setWordWrap((v) => !v) },
@@ -482,8 +550,9 @@ export function DevelopmentCodeStudio({
       persist,
       projectId,
       selectedDir,
-      snapshot.files.length,
-      snapshot,
+      activeFile?.language,
+      studio.files.length,
+      studio,
       triggerOpenFolder,
       triggerOpenLocalFile,
       triggerOpenLocalFiles,
@@ -495,7 +564,15 @@ export function DevelopmentCodeStudio({
     const onKey = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.key === "s") {
         e.preventDefault();
-        persist(snapshot);
+        persist(studio);
+      }
+      if (e.ctrlKey && !e.shiftKey && e.key.toLowerCase() === "w") {
+        e.preventDefault();
+        updateSnapshot((prev) => {
+          const id = ensureOpenTabs(prev).openFileId;
+          if (!id) return prev;
+          return closeTabInSnapshot(prev, id);
+        });
       }
       if (e.ctrlKey && e.shiftKey && e.key === "N") {
         e.preventDefault();
@@ -516,7 +593,7 @@ export function DevelopmentCodeStudio({
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [onNewFile, onNewFolder, persist, selectedDir, snapshot, triggerOpenLocalFile]);
+  }, [onNewFile, onNewFolder, persist, selectedDir, studio, triggerOpenLocalFile, updateSnapshot]);
 
   const onEditorMount: OnMount = (editor) => {
     editorRef.current = editor;
@@ -527,22 +604,32 @@ export function DevelopmentCodeStudio({
 
   const onChange = (value: string | undefined) => {
     if (value === undefined || !activeFile) return;
-    updateSnapshot((prev) => ({
-      ...prev,
-      files: prev.files.map((f) => (f.id === activeFile.id ? { ...f, content: value } : f))
-    }));
+    updateSnapshot((prev) =>
+      pinTabForFile(
+        {
+          ...prev,
+          files: prev.files.map((f) => (f.id === activeFile.id ? { ...f, content: value } : f))
+        },
+        activeFile.id
+      )
+    );
   };
 
   const setLanguage = (language: string) => {
     if (!activeFile) return;
-    updateSnapshot((prev) => ({
-      ...prev,
-      files: prev.files.map((f) => (f.id === activeFile.id ? { ...f, language } : f))
-    }));
+    updateSnapshot((prev) =>
+      pinTabForFile(
+        {
+          ...prev,
+          files: prev.files.map((f) => (f.id === activeFile.id ? { ...f, language } : f))
+        },
+        activeFile.id
+      )
+    );
   };
 
   return (
-    <div className="dev-code-studio" data-theme={theme === "vs-dark" ? "dark" : "light"}>
+    <div className="dev-code-studio" data-theme={shellUi}>
       <input
         ref={fileInputRef}
         type="file"
@@ -574,22 +661,65 @@ export function DevelopmentCodeStudio({
 
       <div className="dev-code-studio__toolbar">
         <div className="dev-code-studio__toolbar-group dev-code-studio__toolbar-group--grow">
-          {snapshot.files.length === 0 ? (
-            <span className="dev-code-studio__tab-placeholder">Nenhum arquivo aberto</span>
+          {openTabs.length === 0 ? (
+            <span className="dev-code-studio__tab-placeholder">Nenhuma aba aberta · clique num arquivo no explorador</span>
           ) : (
-            snapshot.files.map((file) => (
-              <button
-                key={file.id}
-                type="button"
-                className={`dev-code-studio__tab${file.id === snapshot.openFileId ? " is-active" : ""}`}
-                onClick={() => updateSnapshot((prev) => ({ ...prev, openFileId: file.id }))}
-              >
-                {fileBaseName(file.path)}
-              </button>
-            ))
+            openTabs.map((tab) => {
+              const file = studio.files.find((f) => f.id === tab.fileId);
+              if (!file) return null;
+              const isActive = tab.fileId === studio.openFileId;
+              return (
+                <div
+                  key={tab.fileId}
+                  className={`dev-code-studio__tab dev-code-studio__tab--with-close${isActive ? " is-active" : ""}${
+                    tab.preview ? " is-preview" : ""
+                  }`}
+                >
+                  <button
+                    type="button"
+                    className="dev-code-studio__tab-label"
+                    onClick={() => updateSnapshot((prev) => setActiveOpenFile(prev, tab.fileId))}
+                    title={file.path}
+                  >
+                    {fileBaseName(file.path)}
+                  </button>
+                  <button
+                    type="button"
+                    className="dev-code-studio__tab-close"
+                    title="Fechar aba"
+                    aria-label={`Fechar ${fileBaseName(file.path)}`}
+                    onClick={(ev) => closeEditorTab(tab.fileId, ev)}
+                  >
+                    <X className="h-3 w-3" aria-hidden />
+                  </button>
+                </div>
+              );
+            })
           )}
         </div>
         <div className="dev-code-studio__toolbar-group">
+          <label className="dev-code-studio__theme">
+            <Monitor className="h-3.5 w-3.5 opacity-70" aria-hidden />
+            <select
+              value={editorThemeChoice}
+              onChange={(e) => setEditorThemeChoice(e.target.value as EditorThemeChoice)}
+              aria-label="Tema do editor"
+            >
+              <option value="auto">Tema automático</option>
+              <option value="vs">Claro (VS)</option>
+              <option value="vs-dark">Escuro (VS)</option>
+              <option value="dracula">Dracula (oficial)</option>
+            </select>
+          </label>
+          <button
+            type="button"
+            className={`dev-code-studio__icon-btn${htmlPreviewOpen && activeFile?.language === "html" ? " is-active" : ""}`}
+            title={activeFile?.language === "html" ? "Alternar preview HTML" : "Abra um arquivo HTML para usar o preview"}
+            disabled={activeFile?.language !== "html"}
+            onClick={() => setHtmlPreviewOpen((v) => !v)}
+          >
+            <Eye className="h-4 w-4" aria-hidden />
+          </button>
           <label className="dev-code-studio__lang">
             <Braces className="h-3.5 w-3.5 opacity-70" aria-hidden />
             <select
@@ -623,10 +753,11 @@ export function DevelopmentCodeStudio({
       <div className="dev-code-studio__body">
         {explorerOpen ? (
           <CodeStudioExplorer
-            snapshot={snapshot}
+            snapshot={studio}
+            activeFileId={studio.openFileId}
             selectedDir={selectedDir}
             onSelectDir={setSelectedDir}
-            onOpenFile={(id) => updateSnapshot((prev) => ({ ...prev, openFileId: id }))}
+            onOpenFile={openExplorerFile}
             onNewFile={onNewFile}
             onNewFolder={onNewFolder}
             onRename={onRename}
@@ -635,7 +766,10 @@ export function DevelopmentCodeStudio({
         ) : null}
 
         <div className="dev-code-studio__editor-column">
-          <div ref={paneRef} className="dev-code-studio__editor-wrap">
+          <div
+            ref={paneRef}
+            className={`dev-code-studio__editor-wrap${htmlPreviewOpen && activeFile?.language === "html" ? " dev-code-studio__editor-wrap--split" : ""}`}
+          >
             {!activeFile ? (
               <CodeStudioWelcome
                 onNewFile={() => onNewFile(selectedDir)}
@@ -645,15 +779,16 @@ export function DevelopmentCodeStudio({
                 onImportFolder={triggerOpenFolder}
               />
             ) : (
-              <Editor
-                key={`${activeFile.id}-${theme}`}
-                height={editorHeightPx}
-                language={activeFile.language}
-                value={activeFile.content}
-                theme={theme}
-                onMount={onEditorMount}
-                onChange={onChange}
-                options={{
+              <div className="monaco-editor-host" style={{ flex: 1, minHeight: 0 }}>
+                <Editor
+                  key={`${activeFile.id}-${monacoTheme}`}
+                  height={editorHeightPx}
+                  language={activeFile.language}
+                  value={activeFile.content}
+                  theme={monacoTheme}
+                  onMount={onEditorMount}
+                  onChange={onChange}
+                  options={{
                   automaticLayout: true,
                   minimap: { enabled: minimap },
                   fontSize: 13,
@@ -684,14 +819,18 @@ export function DevelopmentCodeStudio({
                   renderWhitespace: "selection",
                   scrollbar: { verticalScrollbarSize: 10, horizontalScrollbarSize: 10 }
                 }}
-                loading={
-                  <div className="dev-code-studio__loading">
-                    <span className="dev-code-studio__loading-dot" />
-                    Carregando Monaco…
-                  </div>
-                }
-              />
+                  loading={
+                    <div className="dev-code-studio__loading">
+                      <span className="dev-code-studio__loading-dot" />
+                      Carregando Monaco…
+                    </div>
+                  }
+                />
+              </div>
             )}
+            {htmlPreviewOpen && activeFile?.language === "html" && htmlPreviewSrcDoc ? (
+              <CodeStudioHtmlPreview srcDoc={htmlPreviewSrcDoc} title={`Preview · ${fileBaseName(activeFile.path)}`} />
+            ) : null}
           </div>
           {terminalOpen ? (
             <div className="dev-code-studio__terminal" aria-label="Terminal">

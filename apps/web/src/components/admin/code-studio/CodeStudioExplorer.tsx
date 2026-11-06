@@ -5,15 +5,16 @@ import {
   type CodeStudioTreeNode,
   type DevCodeStudioSnapshot
 } from "@ederson-agencia/shared";
-import { FileCode2, FilePlus2, FolderPlus, Trash2 } from "lucide-react";
 import { FolderChevron } from "./CodeStudioMenuBar";
+import { materialFileIcon, materialFolderIconOpen } from "./fileMaterialIcon";
 
 type CodeStudioExplorerProps = {
   snapshot: DevCodeStudioSnapshot;
-  activeFilePath?: string;
+  activeFileId?: string;
   selectedDir: string;
   onSelectDir: (dir: string) => void;
-  onOpenFile: (fileId: string) => void;
+  /** Clique simples = preview (VS Code); duplo clique = aba fixa. */
+  onOpenFile: (fileId: string, mode: "preview" | "pin") => void;
   onNewFile: (dir: string) => void;
   onNewFolder: (parentDir: string) => void;
   onRename: (path: string, isFolder: boolean) => void;
@@ -36,7 +37,7 @@ function collectFolderPaths(snapshot: DevCodeStudioSnapshot): string[] {
 
 export function CodeStudioExplorer({
   snapshot,
-  activeFilePath,
+  activeFileId,
   selectedDir,
   onSelectDir,
   onOpenFile,
@@ -79,6 +80,9 @@ export function CodeStudioExplorer({
               }}
               onDoubleClick={() => onRename(node.path, true)}
             >
+              <span className="dev-code-studio__mi dev-code-studio__mi--folder material-icons-round" aria-hidden>
+                {materialFolderIconOpen(open)}
+              </span>
               <span className="dev-code-studio__tree-folder-name">{node.name}</span>
             </button>
           </div>
@@ -88,7 +92,7 @@ export function CodeStudioExplorer({
         </li>
       );
     }
-    const active = snapshot.openFileId === node.id;
+    const active = activeFileId === node.id;
     return (
       <li key={node.id}>
         <div className="dev-code-studio__tree-row" style={{ paddingLeft: `${8 + depth * 12}px` }}>
@@ -96,10 +100,15 @@ export function CodeStudioExplorer({
           <button
             type="button"
             className={`dev-code-studio__tree-label dev-code-studio__tree-file${active ? " is-active" : ""}`}
-            onClick={() => onOpenFile(node.id)}
-            onDoubleClick={() => onRename(node.path, false)}
+            onClick={() => onOpenFile(node.id, "preview")}
+            onDoubleClick={(e) => {
+              e.preventDefault();
+              onOpenFile(node.id, "pin");
+            }}
           >
-            <FileCode2 className="h-3.5 w-3.5 shrink-0 opacity-70" aria-hidden />
+            <span className="dev-code-studio__mi dev-code-studio__mi--file material-icons-round" aria-hidden>
+              {materialFileIcon(node.name)}
+            </span>
             <span className="truncate">{node.name}</span>
           </button>
         </div>
@@ -113,13 +122,19 @@ export function CodeStudioExplorer({
         <p className="dev-code-studio__explorer-label">EXPLORADOR</p>
         <div className="dev-code-studio__explorer-actions">
           <button type="button" title="Novo arquivo" onClick={() => onNewFile(selectedDir)}>
-            <FilePlus2 className="h-3.5 w-3.5" aria-hidden />
+            <span className="dev-code-studio__mi-toolbar material-icons-round" aria-hidden>
+              note_add
+            </span>
           </button>
           <button type="button" title="Nova pasta" onClick={() => onNewFolder(selectedDir)}>
-            <FolderPlus className="h-3.5 w-3.5" aria-hidden />
+            <span className="dev-code-studio__mi-toolbar material-icons-round" aria-hidden>
+              create_new_folder
+            </span>
           </button>
           <button type="button" title="Excluir pasta selecionada ou arquivo aberto" onClick={onDeleteSelection}>
-            <Trash2 className="h-3.5 w-3.5" aria-hidden />
+            <span className="dev-code-studio__mi-toolbar material-icons-round" aria-hidden>
+              delete
+            </span>
           </button>
         </div>
       </div>

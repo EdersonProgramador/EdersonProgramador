@@ -1,4 +1,11 @@
-import type { DevCodeStudioFile, DevCodeStudioFolder, DevCodeStudioSnapshot } from "./development-code-studio.js";
+import type {
+  DevCodeStudioFile,
+  DevCodeStudioFolder,
+  DevCodeStudioOpenTab,
+  DevCodeStudioSnapshot,
+  DevCodeStudioTabGroup
+} from "./development-code-studio.js";
+import { MONACO_LANGUAGE_BY_EXTENSION } from "./monaco-extension-language-map.generated.js";
 
 export type CodeStudioTreeNode =
   | { kind: "folder"; id: string; path: string; name: string; children: CodeStudioTreeNode[] }
@@ -22,19 +29,20 @@ export function joinPath(dir: string, name: string): string {
   return `${dir.replace(/\\/g, "/").replace(/\/+$/, "")}/${n}`;
 }
 
+/**
+ * ID de linguagem do Monaco a partir do caminho (extensão).
+ * Usa mapa gerado a partir dos `register.js` do pacote monaco-editor + alguns extras.
+ */
 export function languageFromPath(path: string): string {
   const base = fileBaseName(path).toLowerCase();
-  if (base.endsWith(".tsx")) return "typescript";
-  if (base.endsWith(".ts")) return "typescript";
-  if (base.endsWith(".jsx")) return "javascript";
-  if (base.endsWith(".js")) return "javascript";
-  if (base.endsWith(".json")) return "json";
-  if (base.endsWith(".css")) return "css";
-  if (base.endsWith(".html")) return "html";
-  if (base.endsWith(".md")) return "markdown";
-  if (base.endsWith(".yml") || base.endsWith(".yaml")) return "yaml";
-  if (base.endsWith(".prisma") || base.endsWith(".sql")) return "sql";
-  if (base.startsWith(".env")) return "plaintext";
+  if (base === "dockerfile" || base.startsWith("dockerfile.")) return "dockerfile";
+  if (base === "makefile" || base === "gnumakefile") return "shell";
+  if (base === "cmakelists.txt") return "plaintext";
+
+  const dot = base.lastIndexOf(".");
+  const ext = dot >= 0 ? base.slice(dot + 1) : "";
+  if (ext && MONACO_LANGUAGE_BY_EXTENSION[ext]) return MONACO_LANGUAGE_BY_EXTENSION[ext];
+  if (base.startsWith(".env")) return "ini";
   return "plaintext";
 }
 
@@ -106,6 +114,78 @@ export function buildCodeStudioTree(snapshot: DevCodeStudioSnapshot): CodeStudio
   return buildLevel(snapshot, folderPaths, "");
 }
 
+const EMPTY_TABS: DevCodeStudioTabGroup = { activeFileId: "", tabs: [] };
+
+/** Garante `openTabs` coerente com `files` e sincroniza `openFileId`. */
+export function ensureOpenTabs(snapshot: DevCodeStudioSnapshot): DevCodeStudioSnapshot {
+  const fileIds = new Set(snapshot.files.map((f) => f.id));
+  let tabs: DevCodeStudioOpenTab[] = snapshot.openTabs?.tabs?.filter((t) => fileIds.has(t.fileId)) ?? [];
+  if (!snapshot.openTabs?.tabs?.length && snapshot.openFileId && fileIds.has(snapshot.openFileId)) {
+    tabs = [{ fileId: snapshot.openFileId, preview: false }];
+  }
+  let active = snapshot.openTabs?.activeFileId ?? snapshot.openFileId ?? "";
+  if (!active || !fileIds.has(active) || !tabs.some((t) => t.fileId === active)) {
+    active = tabs[tabs.length - 1]?.fileId ?? "";
+  }
+  return { ...snapshot, openTabs: { activeFileId: active, tabs }, openFileId: active };
+}
+
+/**
+ * Abre arquivo na barra de abas (estilo VS Code).
+ * `preview` = clique simples no explorador (substitui a aba de preview existente).
+ * `pin` = duplo clique ou arquivo novo (aba fixa).
+ */
+export function openFileInTab(snapshot: DevCodeStudioSnapshot, fileId: string, mode: "preview" | "pin"): DevCodeStudioSnapshot {
+  const s = ensureOpenTabs(snapshot);
+  if (!s.files.some((f) => f.id === fileId)) return s;
+  const tabs = [...(s.openTabs?.tabs ?? [])];
+  const iPreview = tabs.findIndex((t) => t.preview);
+  const iExisting = tabs.findIndex((t) => t.fileId === fileId);
+
+  if (mode === "pin") {
+    if (iExisting >= 0) tabs[iExisting] = { fileId, preview: false };
+    else if (iPreview >= 0) tabs[iPreview] = { fileId, preview: false };
+    else tabs.push({ fileId, preview: false });
+    return { ...s, openTabs: { activeFileId: fileId, tabs }, openFileId: fileId };
+  }
+
+  if (iExisting >= 0) return { ...s, openTabs: { activeFileId: fileId, tabs }, openFileId: fileId };
+  if (iPreview >= 0) tabs[iPreview] = { fileId, preview: true };
+  else tabs.push({ fileId, preview: true });
+  return { ...s, openTabs: { activeFileId: fileId, tabs }, openFileId: fileId };
+}
+
+export function closeTabInSnapshot(snapshot: DevCodeStudioSnapshot, fileId: string): DevCodeStudioSnapshot {
+  const s = ensureOpenTabs(snapshot);
+  const oldTabs = s.openTabs?.tabs ?? [];
+  const closedIdx = oldTabs.findIndex((t) => t.fileId === fileId);
+  const tabs = oldTabs.filter((t) => t.fileId !== fileId);
+  let active = s.openTabs!.activeFileId;
+  if (active === fileId) {
+    const next = oldTabs[closedIdx + 1] ?? oldTabs[closedIdx - 1];
+    active = next?.fileId ?? tabs[tabs.length - 1]?.fileId ?? "";
+  }
+  return { ...s, openTabs: { activeFileId: active, tabs }, openFileId: active };
+}
+
+export function setActiveOpenFile(snapshot: DevCodeStudioSnapshot, fileId: string): DevCodeStudioSnapshot {
+  const s = ensureOpenTabs(snapshot);
+  if (!s.files.some((f) => f.id === fileId)) return s;
+  return { ...s, openTabs: { ...s.openTabs!, activeFileId: fileId }, openFileId: fileId };
+}
+
+/** Deixa a aba fixa (sai do modo preview), ex.: ao editar o arquivo. */
+export function pinTabForFile(snapshot: DevCodeStudioSnapshot, fileId: string): DevCodeStudioSnapshot {
+  const s = ensureOpenTabs(snapshot);
+  if (!s.openTabs?.tabs.some((t) => t.fileId === fileId)) return s;
+  const tabs = s.openTabs.tabs.map((t) => (t.fileId === fileId ? { ...t, preview: false } : t));
+  return { ...s, openTabs: { ...s.openTabs, tabs } };
+}
+
+function withImportBatchNoTabs(snapshot: DevCodeStudioSnapshot): DevCodeStudioSnapshot {
+  return { ...snapshot, openFileId: "", openTabs: { ...EMPTY_TABS } };
+}
+
 function normalizedFilePath(path: string): string {
   return path.replace(/\\/g, "/");
 }
@@ -141,12 +221,12 @@ export function createFileInSnapshot(
     language: languageFromPath(path),
     content: content || (languageFromPath(path) === "typescript" ? "// Novo arquivo\n" : "")
   };
-  return {
+  const next: DevCodeStudioSnapshot = {
     ...snapshot,
-    openFileId: id,
     folders: ensureFolderChain(snapshot, dir),
     files: [...snapshot.files, file]
   };
+  return openFileInTab(next, id, "pin");
 }
 
 /** Importa conteúdo de um arquivo local (nome seguro + caminho único). Último arquivo importado fica aberto. */
@@ -165,20 +245,21 @@ export function importFileIntoSnapshot(
     content
   };
   const parent = folderParentPath(path);
-  return {
+  const next: DevCodeStudioSnapshot = {
     ...snapshot,
-    openFileId: id,
     folders: ensureFolderChain(snapshot, parent),
     files: [...snapshot.files, file]
   };
+  return openFileInTab(next, id, "pin");
 }
+
 
 export type ImportLocalFileSpec = { relativePath: string; content: string };
 
 /**
  * Importa vários arquivos locais de uma vez (ex.: multi-seleção ou pasta com `webkitRelativePath`).
  * `relativePath` é relativo a `baseDir` no workspace (use `""` na raiz do workspace + caminhos como `src/a.ts`).
- * O último arquivo da lista fica aberto.
+ * Não abre abas — os arquivos ficam no explorador; abra pelo clique (preview) ou duplo clique (fixar).
  */
 export function importFilesIntoSnapshot(
   snapshot: DevCodeStudioSnapshot,
@@ -186,7 +267,7 @@ export function importFilesIntoSnapshot(
   files: ImportLocalFileSpec[]
 ): DevCodeStudioSnapshot {
   if (files.length === 0) return snapshot;
-  let next: DevCodeStudioSnapshot = snapshot;
+  let next: DevCodeStudioSnapshot = withImportBatchNoTabs(snapshot);
   for (const { relativePath, content } of files) {
     const rel = relativePath.replace(/\\/g, "/").replace(/^\/+/, "");
     if (!rel) continue;
@@ -203,12 +284,11 @@ export function importFilesIntoSnapshot(
     };
     next = {
       ...next,
-      openFileId: id,
       folders: ensureFolderChain(next, folderParentPath(path)),
       files: [...next.files, file]
     };
   }
-  return next;
+  return ensureOpenTabs(next);
 }
 
 export function createFolderInSnapshot(snapshot: DevCodeStudioSnapshot, parentDir: string, folderName: string): DevCodeStudioSnapshot {
@@ -222,21 +302,27 @@ export function createFolderInSnapshot(snapshot: DevCodeStudioSnapshot, parentDi
 
 export function deleteFileFromSnapshot(snapshot: DevCodeStudioSnapshot, fileId: string): DevCodeStudioSnapshot {
   const files = snapshot.files.filter((f) => f.id !== fileId);
-  let openFileId = snapshot.openFileId;
-  if (openFileId === fileId) openFileId = files[0]?.id ?? "";
-  return { ...snapshot, files, openFileId };
+  return ensureOpenTabs(closeTabInSnapshot({ ...snapshot, files }, fileId));
 }
 
 export function deleteFolderFromSnapshot(snapshot: DevCodeStudioSnapshot, folderPath: string): DevCodeStudioSnapshot {
   const prefix = folderPath.replace(/\\/g, "/").replace(/\/+$/, "") + "/";
+  const removedIds = new Set(
+    snapshot.files.filter((f) => {
+      const p = f.path.replace(/\\/g, "/");
+      return p === folderPath || p.startsWith(prefix);
+    }).map((f) => f.id)
+  );
   const files = snapshot.files.filter((f) => {
     const p = f.path.replace(/\\/g, "/");
     return p !== folderPath && !p.startsWith(prefix);
   });
   const folders = snapshot.folders.filter((f) => f.path !== folderPath && !f.path.startsWith(prefix));
-  let openFileId = snapshot.openFileId;
-  if (!files.some((f) => f.id === openFileId)) openFileId = files[0]?.id ?? "";
-  return { ...snapshot, files, folders, openFileId };
+  const s = ensureOpenTabs(snapshot);
+  const tabs = (s.openTabs?.tabs ?? []).filter((t) => !removedIds.has(t.fileId));
+  let active = s.openTabs!.activeFileId;
+  if (removedIds.has(active)) active = tabs[tabs.length - 1]?.fileId ?? "";
+  return ensureOpenTabs({ ...snapshot, files, folders, openTabs: { activeFileId: active, tabs }, openFileId: active });
 }
 
 export function renamePathInSnapshot(snapshot: DevCodeStudioSnapshot, oldPath: string, newPath: string): DevCodeStudioSnapshot {
@@ -278,15 +364,41 @@ export function migrateSnapshotToV2(raw: unknown): DevCodeStudioSnapshot | null 
       return { ...f, path, language: f.language ?? languageFromPath(path), content: f.content ?? "" };
     });
     const folders = Array.isArray(parsed.folders) ? (parsed.folders as DevCodeStudioFolder[]) : [];
+    const openFileIdFromJson =
+      typeof parsed.openFileId === "string" && files.some((f) => f.id === parsed.openFileId) ? parsed.openFileId : "";
+    let openTabsParsed: DevCodeStudioTabGroup | undefined;
+    const ot = parsed.openTabs as { activeFileId?: unknown; tabs?: unknown } | undefined;
+    if (ot && typeof ot === "object" && Array.isArray(ot.tabs)) {
+      const tabs: DevCodeStudioOpenTab[] = (ot.tabs as unknown[]).reduce<DevCodeStudioOpenTab[]>((acc, row) => {
+        if (!row || typeof row !== "object") return acc;
+        const fid = (row as { fileId?: unknown }).fileId;
+        if (typeof fid !== "string" || !files.some((f) => f.id === fid)) return acc;
+        acc.push({ fileId: fid, preview: Boolean((row as { preview?: unknown }).preview) });
+        return acc;
+      }, []);
+      let active =
+        typeof ot.activeFileId === "string" && files.some((f) => f.id === ot.activeFileId) ? ot.activeFileId : tabs[tabs.length - 1]?.fileId ?? "";
+      if (active && !tabs.some((t) => t.fileId === active)) active = tabs[tabs.length - 1]?.fileId ?? "";
+      openTabsParsed = { activeFileId: active, tabs };
+    }
     const openFileId =
       files.length === 0
         ? ""
-        : typeof parsed.openFileId === "string" && files.some((f) => f.id === parsed.openFileId)
-          ? parsed.openFileId
-          : (files[0]?.id ?? "");
-    let snap: DevCodeStudioSnapshot = { version: 2, openFileId, files, folders };
+        : openTabsParsed?.activeFileId && files.some((f) => f.id === openTabsParsed.activeFileId)
+          ? openTabsParsed.activeFileId
+          : openFileIdFromJson || (files[0]?.id ?? "");
+    let snap: DevCodeStudioSnapshot = {
+      version: 2,
+      openFileId,
+      openTabs:
+        openTabsParsed && openTabsParsed.tabs.length > 0
+          ? openTabsParsed
+          : { activeFileId: openFileId, tabs: openFileId ? [{ fileId: openFileId, preview: false }] : [] },
+      files,
+      folders
+    };
     for (const f of files) snap = { ...snap, folders: ensureFolderChain(snap, folderParentPath(f.path)) };
-    return snap;
+    return ensureOpenTabs(snap);
   }
   if (parsed.version === 1 && Array.isArray(parsed.files)) {
     const files = (parsed.files as Array<DevCodeStudioFile & { name?: string }>).map((f) => {
@@ -294,12 +406,22 @@ export function migrateSnapshotToV2(raw: unknown): DevCodeStudioSnapshot | null 
       return { id: f.id, path, language: f.language ?? languageFromPath(path), content: f.content ?? "" };
     });
     if (files.length === 0) {
-      return { version: 2, openFileId: "", files: [], folders: [] };
+      return ensureOpenTabs({ version: 2, openFileId: "", openTabs: { activeFileId: "", tabs: [] }, files: [], folders: [] });
     }
-    let snap: DevCodeStudioSnapshot = { version: 2, openFileId: files[0].id, files, folders: [] };
+    let snap: DevCodeStudioSnapshot = {
+      version: 2,
+      openFileId: files[0].id,
+      openTabs: { activeFileId: files[0].id, tabs: [{ fileId: files[0].id, preview: false }] },
+      files,
+      folders: []
+    };
     for (const f of files) snap = { ...snap, folders: ensureFolderChain(snap, folderParentPath(f.path)) };
     const openFileId = files.some((f) => f.id === parsed.openFileId) ? (parsed.openFileId as string) : files[0].id;
-    return { ...snap, openFileId };
+    return ensureOpenTabs({
+      ...snap,
+      openFileId,
+      openTabs: { activeFileId: openFileId, tabs: [{ fileId: openFileId, preview: false }] }
+    });
   }
   return null;
 }

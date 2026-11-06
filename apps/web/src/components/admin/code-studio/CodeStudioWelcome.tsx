@@ -77,6 +77,9 @@ export function CodeStudioWelcome({
               <span>Abrir arquivo local</span> <kbd>Ctrl+O</kbd>
             </li>
             <li>
+              <span>Fechar aba</span> <kbd>Ctrl+W</kbd>
+            </li>
+            <li>
               <span>Salvar no projeto</span> <kbd>Ctrl+S</kbd>
             </li>
             <li>

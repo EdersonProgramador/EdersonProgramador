@@ -265,20 +265,27 @@ export {
   serializeDevCodeStudioSnapshot,
   type DevCodeStudioFile,
   type DevCodeStudioFolder,
-  type DevCodeStudioSnapshot
+  type DevCodeStudioOpenTab,
+  type DevCodeStudioSnapshot,
+  type DevCodeStudioTabGroup
 } from "./development-code-studio.js";
 export {
   buildCodeStudioTree,
+  closeTabInSnapshot,
   createFileInSnapshot,
   createFolderInSnapshot,
   deleteFileFromSnapshot,
   deleteFolderFromSnapshot,
+  ensureOpenTabs,
   fileBaseName,
   importFileIntoSnapshot,
   importFilesIntoSnapshot,
   joinPath,
   languageFromPath,
+  openFileInTab,
+  pinTabForFile,
   renamePathInSnapshot,
+  setActiveOpenFile,
   type CodeStudioTreeNode,
   type ImportLocalFileSpec
 } from "./development-code-studio-fs.js";
