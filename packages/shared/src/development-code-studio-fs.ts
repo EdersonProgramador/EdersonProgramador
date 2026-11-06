@@ -139,9 +139,8 @@ export function createFolderInSnapshot(snapshot: DevCodeStudioSnapshot, parentDi
 
 export function deleteFileFromSnapshot(snapshot: DevCodeStudioSnapshot, fileId: string): DevCodeStudioSnapshot {
   const files = snapshot.files.filter((f) => f.id !== fileId);
-  if (files.length === 0) return snapshot;
   let openFileId = snapshot.openFileId;
-  if (openFileId === fileId) openFileId = files[0].id;
+  if (openFileId === fileId) openFileId = files[0]?.id ?? "";
   return { ...snapshot, files, openFileId };
 }
 
@@ -153,7 +152,7 @@ export function deleteFolderFromSnapshot(snapshot: DevCodeStudioSnapshot, folder
   });
   const folders = snapshot.folders.filter((f) => f.path !== folderPath && !f.path.startsWith(prefix));
   let openFileId = snapshot.openFileId;
-  if (!files.some((f) => f.id === openFileId)) openFileId = files[0]?.id ?? openFileId;
+  if (!files.some((f) => f.id === openFileId)) openFileId = files[0]?.id ?? "";
   return { ...snapshot, files, folders, openFileId };
 }
 
@@ -197,10 +196,11 @@ export function migrateSnapshotToV2(raw: unknown): DevCodeStudioSnapshot | null 
     });
     const folders = Array.isArray(parsed.folders) ? (parsed.folders as DevCodeStudioFolder[]) : [];
     const openFileId =
-      typeof parsed.openFileId === "string" && files.some((f) => f.id === parsed.openFileId)
-        ? parsed.openFileId
-        : files[0]?.id;
-    if (!files.length || !openFileId) return null;
+      files.length === 0
+        ? ""
+        : typeof parsed.openFileId === "string" && files.some((f) => f.id === parsed.openFileId)
+          ? parsed.openFileId
+          : (files[0]?.id ?? "");
     let snap: DevCodeStudioSnapshot = { version: 2, openFileId, files, folders };
     for (const f of files) snap = { ...snap, folders: ensureFolderChain(snap, folderParentPath(f.path)) };
     return snap;
@@ -210,6 +210,9 @@ export function migrateSnapshotToV2(raw: unknown): DevCodeStudioSnapshot | null 
       const path = f.path ?? f.name ?? "untitled.txt";
       return { id: f.id, path, language: f.language ?? languageFromPath(path), content: f.content ?? "" };
     });
+    if (files.length === 0) {
+      return { version: 2, openFileId: "", files: [], folders: [] };
+    }
     let snap: DevCodeStudioSnapshot = { version: 2, openFileId: files[0].id, files, folders: [] };
     for (const f of files) snap = { ...snap, folders: ensureFolderChain(snap, folderParentPath(f.path)) };
     const openFileId = files.some((f) => f.id === parsed.openFileId) ? (parsed.openFileId as string) : files[0].id;

@@ -292,6 +292,13 @@
   border-color: var(--dcs-border);
 }
 
+.dev-code-studio__tab-placeholder {
+  padding: 0.35rem 0.65rem;
+  font-size: 0.75rem;
+  color: var(--dcs-muted);
+  font-style: italic;
+}
+
 .dev-code-studio__tab--add {
   min-width: 1.75rem;
   text-align: center;
@@ -361,6 +368,137 @@
   border-radius: 999px;
   background: var(--dcs-accent);
   animation: devCodeStudioPulse 1s ease-in-out infinite;
+}
+
+.dev-code-studio__welcome {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 320px;
+  padding: 2rem 1.5rem;
+  background: var(--dcs-bg);
+}
+
+.dev-code-studio__welcome-inner {
+  max-width: 36rem;
+  width: 100%;
+}
+
+.dev-code-studio__welcome-brand {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+}
+
+.dev-code-studio__welcome-title {
+  margin: 0;
+  font-size: 1.375rem;
+  font-weight: 600;
+  color: var(--dcs-text);
+  letter-spacing: -0.02em;
+}
+
+.dev-code-studio__welcome-sub {
+  margin: 0.35rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--dcs-muted);
+}
+
+.dev-code-studio__welcome-section {
+  margin-bottom: 1.5rem;
+}
+
+.dev-code-studio__welcome-section:last-child {
+  margin-bottom: 0;
+}
+
+.dev-code-studio__welcome-section h3 {
+  margin: 0 0 0.65rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--dcs-muted);
+}
+
+.dev-code-studio__welcome-actions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.dev-code-studio__welcome-actions li {
+  margin-bottom: 0.35rem;
+}
+
+.dev-code-studio__welcome-actions li:last-child {
+  margin-bottom: 0;
+}
+
+.dev-code-studio__welcome-actions button {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: 0.35rem;
+  font-size: 0.8125rem;
+  color: var(--dcs-text);
+  text-align: left;
+  border: 1px solid var(--dcs-border);
+  background: var(--dcs-panel);
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.dev-code-studio__welcome-actions button:hover {
+  background: rgb(55 148 255 / 0.1);
+  border-color: var(--dcs-accent);
+  color: var(--dcs-accent);
+}
+
+.dev-code-studio__welcome-actions button kbd {
+  margin-left: auto;
+  font-size: 0.6875rem;
+  font-family: ui-monospace, monospace;
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.25rem;
+  background: var(--dcs-bg);
+  border: 1px solid var(--dcs-border);
+  color: var(--dcs-muted);
+}
+
+.dev-code-studio__welcome-shortcuts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.75rem;
+  color: var(--dcs-muted);
+}
+
+.dev-code-studio__welcome-shortcuts li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--dcs-border);
+}
+
+.dev-code-studio__welcome-shortcuts li:last-child {
+  border-bottom: none;
+}
+
+.dev-code-studio__welcome-shortcuts kbd {
+  font-size: 0.6875rem;
+  font-family: ui-monospace, monospace;
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.25rem;
+  background: var(--dcs-panel);
+  border: 1px solid var(--dcs-border);
+  color: var(--dcs-text);
 }
 
 @keyframes devCodeStudioPulse {

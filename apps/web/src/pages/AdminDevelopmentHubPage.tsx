@@ -85,31 +85,13 @@ export function AdminDevelopmentHubPage() {
 
   if (view === "editor") {
     const studioRaw = typeof fields[DEV_CODE_STUDIO_FIELD_ID] === "string" ? fields[DEV_CODE_STUDIO_FIELD_ID] : undefined;
-    const editorNav = navItem ?? {
-      label: "Studio de código",
-      description: "Editor Monaco (motor VS Code) para protótipos e snippets do lançamento."
-    };
     return (
-      <div className="space-y-6">
-        <header className="agency-admin-page-head">
-          <p className="text-xs font-semibold uppercase tracking-wide text-sky-600 dark:text-sky-300">
-            {navCtx ? (
-              <>
-                {navCtx.pillarLabel} · {navCtx.sectionLabel} · {navCtx.itemLabel}
-              </>
-            ) : (
-              "Desenvolvimento"
-            )}
-          </p>
-          <h1>{editorNav.label}</h1>
-          <p>{editorNav.description}</p>
-        </header>
-
-        <div className="panel space-y-3 p-4 sm:p-5">
-          <label className="block space-y-1.5 text-sm">
-            <span className="font-medium text-[var(--app-text)]">Projeto (opcional — para salvar no workspace)</span>
-            <select className="input w-full max-w-xl" value={projectId} onChange={(e) => onProjectChange(e.target.value)}>
-              <option value="">Sem projeto — só visualizar/editar localmente</option>
+      <div className="space-y-3">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+          <label className="flex min-w-0 flex-wrap items-center gap-2">
+            <span className="shrink-0 text-[var(--app-text-muted)]">Projeto (salvar no workspace)</span>
+            <select className="input max-w-md min-w-[12rem] flex-1" value={projectId} onChange={(e) => onProjectChange(e.target.value)}>
+              <option value="">Local — sem persistência no projeto</option>
               {projects.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.title}
@@ -117,20 +99,15 @@ export function AdminDevelopmentHubPage() {
               ))}
             </select>
           </label>
-          {!projectId ? (
-            <p className="text-xs text-amber-700 dark:text-amber-200">
-              O editor abre abaixo; escolha um projeto para persistir arquivos na operação.
-            </p>
-          ) : null}
-          {loading ? <p className="text-xs text-[var(--app-text-muted)]">Carregando…</p> : null}
-          {error ? <p className="text-sm text-red-500">{error}</p> : null}
-          {saving ? <p className="text-xs text-[var(--app-text-muted)]">Salvando…</p> : null}
+          {loading ? <span className="text-xs text-[var(--app-text-muted)]">Carregando…</span> : null}
+          {error ? <span className="text-sm text-red-500">{error}</span> : null}
+          {saving ? <span className="text-xs text-[var(--app-text-muted)]">Salvando…</span> : null}
         </div>
 
         <Suspense
           fallback={
-            <div className="panel flex min-h-[480px] items-center justify-center p-8 text-sm text-[var(--app-text-muted)]">
-              Carregando editor Monaco…
+            <div className="flex min-h-[480px] items-center justify-center rounded-xl border border-[var(--app-border)] bg-[var(--app-surface)] p-8 text-sm text-[var(--app-text-muted)]">
+              Carregando editor…
             </div>
           }
         >

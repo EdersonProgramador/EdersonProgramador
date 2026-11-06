@@ -3,6 +3,7 @@ import type { editor as MonacoEditor } from "monaco-editor";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { setupMonaco } from "../../monaco/setupMonaco";
 import {
+  AGENCY_APP_BASE,
   createFileInSnapshot,
   createFolderInSnapshot,
   defaultDevCodeStudioSnapshot,
@@ -20,6 +21,7 @@ import { patchProjectWorkspace } from "../../api/project-workspace-api";
 import { Braces, Copy, Maximize2, Minimize2, Sparkles, WrapText } from "lucide-react";
 import { CodeStudioExplorer } from "./code-studio/CodeStudioExplorer";
 import { CodeStudioMenuBar, type CodeStudioMenu } from "./code-studio/CodeStudioMenuBar";
+import { CodeStudioWelcome } from "./code-studio/CodeStudioWelcome";
 import "../../styles/dev-code-studio.css";
 
 type DevelopmentCodeStudioProps = {
@@ -114,7 +116,9 @@ export function DevelopmentCodeStudio({
     return () => ro.disconnect();
   }, [explorerOpen, terminalOpen]);
 
-  const activeFile = snapshot.files.find((f) => f.id === snapshot.openFileId) ?? snapshot.files[0];
+  const activeFile = snapshot.openFileId
+    ? snapshot.files.find((f) => f.id === snapshot.openFileId) ?? null
+    : null;
 
   const persist = useCallback(
     (next: DevCodeStudioSnapshot) => {
@@ -201,6 +205,12 @@ export function DevelopmentCodeStudio({
     if (af) onDelete(af.path, false);
   }, [onDelete, selectedDir, snapshot.files, snapshot.openFileId]);
 
+  const expandIdeUrl = useMemo(() => {
+    const path = `${AGENCY_APP_BASE}/studio/desenvolvimento`;
+    const qs = projectId ? `?project=${encodeURIComponent(projectId)}` : "";
+    return `${path}${qs}`;
+  }, [projectId]);
+
   const menus: CodeStudioMenu[] = useMemo(
     () => [
       {
@@ -223,6 +233,16 @@ export function DevelopmentCodeStudio({
             onClick: () => {
               if (!activeFile) return;
               updateSnapshot((prev) => deleteFileFromSnapshot(prev, activeFile.id));
+            }
+          },
+          {
+            id: "clear-ws",
+            label: "Esvaziar workspace",
+            disabled: snapshot.files.length === 0,
+            onClick: () => {
+              if (!window.confirm("Remover todos os arquivos e pastas deste workspace?")) return;
+              setSelectedDir("");
+              updateSnapshot(() => defaultDevCodeStudioSnapshot());
             }
           }
         ]
@@ -256,7 +276,12 @@ export function DevelopmentCodeStudio({
           { id: "terminal", label: "Terminal", shortcut: "Ctrl+`", onClick: () => setTerminalOpen((v) => !v) },
           { id: "minimap", label: "Minimap", onClick: () => setMinimap((v) => !v) },
           { id: "wordwrap", label: "Quebra de linha", onClick: () => setWordWrap((v) => !v) },
-          { id: "palette", label: "Paleta de comandos", shortcut: "F1", onClick: () => runEditorAction("editor.action.quickCommand") }
+          { id: "palette", label: "Paleta de comandos", shortcut: "F1", onClick: () => runEditorAction("editor.action.quickCommand") },
+          {
+            id: "expand-ide",
+            label: "Expandir IDE (nova aba)",
+            onClick: () => window.open(expandIdeUrl, "_blank", "noopener,noreferrer")
+          }
         ]
       },
       {
@@ -293,7 +318,7 @@ export function DevelopmentCodeStudio({
         ]
       }
     ],
-    [activeFile, onNewFile, onNewFolder, persist, projectId, selectedDir, snapshot, updateSnapshot]
+    [activeFile, expandIdeUrl, onNewFile, onNewFolder, persist, projectId, selectedDir, snapshot.files.length, snapshot, updateSnapshot]
   );
 
   useEffect(() => {
@@ -348,21 +373,30 @@ export function DevelopmentCodeStudio({
 
       <div className="dev-code-studio__toolbar">
         <div className="dev-code-studio__toolbar-group dev-code-studio__toolbar-group--grow">
-          {snapshot.files.map((file) => (
-            <button
-              key={file.id}
-              type="button"
-              className={`dev-code-studio__tab${file.id === snapshot.openFileId ? " is-active" : ""}`}
-              onClick={() => updateSnapshot((prev) => ({ ...prev, openFileId: file.id }))}
-            >
-              {fileBaseName(file.path)}
-            </button>
-          ))}
+          {snapshot.files.length === 0 ? (
+            <span className="dev-code-studio__tab-placeholder">Nenhum arquivo aberto</span>
+          ) : (
+            snapshot.files.map((file) => (
+              <button
+                key={file.id}
+                type="button"
+                className={`dev-code-studio__tab${file.id === snapshot.openFileId ? " is-active" : ""}`}
+                onClick={() => updateSnapshot((prev) => ({ ...prev, openFileId: file.id }))}
+              >
+                {fileBaseName(file.path)}
+              </button>
+            ))
+          )}
         </div>
         <div className="dev-code-studio__toolbar-group">
           <label className="dev-code-studio__lang">
             <Braces className="h-3.5 w-3.5 opacity-70" aria-hidden />
-            <select value={activeFile?.language ?? "typescript"} onChange={(e) => setLanguage(e.target.value)} aria-label="Linguagem">
+            <select
+              value={activeFile?.language ?? "typescript"}
+              onChange={(e) => setLanguage(e.target.value)}
+              aria-label="Linguagem"
+              disabled={!activeFile}
+            >
               {LANGUAGE_OPTIONS.map((opt) => (
                 <option key={opt.id} value={opt.id}>
                   {opt.label}
@@ -401,7 +435,9 @@ export function DevelopmentCodeStudio({
 
         <div className="dev-code-studio__editor-column">
           <div ref={paneRef} className="dev-code-studio__editor-wrap">
-            {activeFile ? (
+            {!activeFile ? (
+              <CodeStudioWelcome onNewFile={() => onNewFile(selectedDir)} onNewFolder={() => onNewFolder(selectedDir)} />
+            ) : (
               <Editor
                 key={`${activeFile.id}-${theme}`}
                 height={editorHeightPx}
@@ -448,8 +484,6 @@ export function DevelopmentCodeStudio({
                   </div>
                 }
               />
-            ) : (
-              <div className="dev-code-studio__loading">Crie um arquivo em Arquivo → Novo arquivo.</div>
             )}
           </div>
           {terminalOpen ? (
@@ -466,7 +500,7 @@ Terminal integrado em breve — use o editor para snippets do lançamento`}
 
       <footer className="dev-code-studio__status">
         <span>{activeFile?.language ?? "—"}</span>
-        <span>{activeFile?.path ?? "—"}</span>
+        <span className="min-w-0 truncate">{activeFile?.path ?? "Bem-vindo — crie um arquivo"}</span>
         <span>UTF-8</span>
         <span>Spaces: 2</span>
         <span className="dev-code-studio__status-grow">{cursor}</span>

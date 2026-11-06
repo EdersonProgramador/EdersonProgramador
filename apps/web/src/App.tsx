@@ -51,6 +51,7 @@ import { AdminMarketingDevPage } from "./pages/AdminMarketingDevPage";
 import { AdminMarketingHubPage } from "./pages/AdminMarketingHubPage";
 import { AdminBrandingHubPage } from "./pages/AdminBrandingHubPage";
 import { AdminDevelopmentHubPage } from "./pages/AdminDevelopmentHubPage";
+import { AdminCodeStudioFullPage } from "./pages/AdminCodeStudioFullPage";
 import { AdminFormulaHubPage } from "./pages/AdminFormulaHubPage";
 import { AdminOperationsLayout } from "./components/admin/AdminOperationsLayout";
 import { LegacyMarketingStackRoute } from "./components/admin/LegacyMarketingStackRoute";
@@ -92,6 +93,7 @@ export default function App() {
           <Route element={<AgencyShellLayout title="Operação" />}>
             <Route index element={<AgencyHomeRedirect />} />
             <Route element={<ProtectedRoute realm="agency" roles={["ADMIN"]} />}>
+              <Route path="studio/desenvolvimento" element={<AdminCodeStudioFullPage />} />
               <Route path="admin" element={<AdminOperationsLayout />}>
                 <Route index element={<Navigate to="projetos" replace />} />
                 <Route path="projetos" element={<AdminProjectsPage />} />
