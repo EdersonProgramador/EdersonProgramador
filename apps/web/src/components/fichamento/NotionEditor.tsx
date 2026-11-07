@@ -32,12 +32,16 @@ import {
   Underline as UnderlineIcon,
   Undo2
 } from "lucide-react";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState, type ReactNode } from "react";
 import { FontSize } from "./fontSizeExtension";
 import { LineHeight } from "./lineHeightExtension";
 import "../../styles/fichamento-editor.css";
 
 export type EditorSnapshot = { docJson: string; docHtml: string };
+
+export type NotionEditorHandle = {
+  getSnapshot: () => EditorSnapshot;
+};
 
 type NotionEditorProps = {
   contentJson?: string | null;
@@ -66,7 +70,10 @@ const LINE_HEIGHTS = [
 const TEXT_COLORS = ["#eef2f6", "#f87171", "#fb923c", "#facc15", "#4ade80", "#38bdf8", "#a78bfa", "#1f2937"];
 const HIGHLIGHT_COLORS = ["#fef08a", "#bbf7d0", "#bae6fd", "#fbcfe8", "#e5e7eb"];
 
-export function NotionEditor({ contentJson, contentHtml, placeholder, onSave, editorKey }: NotionEditorProps) {
+export const NotionEditor = forwardRef<NotionEditorHandle, NotionEditorProps>(function NotionEditor(
+  { contentJson, contentHtml, placeholder, onSave, editorKey },
+  ref
+) {
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
   const [, toolbarTick] = useState(0);
   const saveTimer = useRef<number | null>(null);
@@ -147,6 +154,17 @@ export function NotionEditor({ contentJson, contentHtml, placeholder, onSave, ed
       if (saveTimer.current) window.clearTimeout(saveTimer.current);
     };
   }, []);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      getSnapshot: () => {
+        if (!editor) return { docJson: "{}", docHtml: "" };
+        return { docJson: JSON.stringify(editor.getJSON()), docHtml: editor.getHTML() };
+      }
+    }),
+    [editor]
+  );
 
   if (!editor) return null;
 
@@ -428,7 +446,7 @@ export function NotionEditor({ contentJson, contentHtml, placeholder, onSave, ed
       <EditorContent editor={editor} />
     </div>
   );
-}
+});
 
 type ListKind = "taskList" | "bulletList" | "orderedList";
 type BlockContext =

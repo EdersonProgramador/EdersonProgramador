@@ -39,6 +39,7 @@ import { ThemeToggle } from "../components/theme/ThemeToggle";
 import { useAcademySession, useAuthStore } from "../stores/authStore";
 import { FichamentoWorkspace } from "../components/fichamento/FichamentoWorkspace";
 import { LessonFichamentoBlock } from "../components/fichamento/LessonFichamentoBlock";
+import { LessonFichamentoMode } from "../components/fichamento/LessonFichamentoMode";
 import { CourseLibraryView } from "../components/library/CourseLibraryView";
 import { enhanceLessonProseHtml } from "../lib/scripture-prose";
 import "../styles/course-certificate.css";
@@ -115,6 +116,9 @@ export function CourseStudyPage() {
   const moduleFichamentoMatch = subPath.match(/^fichamento\/modulo\/(\d+)$/);
   const moduleFichamentoNum = moduleFichamentoMatch ? Number(moduleFichamentoMatch[1]) : null;
   const isCourseFichamento = subPath === "fichamento/curso";
+  const fichamentoAulaMatch = subPath.match(/^fichamento\/aula\/(.+)$/);
+  const fichamentoLessonSlug = fichamentoAulaMatch ? decodeURIComponent(fichamentoAulaMatch[1]) : "";
+  const isLessonFichamentoMode = Boolean(fichamentoLessonSlug);
   const isCertificateView = subPath === "certificado";
   const isBonusPath = subPath.startsWith("bonus/");
   const libraryBookMatch = subPath.match(/^biblioteca\/([^/]+)(?:\/p\/(\d+))?$/);
@@ -129,6 +133,7 @@ export function CourseStudyPage() {
     !isCertificateView &&
     !moduleFichamentoMatch &&
     !isCourseFichamento &&
+    !fichamentoAulaMatch &&
     !isBonusPath &&
     !isLibraryList &&
     !libraryBookMatch
@@ -205,32 +210,40 @@ export function CourseStudyPage() {
   const items = payload?.curriculum.items ?? [];
   const bySlug = useMemo(() => new Map(items.map((i) => [i.slug, i])), [items]);
   const activeItem = lessonSlug ? bySlug.get(lessonSlug) : undefined;
+  const fichamentoModeItem = fichamentoLessonSlug ? bySlug.get(fichamentoLessonSlug) : undefined;
+  const noteLessonSlug = activeItem?.slug ?? fichamentoModeItem?.slug;
+
   useEffect(() => {
-    if (!courseSlug || !activeItem || !payload) {
+    if (!courseSlug || !noteLessonSlug || !payload) {
       setActiveLessonNote(null);
       return;
     }
-    const bundled = payload.lessonNotes[activeItem.slug];
+    const noteItem = bySlug.get(noteLessonSlug);
+    if (!noteItem) {
+      setActiveLessonNote(null);
+      return;
+    }
+    const bundled = payload.lessonNotes[noteItem.slug];
     if (bundled?.html) {
       setActiveLessonNote(bundled);
       return;
     }
     let cancelled = false;
     void apiGet<{ html?: string; displayTitle?: string }>(
-      `/courses/${courseSlug}/lessons/${encodeURIComponent(activeItem.slug)}`
+      `/courses/${courseSlug}/lessons/${encodeURIComponent(noteItem.slug)}`
     )
       .then((note) => {
         if (!cancelled) setActiveLessonNote(note);
       })
       .catch(() => {
         if (!cancelled) {
-          setActiveLessonNote(bundled ?? { displayTitle: activeItem.title });
+          setActiveLessonNote(bundled ?? { displayTitle: noteItem.title });
         }
       });
     return () => {
       cancelled = true;
     };
-  }, [courseSlug, activeItem?.slug, payload]);
+  }, [courseSlug, noteLessonSlug, payload, bySlug]);
   const activeBonus = isBonusPath
     ? payload?.bonusContent.find((b) => b.slug === subPath.replace(/^bonus\//, ""))
     : undefined;
@@ -320,14 +333,17 @@ export function CourseStudyPage() {
   }, [moduleRepetitions]);
 
   useEffect(() => {
+    const navItem = fichamentoModeItem ?? activeItem;
     const onKey = (e: KeyboardEvent) => {
-      if (!activeItem || e.target instanceof HTMLInputElement) return;
-      if (e.key === "ArrowLeft" && activeItem.prev) goLesson(activeItem.prev);
-      if (e.key === "ArrowRight" && activeItem.next) goLesson(activeItem.next);
+      if (!navItem || e.target instanceof HTMLInputElement) return;
+      const targetSlug = (slug: string) =>
+        isLessonFichamentoMode ? `fichamento/aula/${slug}` : slug;
+      if (e.key === "ArrowLeft" && navItem.prev) goLesson(targetSlug(navItem.prev));
+      if (e.key === "ArrowRight" && navItem.next) goLesson(targetSlug(navItem.next));
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [activeItem, goLesson]);
+  }, [activeItem, fichamentoModeItem, isLessonFichamentoMode, goLesson]);
 
   const filteredItems = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -487,7 +503,7 @@ export function CourseStudyPage() {
                           ? tanarBiblePageForLesson(item.slug, item.sectionTitle)
                           : null
                       }
-                      isActive={lessonSlug === item.slug}
+                      isActive={lessonSlug === item.slug || fichamentoLessonSlug === item.slug}
                       isDone={completed.has(item.slug)}
                       hasVideo={Boolean(videoFile(item.id))}
                       isYoutube={isYoutubeUrl(videoFile(item.id))}
@@ -501,7 +517,7 @@ export function CourseStudyPage() {
               <TocTree
                 items={items}
                 bonus={payload.bonusContent}
-                activeSlug={subPath}
+                activeSlug={fichamentoLessonSlug || lessonSlug || subPath}
                 completed={completed}
                 showBiblePages={payload.course.slug === TANAR_COURSE.slug}
                 moduleRepsByNumber={moduleRepsByNumber}
@@ -636,6 +652,33 @@ export function CourseStudyPage() {
                 <div className="course-lesson-prose mt-4 text-sm" dangerouslySetInnerHTML={{ __html: activeBonus.html }} />
               ) : null}
             </article>
+          ) : isLessonFichamentoMode && fichamentoModeItem && courseSlug && payload ? (
+            <LessonFichamentoMode
+              courseSlug={courseSlug}
+              item={fichamentoModeItem}
+              displayTitle={activeLessonNote?.displayTitle ?? fichamentoModeItem.title}
+              videoSrc={
+                videoFile(fichamentoModeItem.id) ? apiAssetUrl(videoFile(fichamentoModeItem.id)!) : null
+              }
+              pdfSrc={lessonPdfSrc(
+                fichamentoModeItem,
+                payload.curriculum.documentBase,
+                payload.videoManifest.files
+              )}
+              fichamentoJson={fichamento?.lessons[fichamentoModeItem.slug]?.docJson}
+              fichamentoHtml={fichamento?.lessons[fichamentoModeItem.slug]?.docHtml}
+              onExitLessonView={() => goLesson(fichamentoModeItem.slug)}
+              onPrev={
+                fichamentoModeItem.prev
+                  ? () => goLesson(`fichamento/aula/${fichamentoModeItem.prev}`)
+                  : undefined
+              }
+              onNext={
+                fichamentoModeItem.next
+                  ? () => goLesson(`fichamento/aula/${fichamentoModeItem.next}`)
+                  : undefined
+              }
+            />
           ) : activeItem && courseSlug ? (
             <LessonPanel
               courseSlug={courseSlug}
@@ -652,14 +695,39 @@ export function CourseStudyPage() {
                 <LessonFichamentoBlock
                   courseSlug={courseSlug}
                   lessonSlug={activeItem.slug}
+                  lessonTitle={activeLessonNote?.displayTitle ?? activeItem.title}
                   initialJson={fichamento?.lessons[activeItem.slug]?.docJson}
                   initialHtml={fichamento?.lessons[activeItem.slug]?.docHtml}
                 />
               }
+              onOpenFichamentoMode={() => goLesson(`fichamento/aula/${activeItem.slug}`)}
             />
           ) : null}
 
-          {activeItem ? (
+          {fichamentoModeItem && isLessonFichamentoMode ? (
+            <nav className="mt-4 flex flex-col-reverse gap-3 border-t border-white/10 pt-4 sm:flex-row sm:flex-wrap sm:justify-between lg:hidden">
+              {fichamentoModeItem.prev ? (
+                <button
+                  type="button"
+                  className="btn-secondary inline-flex w-full min-h-11 items-center justify-center gap-1 sm:w-auto"
+                  onClick={() => goLesson(`fichamento/aula/${fichamentoModeItem.prev}`)}
+                >
+                  <ChevronLeft className="h-4 w-4" /> Anterior
+                </button>
+              ) : (
+                <span className="hidden sm:block" />
+              )}
+              {fichamentoModeItem.next ? (
+                <button
+                  type="button"
+                  className="btn-primary inline-flex w-full min-h-11 items-center justify-center gap-1 sm:w-auto"
+                  onClick={() => goLesson(`fichamento/aula/${fichamentoModeItem.next}`)}
+                >
+                  Próxima <ChevronRight className="h-4 w-4" />
+                </button>
+              ) : null}
+            </nav>
+          ) : activeItem ? (
             <nav className="mt-6 flex flex-col-reverse gap-3 border-t border-white/10 pt-4 sm:flex-row sm:flex-wrap sm:justify-between">
               {activeItem.prev ? (
                 <button
@@ -1194,7 +1262,8 @@ function LessonPanel({
   telegramMessageMap,
   done,
   onToggleDone,
-  fichamentoSlot
+  fichamentoSlot,
+  onOpenFichamentoMode
 }: {
   courseSlug: string;
   item: CurriculumItem;
@@ -1207,6 +1276,7 @@ function LessonPanel({
   done: boolean;
   onToggleDone: (done: boolean) => void;
   fichamentoSlot?: ReactNode;
+  onOpenFichamentoMode?: () => void;
 }) {
   const title = note?.displayTitle ?? item.title;
   const pdfSrc = lessonPdfSrc(item, documentBase, mediaFiles);
@@ -1215,9 +1285,18 @@ function LessonPanel({
 
   return (
     <article className="panel p-4 sm:p-6 md:p-8">
-      <p className="course-text-subtle text-xs">{item.breadcrumb.join(" › ")}</p>
-      <h2 className="mt-2 text-xl font-bold text-[var(--course-fg)]">{title}</h2>
-      <p className="mt-1 font-mono text-sm text-brand-primary">{item.id}</p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <p className="course-text-subtle text-xs">{item.breadcrumb.join(" › ")}</p>
+          <h2 className="mt-2 text-xl font-bold text-[var(--course-fg)]">{title}</h2>
+          <p className="mt-1 font-mono text-sm text-brand-primary">{item.id}</p>
+        </div>
+        {onOpenFichamentoMode ? (
+          <button type="button" className="btn-primary shrink-0 text-sm" onClick={onOpenFichamentoMode}>
+            {COURSES_UI.study.fichamentoModeOpen}
+          </button>
+        ) : null}
+      </div>
 
       {pdfSrc || item.type === "video" ? (
         <div className="mt-6 space-y-4">
