@@ -32,27 +32,11 @@ export const CANVA_INTEGRATION_FIELD_IDS = {
   lastAutofillAt: "integration:canva:last-autofill-at"
 } as const;
 
-/** Chaves de dados no brand template Canva (Bulk Create / Labels) — alinhe no template. */
-export const CANVA_AUTOFILL_TEXT_BINDINGS = [
-  {
-    canvaKey: "PROMESSA",
-    sourceFieldIds: [
-      "product:offer:promessa-fl",
-      "branding:plataforma:posicionamento:declaracao",
-      "marketing:planejamento:estrategia:promessa-campanha"
-    ]
-  },
-  { canvaKey: "TAGLINE", sourceFieldIds: ["branding:identidade:verbal:tagline"] },
-  {
-    canvaKey: "NOME",
-    sourceFieldIds: [
-      "product:core:nome",
-      "branding:identidade:verbal:naming-opcoes"
-    ]
-  },
-  { canvaKey: "PERSONA", sourceFieldIds: ["branding:diagnostico:persona:resumo"] },
-  { canvaKey: "MANIFESTO", sourceFieldIds: ["branding:identidade:verbal:manifesto"] }
-] as const;
+/** Bindings Canva Autofill — preencher quando a sequência de campos for definida. */
+export const CANVA_AUTOFILL_TEXT_BINDINGS: ReadonlyArray<{
+  canvaKey: string;
+  sourceFieldIds: readonly string[];
+}> = [];
 
 export type CanvaAutofillTextDatum = { type: "text"; text: string };
 

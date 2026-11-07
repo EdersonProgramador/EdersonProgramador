@@ -34,41 +34,8 @@ function itemAt(ref: MarketingProductionTaskRef): LaunchOperationChecklistItem |
   return phase?.sections[ref.sectionIndex]?.items[ref.itemIndex];
 }
 
-export const MARKETING_PRODUCTION_VIEWS: readonly MarketingProductionView[] = [
-  {
-    type: "production",
-    id: "conteudo-seo",
-    navLabel: "Conteúdo, SEO & aquecimento",
-    title: "Marketing — Conteúdo, SEO & aquecimento",
-    subtitle:
-      "Distribuição orgânica, palavras-chave e calendário teaser antes do PPL — avatar certo aquecido com a voz da marca.",
-    refs: [
-      { phaseId: "fase-2", sectionIndex: 1, itemIndex: 0 },
-      { phaseId: "fase-2", sectionIndex: 2, itemIndex: 0 },
-      { phaseId: "fase-2", sectionIndex: 2, itemIndex: 1 },
-      { phaseId: "fase-1", sectionIndex: 4, itemIndex: 0 },
-      { phaseId: "fase-1", sectionIndex: 4, itemIndex: 1 }
-    ]
-  },
-  {
-    type: "production",
-    id: "captacao-trafego",
-    navLabel: "Captação, automação & tráfego",
-    title: "Marketing — Captação, automação & tráfego (PPL)",
-    subtitle:
-      "LPs no ar, e-mail entregando, pixels ativos e mídia paga capturando inscritos — mesmo playbook da Fase 3 FL.",
-    refs: [
-      { phaseId: "fase-3", sectionIndex: 0, itemIndex: 0 },
-      { phaseId: "fase-3", sectionIndex: 0, itemIndex: 1 },
-      { phaseId: "fase-3", sectionIndex: 1, itemIndex: 0 },
-      { phaseId: "fase-3", sectionIndex: 1, itemIndex: 1 },
-      { phaseId: "fase-3", sectionIndex: 2, itemIndex: 0 },
-      { phaseId: "fase-3", sectionIndex: 2, itemIndex: 1 },
-      { phaseId: "fase-3", sectionIndex: 3, itemIndex: 0 },
-      { phaseId: "fase-3", sectionIndex: 3, itemIndex: 1 }
-    ]
-  }
-] as const;
+/** Conteúdo esvaziado — a sequência será redefinida pela agência. */
+export const MARKETING_PRODUCTION_VIEWS: readonly MarketingProductionView[] = [];
 
 export function getMarketingProductionView(id: string): MarketingProductionView | undefined {
   return MARKETING_PRODUCTION_VIEWS.find((v) => v.id === id);

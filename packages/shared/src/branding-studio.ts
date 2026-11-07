@@ -231,50 +231,6 @@ export function buildBrandbookPdfModel(
 
 /** Conteúdo textual do brandbook a partir do workspace (PDF/HTML). */
 export function buildBrandbookOutline(fields: BrandingWorkspaceData): BrandbookSection[] {
-  const sections: BrandbookSection[] = [];
-
-  const pushText = (title: string, fieldIds: string[]) => {
-    const lines: string[] = [];
-    for (const id of fieldIds) {
-      const v = fields[id];
-      if (v === undefined || v === null) continue;
-      if (typeof v === "string" && !v.trim()) continue;
-      if (typeof v === "string" && v.trim()) lines.push(v.trim());
-    }
-    if (lines.length) sections.push({ title, lines });
-  };
-
-  pushText("Posicionamento", [
-    "branding:plataforma:posicionamento:declaracao",
-    "branding:plataforma:posicionamento:diferenciais"
-  ]);
-  pushText("Propósito e cultura", [
-    "branding:plataforma:proposito:texto",
-    "branding:plataforma:cultura:missao",
-    "branding:plataforma:cultura:visao",
-    "branding:plataforma:cultura:valores"
-  ]);
-  pushText("Persona", ["branding:diagnostico:persona:resumo"]);
-
-  const naming = parseBrandingNamingField(fields[BRANDING_NAMING_FIELD_ID]);
-  const chosen = naming.chosen?.trim();
-  const tagline = fields["branding:identidade:verbal:tagline"];
-  const manifesto = fields["branding:identidade:verbal:manifesto"];
-  const verbal: string[] = [];
-  if (chosen) verbal.push(`Nome aprovado: ${chosen}`);
-  if (typeof tagline === "string" && tagline.trim()) verbal.push(`Tagline: ${tagline.trim()}`);
-  if (typeof manifesto === "string" && manifesto.trim()) verbal.push(manifesto.trim());
-  if (verbal.length) sections.push({ title: "Identidade verbal", lines: verbal });
-
-  const palette = parseBrandingPaletteField(fields[BRANDING_PALETTE_FIELD_ID]);
-  const paletteLines = palette.swatches
-    .filter((s) => s.hex.trim())
-    .map((s) => `${s.name} (${s.role}): ${s.hex.toUpperCase()}`);
-  if (palette.notes?.trim()) paletteLines.push(palette.notes.trim());
-  const tipografia = fields["branding:identidade:visual:tipografia"];
-  const visual: string[] = [...paletteLines];
-  if (typeof tipografia === "string" && tipografia.trim()) visual.push(`Tipografia: ${tipografia.trim()}`);
-  if (visual.length) sections.push({ title: "Identidade visual", lines: visual });
-
-  return sections;
+  void fields;
+  return [];
 }

@@ -14,43 +14,13 @@ export const FORMULA_SIMULATOR_FIELD_IDS = {
   notas: `${F}:notas`
 } as const;
 
-export const FORMULA_SIMULATOR_FIELDS = [
-  {
-    id: FORMULA_SIMULATOR_FIELD_IDS.lista,
-    label: "Tamanho da lista / base (leads)",
-    type: "text" as const,
-    placeholder: "Ex.: 5000"
-  },
-  {
-    id: FORMULA_SIMULATOR_FIELD_IDS.convWebinar,
-    label: "Conversão para live / CPL1 (%)",
-    type: "text" as const,
-    placeholder: "Ex.: 25"
-  },
-  {
-    id: FORMULA_SIMULATOR_FIELD_IDS.convCheckout,
-    label: "Conversão checkout (%)",
-    type: "text" as const,
-    placeholder: "Ex.: 8"
-  },
-  {
-    id: FORMULA_SIMULATOR_FIELD_IDS.ticket,
-    label: "Ticket médio (R$)",
-    type: "text" as const,
-    placeholder: "Ex.: 1997"
-  },
-  {
-    id: FORMULA_SIMULATOR_FIELD_IDS.budgetAds,
-    label: "Investimento em mídia (R$)",
-    type: "text" as const,
-    placeholder: "Ex.: 12000"
-  },
-  {
-    id: FORMULA_SIMULATOR_FIELD_IDS.notas,
-    label: "Premissas e cenários",
-    type: "textarea" as const
-  }
-] as const;
+/** Campos do simulador esvaziados — serão redefinidos com a nova sequência FL. */
+export const FORMULA_SIMULATOR_FIELDS: readonly {
+  id: string;
+  label: string;
+  type: "text" | "textarea";
+  placeholder?: string;
+}[] = [];
 
 function num(value: BrandingFieldValue | undefined): number {
   if (typeof value !== "string") return 0;
@@ -109,5 +79,5 @@ export function formulaSimulatorProgress(fields: BrandingWorkspaceData): { total
     if (!isBrandingFieldValueEmpty(fields[f.id])) done += 1;
   }
   const total = formulaSimulatorFieldCount();
-  return { total, done, percent: Math.round((done / total) * 100) };
+  return { total, done, percent: total === 0 ? 0 : Math.round((done / total) * 100) };
 }
