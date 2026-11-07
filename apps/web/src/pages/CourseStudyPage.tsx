@@ -875,9 +875,11 @@ export function CourseStudyPage() {
 }
 
 function lessonStatusClass(isActive: boolean, isDone: boolean) {
-  if (isActive) return "is-active";
-  if (isDone) return "is-done";
-  return "is-pending";
+  const classes: string[] = [];
+  if (isActive) classes.push("is-active");
+  if (isDone) classes.push("is-done");
+  else if (!isActive) classes.push("is-pending");
+  return classes.join(" ");
 }
 
 function lessonKindLabel(

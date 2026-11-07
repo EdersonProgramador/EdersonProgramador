@@ -216,7 +216,7 @@
   border-color: rgb(255 255 255 / 0.28);
 }
 
-.course-study__toc-link.is-active .course-study__toc-status {
+.course-study__toc-link.is-active:not(.is-done) .course-study__toc-status {
   border-color: rgb(56 189 248 / 0.85);
   box-shadow: 0 0 0 3px rgb(56 189 248 / 0.15);
 }
@@ -225,6 +225,13 @@
   border-color: rgb(52 211 153 / 0.9);
   background: rgb(52 211 153 / 0.18);
   color: #6ee7b7;
+}
+
+.course-study__toc-link.is-active.is-done .course-study__toc-status {
+  border-color: rgb(16 185 129 / 0.95);
+  background: rgb(52 211 153 / 0.28);
+  color: rgb(110 231 183);
+  box-shadow: 0 0 0 2px rgb(255 255 255 / 0.35), 0 0 0 3px rgb(52 211 153 / 0.22);
 }
 
 .course-study__toc-body {

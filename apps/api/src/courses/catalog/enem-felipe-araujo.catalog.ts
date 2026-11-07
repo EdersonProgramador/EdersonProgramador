@@ -1,5 +1,8 @@
 /** Cronograma ENEM — Felipe Araújo (PDF 452378109). Trilha completa para admin/academia. */
 
+export const ENEM_FOLHA_REDACAO_IMAGE_URL =
+  "/course-assets/enem-cronograma-felipe-araujo/folha-redacao-enem.png";
+
 export type EnemCronogramaLesson = {
   slug: string;
   title: string;
@@ -1004,7 +1007,7 @@ const ESPANHOL = [
   "Falsos Amigos en español 2"
 ];
 
-const LINGUAGENS = [
+const TIC_ED_FISICA = [
   "Função e Impacto das Novas Mídias",
   "Gêneros Digitais",
   "Meios de Comunicação e a Indústria Cultural",
@@ -1043,7 +1046,62 @@ const LINGUAGENS = [
   "Brincadeiras"
 ];
 
-const REDACAO = [
+const GRAMATICA = [
+  "Acentuação",
+  "Ortografia",
+  "Substantivos",
+  "Artigos",
+  "Adjetivos",
+  "Numerais",
+  "Pronomes",
+  "Colocação Pronominal",
+  "Verbos 1",
+  "Verbos 2",
+  "Advérbios",
+  "Preposição",
+  "Conjunção e Interjeição",
+  "Período Simples: Sujeito e Predicado",
+  "Termos Ligados ao VERBO",
+  "Termos Ligados ao NOME",
+  "Concordância Nominal 1",
+  "Concordância Nominal 2",
+  "Concordância Verbal 1",
+  "Concordância Verbal 2",
+  "Regência Verbal 1",
+  "Regência Verbal 2",
+  "Regência Nominal",
+  "Crase",
+  "Período Composto por Coordenação",
+  "Período Composto por Subordinação – Substantiva 1",
+  "Período Composto por Subordinação – Substantiva 2",
+  "Período Composto por Subordinação – Adjetiva",
+  "Período Composto por Subordinação – Adverbial 1",
+  "Período Composto por Subordinação – Adverbial 2",
+  "Pontuação",
+  "Análise Sintático-Semântica 1",
+  "Análise Sintático-Semântica 2",
+  "Estrutura e Formação das Palavras",
+  "Estrutura e Formação das Palavras",
+  "Dificuldades gerais da língua e vícios de linguagem"
+];
+
+const INTERPRETACAO_PRODUCAO_TEXTUAL = [
+  "Elementos da Poesia 1",
+  "Elementos da Poesia 2",
+  "Elementos da Prosa 1",
+  "Elementos da Prosa 2",
+  "Técnicas de Leitura",
+  "Figuras de Linguagem 1",
+  "Figuras de Linguagem 2",
+  "Funções da Linguagem",
+  "Gênero Textual I",
+  "Gênero Textual II",
+  "Tipologia Textual",
+  "Intertextualidade I",
+  "Intertextualidade II",
+  "Variação Linguística",
+  "O texto Dissertativo-Argumentativo",
+  "Orientações básicas para a dissertação",
   "Estrutura Dissertativa: Microestrutura e macroestrutura",
   "Métodos de raciocínio: indução e dedução",
   "Métodos de raciocínio: dialética e falhas na argumentação",
@@ -1058,13 +1116,110 @@ const REDACAO = [
   "Introdução: Funções e Estratégias",
   "Tese: Funções e Estratégias",
   "Mecanismos Estruturais no Desenvolvimento",
+  "Argumentação I",
+  "Argumentação II",
+  "Alusões I",
+  "Alusões II",
   "Conclusão: Funções e Estratégias",
+  "Proposta de Intervenção",
+  "Redação ENEM: Competência 1",
+  "Redação ENEM: Competência 2",
+  "Redação ENEM: Competência 3",
+  "Redação ENEM: Competência 4",
+  "Redação ENEM: Competência 5",
+  "Leitura e Aproveitamento da Coletânea / Texto de Apoio",
+  "Coesão lexical e semântica",
+  "Conectivos I",
+  "Conectivos II",
+  "Coerência I",
+  "Coerência II",
   "Análise de Redações Exemplares 1",
-  "Análise de Redações Exemplares 2",
-  "Folha de redação ENEM — orientações oficiais"
+  "Análise de Redações Exemplares 2"
 ];
 
-const TEMAS_REDACAO = [
+const TEMAS_PRODUCAO_TEXTUAL_1 = [
+  "Alternativas para o escoamento de produtos no Brasil",
+  "O aumento de homicídios entre os jovens brasileiros e seus fatores motivadores",
+  "A relevância de uma infância saudável na formação do cidadão brasileiro",
+  "Os perigos da automedicação na cultura brasileira",
+  "As mídias sociais como impulsionadoras da busca pela perfeição",
+  "A demarcação de terras e a sobrevivência da cultura indígena",
+  "O vício em games como distúrbio mental e suas implicações",
+  "A questão da fome no Brasil e seus fatores motivadores",
+  "O aumento dos casos de ansiedade no Brasil",
+  "A banalização do diagnóstico de tdah",
+  "Foro privilegiado: privilégio pessoal ou proteção do exercício de função?",
+  "Os desafios para promover a integração dos moradores de rua à sociedade",
+  "Direitos Civis dos Homossexuais",
+  "Mudanças Climáticas Globais e Brasil",
+  "O Parto como Questão de Saúde Pública no Brasil",
+  "Atual Cenário da Leitura no Brasil.",
+  "Descriminalização da Maconha: Problema ou Solução?",
+  "Envelhecimento da População Brasileira",
+  "O trabalho informal como alternativa à crise econômica",
+  "Os refugiados da Venezuela em território brasileiro",
+  "Saúde Global em Tempos de Globalização",
+  "Trotes Universitários",
+  "A integração social da pessoa com síndrome de Down",
+  "Energia Nuclear como Solução para o Brasil",
+  "A Gramática Facilita ou Dificulta a Comunicação?",
+  "Como enfrentar o aumento do consumo de drogas lícitas por adolescentes",
+  "Leis e Penas mais Severas é a Solução para o Trânsito no Brasil?",
+  "Gravidez na Adolescência em questão no Brasil",
+  "Favela e Cidade: as Distâncias Sociais Desapareceram?",
+  "Cotas nas Universidades",
+  "Combate ao Fumo: Autoritarismo ou Dever do Governo?",
+  "A tolerância aos agrotóxicos e seus efeitos no Brasil",
+  "Como promover a inclusão social de ex-presidiários no Brasil",
+  "Os efeitos da erotização infantil no Brasil",
+  "Mentira: Doença, Problema Moral, Necessidade ou Brincadeira?",
+  "Os impactos da economia colaborativa no cenário de crise econômica do Brasil",
+  "Educação domiciliar: solução para o ensino brasileiro ou fracasso do sistema?",
+  "As manifestações de violência nos estádios de futebol brasileiros",
+  "A discussão linguística no Brasil atual",
+  "Mobilidade urbana no século XXI – o ir e vir em questão na sociedade brasileira"
+];
+
+const TEMAS_PRODUCAO_TEXTUAL_2 = [
+  "O esporte como ferramenta de inclusão social no Brasil",
+  "A prática do Bullying e Cyberbullying nas escolas brasileiras",
+  "O problema do uso excessivo da tecnologia entre os brasileiros e suas consequências",
+  "A precarização do patrimônio histórico brasileiro e suas implicações",
+  "A Questão do Lixo nas Sociedades de Consumo",
+  "Eutanásia: Quem Decide a Hora Certa de Morrer?",
+  "O Ensino a distância em questão no Brasil",
+  "O Papel da Imprensa Numa Sociedade Democrática",
+  "Juventude e Alcoolismo: Problema Social?",
+  "Influência de Filmes e Novelas na Formação Social do Indivíduo",
+  "O Papel do Estado na Vida dos Cidadãos e Nações",
+  "Transgênicos: Fonte de Problema ou Solução?",
+  "Marco Civil da Internet: Interesses em Conflito?",
+  "Palmada Educa?",
+  "A mudança das relações de trabalho no Brasil",
+  "A diversidade presente na sociedade atual",
+  "O aumento de IST's entre os jovens brasileiros.",
+  "Divulgação de Fake News e seus impactos",
+  "A população em situação de rua no Brasil",
+  "Escravidão contemporânea e seus efeitos",
+  "Os obstáculos para doação de órgãos no Brasil",
+  "Diversidade de gênero e igualdade de gênero em discussão no século XXI",
+  "As consequências da biopirataria no Brasil",
+  "Criação Publicitária e Poder das Redes Sociais",
+  "Novos Modelos Familiares",
+  "Tráfico de Animais Silvestres no Brasil",
+  "O cenário de Redemocratização em Construção no Brasil",
+  "O Cenário da Autonomia da Mulher Brasileira nos casos de Interrupção da Gestação.",
+  "A AIDS em Questão no Brasil",
+  "Bandido Bom é Bandido Morto?",
+  "Como Resolver o Problema da Criminalidade Infantil em na Sociedade?",
+  "A Valorização da Cultura Nacional na Formação da Identidade Contemporânea",
+  "O discurso de ódio no Brasil: intolerância ou liberdade de expressão?",
+  "O ativismo moderno e as mudanças sociais no Brasil atual",
+  "Alimentação irregular e obesidade no Brasil",
+  "O suicídio entre os jovens brasileiros - alternativas para enfrentar esse problema"
+];
+
+const TEMAS_PRODUCAO_TEXTUAL_3 = [
   "Desafios para a conciliação da Biotecnologia e a Ética",
   "A exploração trabalhista na sociedade moderna",
   "Os efeitos da desinformação e da espetacularização midiática nas sociedades contemporâneas",
@@ -1072,20 +1227,20 @@ const TEMAS_REDACAO = [
   "Cibercondria – a doença da era digital",
   "Desafios da alfabetização tecnológica para os idosos",
   "Êxodo rural e suas consequências sociais",
-  "Aleitamento materno em questão no Brasil",
+  "Aleitamento materno em questão no brasil",
   "Funk: expressão de uma cultura ou apenas mais um produto da mídia",
   "A importância da educação financeira na vida do cidadão",
   "Desaparecimento de pessoas no Brasil",
   "O ensino da história e cultura africana no Brasil: conquistas e desafios",
   "Limites entre a liberdade de expressão e o politicamente correto",
-  "Caminhos para combater a epidemia de crack no Brasil",
+  "Caminhos para combater a epidemia de crack no brasil",
   "Humanização no Atendimento à Saúde",
   "Os efeitos da má gestão hídrica no setor energético brasileiro",
-  "Os desafios da produção artística no Brasil",
+  "Os desafios da produção artística no brasil",
   "Doenças negligenciadas pela indústria farmacêutica: causas e consequências",
   "A tecnologia no combate à criminalidade",
   "Lixo eletrônico e impactos socioambientais",
-  "A sociedade atual e as relações de trabalho: o fenômeno da uberização",
+  "A sociedade atual e as relações de trabalho: o fenômeno da \"uberização\"",
   "Perigos da obsolescência programada",
   "Tatuagem: modismo ou formação de identidade",
   "O futuro do trabalho: automação e aspectos sociais",
@@ -1110,7 +1265,7 @@ export const ENEM_FELIPE_ARAUJO_CATALOG: EnemCronogramaCatalog = {
     "Trilha completa baseada no cronograma F3lipearaujo: metas e filmes, Ciências da Natureza, Matemática, Humanas, Linguagens, Redação, competências e temas de prática.",
   coverUrl: "/course-covers/enem-cronograma-felipe-araujo.png",
   sortOrder: 5,
-  catalogVersion: 14,
+  catalogVersion: 19,
   modules: [
     {
       title: "Introdução",
@@ -1157,10 +1312,31 @@ export const ENEM_FELIPE_ARAUJO_CATALOG: EnemCronogramaCatalog = {
     cronogramaModule("hist-brasil", "História do Brasil", HIST_BR),
     cronogramaModule("hist-arte", "História da Arte", HISTORIA_DA_ARTE),
     cronogramaModule("literatura", "Literatura", LITERATURA),
+    cronogramaModule("gramatica", "Gramática", GRAMATICA),
     cronogramaModule("ingles", "Inglês", INGLES),
     cronogramaModule("espanhol", "Espanhol", ESPANHOL),
-    cronogramaModule("linguagens", "Linguagens", LINGUAGENS),
-    cronogramaModule("redacao", "Redação", REDACAO),
-    cronogramaModule("temas-redacao", "Temas de redação", TEMAS_REDACAO)
+    cronogramaModule(
+      "tic-ed-fisica",
+      "Tecnologia da Informação e Comunicação / Ed. Física",
+      TIC_ED_FISICA
+    ),
+    cronogramaModule(
+      "interpretacao-producao-textual",
+      "Interpretação e Produção Textual",
+      INTERPRETACAO_PRODUCAO_TEXTUAL
+    ),
+    cronogramaModule("temas-producao-1", "Temas para Produção Textual 1", TEMAS_PRODUCAO_TEXTUAL_1),
+    cronogramaModule("temas-producao-2", "Temas para Produção Textual 2", TEMAS_PRODUCAO_TEXTUAL_2),
+    cronogramaModule("temas-producao-3", "Temas para Produção Textual 3", TEMAS_PRODUCAO_TEXTUAL_3),
+    cronogramaModule("folha-redacao", "Folha de Redação", ["Modelo oficial ENEM — folha de redação"], {
+      "Modelo oficial ENEM — folha de redação": `<p>Use o modelo abaixo como padrão de escrita (30 linhas, margens e identificação conforme o ENEM). Você pode abrir a imagem em nova aba para imprimir ou traçar por cima no digital.</p>
+<figure class="course-figure my-4">
+  <a href="${ENEM_FOLHA_REDACAO_IMAGE_URL}" target="_blank" rel="noopener noreferrer">
+    <img src="${ENEM_FOLHA_REDACAO_IMAGE_URL}" alt="Folha de redação ENEM — modelo oficial com 30 linhas" width="820" height="1160" class="max-w-full h-auto rounded-lg border border-[var(--course-border)]" loading="lazy" />
+  </a>
+  <figcaption class="course-text-muted text-sm mt-2">Clique na imagem para abrir em tamanho completo.</figcaption>
+</figure>
+<p>Lembrete do edital: caneta esferográfica de tinta preta em material transparente; respeite as margens; em caso de erro, risque com um traço simples e escreva o substituto ao lado.</p>`
+    })
   ]
 };
