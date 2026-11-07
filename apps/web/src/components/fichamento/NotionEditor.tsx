@@ -453,7 +453,7 @@ export const NotionEditor = forwardRef<NotionEditorHandle, NotionEditorProps>(fu
           </div>
         </div>
       </div>
-      <EditorContent editor={editor} />
+      <EditorContent editor={editor} className="fichamento-editor__scroll" />
     </div>
   );
 });

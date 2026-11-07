@@ -88,7 +88,7 @@ export function LessonFichamentoBlock({
           </div>
         ) : null}
       </div>
-      <div className="mt-3 min-h-0 flex-1">
+      <div className="fichamento-lesson-block__editor mt-3 min-h-0 flex-1">
         <NotionEditor
           ref={editorRef}
           editorKey={`lesson-${courseSlug}-${lessonSlug}`}

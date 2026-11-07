@@ -999,24 +999,35 @@ html[data-theme="day"] .course-study__section-block[open] {
   min-height: 300px;
 }
 
-.course-study-fichamento-mode__editor .fichamento-editor {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 260px;
+.course-study-fichamento-mode__editor .fichamento-lesson-block__head {
+  flex-shrink: 0;
 }
 
-.course-study-fichamento-mode__editor .fichamento-editor__content {
+.course-study-fichamento-mode__editor .fichamento-lesson-block__editor {
+  display: flex;
+  flex-direction: column;
   flex: 1;
-  min-height: 180px;
+  min-height: 0;
+}
+
+.course-study-fichamento-mode__editor .fichamento-editor {
+  flex: 1;
+  min-height: 0;
+  max-height: 100%;
+}
+
+.course-study-fichamento-mode__editor .fichamento-editor__scroll {
   max-height: min(48vh, 560px);
-  overflow-y: auto;
 }
 
 @media (min-width: 1024px) {
-  .course-study-fichamento-mode__editor .fichamento-editor__content {
-    max-height: calc(100dvh - var(--course-header-h) - 10.5rem);
+  .course-study-fichamento-mode__editor .fichamento-editor__scroll {
+    max-height: calc(100dvh - var(--course-header-h) - 11rem);
   }
+}
+
+.course-study-fichamento-mode__editor .fichamento-editor__content {
+  min-height: 12rem;
 }
 
 /* Modo leitura — área principal em tela cheia (fichamento / escrita) */
@@ -1052,8 +1063,15 @@ html[data-theme="day"] .course-study__section-block[open] {
   height: 100%;
 }
 
-.course-study.is-study-focus .course-study-fichamento-mode__editor .fichamento-editor__content {
+.course-study.is-study-focus .course-study-fichamento-mode__grid.has-consumo {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.course-study.is-study-focus .course-study-fichamento-mode__editor .fichamento-editor__scroll {
   max-height: none;
+  flex: 1;
+  min-height: 0;
 }
 
 @media (min-width: 1024px) {
@@ -1073,12 +1091,14 @@ html[data-theme="day"] .course-study__section-block[open] {
 }
 
 .course-study.is-study-focus .fichamento-workspace .fichamento-editor {
-  min-height: calc(100dvh - 10rem);
+  min-height: 0;
+  max-height: calc(100dvh - 8rem);
 }
 
-.course-study.is-study-focus .fichamento-workspace .fichamento-editor__content {
+.course-study.is-study-focus .fichamento-workspace .fichamento-editor__scroll {
+  flex: 1;
+  min-height: 0;
   max-height: none;
-  min-height: calc(100dvh - 14rem);
 }
 
 .course-study__focus-exit {
