@@ -26,6 +26,12 @@ export const FORMULA_OPERATION_NAV: readonly FormulaNavSection[] = [
         label: "Simulador de receita",
         adminPath: "operacao/formula-lancamento/simulador",
         description: "Lista, conversão e ticket — cenários conservador, base e agressivo."
+      },
+      {
+        id: "plano-pdf",
+        label: "Plano PDF",
+        adminPath: "operacao/formula-lancamento/plano-pdf",
+        description: "Relatório executivo do lançamento (oferta, marketing, simulador, checklist)."
       }
     ]
   },

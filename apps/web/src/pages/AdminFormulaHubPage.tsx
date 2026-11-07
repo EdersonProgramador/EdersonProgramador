@@ -21,7 +21,7 @@ export function AdminFormulaHubPage() {
   const projectId = searchParams.get("project") ?? "";
   const q = projectId ? `?project=${encodeURIComponent(projectId)}` : "";
 
-  if (view && view !== "estatistica" && view !== "simulador") {
+  if (view && view !== "estatistica" && view !== "simulador" && view !== "plano-pdf") {
     const phaseId = formulaLaunchPhaseIdFromHubView(view);
     if (phaseId) {
       return <Navigate to={`${ADMIN_BASE}/operacao/${phaseId}${q}`} replace />;

@@ -355,6 +355,16 @@ export {
   type BrandingPaletteValue
 } from "./branding-studio.js";
 export {
+  buildLaunchPlanOutline,
+  buildLaunchPlanPdfModel,
+  type LaunchPlanPdfModel
+} from "./launch-plan-report.js";
+export {
+  buildCanvaAutofillData,
+  CANVA_AUTOFILL_TEXT_BINDINGS,
+  type CanvaAutofillTextDatum
+} from "./canva-integration.js";
+export {
   computeLaunchRevenueProjection,
   FORMULA_SIMULATOR_FIELD_IDS,
   FORMULA_SIMULATOR_FIELDS,

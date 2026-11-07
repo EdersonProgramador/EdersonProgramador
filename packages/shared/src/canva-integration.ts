@@ -1,5 +1,8 @@
 /** Links, OAuth Connect e campos de integração no workspace. */
 
+import type { BrandingFieldValue, BrandingWorkspaceData } from "./branding-workspace.js";
+import { formatBrandingNamingForFeed, formatBrandingPaletteForFeed, isBrandingNamingStudioValue, isBrandingPaletteValue } from "./branding-studio.js";
+
 export const CANVA_OAUTH_AUTHORIZE_URL = "https://www.canva.com/api/oauth/authorize" as const;
 export const CANVA_OAUTH_TOKEN_URL = "https://api.canva.com/rest/v1/oauth/token" as const;
 export const CANVA_API_BASE = "https://api.canva.com/rest/v1" as const;
@@ -22,8 +25,63 @@ export const CANVA_INTEGRATION_FIELD_IDS = {
   scopes: "integration:canva:scopes",
   pkceVerifier: "integration:canva:pkce-verifier",
   connectedAt: "integration:canva:connected-at",
-  profileName: "integration:canva:profile-name"
+  profileName: "integration:canva:profile-name",
+  brandTemplateId: "integration:canva:brand-template-id",
+  lastAutofillJobId: "integration:canva:last-autofill-job-id",
+  lastDesignUrl: "integration:canva:last-design-url",
+  lastAutofillAt: "integration:canva:last-autofill-at"
 } as const;
+
+/** Chaves de dados no brand template Canva (Bulk Create / Labels) — alinhe no template. */
+export const CANVA_AUTOFILL_TEXT_BINDINGS = [
+  {
+    canvaKey: "PROMESSA",
+    sourceFieldIds: [
+      "product:offer:promessa-fl",
+      "branding:plataforma:posicionamento:declaracao",
+      "marketing:planejamento:estrategia:promessa-campanha"
+    ]
+  },
+  { canvaKey: "TAGLINE", sourceFieldIds: ["branding:identidade:verbal:tagline"] },
+  {
+    canvaKey: "NOME",
+    sourceFieldIds: [
+      "product:core:nome",
+      "branding:identidade:verbal:naming-opcoes"
+    ]
+  },
+  { canvaKey: "PERSONA", sourceFieldIds: ["branding:diagnostico:persona:resumo"] },
+  { canvaKey: "MANIFESTO", sourceFieldIds: ["branding:identidade:verbal:manifesto"] }
+] as const;
+
+export type CanvaAutofillTextDatum = { type: "text"; text: string };
+
+function autofillTextFromField(fieldId: string, value: BrandingFieldValue | undefined): string | undefined {
+  if (value === undefined || value === null) return undefined;
+  if (fieldId === "branding:identidade:visual:paleta") return formatBrandingPaletteForFeed(value);
+  if (fieldId === "branding:identidade:verbal:naming-opcoes") return formatBrandingNamingForFeed(value);
+  if (typeof value === "string") {
+    const t = value.trim();
+    return t || undefined;
+  }
+  if (isBrandingPaletteValue(value) || isBrandingNamingStudioValue(value)) return undefined;
+  if (typeof value === "object" && "rows" in value) return undefined;
+  return undefined;
+}
+
+export function buildCanvaAutofillData(fields: BrandingWorkspaceData): Record<string, CanvaAutofillTextDatum> {
+  const data: Record<string, CanvaAutofillTextDatum> = {};
+  for (const binding of CANVA_AUTOFILL_TEXT_BINDINGS) {
+    for (const sourceId of binding.sourceFieldIds) {
+      const text = autofillTextFromField(sourceId, fields[sourceId]);
+      if (text) {
+        data[binding.canvaKey] = { type: "text", text: text.slice(0, 8000) };
+        break;
+      }
+    }
+  }
+  return data;
+}
 
 export type CanvaIntegrationStatus = {
   configured: boolean;

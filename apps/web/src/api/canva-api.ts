@@ -16,6 +16,20 @@ export async function disconnectCanva(projectId: string): Promise<{ ok: boolean 
   return apiPost(`/agency/projects/${projectId}/canva/disconnect`, {});
 }
 
+export async function runCanvaAutofill(
+  projectId: string,
+  body?: { brandTemplateId?: string; title?: string }
+): Promise<{
+  ok: boolean;
+  jobId: string;
+  editUrl?: string;
+  viewUrl?: string;
+  designId?: string;
+  autofillKeys: string[];
+}> {
+  return apiPost(`/agency/projects/${projectId}/canva/autofill`, body ?? {});
+}
+
 export async function syncCanvaBrand(projectId: string): Promise<{
   ok: boolean;
   profileName?: string;

@@ -1,29 +1,35 @@
 import {
   BRANDING_PALETTE_FIELD_ID,
+  CANVA_AUTOFILL_TEXT_BINDINGS,
   CANVA_CONNECT_DOCS_URL,
   CANVA_CREATE_LINKS,
+  CANVA_INTEGRATION_FIELD_IDS,
   formatPaletteForCanvaClipboard,
   parseBrandingPaletteField,
   type BrandingWorkspaceData,
   type CanvaIntegrationStatus
 } from "@ederson-agencia/shared";
-import { ExternalLink, Copy, Check, Link2, Unlink, RefreshCw } from "lucide-react";
+import { ExternalLink, Copy, Check, Link2, Unlink, RefreshCw, Sparkles } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { ApiError } from "../../../api";
-import { disconnectCanva, getCanvaStatus, startCanvaOAuth, syncCanvaBrand } from "../../../api/canva-api";
+import { patchProjectWorkspace } from "../../../api/project-workspace-api";
+import { disconnectCanva, getCanvaStatus, runCanvaAutofill, startCanvaOAuth, syncCanvaBrand } from "../../../api/canva-api";
 
 type Props = {
   fields: BrandingWorkspaceData;
   projectId?: string;
+  onWorkspaceUpdated?: () => void;
 };
 
-export function BrandCanvaStudioPanel({ fields, projectId }: Props) {
+export function BrandCanvaStudioPanel({ fields, projectId, onWorkspaceUpdated }: Props) {
   const [copied, setCopied] = useState(false);
   const [status, setStatus] = useState<CanvaIntegrationStatus | null>(null);
   const [redirectUri, setRedirectUri] = useState<string | undefined>();
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [templateId, setTemplateId] = useState("");
+  const [lastDesignUrl, setLastDesignUrl] = useState("");
 
   const palette = parseBrandingPaletteField(fields[BRANDING_PALETTE_FIELD_ID]);
   const swatches = palette.swatches.filter((s) => s.hex.trim());
@@ -44,6 +50,13 @@ export function BrandCanvaStudioPanel({ fields, projectId }: Props) {
   useEffect(() => {
     loadStatus();
   }, [loadStatus]);
+
+  useEffect(() => {
+    const t = fields[CANVA_INTEGRATION_FIELD_IDS.brandTemplateId];
+    if (typeof t === "string") setTemplateId(t);
+    const u = fields[CANVA_INTEGRATION_FIELD_IDS.lastDesignUrl];
+    if (typeof u === "string") setLastDesignUrl(u);
+  }, [fields]);
 
   async function copyPalette() {
     const text = formatPaletteForCanvaClipboard(swatches);
@@ -78,6 +91,42 @@ export function BrandCanvaStudioPanel({ fields, projectId }: Props) {
       loadStatus();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Falha ao desconectar.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function saveTemplateId() {
+    if (!projectId || !templateId.trim()) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await patchProjectWorkspace(projectId, {
+        fieldId: CANVA_INTEGRATION_FIELD_IDS.brandTemplateId,
+        value: templateId.trim()
+      });
+      onWorkspaceUpdated?.();
+      setMessage("Brand template ID salvo no projeto.");
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Falha ao salvar template ID.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function onAutofill() {
+    if (!projectId) return;
+    setBusy(true);
+    setError(null);
+    setMessage(null);
+    try {
+      const res = await runCanvaAutofill(projectId, { brandTemplateId: templateId.trim() || undefined });
+      const url = res.editUrl ?? res.viewUrl ?? "";
+      if (url) setLastDesignUrl(url);
+      setMessage(`Autofill concluído (${res.autofillKeys.join(", ")}).`);
+      onWorkspaceUpdated?.();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Falha no autofill Canva.");
     } finally {
       setBusy(false);
     }
@@ -161,6 +210,46 @@ export function BrandCanvaStudioPanel({ fields, projectId }: Props) {
 
       {error ? <p className="text-sm text-red-500">{error}</p> : null}
       {message ? <p className="text-xs text-[var(--app-text-muted)]">{message}</p> : null}
+
+      <div className="rounded-lg border border-dashed border-violet-400/50 bg-violet-500/5 px-3 py-3 text-sm">
+        <h3 className="font-semibold text-[var(--app-text)]">Autofill (brand template)</h3>
+        <p className="mt-1 text-xs text-[var(--app-text-muted)]">
+          No Canva, marque labels no template como:{" "}
+          {CANVA_AUTOFILL_TEXT_BINDINGS.map((b) => b.canvaKey).join(", ")}.
+        </p>
+        <div className="mt-3 flex flex-wrap items-end gap-2">
+          <label className="flex min-w-[12rem] flex-1 flex-col gap-1 text-xs">
+            <span className="text-[var(--app-text-muted)]">Brand template ID</span>
+            <input
+              className="input font-mono text-sm"
+              value={templateId}
+              disabled={!projectId || busy}
+              onChange={(e) => setTemplateId(e.target.value)}
+              placeholder="DAF…"
+            />
+          </label>
+          <button type="button" className="btn-secondary text-sm" disabled={!projectId || busy} onClick={() => void saveTemplateId()}>
+            Salvar ID
+          </button>
+          <button
+            type="button"
+            className="btn-primary text-sm"
+            disabled={!projectId || !status?.connected || busy}
+            onClick={() => void onAutofill()}
+          >
+            <Sparkles className="mr-1 inline h-4 w-4" />
+            Gerar design
+          </button>
+        </div>
+        {lastDesignUrl ? (
+          <p className="mt-2 text-xs">
+            Último design:{" "}
+            <a href={lastDesignUrl} target="_blank" rel="noreferrer" className="text-violet-600 underline dark:text-violet-300">
+              Abrir no Canva
+            </a>
+          </p>
+        ) : null}
+      </div>
 
       {swatches.length ? (
         <div className="flex flex-wrap items-center gap-3">

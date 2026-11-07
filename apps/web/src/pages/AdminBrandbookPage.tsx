@@ -203,7 +203,14 @@ export function AdminBrandbookPage() {
         ) : null}
       </div>
 
-      <BrandCanvaStudioPanel fields={data} projectId={projectId || undefined} />
+      <BrandCanvaStudioPanel
+        fields={data}
+        projectId={projectId || undefined}
+        onWorkspaceUpdated={() => {
+          if (!projectId) return;
+          void getProjectWorkspace(projectId).then((res) => setData(res.workspace.fields));
+        }}
+      />
     </div>
   );
 }

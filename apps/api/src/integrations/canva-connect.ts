@@ -145,6 +145,80 @@ export function canvaDisconnectFields(): string[] {
   return Object.values(CANVA_INTEGRATION_FIELD_IDS);
 }
 
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+type AutofillJobResponse = {
+  job?: { id?: string; status?: string };
+  design?: { urls?: { edit_url?: string; view_url?: string }; id?: string };
+};
+
+export async function createCanvaAutofillJob(
+  accessToken: string,
+  brandTemplateId: string,
+  title: string,
+  data: Record<string, { type: "text"; text: string }>
+): Promise<{ jobId: string }> {
+  const res = await fetch(`${CANVA_API_BASE}/autofills`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      brand_template_id: brandTemplateId,
+      title,
+      data
+    })
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw Object.assign(new Error(`Canva autofill: ${res.status} ${text.slice(0, 300)}`), { statusCode: 502 });
+  }
+  const json = (await res.json()) as AutofillJobResponse;
+  const jobId = json.job?.id;
+  if (!jobId) {
+    throw Object.assign(new Error("Canva autofill: resposta sem job id."), { statusCode: 502 });
+  }
+  return { jobId };
+}
+
+export async function getCanvaAutofillJob(accessToken: string, jobId: string): Promise<AutofillJobResponse> {
+  const res = await fetch(`${CANVA_API_BASE}/autofills/${encodeURIComponent(jobId)}`, {
+    headers: { Authorization: `Bearer ${accessToken}` }
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw Object.assign(new Error(`Canva autofill status: ${res.status} ${text.slice(0, 200)}`), { statusCode: 502 });
+  }
+  return (await res.json()) as AutofillJobResponse;
+}
+
+export async function pollCanvaAutofillJob(
+  accessToken: string,
+  jobId: string,
+  timeoutMs = 28_000
+): Promise<{ editUrl?: string; viewUrl?: string; designId?: string }> {
+  const started = Date.now();
+  while (Date.now() - started < timeoutMs) {
+    const json = await getCanvaAutofillJob(accessToken, jobId);
+    const status = json.job?.status;
+    if (status === "success") {
+      return {
+        editUrl: json.design?.urls?.edit_url,
+        viewUrl: json.design?.urls?.view_url,
+        designId: json.design?.id
+      };
+    }
+    if (status === "failed") {
+      throw Object.assign(new Error("Canva autofill: job falhou."), { statusCode: 502 });
+    }
+    await sleep(1500);
+  }
+  throw Object.assign(new Error("Canva autofill: tempo esgotado aguardando o job."), { statusCode: 504 });
+}
+
 export async function getValidCanvaAccessToken(
   cfg: CanvaEnvConfig,
   fields: BrandingWorkspaceData

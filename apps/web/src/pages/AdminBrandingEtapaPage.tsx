@@ -177,7 +177,16 @@ export function AdminBrandingEtapaPage() {
         ) : null}
       </div>
 
-      {etapa.id === "identidade" ? <BrandCanvaStudioPanel fields={data} projectId={projectId || undefined} /> : null}
+      {etapa.id === "identidade" ? (
+        <BrandCanvaStudioPanel
+          fields={data}
+          projectId={projectId || undefined}
+          onWorkspaceUpdated={() => {
+            if (!projectId) return;
+            void getProjectWorkspace(projectId).then((res) => setData(res.workspace.fields));
+          }}
+        />
+      ) : null}
 
       {projectId && etapa.id === "plataforma" ? (
         <div className="panel space-y-2 p-4 sm:p-5">

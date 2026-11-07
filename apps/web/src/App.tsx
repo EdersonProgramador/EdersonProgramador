@@ -45,6 +45,7 @@ import {
 } from "./pages/DashboardPages";
 import { AdminBrandbookPage } from "./pages/AdminBrandbookPage";
 import { AdminFormulaSimuladorPage } from "./pages/AdminFormulaSimuladorPage";
+import { AdminLaunchPlanPdfPage } from "./pages/AdminLaunchPlanPdfPage";
 import { AdminMarketingPlanejamentoPage } from "./pages/AdminMarketingPlanejamentoPage";
 import { AdminBrandingEtapaPage } from "./pages/AdminBrandingEtapaPage";
 import { AdminProductOfferPage } from "./pages/AdminProductOfferPage";
@@ -128,6 +129,7 @@ export default function App() {
                 ))}
                 <Route path="operacao/marketing/:stackId" element={<LegacyMarketingStackRoute />} />
                 <Route path="operacao/formula-lancamento/simulador" element={<AdminFormulaSimuladorPage />} />
+                <Route path="operacao/formula-lancamento/plano-pdf" element={<AdminLaunchPlanPdfPage />} />
                 {formulaNavFlatItems().map((item) => (
                   <Route key={item.id} path={item.adminPath} element={<AdminFormulaHubPage />} />
                 ))}
