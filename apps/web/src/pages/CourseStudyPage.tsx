@@ -112,7 +112,9 @@ export function CourseStudyPage() {
   const moduleFichamentoNum = moduleFichamentoMatch ? Number(moduleFichamentoMatch[1]) : null;
   const isCourseFichamento = subPath === "fichamento/curso";
   const fichamentoAulaMatch = subPath.match(/^fichamento\/aula\/(.+)$/);
-  const fichamentoLessonSlug = fichamentoAulaMatch ? decodeURIComponent(fichamentoAulaMatch[1]) : "";
+  const fichamentoLessonSlug = fichamentoAulaMatch
+    ? decodeURIComponent(fichamentoAulaMatch[1].replace(/\+/g, " "))
+    : "";
   const isLessonFichamentoMode = Boolean(fichamentoLessonSlug);
   const isCertificateView = subPath === "certificado";
   const isBonusPath = subPath.startsWith("bonus/");
@@ -260,6 +262,8 @@ export function CourseStudyPage() {
     })();
   }, [isCertificateView, courseSlug, certificate]);
 
+  const fichamentoAulaPath = useCallback((lessonSlug: string) => `fichamento/aula/${encodeURIComponent(lessonSlug)}`, []);
+
   const goLesson = useCallback(
     (slug: string) => {
       if (!courseSlug) return;
@@ -332,13 +336,13 @@ export function CourseStudyPage() {
     const onKey = (e: KeyboardEvent) => {
       if (!navItem || e.target instanceof HTMLInputElement) return;
       const targetSlug = (slug: string) =>
-        isLessonFichamentoMode ? `fichamento/aula/${slug}` : slug;
+        isLessonFichamentoMode ? fichamentoAulaPath(slug) : slug;
       if (e.key === "ArrowLeft" && navItem.prev) goLesson(targetSlug(navItem.prev));
       if (e.key === "ArrowRight" && navItem.next) goLesson(targetSlug(navItem.next));
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [activeItem, fichamentoModeItem, isLessonFichamentoMode, goLesson]);
+  }, [activeItem, fichamentoModeItem, isLessonFichamentoMode, goLesson, fichamentoAulaPath]);
 
   const filteredItems = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -647,6 +651,14 @@ export function CourseStudyPage() {
                 <div className="course-lesson-prose mt-4 text-sm" dangerouslySetInnerHTML={{ __html: activeBonus.html }} />
               ) : null}
             </article>
+          ) : isLessonFichamentoMode && !fichamentoModeItem && courseSlug && payload ? (
+            <article className="panel p-6">
+              <p className="text-sm text-red-400">{COURSES_UI.study.fichamentoModeLessonNotFound}</p>
+              <p className="course-text-faint mt-2 font-mono text-xs">{fichamentoLessonSlug}</p>
+              <button type="button" className="btn-secondary mt-4" onClick={() => goLesson("")}>
+                {COURSES_UI.study.fichamentoBackLesson}
+              </button>
+            </article>
           ) : isLessonFichamentoMode && fichamentoModeItem && courseSlug && payload ? (
             <LessonFichamentoMode
               courseSlug={courseSlug}
@@ -668,12 +680,12 @@ export function CourseStudyPage() {
               onExitLessonView={() => goLesson(fichamentoModeItem.slug)}
               onPrev={
                 fichamentoModeItem.prev
-                  ? () => goLesson(`fichamento/aula/${fichamentoModeItem.prev}`)
+                  ? () => goLesson(fichamentoAulaPath(fichamentoModeItem.prev))
                   : undefined
               }
               onNext={
                 fichamentoModeItem.next
-                  ? () => goLesson(`fichamento/aula/${fichamentoModeItem.next}`)
+                  ? () => goLesson(fichamentoAulaPath(fichamentoModeItem.next!))
                   : undefined
               }
             />
@@ -698,7 +710,7 @@ export function CourseStudyPage() {
                   initialHtml={fichamento?.lessons[activeItem.slug]?.docHtml}
                 />
               }
-              onOpenFichamentoMode={() => goLesson(`fichamento/aula/${activeItem.slug}`)}
+              onOpenFichamentoMode={() => goLesson(fichamentoAulaPath(activeItem.slug))}
             />
           ) : null}
 
@@ -708,7 +720,7 @@ export function CourseStudyPage() {
                 <button
                   type="button"
                   className="btn-secondary inline-flex w-full min-h-11 items-center justify-center gap-1 sm:w-auto"
-                  onClick={() => goLesson(`fichamento/aula/${fichamentoModeItem.prev}`)}
+                  onClick={() => goLesson(fichamentoAulaPath(fichamentoModeItem.prev!))}
                 >
                   <ChevronLeft className="h-4 w-4" /> Anterior
                 </button>
@@ -719,7 +731,7 @@ export function CourseStudyPage() {
                 <button
                   type="button"
                   className="btn-primary inline-flex w-full min-h-11 items-center justify-center gap-1 sm:w-auto"
-                  onClick={() => goLesson(`fichamento/aula/${fichamentoModeItem.next}`)}
+                  onClick={() => goLesson(fichamentoAulaPath(fichamentoModeItem.next!))}
                 >
                   Próxima <ChevronRight className="h-4 w-4" />
                 </button>

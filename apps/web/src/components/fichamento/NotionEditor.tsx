@@ -70,6 +70,41 @@ const LINE_HEIGHTS = [
 const TEXT_COLORS = ["#eef2f6", "#f87171", "#fb923c", "#facc15", "#4ade80", "#38bdf8", "#a78bfa", "#1f2937"];
 const HIGHLIGHT_COLORS = ["#fef08a", "#bbf7d0", "#bae6fd", "#fbcfe8", "#e5e7eb"];
 
+/** StarterKit v3 já registra Link e Underline — desligar para não duplicar. */
+function fichamentoEditorExtensions(placeholder: string) {
+  return [
+    StarterKit.configure({
+      heading: { levels: [1, 2, 3] },
+      bulletList: {
+        HTMLAttributes: { class: "fichamento-list fichamento-list--bullet" }
+      },
+      orderedList: {
+        HTMLAttributes: { class: "fichamento-list fichamento-list--ordered" }
+      },
+      link: false,
+      underline: false
+    }),
+    Underline,
+    TextStyle,
+    FontFamily,
+    FontSize,
+    Color,
+    Highlight.configure({ multicolor: true }),
+    Link.configure({ openOnClick: false, autolink: true, linkOnPaste: true }),
+    Image.configure({ inline: false, allowBase64: true }),
+    TextAlign.configure({ types: ["heading", "paragraph"] }),
+    TaskList.configure({
+      HTMLAttributes: { class: "fichamento-list fichamento-list--check" }
+    }),
+    TaskItem.configure({
+      nested: true,
+      HTMLAttributes: { class: "fichamento-task-item" }
+    }),
+    LineHeight,
+    Placeholder.configure({ placeholder })
+  ];
+}
+
 export const NotionEditor = forwardRef<NotionEditorHandle, NotionEditorProps>(function NotionEditor(
   { contentJson, contentHtml, placeholder, onSave, editorKey },
   ref
@@ -80,38 +115,13 @@ export const NotionEditor = forwardRef<NotionEditorHandle, NotionEditorProps>(fu
   const onSaveRef = useRef(onSave);
   onSaveRef.current = onSave;
 
+  const placeholderText = placeholder ?? "Escreva seu fichamento…";
+
   const editor = useEditor(
     {
-      extensions: [
-        StarterKit.configure({
-          heading: { levels: [1, 2, 3] },
-          bulletList: {
-            HTMLAttributes: { class: "fichamento-list fichamento-list--bullet" }
-          },
-          orderedList: {
-            HTMLAttributes: { class: "fichamento-list fichamento-list--ordered" }
-          }
-        }),
-        Underline,
-        TextStyle,
-        FontFamily,
-        FontSize,
-        Color,
-        Highlight.configure({ multicolor: true }),
-        Link.configure({ openOnClick: false, autolink: true, linkOnPaste: true }),
-        Image.configure({ inline: false, allowBase64: true }),
-        TextAlign.configure({ types: ["heading", "paragraph"] }),
-        TaskList.configure({
-          HTMLAttributes: { class: "fichamento-list fichamento-list--check" }
-        }),
-        TaskItem.configure({
-          nested: true,
-          HTMLAttributes: { class: "fichamento-task-item" }
-        }),
-        LineHeight,
-        Placeholder.configure({ placeholder: placeholder ?? "Escreva seu fichamento…" })
-      ],
+      extensions: fichamentoEditorExtensions(placeholderText),
       content: contentJson ? safeParseJson(contentJson) : contentHtml ?? "",
+      immediatelyRender: false,
       editorProps: {
         attributes: {
           class: "fichamento-editor__content"

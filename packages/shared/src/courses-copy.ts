@@ -153,6 +153,7 @@ export const COURSES_UI = {
     fichamentoModeNext: "Próxima aula",
     fichamentoModeNoMedia:
       "Nenhum vídeo, PDF ou texto publicado foi encontrado para esta aula — use o editor ao lado para suas anotações.",
+    fichamentoModeLessonNotFound: "Não foi possível abrir o modo fichamento — aula não encontrada no sumário.",
     fichamentoSaved: "Salvo",
     fichamentoSaving: "Salvando…",
     fichamentoOpenModule: "Fichamento do módulo",
