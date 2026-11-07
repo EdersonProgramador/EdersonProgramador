@@ -1,7 +1,7 @@
 /** Cronograma ENEM — Felipe Araújo (PDF 452378109). Trilha completa para admin/academia. */
 
 export const ENEM_FOLHA_REDACAO_IMAGE_URL =
-  "/course-assets/enem-cronograma-felipe-araujo/folha-redacao-enem.png";
+  "/course-assets/enem-cronograma-felipe-araujo/folha-redacao-enem.jpg";
 
 export type EnemCronogramaLesson = {
   slug: string;
@@ -1265,7 +1265,7 @@ export const ENEM_FELIPE_ARAUJO_CATALOG: EnemCronogramaCatalog = {
     "Trilha completa baseada no cronograma F3lipearaujo: metas e filmes, Ciências da Natureza, Matemática, Humanas, Linguagens, Redação, competências e temas de prática.",
   coverUrl: "/course-covers/enem-cronograma-felipe-araujo.png",
   sortOrder: 5,
-  catalogVersion: 19,
+  catalogVersion: 20,
   modules: [
     {
       title: "Introdução",
@@ -1315,28 +1315,13 @@ export const ENEM_FELIPE_ARAUJO_CATALOG: EnemCronogramaCatalog = {
     cronogramaModule("gramatica", "Gramática", GRAMATICA),
     cronogramaModule("ingles", "Inglês", INGLES),
     cronogramaModule("espanhol", "Espanhol", ESPANHOL),
-    cronogramaModule(
-      "tic-ed-fisica",
-      "Tecnologia da Informação e Comunicação / Ed. Física",
-      TIC_ED_FISICA
-    ),
+    cronogramaModule("linguagens", "Linguagens", LINGUAGENS),
+    cronogramaModule("redacao", "Redação", REDACAO),
+    cronogramaModule("temas-redacao", "Temas de redação", TEMAS_REDACAO)
+  ]
+};
     cronogramaModule(
       "interpretacao-producao-textual",
       "Interpretação e Produção Textual",
       INTERPRETACAO_PRODUCAO_TEXTUAL
     ),
-    cronogramaModule("temas-producao-1", "Temas para Produção Textual 1", TEMAS_PRODUCAO_TEXTUAL_1),
-    cronogramaModule("temas-producao-2", "Temas para Produção Textual 2", TEMAS_PRODUCAO_TEXTUAL_2),
-    cronogramaModule("temas-producao-3", "Temas para Produção Textual 3", TEMAS_PRODUCAO_TEXTUAL_3),
-    cronogramaModule("folha-redacao", "Folha de Redação", ["Modelo oficial ENEM — folha de redação"], {
-      "Modelo oficial ENEM — folha de redação": `<p>Use o modelo abaixo como padrão de escrita (30 linhas, margens e identificação conforme o ENEM). Você pode abrir a imagem em nova aba para imprimir ou traçar por cima no digital.</p>
-<figure class="course-figure my-4">
-  <a href="${ENEM_FOLHA_REDACAO_IMAGE_URL}" target="_blank" rel="noopener noreferrer">
-    <img src="${ENEM_FOLHA_REDACAO_IMAGE_URL}" alt="Folha de redação ENEM — modelo oficial com 30 linhas" width="820" height="1160" class="max-w-full h-auto rounded-lg border border-[var(--course-border)]" loading="lazy" />
-  </a>
-  <figcaption class="course-text-muted text-sm mt-2">Clique na imagem para abrir em tamanho completo.</figcaption>
-</figure>
-<p>Lembrete do edital: caneta esferográfica de tinta preta em material transparente; respeite as margens; em caso de erro, risque com um traço simples e escreva o substituto ao lado.</p>`
-    })
-  ]
-};
