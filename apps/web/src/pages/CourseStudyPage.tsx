@@ -9,6 +9,8 @@ import {
   FileText,
   LogOut,
   Menu,
+  PanelLeftClose,
+  PanelLeftOpen,
   PlayCircle
 } from "lucide-react";
 import {
@@ -105,6 +107,17 @@ type FichamentoBundle = {
   outline: { moduleNumber: number; title: string }[];
 };
 
+const COURSE_SIDEBAR_COLLAPSED_KEY = "academy-course-sidebar-collapsed";
+
+function readSidebarCollapsedPreference(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return window.localStorage.getItem(COURSE_SIDEBAR_COLLAPSED_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
 export function CourseStudyPage() {
   const { courseSlug, "*": rest } = useParams<{ courseSlug: string; "*": string }>();
   const subPath = rest?.replace(/^\//, "") ?? "";
@@ -144,6 +157,8 @@ export function CourseStudyPage() {
   const [completed, setCompleted] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarDesktopCollapsed, setSidebarDesktopCollapsed] = useState(readSidebarCollapsedPreference);
+  const [studyFocusMode, setStudyFocusMode] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [certificate, setCertificate] = useState<CertificateData | null>(null);
   const [fichamento, setFichamento] = useState<FichamentoBundle | null>(null);
@@ -158,6 +173,38 @@ export function CourseStudyPage() {
     html?: string;
     displayTitle?: string;
   } | null>(null);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(COURSE_SIDEBAR_COLLAPSED_KEY, sidebarDesktopCollapsed ? "1" : "0");
+    } catch {
+      /* ignore quota / private mode */
+    }
+  }, [sidebarDesktopCollapsed]);
+
+  useEffect(() => {
+    setStudyFocusMode(false);
+  }, [subPath]);
+
+  useEffect(() => {
+    if (!studyFocusMode) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setStudyFocusMode(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [studyFocusMode]);
+
+  const toggleStudyFocus = useCallback(() => {
+    setStudyFocusMode((on) => {
+      const next = !on;
+      if (next) {
+        setSidebarOpen(false);
+        setSidebarDesktopCollapsed(true);
+      }
+      return next;
+    });
+  }, []);
 
   const loadCoursePayload = useCallback(async (bustCache = false) => {
     if (!courseSlug) return;
@@ -388,7 +435,11 @@ export function CourseStudyPage() {
   const videoFile = (id: string) => payload.videoManifest.files[id];
 
   return (
-    <div className="course-study surface-light min-h-screen bg-[var(--course-surface-main)]">
+    <div
+      className={`course-study surface-light min-h-screen bg-[var(--course-surface-main)]${
+        studyFocusMode ? " is-study-focus" : ""
+      }`}
+    >
       <header className="course-study__header app-shell-header">
         <div className="flex items-center justify-between gap-2 px-3 py-2 sm:gap-3 sm:px-4 sm:py-3">
           <div className="flex min-w-0 flex-1 items-center gap-2">
@@ -422,12 +473,41 @@ export function CourseStudyPage() {
         </div>
       </header>
 
-      <div className="course-study__layout">
-        <aside className={`course-study__sidebar ${sidebarOpen ? "is-open" : ""}`}>
+      <div
+        className={`course-study__layout${sidebarDesktopCollapsed ? " is-sidebar-collapsed" : ""}`}
+      >
+        <aside
+          className={`course-study__sidebar ${sidebarOpen ? "is-open" : ""}${
+            sidebarDesktopCollapsed ? " is-desktop-collapsed" : ""
+          }`}
+        >
           <div className="course-study__sidebar-head">
-            <p className="text-xs uppercase tracking-wider text-brand-primary">{COURSES_UI.study.sidebarEyebrow}</p>
-            <h1 className="text-lg font-bold">{payload.course.title}</h1>
-            <p className="course-text-subtle text-xs">{COURSES_UI.study.sidebarSubtitle}</p>
+            <div className="course-study__sidebar-head-row">
+              <div className="course-study__sidebar-head-titles min-w-0">
+                <p className="text-xs uppercase tracking-wider text-brand-primary">
+                  {COURSES_UI.study.sidebarEyebrow}
+                </p>
+                <h1 className="text-lg font-bold">{payload.course.title}</h1>
+                <p className="course-text-subtle text-xs">{COURSES_UI.study.sidebarSubtitle}</p>
+              </div>
+              <button
+                type="button"
+                className="course-study__sidebar-toggle btn-secondary hidden shrink-0 lg:inline-flex"
+                aria-label={COURSES_UI.study.sidebarCollapse}
+                title={COURSES_UI.study.sidebarCollapse}
+                onClick={() => setSidebarDesktopCollapsed(true)}
+              >
+                <PanelLeftClose className="h-4 w-4" aria-hidden />
+              </button>
+              <button
+                type="button"
+                className="course-study__sidebar-toggle btn-secondary inline-flex shrink-0 lg:hidden"
+                aria-label="Fechar menu"
+                onClick={() => setSidebarOpen(false)}
+              >
+                <PanelLeftClose className="h-4 w-4" aria-hidden />
+              </button>
+            </div>
             <input
               className="input mt-3 text-sm"
               type="search"
@@ -542,6 +622,18 @@ export function CourseStudyPage() {
           />
         ) : null}
 
+        {sidebarDesktopCollapsed ? (
+          <button
+            type="button"
+            className="course-study__sidebar-expand btn-secondary"
+            aria-label={COURSES_UI.study.sidebarExpand}
+            title={COURSES_UI.study.sidebarExpand}
+            onClick={() => setSidebarDesktopCollapsed(false)}
+          >
+            <PanelLeftOpen className="h-4 w-4" aria-hidden />
+          </button>
+        ) : null}
+
         <main className="course-study__main">
           {(isLibraryList || libraryBookSlug) && courseSlug ? (
             <CourseLibraryView
@@ -583,6 +675,8 @@ export function CourseStudyPage() {
                     : prev
                 )
               }
+              studyFocusMode={studyFocusMode}
+              onToggleStudyFocus={toggleStudyFocus}
             />
           ) : isCourseFichamento && courseSlug && payload ? (
             <FichamentoWorkspace
@@ -605,6 +699,8 @@ export function CourseStudyPage() {
                     : prev
                 )
               }
+              studyFocusMode={studyFocusMode}
+              onToggleStudyFocus={toggleStudyFocus}
             />
           ) : isCertificateView ? (
             certificate ? (
@@ -659,6 +755,8 @@ export function CourseStudyPage() {
                   ? () => goLesson(fichamentoAulaPath(fichamentoModeItem.next!))
                   : undefined
               }
+              studyFocusMode={studyFocusMode}
+              onToggleStudyFocus={toggleStudyFocus}
             />
           ) : !activeItem && !activeBonus ? (
             <div className="course-study__welcome panel p-5 sm:p-8">
@@ -763,6 +861,16 @@ export function CourseStudyPage() {
           ) : null}
         </main>
       </div>
+
+      {studyFocusMode ? (
+        <button
+          type="button"
+          className="course-study__focus-exit btn-secondary"
+          onClick={() => setStudyFocusMode(false)}
+        >
+          {COURSES_UI.study.studyFocusExit}
+        </button>
+      ) : null}
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { COURSES_UI } from "@ederson-agencia/shared";
-import { ChevronLeft, ChevronRight, LayoutPanelLeft, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, LayoutPanelLeft, Maximize2, Minimize2, X } from "lucide-react";
 import type { TelegramConfig } from "../../courses/telegram";
 import { LessonConsumo, lessonHasConsumableMaterial, type LessonConsumoItem } from "./LessonConsumo";
 import { LessonFichamentoBlock } from "./LessonFichamentoBlock";
@@ -18,6 +18,8 @@ type LessonFichamentoModeProps = {
   onExitLessonView: () => void;
   onPrev?: () => void;
   onNext?: () => void;
+  studyFocusMode?: boolean;
+  onToggleStudyFocus?: () => void;
 };
 
 export function LessonFichamentoMode({
@@ -33,7 +35,9 @@ export function LessonFichamentoMode({
   fichamentoHtml,
   onExitLessonView,
   onPrev,
-  onNext
+  onNext,
+  studyFocusMode = false,
+  onToggleStudyFocus
 }: LessonFichamentoModeProps) {
   const hasConsumo = lessonHasConsumableMaterial(item, {
     pdfSrc,
@@ -55,6 +59,21 @@ export function LessonFichamentoMode({
           </p>
         </div>
         <div className="flex shrink-0 flex-wrap items-center gap-2">
+          {onToggleStudyFocus ? (
+            <button
+              type="button"
+              className={`btn-secondary min-h-9 text-xs${studyFocusMode ? " ring-2 ring-brand-primary/40" : ""}`}
+              aria-pressed={studyFocusMode}
+              onClick={onToggleStudyFocus}
+            >
+              {studyFocusMode ? (
+                <Minimize2 className="mr-1 inline h-4 w-4" aria-hidden />
+              ) : (
+                <Maximize2 className="mr-1 inline h-4 w-4" aria-hidden />
+              )}
+              {studyFocusMode ? COURSES_UI.study.studyFocusExit : COURSES_UI.study.studyFocusMode}
+            </button>
+          ) : null}
           {item.prev && onPrev ? (
             <button type="button" className="btn-secondary min-h-9 text-xs" onClick={onPrev}>
               <ChevronLeft className="mr-0.5 inline h-4 w-4" />

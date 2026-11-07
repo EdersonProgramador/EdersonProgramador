@@ -1,4 +1,5 @@
 import { COURSES_UI } from "@ederson-agencia/shared";
+import { Maximize2, Minimize2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { apiPost, apiPut } from "../../api";
 import { downloadHtmlDocument } from "../../fichamento/downloadDocument";
@@ -14,6 +15,8 @@ type FichamentoWorkspaceProps = {
   initialJson?: string | null;
   onBack: () => void;
   onCompiled?: (html: string, json?: string | null) => void;
+  studyFocusMode?: boolean;
+  onToggleStudyFocus?: () => void;
 };
 
 export function FichamentoWorkspace({
@@ -25,7 +28,9 @@ export function FichamentoWorkspace({
   initialHtml,
   initialJson,
   onBack,
-  onCompiled
+  onCompiled,
+  studyFocusMode = false,
+  onToggleStudyFocus
 }: FichamentoWorkspaceProps) {
   const [contentHtml, setContentHtml] = useState(initialHtml ?? "");
   const [contentJson, setContentJson] = useState(initialJson ?? null);
@@ -104,6 +109,21 @@ export function FichamentoWorkspace({
           <h2 className="mt-1 text-xl font-bold text-[var(--course-fg)]">{title}</h2>
         </div>
         <div className="flex flex-wrap gap-2">
+          {onToggleStudyFocus ? (
+            <button
+              type="button"
+              className={`btn-secondary text-sm${studyFocusMode ? " ring-2 ring-brand-primary/40" : ""}`}
+              aria-pressed={studyFocusMode}
+              onClick={onToggleStudyFocus}
+            >
+              {studyFocusMode ? (
+                <Minimize2 className="mr-1 inline h-4 w-4" aria-hidden />
+              ) : (
+                <Maximize2 className="mr-1 inline h-4 w-4" aria-hidden />
+              )}
+              {studyFocusMode ? COURSES_UI.study.studyFocusExit : COURSES_UI.study.studyFocusMode}
+            </button>
+          ) : null}
           <button type="button" className="btn-secondary text-sm" onClick={() => void compileFromSources()}>
             {mode === "module" ? COURSES_UI.study.fichamentoCompileModule : COURSES_UI.study.fichamentoCompileCourse}
           </button>

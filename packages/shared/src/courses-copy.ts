@@ -80,6 +80,8 @@ export const COURSES_UI = {
     loading: "Carregando trilha…",
     sidebarEyebrow: "Trilha de estudos",
     sidebarSubtitle: "Módulos e aulas na ordem recomendada",
+    sidebarCollapse: "Recolher trilha",
+    sidebarExpand: "Expandir trilha",
     curriculumHeading: "Conteúdo do curso",
     searchPlaceholder: "Buscar por código (F042) ou palavra-chave…",
     progressLabel: "Aulas concluídas",
@@ -154,6 +156,8 @@ export const COURSES_UI = {
     fichamentoModeNoMedia:
       "Nenhum vídeo, PDF ou texto publicado foi encontrado para esta aula — use o editor ao lado para suas anotações.",
     fichamentoModeLessonNotFound: "Não foi possível abrir o modo fichamento — aula não encontrada no sumário.",
+    studyFocusMode: "Modo leitura",
+    studyFocusExit: "Sair do modo leitura",
     fichamentoSaved: "Salvo",
     fichamentoSaving: "Salvando…",
     fichamentoOpenModule: "Fichamento do módulo",
