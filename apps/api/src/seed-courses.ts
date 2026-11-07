@@ -3,6 +3,10 @@ import type { FastifyBaseLogger } from "fastify";
 import { FL_CONTENT_KEY, PORTAL_CONTENT_KEY } from "./courses/content-key.js";
 import { ensureUspLeituraEscritaCourse } from "./courses/import-catalog-course.js";
 import { ensureEnemCronogramaCourse, ENEM_CRONOGRAMA_SLUG } from "./courses/import-enem-cronograma-course.js";
+import {
+  ensureCabalasRabinoDuduCourse,
+  CABALAS_RABINO_DUDU_SLUG
+} from "./courses/import-cabalas-rabino-dudu-course.js";
 import { ensureTanarCourse, TANAR_SLUG } from "./courses/import-tanar-course.js";
 import { ensurePortalStarterContent } from "./courses/portal-starter.js";
 import { prisma } from "./prisma.js";
@@ -36,6 +40,7 @@ export async function ensureSeedCourses(log: FastifyBaseLogger) {
   await ensureUspLeituraEscritaCourse(prisma, log);
   await ensureTanarCourse(prisma, log);
   await ensureEnemCronogramaCourse(prisma, log);
+  await ensureCabalasRabinoDuduCourse(prisma, log);
 
   const portalCourses = await prisma.course.findMany({
     where: {
@@ -45,7 +50,13 @@ export async function ensureSeedCourses(log: FastifyBaseLogger) {
   });
 
   for (const c of portalCourses) {
-    if (c.slug === USP_LEITURA_SLUG || c.slug === TANAR_SLUG || c.slug === ENEM_CRONOGRAMA_SLUG) continue;
+    if (
+      c.slug === USP_LEITURA_SLUG ||
+      c.slug === TANAR_SLUG ||
+      c.slug === ENEM_CRONOGRAMA_SLUG ||
+      c.slug === CABALAS_RABINO_DUDU_SLUG
+    )
+      continue;
     const key = c.contentKey?.trim().toLowerCase();
     if (key === FL_CONTENT_KEY) continue;
     await prisma.course.update({

@@ -10,3 +10,4 @@ apps/api/prisma/dev.db
 apps/api/uploads/
 .DS_Store
 playlist.json
+scripts/playlist-*.raw.json

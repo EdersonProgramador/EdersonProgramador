@@ -1,0 +1,155 @@
+import type { FastifyBaseLogger } from "fastify";
+import type { PrismaClient } from "@prisma/client";
+import { PORTAL_CONTENT_KEY } from "./content-key.js";
+import { env } from "../env.js";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+
+const catalog = JSON.parse(
+  readFileSync(fileURLToPath(new URL("./catalog/cabalas-rabino-dudu.json", import.meta.url)), "utf8")
+) as PlaylistCatalog;
+
+type CatalogLesson = {
+  slug: string;
+  title: string;
+  lessonType?: string;
+  bodyHtml?: string | null;
+  videoId?: string;
+  durationSeconds?: number;
+};
+
+type PlaylistCatalog = {
+  slug: string;
+  title: string;
+  summary: string;
+  coverUrl?: string;
+  sortOrder?: number;
+  introModule?: { title: string; lessons: CatalogLesson[] };
+  modules: { title: string; lessons: CatalogLesson[] }[];
+};
+
+export const CABALAS_RABINO_DUDU_SLUG = catalog.slug;
+
+const EXPECTED_VIDEO_LESSONS = catalog.modules.reduce(
+  (acc, mod) => acc + mod.lessons.length,
+  0
+);
+
+export async function ensureCabalasRabinoDuduCourse(prisma: PrismaClient, log: FastifyBaseLogger) {
+  const course = await prisma.course.upsert({
+    where: { slug: catalog.slug },
+    create: {
+      slug: catalog.slug,
+      title: catalog.title,
+      summary: catalog.summary,
+      status: "PUBLISHED",
+      visibility: "INTERNAL",
+      contentKey: PORTAL_CONTENT_KEY,
+      coverUrl: catalog.coverUrl ?? null,
+      sortOrder: catalog.sortOrder ?? 4
+    },
+    update: {
+      title: catalog.title,
+      summary: catalog.summary,
+      status: "PUBLISHED",
+      contentKey: PORTAL_CONTENT_KEY,
+      coverUrl: catalog.coverUrl ?? null,
+      sortOrder: catalog.sortOrder ?? 4
+    }
+  });
+
+  const videoLessons = await prisma.courseLesson.count({
+    where: { module: { courseId: course.id }, lessonType: "video" }
+  });
+
+  if (videoLessons < EXPECTED_VIDEO_LESSONS) {
+    await prisma.courseModule.deleteMany({ where: { courseId: course.id } });
+
+    let sortOrder = 0;
+    const intro = catalog.introModule;
+    if (intro?.lessons?.length) {
+      await prisma.courseModule.create({
+        data: {
+          courseId: course.id,
+          sortOrder: sortOrder++,
+          title: intro.title,
+          lessons: {
+            create: intro.lessons.map((lesson, li) => ({
+              slug: lesson.slug,
+              sortOrder: li,
+              title: lesson.title,
+              lessonType: lesson.lessonType ?? "article",
+              status: "PUBLISHED",
+              bodyHtml: lesson.bodyHtml ?? null
+            }))
+          }
+        }
+      });
+    }
+
+    for (const mod of catalog.modules) {
+      await prisma.courseModule.create({
+        data: {
+          courseId: course.id,
+          sortOrder: sortOrder++,
+          title: mod.title,
+          lessons: {
+            create: mod.lessons.map((lesson, li) => ({
+              slug: lesson.slug,
+              sortOrder: li,
+              title: lesson.title,
+              lessonType: "video",
+              status: "PUBLISHED",
+              videoUrl: lesson.videoId ? `https://www.youtube.com/watch?v=${lesson.videoId}` : null,
+              bodyHtml: lesson.bodyHtml ?? null
+            }))
+          }
+        }
+      });
+    }
+
+    log.info(
+      { slug: catalog.slug, modules: catalog.modules.length + (intro ? 1 : 0), videos: EXPECTED_VIDEO_LESSONS },
+      "Curso Cabalas Rabino Dudu sincronizado."
+    );
+  }
+
+  await ensureAdminEnrollmentsForCourse(prisma, course.id, log);
+}
+
+async function ensureAdminEnrollmentsForCourse(
+  prisma: PrismaClient,
+  courseId: string,
+  log: FastifyBaseLogger
+) {
+  const adminIds = new Set<string>();
+  const admins = await prisma.user.findMany({
+    where: { role: "ADMIN", status: "ACTIVE" },
+    select: { id: true }
+  });
+  for (const u of admins) adminIds.add(u.id);
+
+  const bootstrapEmail = env.ADMIN_EMAIL?.trim().toLowerCase();
+  if (bootstrapEmail) {
+    const bootstrap = await prisma.user.findUnique({
+      where: { email: bootstrapEmail },
+      select: { id: true }
+    });
+    if (bootstrap) adminIds.add(bootstrap.id);
+  }
+
+  if (adminIds.size === 0) {
+    log.warn("Nenhum usuário admin encontrado para matricular no curso Cabalas Rabino Dudu.");
+    return;
+  }
+
+  for (const userId of adminIds) {
+    await prisma.courseEnrollment.upsert({
+      where: { userId_courseId: { userId, courseId } },
+      create: { userId, courseId, source: "ADMIN_GRANT", status: "ACTIVE" },
+      update: { status: "ACTIVE", source: "ADMIN_GRANT" }
+    });
+  }
+
+  log.info({ courseId, admins: adminIds.size }, "Admins matriculados no curso Cabalas Rabino Dudu.");
+}

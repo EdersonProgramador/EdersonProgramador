@@ -13,7 +13,8 @@
     "prisma:deploy": "prisma migrate deploy",
     "prisma:seed": "tsx prisma/seed.ts",
     "sync:tanar": "tsx scripts/sync-tanar-course.ts",
-    "sync:enem-cronograma": "tsx scripts/sync-enem-cronograma-course.ts"
+    "sync:enem-cronograma": "tsx scripts/sync-enem-cronograma-course.ts",
+    "sync:cabalas-rabino-dudu": "tsx scripts/sync-cabalas-rabino-dudu-course.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

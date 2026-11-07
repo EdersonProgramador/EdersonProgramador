@@ -1,0 +1,1098 @@
+{
+  "slug": "cabalas-rabino-dudu",
+  "title": "Cabalas - Rabino Dudu",
+  "summary": "Trilha com 148 aulas em vídeo do canal Rabino Dudu, sincronizada com a playlist oficial no YouTube (embed).",
+  "playlistUrl": "https://www.youtube.com/playlist?list=PL1F8E81E875BF490F",
+  "channel": "Rabino Dudu",
+  "coverUrl": "https://i.ytimg.com/vi/Yugy96_gjyk/hqdefault.jpg?sqp=-oaymwEXCNACELwBSFryq4qpAwkIARUAAIhCGAE=&rs=AOn4CLB4e6XhLi6Hp72UQH9CQ8SXCeVXew",
+  "sortOrder": 4,
+  "introModule": {
+    "title": "Apresentação",
+    "lessons": [
+      {
+        "slug": "sobre-a-trilha",
+        "title": "Sobre a playlist e como estudar",
+        "lessonType": "article",
+        "bodyHtml": "<p>Trilha montada a partir da playlist <strong>Cabalas - Rabino Dudu</strong> no canal <strong>Rabino Dudu</strong>. Os vídeos abrem embutidos do YouTube.</p><p><a href=\"https://www.youtube.com/playlist?list=PL1F8E81E875BF490F\" target=\"_blank\" rel=\"noopener noreferrer\">Abrir playlist no YouTube</a></p>"
+      }
+    ]
+  },
+  "modules": [
+    {
+      "title": "Aulas 1–20",
+      "lessons": [
+        {
+          "slug": "001-a-cabala-do-dinheiro-parte-1-rabino-dudu",
+          "title": "A Cabala do Dinheiro (parte 1) - Rabino Dudu",
+          "videoId": "Yugy96_gjyk",
+          "durationSeconds": 1323,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 22 min 3 s.</p>"
+        },
+        {
+          "slug": "002-a-cabala-da-atracao-rabino-dudu",
+          "title": "A Cabala da Atração - Rabino Dudu",
+          "videoId": "8x7yV4SxyGE",
+          "durationSeconds": 2179,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 36 min 19 s.</p>"
+        },
+        {
+          "slug": "003-a-cabala-do-dinheiro-parte-2-rabino-dudu",
+          "title": "A Cabala do Dinheiro (parte 2) - Rabino Dudu",
+          "videoId": "JdKpCW4kvwM",
+          "durationSeconds": 546,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 9 min 6 s.</p>"
+        },
+        {
+          "slug": "004-a-cabala-da-autoconfianca-rabino-dudu",
+          "title": "A Cabala da Autoconfiança - Rabino Dudu",
+          "videoId": "9F3QEUnipa8",
+          "durationSeconds": 2126,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 35 min 26 s.</p>"
+        },
+        {
+          "slug": "005-a-cabala-dos-sonhos-rabino-dudu",
+          "title": "A Cabala dos Sonhos - Rabino Dudu",
+          "videoId": "KpcB0-sBmiI",
+          "durationSeconds": 2332,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 38 min 52 s.</p>"
+        },
+        {
+          "slug": "006-a-cabala-do-trabalho-rabino-dudu",
+          "title": "A Cabala do Trabalho - Rabino Dudu",
+          "videoId": "wTA3pVD26Fc",
+          "durationSeconds": 2036,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 33 min 56 s.</p>"
+        },
+        {
+          "slug": "007-a-cabala-da-forca-interior-rabino-dudu",
+          "title": "A Cabala da Força Interior - Rabino Dudu",
+          "videoId": "p7OgbzLcwCU",
+          "durationSeconds": 3459,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 57 min 39 s.</p>"
+        },
+        {
+          "slug": "008-a-cabala-do-amor-rabino-dudu",
+          "title": "A Cabala do Amor - Rabino Dudu",
+          "videoId": "DUdvvQQND44",
+          "durationSeconds": 2533,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 42 min 13 s.</p>"
+        },
+        {
+          "slug": "009-a-cabala-da-saude-mental-rabino-dudu",
+          "title": "A Cabala da Saúde Mental - Rabino Dudu",
+          "videoId": "tEyqp4_M-xk",
+          "durationSeconds": 2375,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 39 min 35 s.</p>"
+        },
+        {
+          "slug": "010-a-cabala-da-tomada-de-decisao-rabino-dudu",
+          "title": "A Cabala da Tomada de Decisão - Rabino Dudu",
+          "videoId": "pWkHxkyCJmc",
+          "durationSeconds": 2172,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 36 min 12 s.</p>"
+        },
+        {
+          "slug": "011-a-cabala-da-astrologia-previsao-do-futuro-mau-olhado",
+          "title": "A Cabala da Astrologia, Previsão do Futuro, Mau Olhado e Magia- Rabino Dudu",
+          "videoId": "NLp9W2lRIbU",
+          "durationSeconds": 1520,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 25 min 20 s.</p>"
+        },
+        {
+          "slug": "012-a-cabala-do-auto-estima-rabino-dudu",
+          "title": "A Cabala do Auto Estima - Rabino Dudu",
+          "videoId": "3ZmhJBXT9-s",
+          "durationSeconds": 1692,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 28 min 12 s.</p>"
+        },
+        {
+          "slug": "013-a-cabala-dos-vicios-e-obsessoes-rabino-dudu",
+          "title": "A Cabala dos Vícios e Obsessões - Rabino Dudu",
+          "videoId": "u66Y--7u9v4",
+          "durationSeconds": 2022,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 33 min 42 s.</p>"
+        },
+        {
+          "slug": "014-a-cabala-de-messias-mashiach-parte-1-rabino-dudu",
+          "title": "A Cabala de Messias (Mashiach) - Parte 1 - Rabino Dudu",
+          "videoId": "Ymox779ncBM",
+          "durationSeconds": 2580,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 43 min.</p>"
+        },
+        {
+          "slug": "015-a-cabala-do-pensamento-rabino-dudu",
+          "title": "A Cabala do Pensamento - Rabino Dudu",
+          "videoId": "78caDaCvmF0",
+          "durationSeconds": 2213,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 36 min 53 s.</p>"
+        },
+        {
+          "slug": "016-a-cabala-das-emocoes-parte-1-rabino-dudu",
+          "title": "A Cabala das Emoções - Parte 1 - Rabino Dudu",
+          "videoId": "L2WqepMyYSQ",
+          "durationSeconds": 2237,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 37 min 17 s.</p>"
+        },
+        {
+          "slug": "017-a-cabala-do-esforco-rabino-dudu",
+          "title": "A Cabala do Esforço - Rabino Dudu",
+          "videoId": "fkflHb-Zan0",
+          "durationSeconds": 1822,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 30 min 22 s.</p>"
+        },
+        {
+          "slug": "018-a-cabala-do-sofrimento-humano-rabino-dudu",
+          "title": "A Cabala do Sofrimento Humano - Rabino Dudu",
+          "videoId": "nH6ebIJhP7A",
+          "durationSeconds": 2666,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 44 min 26 s.</p>"
+        },
+        {
+          "slug": "019-a-cabala-da-atitude-rabino-dudu",
+          "title": "A Cabala da Atitude - Rabino Dudu",
+          "videoId": "xiSw3qOy3-8",
+          "durationSeconds": 1927,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 32 min 7 s.</p>"
+        },
+        {
+          "slug": "020-a-cabala-da-acao-rabino-dudu",
+          "title": "A Cabala da Ação - Rabino Dudu",
+          "videoId": "TtxVDY6QwuY",
+          "durationSeconds": 1810,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 30 min 10 s.</p>"
+        }
+      ]
+    },
+    {
+      "title": "Aulas 21–40",
+      "lessons": [
+        {
+          "slug": "021-a-cabala-da-cura-rabino-dudu",
+          "title": "A Cabala da Cura - Rabino Dudu",
+          "videoId": "4VTZXA3Rq3U",
+          "durationSeconds": 3325,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 55 min 25 s.</p>"
+        },
+        {
+          "slug": "022-a-cabala-do-medo-rabino-dudu",
+          "title": "A Cabala do Medo - Rabino Dudu",
+          "videoId": "5aV2fHMj6gk",
+          "durationSeconds": 1552,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 25 min 52 s.</p>"
+        },
+        {
+          "slug": "023-a-cabala-da-solidao-rabino-dudu",
+          "title": "A Cabala da Solidão - Rabino Dudu",
+          "videoId": "dT1xDitVWDE",
+          "durationSeconds": 2197,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 36 min 37 s.</p>"
+        },
+        {
+          "slug": "024-a-cabala-da-simplicidade-rabino-dudu",
+          "title": "A Cabala da Simplicidade - Rabino Dudu",
+          "videoId": "lM0sPrDyuJo",
+          "durationSeconds": 2923,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 48 min 43 s.</p>"
+        },
+        {
+          "slug": "025-a-cabala-do-poder-rabino-dudu",
+          "title": "A Cabala do Poder - Rabino Dudu",
+          "videoId": "fE1hBaunihI",
+          "durationSeconds": 2363,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 39 min 23 s.</p>"
+        },
+        {
+          "slug": "026-a-cabala-do-tempo-rabino-dudu",
+          "title": "A Cabala do Tempo - Rabino Dudu",
+          "videoId": "bbmdQOxs-lE",
+          "durationSeconds": 2097,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 34 min 57 s.</p>"
+        },
+        {
+          "slug": "027-a-cabala-do-inconsciente-rabino-dudu",
+          "title": "A Cabala do Inconsciente - Rabino Dudu",
+          "videoId": "f39nty6lVtI",
+          "durationSeconds": 2126,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 35 min 26 s.</p>"
+        },
+        {
+          "slug": "028-a-cabala-do-coronavirus",
+          "title": "A Cabala Do Coronavírus",
+          "videoId": "LmBFMVAOQPE",
+          "durationSeconds": 3391,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 56 min 31 s.</p>"
+        },
+        {
+          "slug": "029-a-cabala-do-perdao-rabino-dudu",
+          "title": "A Cabala do Perdão - Rabino Dudu",
+          "videoId": "ANMkY0p93j4",
+          "durationSeconds": 1898,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 31 min 38 s.</p>"
+        },
+        {
+          "slug": "030-a-cabala-da-fala-rabino-dudu",
+          "title": "A Cabala da Fala - Rabino Dudu",
+          "videoId": "3mbSOVFk3wI",
+          "durationSeconds": 942,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 15 min 42 s.</p>"
+        },
+        {
+          "slug": "031-a-cabala-da-certeza-rabino-dudu",
+          "title": "A Cabala da Certeza - Rabino Dudu",
+          "videoId": "P_G3b7Aw81I",
+          "durationSeconds": 1545,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 25 min 45 s.</p>"
+        },
+        {
+          "slug": "032-a-cabala-do-livre-arbitrio-pt-1-rabino-dudu",
+          "title": "A Cabala do Livre Arbítrio - pt. 1 - Rabino Dudu",
+          "videoId": "HaaGfyHtlOM",
+          "durationSeconds": 2071,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 34 min 31 s.</p>"
+        },
+        {
+          "slug": "033-a-cabala-do-empoderamento-feminino-rabino-dudu",
+          "title": "A Cabala do Empoderamento Feminino - Rabino Dudu",
+          "videoId": "8qZCJDrqRyM",
+          "durationSeconds": 4294,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 1 h 11 min.</p>"
+        },
+        {
+          "slug": "034-a-cabala-do-despertar-rabino-dudu",
+          "title": "A Cabala do Despertar - Rabino Dudu",
+          "videoId": "oyCOF5XXN2I",
+          "durationSeconds": 2357,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 39 min 17 s.</p>"
+        },
+        {
+          "slug": "035-a-cabala-da-alma-gemea-rabino-dudu",
+          "title": "A Cabala da Alma Gêmea - Rabino Dudu",
+          "videoId": "25ZEFIa-gOc",
+          "durationSeconds": 2993,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 49 min 53 s.</p>"
+        },
+        {
+          "slug": "036-a-cabala-das-escolhas-pt-1-rabino-dudu",
+          "title": "A Cabala das Escolhas - pt. 1 - Rabino Dudu",
+          "videoId": "iJ6r4JShPw8",
+          "durationSeconds": 2236,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 37 min 16 s.</p>"
+        },
+        {
+          "slug": "037-a-cabala-da-coragem-rabino-dudu",
+          "title": "A Cabala da Coragem - Rabino Dudu",
+          "videoId": "Fjxi60E8D4Y",
+          "durationSeconds": 2784,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 46 min 24 s.</p>"
+        },
+        {
+          "slug": "038-a-cabala-da-resiliencia-rabino-dudu",
+          "title": "A Cabala da Resiliência - Rabino Dudu",
+          "videoId": "oZ0SRyyAF_w",
+          "durationSeconds": 1511,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 25 min 11 s.</p>"
+        },
+        {
+          "slug": "039-a-cabala-dos-relacionamentos-rabino-dudu",
+          "title": "A Cabala dos Relacionamentos - Rabino Dudu",
+          "videoId": "wup3zK3s2Oo",
+          "durationSeconds": 2719,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 45 min 19 s.</p>"
+        },
+        {
+          "slug": "040-a-cabala-do-desejo-rabino-dudu",
+          "title": "A Cabala do Desejo - Rabino Dudu",
+          "videoId": "1dgpDZYM1xY",
+          "durationSeconds": 3345,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 55 min 45 s.</p>"
+        }
+      ]
+    },
+    {
+      "title": "Aulas 41–60",
+      "lessons": [
+        {
+          "slug": "041-a-cabala-da-guerra-interior-rabino-dudu",
+          "title": "A Cabala da Guerra Interior - Rabino Dudu",
+          "videoId": "C6c6xQCoQms",
+          "durationSeconds": 1633,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 27 min 13 s.</p>"
+        },
+        {
+          "slug": "042-a-cabala-da-luz-rabino-dudu",
+          "title": "A Cabala da Luz - Rabino Dudu",
+          "videoId": "lqUQ7L7f9yE",
+          "durationSeconds": 2341,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 39 min 1 s.</p>"
+        },
+        {
+          "slug": "043-a-cabala-das-personalidades-rabino-dudu",
+          "title": "A Cabala Das Personalidades - Rabino Dudu",
+          "videoId": "IW15o4o5dV8",
+          "durationSeconds": 1807,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 30 min 7 s.</p>"
+        },
+        {
+          "slug": "044-a-cabala-da-conquista-rabino-dudu",
+          "title": "A Cabala da Conquista - Rabino Dudu",
+          "videoId": "gwqzbfkrMgU",
+          "durationSeconds": 1740,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 29 min.</p>"
+        },
+        {
+          "slug": "045-a-cabala-do-luxo-rabino-dudu",
+          "title": "A Cabala do Luxo - Rabino Dudu",
+          "videoId": "iNBGzvitMf0",
+          "durationSeconds": 3353,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 55 min 53 s.</p>"
+        },
+        {
+          "slug": "046-a-cabala-da-espiritualidade-rabino-dudu",
+          "title": "A Cabala da Espiritualidade - Rabino Dudu",
+          "videoId": "v5d56kjo2Jg",
+          "durationSeconds": 3557,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 59 min 17 s.</p>"
+        },
+        {
+          "slug": "047-a-cabala-da-seducao-rabino-dudu",
+          "title": "A Cabala da Sedução - Rabino Dudu",
+          "videoId": "8x9nGeOHDVg",
+          "durationSeconds": 1917,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 31 min 57 s.</p>"
+        },
+        {
+          "slug": "048-a-cabala-da-inveja-rabino-dudu",
+          "title": "A Cabala da Inveja - Rabino Dudu",
+          "videoId": "-UppSpGpzjc",
+          "durationSeconds": 1873,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 31 min 13 s.</p>"
+        },
+        {
+          "slug": "049-a-cabala-de-rosh-hashana-rabino-dudu",
+          "title": "A Cabala de Rosh Hashana - Rabino Dudu",
+          "videoId": "3dWrEsD48uo",
+          "durationSeconds": 1806,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 30 min 6 s.</p>"
+        },
+        {
+          "slug": "050-a-cabala-da-realidade-rabino-dudu",
+          "title": "A Cabala da Realidade - Rabino Dudu",
+          "videoId": "mjRdd7YC_Es",
+          "durationSeconds": 2466,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 41 min 6 s.</p>"
+        },
+        {
+          "slug": "051-the-kabbalah-of-intimacy-rabbi-dudu",
+          "title": "The Kabbalah of Intimacy - Rabbi Dudu",
+          "videoId": "xIV_TDnkffY",
+          "durationSeconds": 3643,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 1 h 0 min.</p>"
+        },
+        {
+          "slug": "052-a-cabala-da-saude-rabino-dudu",
+          "title": "A Cabala da Saúde - Rabino Dudu",
+          "videoId": "W1OLE9vpKwo",
+          "durationSeconds": 2251,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 37 min 31 s.</p>"
+        },
+        {
+          "slug": "053-a-cabala-das-frustracoes-rabino-dudu",
+          "title": "A Cabala das Frustrações - Rabino Dudu",
+          "videoId": "LPY-OUzkfdA",
+          "durationSeconds": 2639,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 43 min 59 s.</p>"
+        },
+        {
+          "slug": "054-a-cabala-do-cerebro-humano-rabino-dudu",
+          "title": "A Cabala do Cérebro Humano - Rabino Dudu",
+          "videoId": "jm-TDC79Kr4",
+          "durationSeconds": 1367,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 22 min 47 s.</p>"
+        },
+        {
+          "slug": "055-a-cabala-do-positivismo-rabino-dudu",
+          "title": "A Cabala do Positivismo - Rabino Dudu",
+          "videoId": "fCZJbuvERmw",
+          "durationSeconds": 3050,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 50 min 50 s.</p>"
+        },
+        {
+          "slug": "056-a-cabala-do-equilibrio-pt-1-rabino-dudu",
+          "title": "A Cabala do Equilíbrio - pt. 1 - Rabino Dudu",
+          "videoId": "23ZbF3IjlWo",
+          "durationSeconds": 1368,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 22 min 48 s.</p>"
+        },
+        {
+          "slug": "057-a-cabala-do-agora-rabindo-dudu",
+          "title": "A Cabala do Agora - Rabindo Dudu",
+          "videoId": "O68djM7yZ2w",
+          "durationSeconds": 2046,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 34 min 6 s.</p>"
+        },
+        {
+          "slug": "058-a-cabala-da-vida-parte-1-rabino-dudu",
+          "title": "A Cabala da Vida (parte 1) -  Rabino Dudu",
+          "videoId": "4suzC_Bx9Pc",
+          "durationSeconds": 1332,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 22 min 12 s.</p>"
+        },
+        {
+          "slug": "059-a-cabala-do-bem-e-do-mal-rabino-dudu",
+          "title": "A Cabala do Bem e do Mal - Rabino Dudu",
+          "videoId": "JYMLksb7YDE",
+          "durationSeconds": 1740,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 29 min.</p>"
+        },
+        {
+          "slug": "060-a-cabala-dos-detalhes-rabino-dudu",
+          "title": "A Cabala dos Detalhes - Rabino Dudu",
+          "videoId": "5lPYc-_Xoe0",
+          "durationSeconds": 3239,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 53 min 59 s.</p>"
+        }
+      ]
+    },
+    {
+      "title": "Aulas 61–80",
+      "lessons": [
+        {
+          "slug": "061-a-cabala-da-cabala-rabino-dudu",
+          "title": "A Cabala da Cabala - Rabino Dudu",
+          "videoId": "E6Z0i9uGf3E",
+          "durationSeconds": 3328,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 55 min 28 s.</p>"
+        },
+        {
+          "slug": "062-a-cabala-da-paixao-rabino-dudu",
+          "title": "A Cabala da Paixão - Rabino Dudu",
+          "videoId": "ctf7LPs90bk",
+          "durationSeconds": 2188,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 36 min 28 s.</p>"
+        },
+        {
+          "slug": "063-a-cabala-do-conhecimento-rabino-dudu",
+          "title": "A Cabala do Conhecimento - Rabino Dudu",
+          "videoId": "OvIntsD715E",
+          "durationSeconds": 1686,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 28 min 6 s.</p>"
+        },
+        {
+          "slug": "064-a-cabala-da-felicidade-rabino-dudu",
+          "title": "A Cabala da Felicidade - Rabino Dudu",
+          "videoId": "AaxjmYkuleI",
+          "durationSeconds": 2347,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 39 min 7 s.</p>"
+        },
+        {
+          "slug": "065-a-cabala-da-beleza-pt-1-rabino-dudu",
+          "title": "A Cabala da Beleza pt. 1 - Rabino Dudu",
+          "videoId": "iJrr8NPV1L4",
+          "durationSeconds": 2152,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 35 min 52 s.</p>"
+        },
+        {
+          "slug": "066-a-cabala-dos-limites-rabino-dudu",
+          "title": "A Cabala dos Limites - Rabino Dudu",
+          "videoId": "1pEo3lXa1QU",
+          "durationSeconds": 1695,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 28 min 15 s.</p>"
+        },
+        {
+          "slug": "067-a-cabala-do-prazer-pt-1-rabino-dudu",
+          "title": "A Cabala do Prazer - pt. 1 - Rabino Dudu",
+          "videoId": "30mkRhIn4SA",
+          "durationSeconds": 1328,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 22 min 8 s.</p>"
+        },
+        {
+          "slug": "068-a-cabala-do-prazer-pt-1-rabino-dudu",
+          "title": "A Cabala do Prazer - pt. 1 - Rabino Dudu",
+          "videoId": "30mkRhIn4SA",
+          "durationSeconds": 1328,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 22 min 8 s.</p>"
+        },
+        {
+          "slug": "069-a-cabala-do-mindfulness-rabino-dudu",
+          "title": "A Cabala do Mindfulness - Rabino Dudu",
+          "videoId": "oNv6enw7y_E",
+          "durationSeconds": 1833,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 30 min 33 s.</p>"
+        },
+        {
+          "slug": "070-a-cabala-do-yom-kipur-rabino-dudu",
+          "title": "A Cabala do Yom Kipur - Rabino Dudu",
+          "videoId": "xajORE9NvTQ",
+          "durationSeconds": 1382,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 23 min 2 s.</p>"
+        },
+        {
+          "slug": "071-a-cabala-da-traicao-rabino-dudu",
+          "title": "A Cabala da Traição - Rabino Dudu",
+          "videoId": "zHUP_3pKUrs",
+          "durationSeconds": 2252,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 37 min 32 s.</p>"
+        },
+        {
+          "slug": "072-a-cabala-da-comida-pt-1-rabino-dudu",
+          "title": "A Cabala da Comida - pt. 1 - Rabino Dudu",
+          "videoId": "sSdrdfV8RDo",
+          "durationSeconds": 1328,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 22 min 8 s.</p>"
+        },
+        {
+          "slug": "073-a-cabala-da-consciencia-corporal-rabino-dudu",
+          "title": "A Cabala da Consciência Corporal - Rabino Dudu",
+          "videoId": "8CrLanH-9UQ",
+          "durationSeconds": 3081,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 51 min 21 s.</p>"
+        },
+        {
+          "slug": "074-a-cabala-da-culpa-rabino-dudu",
+          "title": "A Cabala da Culpa - Rabino Dudu",
+          "videoId": "coHDGipuS9I",
+          "durationSeconds": 1878,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 31 min 18 s.</p>"
+        },
+        {
+          "slug": "075-a-cabala-da-imperfeicao-rabino-dudu",
+          "title": "A Cabala da Imperfeição - Rabino Dudu",
+          "videoId": "0DDFQV0N8Zo",
+          "durationSeconds": 2292,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 38 min 12 s.</p>"
+        },
+        {
+          "slug": "076-la-casa-de-papel-rabino-dudu",
+          "title": "La Casa de Papel - Rabino Dudu",
+          "videoId": "xnZKTbJNDkE",
+          "durationSeconds": 2006,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 33 min 26 s.</p>"
+        },
+        {
+          "slug": "077-a-cabala-da-loucura-rabino-dudu",
+          "title": "A Cabala da Loucura - Rabino Dudu",
+          "videoId": "aXypxK3Rio4",
+          "durationSeconds": 1915,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 31 min 55 s.</p>"
+        },
+        {
+          "slug": "078-the-kabbalah-of-philosophy-rabbi-dudu",
+          "title": "The Kabbalah of Philosophy - Rabbi Dudu",
+          "videoId": "0D-O0xvL3Wo",
+          "durationSeconds": 3726,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 1 h 2 min.</p>"
+        },
+        {
+          "slug": "079-a-essencia-da-cabala-e-do-chassidismo-pt-1-rabino-du",
+          "title": "A Essência da Cabala e do Chassidismo - pt. 1 - Rabino Dudu",
+          "videoId": "MDUtT9HmhaY",
+          "durationSeconds": 2652,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 44 min 12 s.</p>"
+        },
+        {
+          "slug": "080-a-cabala-do-amor-e-odio-rabino-dudu",
+          "title": "A Cabala do Amor e Ódio - Rabino Dudu",
+          "videoId": "3jSwIqBDr14",
+          "durationSeconds": 2302,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 38 min 22 s.</p>"
+        }
+      ]
+    },
+    {
+      "title": "Aulas 81–100",
+      "lessons": [
+        {
+          "slug": "081-a-cabala-da-evolucao-rabino-dudu",
+          "title": "A Cabala da Evolução - Rabino Dudu",
+          "videoId": "qWF9uqrWXK8",
+          "durationSeconds": 3247,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 54 min 7 s.</p>"
+        },
+        {
+          "slug": "082-a-cabala-da-entrega-rabino-dudu",
+          "title": "A Cabala da Entrega - Rabino Dudu",
+          "videoId": "WY90gxqaU_4",
+          "durationSeconds": 2585,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 43 min 5 s.</p>"
+        },
+        {
+          "slug": "083-elenao-ou-elesim-a-cabala-das-eleicoes-rabino-dudu",
+          "title": "#elenão ou #elesim (A Cabala das Eleições)  - Rabino Dudu",
+          "videoId": "8ljaTwDV0iA",
+          "durationSeconds": 2173,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 36 min 13 s.</p>"
+        },
+        {
+          "slug": "084-a-cabala-do-aniversario-rabino-dudu",
+          "title": "A Cabala do Aniversário - Rabino Dudu",
+          "videoId": "iV_9VCdxHdU",
+          "durationSeconds": 2860,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 47 min 40 s.</p>"
+        },
+        {
+          "slug": "085-a-cabala-do-brasil-rabino-dudu",
+          "title": "A Cabala do Brasil - Rabino Dudu",
+          "videoId": "pyuNpoUDCB4",
+          "durationSeconds": 1719,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 28 min 39 s.</p>"
+        },
+        {
+          "slug": "086-a-cabala-da-inspiracao-rabino-dudu",
+          "title": "A Cabala da Inspiração - Rabino Dudu",
+          "videoId": "4PHvnLun1XA",
+          "durationSeconds": 2789,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 46 min 29 s.</p>"
+        },
+        {
+          "slug": "087-a-cabala-do-mimimi-rabino-dudu",
+          "title": "A Cabala do Mimimi - Rabino Dudu",
+          "videoId": "cCXkw8gYa3E",
+          "durationSeconds": 3223,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 53 min 43 s.</p>"
+        },
+        {
+          "slug": "088-a-cabala-das-emocoes-2-rabino-dudu",
+          "title": "A Cabala das Emoções 2 - Rabino Dudu",
+          "videoId": "uXokipqDxm8",
+          "durationSeconds": 485,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 8 min 5 s.</p>"
+        },
+        {
+          "slug": "089-a-cabala-do-poco",
+          "title": "A Cabala Do Poço",
+          "videoId": "u47D8Vg05UE",
+          "durationSeconds": 5322,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 1 h 28 min.</p>"
+        },
+        {
+          "slug": "090-a-cabala-da-vida-parte-2-rabino-dudu",
+          "title": "A Cabala da Vida (parte 2) - Rabino Dudu",
+          "videoId": "nkH--xjDcks",
+          "durationSeconds": 1094,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 18 min 14 s.</p>"
+        },
+        {
+          "slug": "091-a-cabala-de-pessach-parte-1-rabino-dudu",
+          "title": "A Cabala de Pessach  (Parte 1) - Rabino Dudu",
+          "videoId": "wXJi_Vu7z_A",
+          "durationSeconds": 2652,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 44 min 12 s.</p>"
+        },
+        {
+          "slug": "092-a-cabala-do-pecado-rabino-dudu",
+          "title": "A Cabala do Pecado - Rabino Dudu",
+          "videoId": "o_9pkilx30o",
+          "durationSeconds": 1801,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 30 min 1 s.</p>"
+        },
+        {
+          "slug": "093-a-cabala-do-coringa-rabino-dudu",
+          "title": "A Cabala do Coringa - Rabino Dudu",
+          "videoId": "JZZNjwoooW8",
+          "durationSeconds": 3363,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 56 min 3 s.</p>"
+        },
+        {
+          "slug": "094-a-cabala-do-tedio-rabino-dudu",
+          "title": "A Cabala do Tédio - Rabino Dudu",
+          "videoId": "z4-nTTH_xsQ",
+          "durationSeconds": 2718,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 45 min 18 s.</p>"
+        },
+        {
+          "slug": "095-a-cabala-das-escolhas-pt-2-rabino-dudu",
+          "title": "A Cabala das Escolhas - pt. 2 - Rabino Dudu",
+          "videoId": "O3zJXeWj0vY",
+          "durationSeconds": 784,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 13 min 4 s.</p>"
+        },
+        {
+          "slug": "096-a-cabala-do-ateismo-rabino-dudu",
+          "title": "A Cabala do Ateísmo - Rabino Dudu",
+          "videoId": "Yc5H-nPW7IM",
+          "durationSeconds": 3126,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 52 min 6 s.</p>"
+        },
+        {
+          "slug": "097-a-cabala-da-empatia-rabino-dudu",
+          "title": "A Cabala da Empatia - Rabino Dudu",
+          "videoId": "1T5uj_Zrpn4",
+          "durationSeconds": 1910,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 31 min 50 s.</p>"
+        },
+        {
+          "slug": "098-a-cabala-do-bem-estar-rabino-dudu",
+          "title": "A Cabala do Bem Estar - Rabino Dudu",
+          "videoId": "hTYa9XjnXEQ",
+          "durationSeconds": 1676,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 27 min 56 s.</p>"
+        },
+        {
+          "slug": "099-a-cabala-do-prazer-pt-2-rabino-dudu",
+          "title": "A Cabala do Prazer - pt. 2 - Rabino Dudu",
+          "videoId": "JDsB1teza-g",
+          "durationSeconds": 1071,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 17 min 51 s.</p>"
+        },
+        {
+          "slug": "100-a-cabala-do-caos-rabino-dudu",
+          "title": "A Cabala do Caos - Rabino Dudu",
+          "videoId": "atz0SvaEp3E",
+          "durationSeconds": 1707,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 28 min 27 s.</p>"
+        }
+      ]
+    },
+    {
+      "title": "Aulas 101–120",
+      "lessons": [
+        {
+          "slug": "101-a-cabala-do-ciume-rabino-dudu",
+          "title": "A Cabala do Ciúme - Rabino Dudu",
+          "videoId": "62hEzYX9ijE",
+          "durationSeconds": 3110,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 51 min 50 s.</p>"
+        },
+        {
+          "slug": "102-a-cabala-das-emocoes-3-rabino-dudu",
+          "title": "A Cabala das Emoções 3 - Rabino Dudu",
+          "videoId": "1ms5_xWLwu0",
+          "durationSeconds": 467,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 7 min 47 s.</p>"
+        },
+        {
+          "slug": "103-a-cabala-de-purim-rabino-dudu",
+          "title": "A Cabala de Purim - Rabino Dudu",
+          "videoId": "UbiWergjEe0",
+          "durationSeconds": 1861,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 31 min 1 s.</p>"
+        },
+        {
+          "slug": "104-a-cabala-da-comida-pt-2-rabino-dudu",
+          "title": "A Cabala da Comida - pt. 2 - Rabino Dudu",
+          "videoId": "7ArVTZi02NA",
+          "durationSeconds": 799,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 13 min 19 s.</p>"
+        },
+        {
+          "slug": "105-a-cabala-dos-paradoxos-rabino-dudu",
+          "title": "A Cabala dos Paradoxos - Rabino Dudu",
+          "videoId": "dKxfEb3lzpM",
+          "durationSeconds": 2728,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 45 min 28 s.</p>"
+        },
+        {
+          "slug": "106-a-cabala-do-feminismo",
+          "title": "A Cabala do Feminismo",
+          "videoId": "LR6x9V23vA4",
+          "durationSeconds": 2150,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 35 min 50 s.</p>"
+        },
+        {
+          "slug": "107-a-cabala-de-marie-kondo-rabino-dudu",
+          "title": "A Cabala de Marie Kondo - Rabino Dudu",
+          "videoId": "4p14jGXLGAI",
+          "durationSeconds": 2818,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 46 min 58 s.</p>"
+        },
+        {
+          "slug": "108-the-kabbalah-of-balance-pt-2-rabbi-dudu",
+          "title": "The Kabbalah of Balance - Pt. 2 - Rabbi Dudu",
+          "videoId": "aMg33xSVyZQ",
+          "durationSeconds": 366,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 6 min 6 s.</p>"
+        },
+        {
+          "slug": "109-a-cabala-da-musica-rabino-dudu",
+          "title": "A Cabala da Música - Rabino Dudu",
+          "videoId": "DytUyI-gSh4",
+          "durationSeconds": 2422,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 40 min 22 s.</p>"
+        },
+        {
+          "slug": "110-a-cabala-da-fidelidade-rabino-dudu",
+          "title": "A Cabala da Fidelidade - Rabino Dudu",
+          "videoId": "KWNV5ma75gU",
+          "durationSeconds": 1548,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 25 min 48 s.</p>"
+        },
+        {
+          "slug": "111-a-cabala-do-livre-arbitrio-pt-2-rabino-dudu",
+          "title": "A Cabala do Livre Arbítrio - pt. 2 - Rabino Dudu",
+          "videoId": "l9JGkS8rORc",
+          "durationSeconds": 357,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 5 min 57 s.</p>"
+        },
+        {
+          "slug": "112-a-cabala-do-holocausto-rabino-dudu",
+          "title": "A Cabala do Holocausto - Rabino Dudu",
+          "videoId": "Y_NcbfeUWmI",
+          "durationSeconds": 3217,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 53 min 37 s.</p>"
+        },
+        {
+          "slug": "113-a-cabala-da-sensibilidade-rabino-dudu",
+          "title": "A Cabala da Sensibilidade - Rabino Dudu",
+          "videoId": "aTD2_GPkWoc",
+          "durationSeconds": 2944,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 49 min 4 s.</p>"
+        },
+        {
+          "slug": "114-a-cabala-da-educacao-rabino-dudu",
+          "title": "A Cabala da Educação - Rabino Dudu",
+          "videoId": "flQZkOlbv_4",
+          "durationSeconds": 1478,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 24 min 38 s.</p>"
+        },
+        {
+          "slug": "115-a-cabala-do-prazer-2015-rabino-dudu",
+          "title": "A Cabala do Prazer 2015 - Rabino Dudu",
+          "videoId": "yEtDppnsLVc",
+          "durationSeconds": 1896,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 31 min 36 s.</p>"
+        },
+        {
+          "slug": "116-a-cabala-da-moda-rabino-dudu",
+          "title": "A Cabala da Moda - Rabino Dudu",
+          "videoId": "j2uwzh6RWyY",
+          "durationSeconds": 2653,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 44 min 13 s.</p>"
+        },
+        {
+          "slug": "117-a-cabala-do-afeto-rabino-dudu",
+          "title": "A Cabala do Afeto - Rabino Dudu",
+          "videoId": "Fqd2-VM8rMU",
+          "durationSeconds": 1343,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 22 min 23 s.</p>"
+        },
+        {
+          "slug": "118-a-cabala-da-harmonia-rabino-dudu",
+          "title": "A Cabala da Harmonia - Rabino Dudu",
+          "videoId": "Nnn3FSotPfg",
+          "durationSeconds": 1175,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 19 min 35 s.</p>"
+        },
+        {
+          "slug": "119-the-kabbalah-of-free-will-pt-3-rabbi-dudu",
+          "title": "The Kabbalah of Free Will - pt. 3 - Rabbi Dudu",
+          "videoId": "aazKy2DfNKY",
+          "durationSeconds": 298,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 4 min 58 s.</p>"
+        },
+        {
+          "slug": "120-a-essencia-da-cabala-e-do-chassidismo-pt-3-rabino-du",
+          "title": "A Essência da Cabala e do Chassidismo - pt. 3 - Rabino Dudu",
+          "videoId": "WdbPQIVjJdc",
+          "durationSeconds": 2651,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 44 min 11 s.</p>"
+        }
+      ]
+    },
+    {
+      "title": "Aulas 121–140",
+      "lessons": [
+        {
+          "slug": "121-the-kabbalah-of-balance-pt-3-rabbi-dudu",
+          "title": "The Kabbalah of Balance - pt. 3 - Rabbi Dudu",
+          "videoId": "xvqZovpVG94",
+          "durationSeconds": 313,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 5 min 13 s.</p>"
+        },
+        {
+          "slug": "122-the-kabbalah-of-coronavirus-part-ii",
+          "title": "The Kabbalah of Coronavirus - Part II",
+          "videoId": "9GO1qdZKDXs",
+          "durationSeconds": 5761,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 1 h 36 min.</p>"
+        },
+        {
+          "slug": "123-a-cabala-da-imersao-rabino-dudu",
+          "title": "A Cabala da Imersão - Rabino Dudu",
+          "videoId": "NfGWE-Xy1EQ",
+          "durationSeconds": 1986,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 33 min 6 s.</p>"
+        },
+        {
+          "slug": "124-a-cabala-da-atualidade-rabino-dudu",
+          "title": "A Cabala da Atualidade - Rabino Dudu",
+          "videoId": "Nj1sena5yTA",
+          "durationSeconds": 1816,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 30 min 16 s.</p>"
+        },
+        {
+          "slug": "125-a-cabala-do-fanatismo-religioso-rabino-dudu",
+          "title": "A Cabala do Fanatismo Religioso - Rabino Dudu",
+          "videoId": "4ZxK7nbzSAM",
+          "durationSeconds": 1369,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 22 min 49 s.</p>"
+        },
+        {
+          "slug": "126-a-cabala-da-beleza-pt-2-rabino-dudu",
+          "title": "A Cabala da Beleza pt.2 - Rabino Dudu",
+          "videoId": "V4qBRPvZwIo",
+          "durationSeconds": 595,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 9 min 55 s.</p>"
+        },
+        {
+          "slug": "127-a-cabala-do-romantismo-rabino-dudu",
+          "title": "A Cabala do Romantismo - Rabino Dudu",
+          "videoId": "1lMII44OJJM",
+          "durationSeconds": 2953,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 49 min 13 s.</p>"
+        },
+        {
+          "slug": "128-a-cabala-da-previdencia-rabino-dudu",
+          "title": "A Cabala da Previdência - Rabino Dudu",
+          "videoId": "lGCQ2hb9Puw",
+          "durationSeconds": 2550,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 42 min 30 s.</p>"
+        },
+        {
+          "slug": "129-a-cabala-do-humor-judaico-rabino-dudu",
+          "title": "A Cabala do Humor Judaico - Rabino Dudu",
+          "videoId": "q08ZV3LXgRQ",
+          "durationSeconds": 885,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 14 min 45 s.</p>"
+        },
+        {
+          "slug": "130-a-cabala-do-mar",
+          "title": "A Cabala Do Mar",
+          "videoId": "_ukOzT7b_dc",
+          "durationSeconds": 3594,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 59 min 54 s.</p>"
+        },
+        {
+          "slug": "131-the-kabbalah-of-corruption-rabbi-dudu",
+          "title": "The Kabbalah of Corruption - Rabbi Dudu",
+          "videoId": "joLZAAf2pO8",
+          "durationSeconds": 983,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 16 min 23 s.</p>"
+        },
+        {
+          "slug": "132-a-cabala-do-humanismo-rabino-dudu",
+          "title": "A Cabala do Humanismo - Rabino Dudu",
+          "videoId": "xVaAk4jP0MM",
+          "durationSeconds": 1941,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 32 min 21 s.</p>"
+        },
+        {
+          "slug": "133-a-cabala-de-sucot-rabino-dudu",
+          "title": "A Cabala de Sucot - Rabino Dudu",
+          "videoId": "8dqtAWp7GlA",
+          "durationSeconds": 1179,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 19 min 39 s.</p>"
+        },
+        {
+          "slug": "134-the-kabbalah-of-gastronomy-rabbi-dudu",
+          "title": "The Kabbalah of Gastronomy - Rabbi Dudu",
+          "videoId": "ChmAsBW78v0",
+          "durationSeconds": 2223,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 37 min 3 s.</p>"
+        },
+        {
+          "slug": "135-a-cabala-organica-rabino-dudu",
+          "title": "A Cabala Orgânica - Rabino Dudu",
+          "videoId": "OL6XKTpUqvg",
+          "durationSeconds": 2938,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 48 min 58 s.</p>"
+        },
+        {
+          "slug": "136-the-kabbalah-of-the-coronavirus-part-iii",
+          "title": "The Kabbalah of the Coronavirus - Part III",
+          "videoId": "6Qv-ptYbV8Q",
+          "durationSeconds": 4659,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 1 h 17 min.</p>"
+        },
+        {
+          "slug": "137-a-cabala-da-liberdade-rabino-dudu",
+          "title": "A Cabala da Liberdade - Rabino Dudu",
+          "videoId": "Ovc5ATp9CRk",
+          "durationSeconds": 632,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 10 min 32 s.</p>"
+        },
+        {
+          "slug": "138-the-wine-kabbalah",
+          "title": "The Wine Kabbalah",
+          "videoId": "v7VnRzH3X5s",
+          "durationSeconds": 4414,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 1 h 13 min.</p>"
+        },
+        {
+          "slug": "139-the-essence-of-kabbalah-and-hasidism-pt-2-rabbi-dudu",
+          "title": "The Essence of Kabbalah and Hasidism - Pt. 2 - Rabbi Dudu",
+          "videoId": "3rvPm0WjdSg",
+          "durationSeconds": 270,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 4 min 30 s.</p>"
+        },
+        {
+          "slug": "140-a-cabala-de-pessach-parte-2-rabino-dudu",
+          "title": "A Cabala de Pessach (Parte 2) - Rabino Dudu",
+          "videoId": "5_WTEj98anY",
+          "durationSeconds": 728,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 12 min 8 s.</p>"
+        }
+      ]
+    },
+    {
+      "title": "Aulas 141–148",
+      "lessons": [
+        {
+          "slug": "141-a-cabala-da-arte-rabino-dudu",
+          "title": "A Cabala da Arte - Rabino Dudu",
+          "videoId": "2RFQNIz4Hn8",
+          "durationSeconds": 1339,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 22 min 19 s.</p>"
+        },
+        {
+          "slug": "142-a-cabala-de-mashiach-pt-2-messias-rabino-dudu",
+          "title": "A Cabala de Mashiach pt 2 (Messias) - Rabino Dudu",
+          "videoId": "gcw3GYPm-xM",
+          "durationSeconds": 169,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 2 min 49 s.</p>"
+        },
+        {
+          "slug": "143-a-essencia-da-cabala-e-do-chassidismo-pt-4-rabino-du",
+          "title": "A Essência da Cabala e do Chassidismo - pt. 4 - Rabino Dudu",
+          "videoId": "VZ7dIJSCn6g",
+          "durationSeconds": 254,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 4 min 14 s.</p>"
+        },
+        {
+          "slug": "144-a-cabala-do-big-brother",
+          "title": "A Cabala Do Big Brother",
+          "videoId": "43wpE3ar180",
+          "durationSeconds": 3487,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 58 min 7 s.</p>"
+        },
+        {
+          "slug": "145-a-essencia-da-cabala-e-do-chassidismo-pt-5-rabino-du",
+          "title": "A Essência da Cabala e do Chassidismo - pt. 5 - Rabino Dudu",
+          "videoId": "y0oOkiFMaOU",
+          "durationSeconds": 737,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 12 min 17 s.</p>"
+        },
+        {
+          "slug": "146-the-essence-of-kabbalah-and-chassidism-pt-6-rabbi-du",
+          "title": "The Essence of Kabbalah and Chassidism - Pt. 6 - Rabbi Dudu",
+          "videoId": "CY5cjorlbL8",
+          "durationSeconds": 797,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 13 min 17 s.</p>"
+        },
+        {
+          "slug": "147-a-essencia-da-cabala-e-do-chassidismo-pt-7-rabino-du",
+          "title": "A Essência da Cabala e do Chassidismo - pt. 7 - Rabino Dudu",
+          "videoId": "N_y4YcN93zk",
+          "durationSeconds": 360,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 6 min.</p>"
+        },
+        {
+          "slug": "148-a-cabala-dos-esportes-rabino-dudu",
+          "title": "A Cabala dos Esportes - Rabino Dudu",
+          "videoId": "sQHm4ywp4Yc",
+          "durationSeconds": 1343,
+          "bodyHtml": "<p class=\"course-text-muted text-sm\">Duração aproximada: 22 min 23 s.</p>"
+        }
+      ]
+    }
+  ]
+}
