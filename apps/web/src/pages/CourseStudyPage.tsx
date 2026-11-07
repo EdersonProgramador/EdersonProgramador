@@ -109,6 +109,14 @@ type FichamentoBundle = {
 
 const COURSE_SIDEBAR_COLLAPSED_KEY = "academy-course-sidebar-collapsed";
 
+function isFichamentoImmersiveSubPath(subPath: string): boolean {
+  return (
+    /^fichamento\/aula\/.+/.test(subPath) ||
+    subPath === "fichamento/curso" ||
+    /^fichamento\/modulo\/\d+$/.test(subPath)
+  );
+}
+
 function readSidebarCollapsedPreference(): boolean {
   if (typeof window === "undefined") return false;
   try {
@@ -182,29 +190,26 @@ export function CourseStudyPage() {
     }
   }, [sidebarDesktopCollapsed]);
 
+  const isFichamentoImmersiveRoute = isFichamentoImmersiveSubPath(subPath);
+  const studyImmersive = studyFocusMode || isFichamentoImmersiveRoute;
+
   useEffect(() => {
-    setStudyFocusMode(false);
+    if (isFichamentoImmersiveSubPath(subPath)) {
+      setSidebarOpen(false);
+      setSidebarDesktopCollapsed(true);
+    } else {
+      setStudyFocusMode(false);
+    }
   }, [subPath]);
 
   useEffect(() => {
-    if (!studyFocusMode) return;
+    if (!studyImmersive) return;
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setStudyFocusMode(false);
+      if (event.key === "Escape" && studyFocusMode) setStudyFocusMode(false);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [studyFocusMode]);
-
-  const toggleStudyFocus = useCallback(() => {
-    setStudyFocusMode((on) => {
-      const next = !on;
-      if (next) {
-        setSidebarOpen(false);
-        setSidebarDesktopCollapsed(true);
-      }
-      return next;
-    });
-  }, []);
+  }, [studyImmersive, studyFocusMode]);
 
   const loadCoursePayload = useCallback(async (bustCache = false) => {
     if (!courseSlug) return;
@@ -437,7 +442,7 @@ export function CourseStudyPage() {
   return (
     <div
       className={`course-study surface-light min-h-screen bg-[var(--course-surface-main)]${
-        studyFocusMode ? " is-study-focus" : ""
+        studyImmersive ? " is-study-focus" : ""
       }`}
     >
       <header className="course-study__header app-shell-header">
@@ -675,8 +680,6 @@ export function CourseStudyPage() {
                     : prev
                 )
               }
-              studyFocusMode={studyFocusMode}
-              onToggleStudyFocus={toggleStudyFocus}
             />
           ) : isCourseFichamento && courseSlug && payload ? (
             <FichamentoWorkspace
@@ -699,8 +702,6 @@ export function CourseStudyPage() {
                     : prev
                 )
               }
-              studyFocusMode={studyFocusMode}
-              onToggleStudyFocus={toggleStudyFocus}
             />
           ) : isCertificateView ? (
             certificate ? (
@@ -755,8 +756,6 @@ export function CourseStudyPage() {
                   ? () => goLesson(fichamentoAulaPath(fichamentoModeItem.next!))
                   : undefined
               }
-              studyFocusMode={studyFocusMode}
-              onToggleStudyFocus={toggleStudyFocus}
             />
           ) : !activeItem && !activeBonus ? (
             <div className="course-study__welcome panel p-5 sm:p-8">
@@ -862,7 +861,7 @@ export function CourseStudyPage() {
         </main>
       </div>
 
-      {studyFocusMode ? (
+      {studyFocusMode && !isFichamentoImmersiveRoute ? (
         <button
           type="button"
           className="course-study__focus-exit btn-secondary"
