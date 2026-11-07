@@ -10,7 +10,9 @@
 
   display: flex;
   flex-direction: column;
+  flex: 1;
   min-height: min(72vh, 720px);
+  min-width: 0;
   border: 1px solid var(--dcs-border);
   border-radius: 0.75rem;
   overflow: hidden;
@@ -33,8 +35,10 @@
 .dev-code-studio__menubar {
   display: flex;
   flex-wrap: wrap;
+  flex-shrink: 0;
   align-items: center;
   gap: 0.125rem;
+  width: 100%;
   padding: 0.125rem 0.35rem;
   background: var(--dcs-panel);
   border-bottom: 1px solid var(--dcs-border);
@@ -723,6 +727,8 @@
   flex: 1;
   flex-direction: column;
   min-width: 0;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .dev-code-studio__terminal {
@@ -756,17 +762,27 @@
 .dev-code-studio__toolbar {
   display: flex;
   flex-wrap: nowrap;
+  flex-shrink: 0;
   align-items: center;
+  justify-content: space-between;
   gap: 0.5rem;
+  width: 100%;
   padding: 0.35rem 0.5rem;
   background: var(--dcs-panel);
   border-bottom: 1px solid var(--dcs-border);
   min-height: 2.25rem;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 720px) {
   .dev-code-studio__toolbar {
     flex-wrap: wrap;
+    row-gap: 0.35rem;
+  }
+
+  .dev-code-studio__toolbar-group--actions {
+    width: 100%;
+    justify-content: flex-start;
+    max-width: none;
   }
 }
 
@@ -778,22 +794,22 @@
 
 .dev-code-studio__toolbar-group--actions {
   flex-shrink: 0;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   justify-content: flex-end;
-  row-gap: 0.25rem;
-  column-gap: 0.35rem;
-  max-width: min(100%, 28rem);
+  gap: 0.35rem;
+  margin-left: auto;
 }
 
 .dev-code-studio__toolbar-group--grow {
-  flex: 1;
+  flex: 1 1 auto;
   min-width: 0;
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: thin;
   padding-bottom: 1px;
-  align-items: stretch;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 .dev-code-studio__toolbar-group--grow::-webkit-scrollbar {
@@ -920,10 +936,17 @@
 }
 
 .dev-code-studio__tab-placeholder {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.75rem;
   padding: 0.35rem 0.65rem;
   font-size: 0.75rem;
   color: var(--dcs-muted);
   font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .dev-code-studio__tab--add {
@@ -956,7 +979,8 @@
 .dev-code-studio__body {
   display: flex;
   flex: 1;
-  min-height: 420px;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .dev-code-studio__explorer-label {
@@ -970,12 +994,15 @@
 
 .dev-code-studio__editor-wrap {
   flex: 1;
-  flex: 1;
   min-width: 0;
-  min-height: 480px;
-  height: 480px;
+  min-height: 12rem;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+}
+
+.dev-code-studio-shell--embedded .dev-code-studio__editor-wrap {
+  min-height: 480px;
 }
 
 .dev-code-studio__editor-wrap--split {
@@ -1094,11 +1121,13 @@
 
 .dev-code-studio__welcome {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex: 1;
+  align-items: flex-start;
+  justify-content: flex-start;
+  min-height: 0;
   height: 100%;
-  min-height: 320px;
-  padding: 2rem 1.5rem;
+  padding: 1.25rem 1.5rem 2rem;
+  overflow: auto;
   background: var(--dcs-bg);
 }
 
@@ -1241,6 +1270,7 @@
 
 .dev-code-studio__status {
   display: flex;
+  flex-shrink: 0;
   flex-wrap: wrap;
   gap: 0.75rem;
   align-items: center;
@@ -1264,4 +1294,43 @@
   .dev-code-studio__explorer {
     display: none;
   }
+}
+
+/* Wrapper nas rotas admin — preenche altura sem quebrar toolbar / welcome */
+.dev-code-studio-shell {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  width: 100%;
+}
+
+.dev-code-studio-shell--embedded {
+  min-height: min(72vh, 720px);
+}
+
+.dev-code-studio-shell--fill,
+.dev-code-studio-fullpage .dev-code-studio-shell {
+  flex: 1;
+  min-height: 0;
+}
+
+.dev-code-studio-shell .dev-code-studio {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+}
+
+.dev-code-studio-shell--fill .dev-code-studio,
+.dev-code-studio-fullpage .dev-code-studio {
+  min-height: 0;
+  height: auto;
+  border-radius: 0.5rem;
+}
+
+.dev-code-studio-fullpage {
+  min-height: 100dvh;
+}
+
+.dev-code-studio-fullpage__bar {
+  background: var(--app-bg-solid, var(--dcs-bg));
 }

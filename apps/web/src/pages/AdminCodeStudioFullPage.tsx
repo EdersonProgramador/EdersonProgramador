@@ -38,30 +38,30 @@ export function AdminCodeStudioFullPage() {
   const studioRaw = typeof fields[DEV_CODE_STUDIO_FIELD_ID] === "string" ? fields[DEV_CODE_STUDIO_FIELD_ID] : undefined;
 
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col bg-[var(--app-bg-solid)]">
-      <div className="relative flex min-h-0 flex-1 flex-col gap-2 p-2 sm:p-3">
-        <div className="absolute right-3 top-3 z-10 flex flex-wrap items-center gap-3 text-xs">
-          {loading ? <span className="text-[var(--app-text-muted)]">Carregando…</span> : null}
+    <div className="dev-code-studio-fullpage fixed inset-0 z-[100] flex flex-col bg-[var(--app-bg-solid)]">
+      <header className="dev-code-studio-fullpage__bar flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-[var(--app-border)] px-3 py-2">
+        <div className="flex min-w-0 flex-wrap items-center gap-3 text-xs text-[var(--app-text-muted)]">
+          {loading ? <span>Carregando…</span> : null}
           {error ? <span className="text-red-500">{error}</span> : null}
-          {saving ? <span className="text-[var(--app-text-muted)]">Salvando…</span> : null}
-          <Link
-            to={`${ADMIN_BASE}/operacao/desenvolvimento/editor${q}`}
-            className="rounded-md border border-[var(--app-border)] bg-[var(--app-panel)] px-2 py-1 text-[var(--app-text)] hover:bg-[var(--app-hover)]"
-          >
-            Voltar à operação
-          </Link>
+          {saving ? <span>Salvando…</span> : null}
         </div>
+        <Link
+          to={`${ADMIN_BASE}/operacao/desenvolvimento/editor${q}`}
+          className="shrink-0 rounded-md border border-[var(--app-border)] bg-[var(--app-panel)] px-2 py-1 text-xs text-[var(--app-text)] hover:bg-[var(--app-hover)]"
+        >
+          Voltar à operação
+        </Link>
+      </header>
 
-        <div className="flex min-h-0 flex-1 flex-col pt-8 [&_.dev-code-studio]:h-full [&_.dev-code-studio]:min-h-0 [&_.dev-code-studio]:flex-1 [&_.dev-code-studio]:max-h-none">
-          <DevelopmentCodeStudio
-            key={projectId || "local"}
-            projectId={projectId || undefined}
-            storedRaw={studioRaw}
-            onStoredChange={(raw) => setFields((prev) => ({ ...prev, [DEV_CODE_STUDIO_FIELD_ID]: raw }))}
-            onError={setError}
-            onSavingChange={setSaving}
-          />
-        </div>
+      <div className="dev-code-studio-shell dev-code-studio-shell--fill min-h-0 flex-1 p-2 sm:p-3">
+        <DevelopmentCodeStudio
+          key={projectId || "local"}
+          projectId={projectId || undefined}
+          storedRaw={studioRaw}
+          onStoredChange={(raw) => setFields((prev) => ({ ...prev, [DEV_CODE_STUDIO_FIELD_ID]: raw }))}
+          onError={setError}
+          onSavingChange={setSaving}
+        />
       </div>
     </div>
   );

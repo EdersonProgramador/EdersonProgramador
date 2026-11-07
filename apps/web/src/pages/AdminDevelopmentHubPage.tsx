@@ -111,7 +111,8 @@ export function AdminDevelopmentHubPage() {
             </div>
           }
         >
-          <DevelopmentCodeStudio
+          <div className="dev-code-studio-shell dev-code-studio-shell--embedded">
+            <DevelopmentCodeStudio
             key={projectId || "local"}
             projectId={projectId || undefined}
             storedRaw={studioRaw}
@@ -119,6 +120,7 @@ export function AdminDevelopmentHubPage() {
             onError={setError}
             onSavingChange={setSaving}
           />
+          </div>
         </Suspense>
       </div>
     );
