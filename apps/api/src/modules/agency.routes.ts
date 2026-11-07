@@ -114,6 +114,8 @@ async function assertProjectAccess(
 export async function registerAgencyRoutes(app: FastifyInstance) {
   app.addHook("preHandler", async (request, reply) => {
     if (!request.url.startsWith("/agency")) return;
+    const pathOnly = request.url.split("?")[0] ?? "";
+    if (pathOnly === "/agency/canva/oauth/callback") return;
     const tokenUser = await getAuthUser(request);
     if (!tokenUser) {
       return reply.code(401).send({ message: "Faça login para continuar." });
@@ -1274,6 +1276,9 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
       packages: resolveFunnelPackages(row)
     };
   });
+
+  const { registerCanvaRoutes } = await import("../integrations/canva.routes.js");
+  await registerCanvaRoutes(app);
 }
 
 declare module "fastify" {

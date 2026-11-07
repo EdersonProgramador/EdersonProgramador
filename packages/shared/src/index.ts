@@ -332,6 +332,42 @@ export {
   type BrandingWorkspaceData
 } from "./branding-workspace.js";
 export {
+  BRANDING_NAMING_FIELD_ID,
+  BRANDING_PALETTE_FIELD_ID,
+  buildBrandbookOutline,
+  buildBrandbookPdfModel,
+  type BrandbookPdfModel,
+  brandingNamingStudioValueEmpty,
+  brandingPaletteValueEmpty,
+  defaultBrandingNamingStudioValue,
+  defaultBrandingPaletteValue,
+  formatBrandingNamingForFeed,
+  formatBrandingPaletteForFeed,
+  isBrandingNamingStudioValue,
+  isBrandingPaletteValue,
+  parseBrandingNamingField,
+  parseBrandingPaletteField,
+  type BrandbookSection,
+  type BrandingNamingOption,
+  type BrandingNamingStudioValue,
+  type BrandingPaletteRole,
+  type BrandingPaletteSwatch,
+  type BrandingPaletteValue
+} from "./branding-studio.js";
+export {
+  CANVA_API_BASE,
+  CANVA_CONNECT_DOCS_URL,
+  CANVA_CREATE_LINKS,
+  CANVA_INTEGRATION_FIELD_IDS,
+  CANVA_OAUTH_AUTHORIZE_URL,
+  CANVA_OAUTH_SCOPES,
+  CANVA_OAUTH_TOKEN_URL,
+  formatPaletteForCanvaClipboard,
+  readCanvaIntegrationStatus,
+  type CanvaCreateLink,
+  type CanvaIntegrationStatus
+} from "./canva-integration.js";
+export {
   PROJECT_WORKSPACE_FEED_RULES,
   PROJECT_WORKSPACE_VERSION,
   brandingFieldIdValid,

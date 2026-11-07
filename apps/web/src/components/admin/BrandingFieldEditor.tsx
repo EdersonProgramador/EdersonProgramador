@@ -7,6 +7,8 @@ import type {
 } from "@ederson-agencia/shared";
 import { apiAssetUrl, apiUploadForm } from "../../api";
 import { Trash2, Upload } from "lucide-react";
+import { BrandNamingStudio } from "./branding-studios/BrandNamingStudio";
+import { BrandPaletteStudio } from "./branding-studios/BrandPaletteStudio";
 
 type Props = {
   field: BrandingFieldDef;
@@ -89,6 +91,14 @@ export function BrandingFieldEditor({ field, value, disabled, projectId, onChang
   const hint = field.acceptHint ? (
     <p className="text-xs text-[var(--app-text-muted)]">{field.acceptHint}</p>
   ) : null;
+
+  if (field.type === "palette") {
+    return <BrandPaletteStudio value={value} disabled={disabled} onChange={(v) => onChange(v)} />;
+  }
+
+  if (field.type === "naming-studio") {
+    return <BrandNamingStudio value={value} disabled={disabled} onChange={(v) => onChange(v)} />;
+  }
 
   if (field.type === "text" || field.type === "url") {
     const inputType = field.type === "url" ? "url" : "text";

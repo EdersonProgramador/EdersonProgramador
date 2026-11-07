@@ -116,6 +116,22 @@ const envSchema = z
     MAIL_FROM: z.preprocess(
       (value) => (typeof value === "string" && value.trim() ? value.trim() : undefined),
       z.string().optional()
+    ),
+    API_PUBLIC_URL: z.preprocess(
+      (value) => (typeof value === "string" && value.trim() ? value.trim().replace(/\/$/, "") : undefined),
+      z.string().min(8).optional()
+    ),
+    CANVA_CLIENT_ID: z.preprocess(
+      (value) => (typeof value === "string" && value.trim() ? value.trim() : undefined),
+      z.string().optional()
+    ),
+    CANVA_CLIENT_SECRET: z.preprocess(
+      (value) => (typeof value === "string" && value.trim() ? value.trim() : undefined),
+      z.string().optional()
+    ),
+    CANVA_REDIRECT_URI: z.preprocess(
+      (value) => (typeof value === "string" && value.trim() ? value.trim() : undefined),
+      z.string().min(8).optional()
     )
   })
   .superRefine((data, ctx) => {
@@ -147,6 +163,11 @@ if (!parsed.success) {
   process.exit(1);
 }
 
-export const env = parsed.data;
+export const env = {
+  ...parsed.data,
+  API_PUBLIC_URL:
+    parsed.data.API_PUBLIC_URL ??
+    (parsed.data.NODE_ENV === "production" ? "https://ederson-agencia-api.onrender.com" : "http://localhost:3333")
+};
 
 process.env.DATABASE_URL = env.DATABASE_URL;

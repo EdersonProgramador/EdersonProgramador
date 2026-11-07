@@ -17,6 +17,7 @@ import { ApiError, apiGet } from "../api";
 import { getProjectWorkspace, patchProjectWorkspace } from "../api/project-workspace-api";
 import { ADMIN_BASE } from "../components/admin/AdminOperationsLayout";
 import { BrandingFieldEditor } from "../components/admin/BrandingFieldEditor";
+import { BrandCanvaStudioPanel } from "../components/admin/branding-studios/BrandCanvaStudioPanel";
 
 const LOCAL_STORAGE_KEY = "ederson-agencia.project-workspace.v1";
 
@@ -175,6 +176,8 @@ export function AdminBrandingEtapaPage() {
           </p>
         ) : null}
       </div>
+
+      {etapa.id === "identidade" ? <BrandCanvaStudioPanel fields={data} projectId={projectId || undefined} /> : null}
 
       {projectId && etapa.id === "plataforma" ? (
         <div className="panel space-y-2 p-4 sm:p-5">

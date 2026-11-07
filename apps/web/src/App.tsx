@@ -43,6 +43,7 @@ import {
   ClientDashboard,
   FreelancerDashboard
 } from "./pages/DashboardPages";
+import { AdminBrandbookPage } from "./pages/AdminBrandbookPage";
 import { AdminBrandingEtapaPage } from "./pages/AdminBrandingEtapaPage";
 import { AdminProductOfferPage } from "./pages/AdminProductOfferPage";
 import { AdminLaunchKitPage } from "./pages/AdminLaunchKitPage";
@@ -101,6 +102,7 @@ export default function App() {
                   <Route key={item.id} path={item.adminPath} element={<AdminMarketingHubPage />} />
                 ))}
                 <Route path="operacao/branding/estatistica" element={<AdminBrandingHubPage />} />
+                <Route path="operacao/branding/brandbook" element={<AdminBrandbookPage />} />
                 <Route path="operacao/branding/:etapaId" element={<AdminBrandingEtapaPage />} />
                 <Route path="operacao/desenvolvimento/stack" element={<AdminDevelopmentHubPage />} />
                 <Route path="operacao/desenvolvimento/stack-front-end" element={<AdminDevelopmentHubPage />} />

@@ -1,8 +1,29 @@
 /** Operação Branding — 4 etapas, seções e campos de captura por projeto/cliente. */
 
+import {
+  brandingNamingStudioValueEmpty,
+  brandingPaletteValueEmpty,
+  isBrandingNamingStudioValue,
+  isBrandingPaletteValue,
+  parseBrandingNamingField,
+  parseBrandingPaletteField,
+  type BrandingNamingStudioValue,
+  type BrandingPaletteValue
+} from "./branding-studio.js";
+
 export type BrandingEtapaId = "diagnostico" | "plataforma" | "identidade" | "implementacao";
 
-export type BrandingFieldType = "text" | "textarea" | "url" | "audio" | "video" | "file" | "files" | "repeater";
+export type BrandingFieldType =
+  | "text"
+  | "textarea"
+  | "url"
+  | "audio"
+  | "video"
+  | "file"
+  | "files"
+  | "repeater"
+  | "palette"
+  | "naming-studio";
 
 export type BrandingRepeaterColumn = {
   key: string;
@@ -46,7 +67,13 @@ export type BrandingMediaAsset = {
 
 export type BrandingRepeaterValue = { rows: Record<string, string>[] };
 
-export type BrandingFieldValue = string | BrandingMediaAsset | BrandingMediaAsset[] | BrandingRepeaterValue;
+export type BrandingFieldValue =
+  | string
+  | BrandingMediaAsset
+  | BrandingMediaAsset[]
+  | BrandingRepeaterValue
+  | BrandingPaletteValue
+  | BrandingNamingStudioValue;
 
 export type BrandingWorkspaceData = Record<string, BrandingFieldValue>;
 
@@ -326,14 +353,9 @@ export const BRANDING_ETAPAS: readonly BrandingEtapaDef[] = [
           },
           {
             id: fid(E3, "verbal", "naming-opcoes"),
-            label: "Opções de nome",
-            type: "repeater",
-            columns: [
-              { key: "nome", label: "Nome", input: "text" },
-              { key: "fonetica", label: "Fonética / memorabilidade", input: "textarea" },
-              { key: "inpi", label: "INPI / jurídico", input: "text" },
-              { key: "dominio", label: "Domínio (.com / .com.br)", input: "text" }
-            ]
+            label: "Opções de nome (studio)",
+            description: "Shortlist, nota e nome aprovado — alimenta Produto e FL.",
+            type: "naming-studio"
           },
           { id: fid(E3, "verbal", "tagline"), label: "Tagline / slogan", type: "text" },
           { id: fid(E3, "verbal", "manifesto"), label: "Manifesto de marca", type: "textarea" },
@@ -358,9 +380,9 @@ export const BRANDING_ETAPAS: readonly BrandingEtapaDef[] = [
           },
           {
             id: fid(E3, "visual", "paleta"),
-            label: "Paleta de cores (descrição + códigos)",
-            type: "textarea",
-            placeholder: "HEX, RGB, CMYK, Pantone…"
+            label: "Paleta de cores (studio)",
+            description: "Cores oficiais com papéis — sincroniza com Dev e export Canva.",
+            type: "palette"
           },
           {
             id: fid(E3, "visual", "tipografia"),
@@ -497,6 +519,8 @@ export function brandingEtapaAdminPath(etapaId: BrandingEtapaId): string {
 
 export function isBrandingFieldValueEmpty(value: BrandingFieldValue | undefined): boolean {
   if (value === undefined || value === null) return true;
+  if (isBrandingPaletteValue(value)) return brandingPaletteValueEmpty(value);
+  if (isBrandingNamingStudioValue(value)) return brandingNamingStudioValueEmpty(value);
   if (typeof value === "string") return value.trim().length === 0;
   if (Array.isArray(value)) return value.length === 0;
   if ("url" in value && !("rows" in value)) return !value.url?.trim();

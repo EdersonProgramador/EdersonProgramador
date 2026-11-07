@@ -1,5 +1,6 @@
 /** Workspace unificado por projeto — campos (Branding…) + checklist (FL / Dev / Marketing). */
 
+import { formatBrandingNamingForFeed, formatBrandingPaletteForFeed } from "./branding-studio.js";
 import type { BrandingFieldValue, BrandingWorkspaceData } from "./branding-workspace.js";
 import { brandingWorkspaceProgress, isBrandingFieldValueEmpty, parseBrandingWorkspaceJson } from "./branding-workspace.js";
 import { MARKETING_PRODUCTION_VIEWS, marketingProductionResolvedItems } from "./launch-operation-marketing-production.js";
@@ -200,8 +201,14 @@ export function projectWorkspaceSummary(doc: ProjectWorkspaceDocument) {
   };
 }
 
-function fieldAsText(value: BrandingFieldValue | undefined): string | undefined {
+function fieldAsText(fieldId: string, value: BrandingFieldValue | undefined): string | undefined {
   if (value === undefined || isBrandingFieldValueEmpty(value)) return undefined;
+  if (fieldId === "branding:identidade:visual:paleta") {
+    return formatBrandingPaletteForFeed(value);
+  }
+  if (fieldId === "branding:identidade:verbal:naming-opcoes") {
+    return formatBrandingNamingForFeed(value);
+  }
   if (typeof value === "string") return value.trim() || undefined;
   if (Array.isArray(value)) return undefined;
   if ("rows" in value && Array.isArray(value.rows)) {
@@ -221,7 +228,7 @@ export function resolveWorkspaceFeed(
   fields: BrandingWorkspaceData
 ): { value?: string; sourceFieldId?: string } {
   for (const sourceId of rule.sourceFieldIds) {
-    const text = fieldAsText(fields[sourceId]);
+    const text = fieldAsText(sourceId, fields[sourceId]);
     if (text) return { value: text, sourceFieldId: sourceId };
   }
   return {};

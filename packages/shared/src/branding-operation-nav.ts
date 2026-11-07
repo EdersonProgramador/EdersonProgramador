@@ -68,6 +68,12 @@ export const BRANDING_OPERATION_NAV: readonly BrandingNavSection[] = [
         label: "Implementação",
         adminPath: "operacao/branding/implementacao",
         description: "Rollout, governança e gestão da marca no dia a dia."
+      },
+      {
+        id: "brandbook",
+        label: "Brandbook PDF",
+        adminPath: "operacao/branding/brandbook",
+        description: "Relatório profissional da marca e download em PDF."
       }
     ]
   }
