@@ -622,35 +622,6 @@ export function CourseStudyPage() {
             ) : (
               <p className="course-text-muted text-sm">{COURSES_UI.study.certificateReadyBody}</p>
             )
-          ) : !activeItem && !activeBonus ? (
-            <div className="course-study__welcome panel p-5 sm:p-8">
-              <CourseCover
-                title={payload.course.title}
-                coverUrl={payload.course.coverUrl}
-                courseSlug={payload.course.slug}
-                className="course-cover--welcome"
-              />
-              <h2 className="text-2xl font-bold">{payload.course.title}</h2>
-              {payload.course.summary ? <p className="course-text-muted mt-3 text-sm leading-relaxed">{payload.course.summary}</p> : null}
-              <p className="course-text-subtle mt-4 text-sm leading-relaxed">{COURSES_UI.study.welcomeHint}</p>
-              {items[0] ? (
-                <button type="button" className="btn-primary mt-6" onClick={() => goLesson(items[0].slug)}>
-                  {COURSES_UI.study.startButton}
-                </button>
-              ) : null}
-              {courseComplete && certificate ? (
-                <button type="button" className="btn-secondary mt-3" onClick={() => goLesson("certificado")}>
-                  {COURSES_UI.study.certificateOpen}
-                </button>
-              ) : null}
-            </div>
-          ) : activeBonus ? (
-            <article className="panel p-6 md:p-8">
-              <h2 className="text-xl font-bold">{activeBonus.title}</h2>
-              {activeBonus.html ? (
-                <div className="course-lesson-prose mt-4 text-sm" dangerouslySetInnerHTML={{ __html: activeBonus.html }} />
-              ) : null}
-            </article>
           ) : isLessonFichamentoMode && !fichamentoModeItem && courseSlug && payload ? (
             <article className="panel p-6">
               <p className="text-sm text-red-400">{COURSES_UI.study.fichamentoModeLessonNotFound}</p>
@@ -689,6 +660,35 @@ export function CourseStudyPage() {
                   : undefined
               }
             />
+          ) : !activeItem && !activeBonus ? (
+            <div className="course-study__welcome panel p-5 sm:p-8">
+              <CourseCover
+                title={payload.course.title}
+                coverUrl={payload.course.coverUrl}
+                courseSlug={payload.course.slug}
+                className="course-cover--welcome"
+              />
+              <h2 className="text-2xl font-bold">{payload.course.title}</h2>
+              {payload.course.summary ? <p className="course-text-muted mt-3 text-sm leading-relaxed">{payload.course.summary}</p> : null}
+              <p className="course-text-subtle mt-4 text-sm leading-relaxed">{COURSES_UI.study.welcomeHint}</p>
+              {items[0] ? (
+                <button type="button" className="btn-primary mt-6" onClick={() => goLesson(items[0].slug)}>
+                  {COURSES_UI.study.startButton}
+                </button>
+              ) : null}
+              {courseComplete && certificate ? (
+                <button type="button" className="btn-secondary mt-3" onClick={() => goLesson("certificado")}>
+                  {COURSES_UI.study.certificateOpen}
+                </button>
+              ) : null}
+            </div>
+          ) : activeBonus ? (
+            <article className="panel p-6 md:p-8">
+              <h2 className="text-xl font-bold">{activeBonus.title}</h2>
+              {activeBonus.html ? (
+                <div className="course-lesson-prose mt-4 text-sm" dangerouslySetInnerHTML={{ __html: activeBonus.html }} />
+              ) : null}
+            </article>
           ) : activeItem && courseSlug ? (
             <LessonPanel
               courseSlug={courseSlug}
