@@ -3,6 +3,7 @@
 import { formatBrandingNamingForFeed, formatBrandingPaletteForFeed } from "./branding-studio.js";
 import type { BrandingFieldValue, BrandingWorkspaceData } from "./branding-workspace.js";
 import { brandingWorkspaceProgress, isBrandingFieldValueEmpty, parseBrandingWorkspaceJson } from "./branding-workspace.js";
+import { marketingPlanejamentoProgress } from "./marketing-workspace.js";
 import { MARKETING_PRODUCTION_VIEWS, marketingProductionResolvedItems } from "./launch-operation-marketing-production.js";
 import { marketingDevAllTaskIds } from "./launch-operation-marketing-dev.js";
 import {
@@ -105,7 +106,7 @@ export function brandingFieldIdValid(fieldId: string): boolean {
 }
 
 export function workspaceFieldIdValid(fieldId: string): boolean {
-  return /^(branding|product|integration):[a-z0-9:-]+$/i.test(fieldId);
+  return /^(branding|product|integration|marketing|formula):[a-z0-9:-]+$/i.test(fieldId);
 }
 
 export function checklistTaskIdValid(taskId: string): boolean {
@@ -161,8 +162,11 @@ export function projectWorkspaceNavPillarProgress(
       return brandingWorkspaceProgress(doc.fields);
     case "marketing":
       return mergeProgress(
-        checklistSubsetProgress(marketingProductionTaskIds(), doc.checklist),
-        productOfferProgress(doc.fields)
+        mergeProgress(
+          checklistSubsetProgress(marketingProductionTaskIds(), doc.checklist),
+          productOfferProgress(doc.fields)
+        ),
+        marketingPlanejamentoProgress(doc.fields)
       );
     case "development":
       return checklistSubsetProgress(marketingDevAllTaskIds(), doc.checklist);

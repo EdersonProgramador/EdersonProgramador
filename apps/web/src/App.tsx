@@ -44,6 +44,8 @@ import {
   FreelancerDashboard
 } from "./pages/DashboardPages";
 import { AdminBrandbookPage } from "./pages/AdminBrandbookPage";
+import { AdminFormulaSimuladorPage } from "./pages/AdminFormulaSimuladorPage";
+import { AdminMarketingPlanejamentoPage } from "./pages/AdminMarketingPlanejamentoPage";
 import { AdminBrandingEtapaPage } from "./pages/AdminBrandingEtapaPage";
 import { AdminProductOfferPage } from "./pages/AdminProductOfferPage";
 import { AdminLaunchKitPage } from "./pages/AdminLaunchKitPage";
@@ -98,6 +100,7 @@ export default function App() {
               <Route path="admin" element={<AdminOperationsLayout />}>
                 <Route index element={<Navigate to="projetos" replace />} />
                 <Route path="projetos" element={<AdminProjectsPage />} />
+                <Route path="operacao/marketing/planejamento" element={<AdminMarketingPlanejamentoPage />} />
                 {marketingNavFlatItems().map((item) => (
                   <Route key={item.id} path={item.adminPath} element={<AdminMarketingHubPage />} />
                 ))}
@@ -124,6 +127,7 @@ export default function App() {
                   />
                 ))}
                 <Route path="operacao/marketing/:stackId" element={<LegacyMarketingStackRoute />} />
+                <Route path="operacao/formula-lancamento/simulador" element={<AdminFormulaSimuladorPage />} />
                 {formulaNavFlatItems().map((item) => (
                   <Route key={item.id} path={item.adminPath} element={<AdminFormulaHubPage />} />
                 ))}

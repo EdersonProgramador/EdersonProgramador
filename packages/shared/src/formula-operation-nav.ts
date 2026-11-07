@@ -20,6 +20,12 @@ export const FORMULA_OPERATION_NAV: readonly FormulaNavSection[] = [
         label: "Estatística",
         adminPath: "operacao/formula-lancamento/estatistica",
         description: "Progresso das fases FL e checklist integrado ao workspace."
+      },
+      {
+        id: "simulador",
+        label: "Simulador de receita",
+        adminPath: "operacao/formula-lancamento/simulador",
+        description: "Lista, conversão e ticket — cenários conservador, base e agressivo."
       }
     ]
   },

@@ -354,7 +354,7 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
     const params = z.object({ id: z.string() }).parse(request.params);
     const body = z
       .object({
-        fieldId: z.string().regex(/^(branding|product|integration):[a-z0-9:-]+$/i).max(120).optional(),
+        fieldId: z.string().regex(/^(branding|product|integration|marketing|formula):[a-z0-9:-]+$/i).max(120).optional(),
         value: z.unknown().optional(),
         taskId: z.string().min(3).max(120).optional(),
         done: z.boolean().optional()

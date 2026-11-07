@@ -48,6 +48,18 @@ export const MARKETING_OPERATION_NAV: readonly MarketingNavSection[] = [
     ]
   },
   {
+    id: "planejar",
+    sectionLabel: "Planejar",
+    items: [
+      {
+        id: "planejamento",
+        label: "Planejamento",
+        adminPath: "operacao/marketing/planejamento",
+        description: "Estratégia, funil e budget com gráficos a partir dos dados do cliente."
+      }
+    ]
+  },
+  {
     id: "capturar",
     sectionLabel: "Capturar",
     items: [

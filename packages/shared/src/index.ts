@@ -355,6 +355,21 @@ export {
   type BrandingPaletteValue
 } from "./branding-studio.js";
 export {
+  computeLaunchRevenueProjection,
+  FORMULA_SIMULATOR_FIELD_IDS,
+  FORMULA_SIMULATOR_FIELDS,
+  formulaSimulatorProgress,
+  type LaunchScenario,
+  type LaunchSimulatorResult
+} from "./formula-launch-simulator.js";
+export {
+  marketingBudgetChart,
+  MARKETING_PLANEJAMENTO_FIELD_IDS,
+  MARKETING_PLANEJAMENTO_SECTIONS,
+  marketingPlanejamentoProgress,
+  type MarketingBudgetBar
+} from "./marketing-workspace.js";
+export {
   CANVA_API_BASE,
   CANVA_CONNECT_DOCS_URL,
   CANVA_CREATE_LINKS,
