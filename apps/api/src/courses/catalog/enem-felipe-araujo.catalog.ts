@@ -54,7 +54,14 @@ function cronogramaLesson(
   const bodyHtml = `<p class="course-text-muted text-sm">Cronograma <strong>ENEM — Felipe Araújo</strong> · ${escapeHtml(sectionTitle)}</p>
 <h3>${escapeHtml(title)}</h3>
 ${extraHtml}
-<p>Marque como concluída quando finalizar o estudo deste tópico na sua rotina.</p>`;
+<p>Siga a mesma rotina da folha oficial para este tópico:</p>
+<ol class="text-sm">
+<li>Aula ou leitura</li>
+<li>Resumo</li>
+<li>Exercícios</li>
+<li>Revisão</li>
+</ol>
+<p>Marque a aula como concluída quando encerrar o ciclo deste tópico.</p>`;
   return {
     slug,
     title,
@@ -78,6 +85,19 @@ function buildLessons(
     }
   }
   return lessons;
+}
+
+/** Uma folha do cronograma = um módulo; cada linha = uma aula (sectionTitle igual ao módulo → TOC plano). */
+function cronogramaModule(
+  moduleKey: string,
+  title: string,
+  topics: string[],
+  extraForTopic?: Record<string, string>
+): EnemCronogramaModule {
+  return {
+    title,
+    lessons: buildLessons(moduleKey, [{ sectionTitle: title, sectionSortOrder: 1, topics, extraForTopic }])
+  };
 }
 
 /** Ordem dos filmes conforme PDF oficial Felipe Araújo. */
@@ -105,11 +125,26 @@ const FILMES_CRONOGRAMA = [
   "12 Anos de Escravidão"
 ];
 
-/** Biologia — genética, fisiologia e citologia na ordem do PDF. */
-const BIO_GENETICA = [
+const BIOLOGIA_1 = [
+  "Água e Sais Minerais",
+  "Carboidratos e Lipídeos",
+  "Aminoácidos, Proteínas e Enzimas",
+  "Nucleotídeos, Ácidos Nucleicos, ATP e Vitaminas",
   "Introdução à Citologia: Célula Eucarionte X Procarionte",
+  "Membrana Plasmática",
+  "Lipídeos e Proteínas de Membrana",
+  "Parede Celular e Glicocálix",
+  "Transporte Passivo: Difusão Simples e Facilitada",
+  "Osmose em célula animal x vegetal",
+  "Transportes Ativos",
+  "Citoplasma, Citosol e Citoesqueleto",
+  "Organelas Citoplasmáticas",
+  "Respiração Celular Aeróbia: Glicólise, Ciclo de Krebs e Fosforilação Oxidativa",
+  "Respiração Anaeróbia e Fermentação",
+  "Fotossíntese e Quimiossíntese",
   "Citogenética e os componentes do núcleo",
   "Divisão Celular: Mitose e Meiose",
+  "Citologia do Câncer",
   "Código Genético e a Síntese Proteica",
   "Introdução à genética: Genes, 1ª Lei de Mendel e Probabilidade Genética",
   "Heredograma, Cruzamento Teste e Retrocruzamento",
@@ -123,24 +158,69 @@ const BIO_GENETICA = [
   "Clonagem, Células Tronco e ética na genética",
   "Espermatogênese e Ovogênese",
   "Ciclo Menstrual e Anticoncepção",
+  "Reprodução",
+  "Ovos e Segmentação e Anexos Embrionários",
+  "Fases Embrionárias",
   "Matriz extracelular",
+  "Tecido Epitelial",
+  "Tecido Conjuntivo (Próprio, Adiposo e Hematopoiético)",
   "Anticorpos, Vacina e Soro",
+  "Tecido Conjuntivo (Transporte e Sustentação)",
+  "Tecido Muscular",
+  "Tecido Nervoso",
   "Homeostase e Morfostase",
   "Sistema Nervoso/Sensorial e Sistema Músculo-Esquelético",
+  "Sistema Endócrino",
+  "Sistema Digestório",
+  "Sistema Respiratório",
   "Sistema Cardiovascular e Linfático",
-  "Sistema Urinário e Sistema Excretor"
+  "Sistema Urinário e Sistema Excretor",
+  "Sistema Reprodutor"
 ];
 
-const BIO_ECOLOGIA = [
+const BIOLOGIA_2 = [
+  "Categorias Taxonômicas",
+  "Vírus e Viroses",
+  "Bactérias e Bacterioses",
+  "Protozoários e Protozooses",
+  "Fungos",
+  "Algas e Briófitas",
+  "Pteridófitas",
+  "Gimnospermas",
+  "Angiospermas",
+  "Histologia Vegetal",
+  "Organologia Vegetal",
+  "Fisiologia Vegetal",
+  "Hormônios e Movimentos Vegetais",
+  "Poríferos e Celenterados",
+  "Platelmintos",
+  "Nematelmintos",
+  "Anelídeos e Moluscos",
+  "Artrópodes",
+  "Equinodermos e Protocordados",
+  "Peixes",
+  "Anfíbios",
+  "Répteis",
+  "Aves e Mamíferos",
+  "Resistência Bacteriana e as Superbactérias",
+  "Doenças no ENEM",
   "Ecologia das Populações: Fatores abióticos, Habitat e Nicho Ecológico",
   "Ecologia das Populações: Dinâmica Populacional e Potencial Biótico",
+  "Ecossistemas",
   "Cadeia e Teia Alimentar",
   "Pirâmide Ecológica e Produtividade nos Ecossistemas",
   "Bioacumulação / Magnificação Trófica",
   "Relações Ecológicas Harmônicas e Desarmônicas",
+  "Sucessão Ecológica",
+  "Desequilíbrios Ambientais",
+  "Sustentabilidade e Desenvolvimento Sustentável",
   "Ciclos Biogeoquímicos (água, carbono, oxigênio, nitrogênio e fósforo)",
+  "Origem da Vida",
   "Paleontologia, Fósseis e Órgãos Vestigiais",
   "Teorias Evolucionistas: Lamarckismo, Darwinismo e Neodarwinismo",
+  "Mecanismos de Especiação",
+  "Evolução dos Vertebrados",
+  "Evolução do Homem",
   "Equilíbrio de Hardy-Weinberg"
 ];
 
@@ -541,7 +621,7 @@ export const ENEM_FELIPE_ARAUJO_CATALOG: EnemCronogramaCatalog = {
     "Trilha completa baseada no cronograma F3lipearaujo: metas e filmes, Ciências da Natureza, Matemática, Humanas, Linguagens, Redação, competências e temas de prática.",
   coverUrl: "/course-covers/enem-cronograma-felipe-araujo.png",
   sortOrder: 5,
-  catalogVersion: 2,
+  catalogVersion: 3,
   modules: [
     {
       title: "Introdução",
@@ -551,7 +631,7 @@ export const ENEM_FELIPE_ARAUJO_CATALOG: EnemCronogramaCatalog = {
           sectionSortOrder: 1,
           topics: ["Visão geral do cronograma ENEM"],
           extraForTopic: {
-            "Visão geral do cronograma ENEM": `<p>Este curso reproduz a sequência de estudos do material <em>Cronograma Felipe Araújo</em>. Avance módulo a módulo e marque cada tópico conforme concluir.</p>`
+            "Visão geral do cronograma ENEM": `<p>Este curso reproduz a sequência de estudos do material <em>Cronograma Felipe Araújo</em>. Cada folha do PDF é um módulo; cada linha da tabela é uma aula. Avance na ordem e marque conclusão conforme sua rotina (aula/leitura, resumo, exercícios, revisão).</p>`
           }
         },
         {
@@ -567,103 +647,32 @@ export const ENEM_FELIPE_ARAUJO_CATALOG: EnemCronogramaCatalog = {
         }
       ])
     },
-    {
-      title: "Metas",
-      lessons: buildLessons("metas", [
-        { sectionTitle: "Metas", sectionSortOrder: 1, topics: ["Metas de estudo"] },
-        { sectionTitle: "Filmes recomendados", sectionSortOrder: 2, topics: FILMES_CRONOGRAMA }
-      ])
-    },
-    {
-      title: "Biologia",
-      lessons: buildLessons("biologia", [
-        { sectionTitle: "Genética, citologia e fisiologia", sectionSortOrder: 1, topics: BIO_GENETICA },
-        { sectionTitle: "Ecologia e evolução", sectionSortOrder: 2, topics: BIO_ECOLOGIA }
-      ])
-    },
-    {
-      title: "Química",
-      lessons: buildLessons("quimica", [
-        { sectionTitle: "Química geral e ambiental", sectionSortOrder: 1, topics: QUIM_GERAL },
-        { sectionTitle: "Soluções, pH e eletroquímica", sectionSortOrder: 2, topics: QUIM_SOLUCOES }
-      ])
-    },
-    {
-      title: "Matemática",
-      lessons: buildLessons("matematica", [
-        { sectionTitle: "Funções", sectionSortOrder: 1, topics: ["Introdução à Função Quadrática"] }
-      ])
-    },
-    {
-      title: "Filosofia",
-      lessons: buildLessons("filosofia", [{ sectionTitle: "História da filosofia", sectionSortOrder: 1, topics: FILOSOFIA }])
-    },
-    {
-      title: "Sociologia",
-      lessons: buildLessons("sociologia", [{ sectionTitle: "Teorias e Brasil", sectionSortOrder: 1, topics: SOCIOLOGIA }])
-    },
-    {
-      title: "Geografia",
-      lessons: buildLessons("geografia", [
-        { sectionTitle: "Geografia física e regional", sectionSortOrder: 1, topics: GEO_FISICA },
-        { sectionTitle: "Geografia humana e geopolítica", sectionSortOrder: 2, topics: GEO_HUMANA }
-      ])
-    },
-    {
-      title: "História Geral",
-      lessons: buildLessons("hist-geral", [
-        {
-          sectionTitle: "História mundial",
-          sectionSortOrder: 1,
-          topics: HIST_GERAL,
-          extraForTopic: {
-            "Peste Negra, Guerra dos 100 anos e Declínio Feudal":
-              "<p><em>Nota do cronograma:</em> sugere-se iniciar o estudo da História do Brasil neste tópico.</p>"
-          }
-        }
-      ])
-    },
-    {
-      title: "História do Brasil",
-      lessons: buildLessons("hist-brasil", [{ sectionTitle: "Do povoamento à República", sectionSortOrder: 1, topics: HIST_BR }])
-    },
-    {
-      title: "Literatura",
-      lessons: buildLessons("literatura", [
-        { sectionTitle: "Literatura", sectionSortOrder: 1, topics: ["Introdução à Literatura"] }
-      ])
-    },
-    {
-      title: "Inglês",
-      lessons: buildLessons("ingles", [
-        {
-          sectionTitle: "Textos em inglês",
-          sectionSortOrder: 1,
-          topics: [
-            "Interrogative adverbs",
-            "Journalistic texts",
-            "Comic strips and cartoons",
-            "Technical texts",
-            "Advertisements"
-          ]
-        }
-      ])
-    },
-    {
-      title: "Espanhol",
-      lessons: buildLessons("espanhol", [{ sectionTitle: "Gramática e interpretação", sectionSortOrder: 1, topics: ESPANHOL }])
-    },
-    {
-      title: "Linguagens, mídia e educação física",
-      lessons: buildLessons("linguagens", [{ sectionTitle: "LC e práticas corporais", sectionSortOrder: 1, topics: LINGUAGENS }])
-    },
-    {
-      title: "Redação ENEM",
-      lessons: buildLessons("redacao", [{ sectionTitle: "Técnicas dissertativas", sectionSortOrder: 1, topics: REDACAO }])
-    },
-    {
-      title: "Temas de redação (prática)",
-      lessons: buildLessons("temas", [{ sectionTitle: "Sugestões de tema", sectionSortOrder: 1, topics: TEMAS_REDACAO }])
-    }
+    cronogramaModule("metas", "Metas", ["Metas de estudo", ...FILMES_CRONOGRAMA]),
+    cronogramaModule("biologia-1", "Biologia 1", BIOLOGIA_1),
+    cronogramaModule("biologia-2", "Biologia 2", BIOLOGIA_2),
+    cronogramaModule("quimica-1", "Química 1", QUIM_GERAL),
+    cronogramaModule("quimica-2", "Química 2", QUIM_SOLUCOES),
+    cronogramaModule("matematica", "Matemática", ["Introdução à Função Quadrática"]),
+    cronogramaModule("filosofia", "Filosofia", FILOSOFIA),
+    cronogramaModule("sociologia", "Sociologia", SOCIOLOGIA),
+    cronogramaModule("geografia-1", "Geografia 1", GEO_FISICA),
+    cronogramaModule("geografia-2", "Geografia 2", GEO_HUMANA),
+    cronogramaModule("hist-geral", "História Geral", HIST_GERAL, {
+      "Peste Negra, Guerra dos 100 anos e Declínio Feudal":
+        "<p><em>Nota do cronograma:</em> sugere-se iniciar o estudo da História do Brasil neste tópico.</p>"
+    }),
+    cronogramaModule("hist-brasil", "História do Brasil", HIST_BR),
+    cronogramaModule("literatura", "Literatura", ["Introdução à Literatura"]),
+    cronogramaModule("ingles", "Inglês", [
+      "Interrogative adverbs",
+      "Journalistic texts",
+      "Comic strips and cartoons",
+      "Technical texts",
+      "Advertisements"
+    ]),
+    cronogramaModule("espanhol", "Espanhol", ESPANHOL),
+    cronogramaModule("linguagens", "Linguagens", LINGUAGENS),
+    cronogramaModule("redacao", "Redação", REDACAO),
+    cronogramaModule("temas-redacao", "Temas de redação", TEMAS_REDACAO)
   ]
 };
