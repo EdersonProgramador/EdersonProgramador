@@ -51,7 +51,12 @@ export function AdminCodeStudioFullPage() {
     else setFields({});
   }, [projectId, loadFields]);
 
-  const studioRaw = typeof fields[DEV_CODE_STUDIO_FIELD_ID] === "string" ? fields[DEV_CODE_STUDIO_FIELD_ID] : undefined;
+  const studioRaw =
+    projectId && loading
+      ? undefined
+      : typeof fields[DEV_CODE_STUDIO_FIELD_ID] === "string"
+        ? fields[DEV_CODE_STUDIO_FIELD_ID]
+        : undefined;
 
   return (
     <div className="dev-code-studio-fullpage fixed inset-0 z-[100] flex flex-col bg-[var(--app-bg-solid)]">
@@ -94,6 +99,7 @@ export function AdminCodeStudioFullPage() {
         <DevelopmentCodeStudio
           key={projectId || "local"}
           projectId={projectId || undefined}
+          workspaceReady={!projectId || !loading}
           storedRaw={studioRaw}
           onStoredChange={(raw) => setFields((prev) => ({ ...prev, [DEV_CODE_STUDIO_FIELD_ID]: raw }))}
           onError={setError}

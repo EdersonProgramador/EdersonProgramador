@@ -53,11 +53,22 @@ import "../../styles/dev-code-studio.css";
 
 type DevelopmentCodeStudioProps = {
   projectId?: string;
+  /** Quando há `projectId`, aguardar a API antes de hidratar o snapshot ou gravar no banco. */
+  workspaceReady?: boolean;
   storedRaw: string | undefined;
   onStoredChange: (raw: string) => void;
   onError: (message: string) => void;
   onSavingChange?: (saving: boolean) => void;
 };
+
+function storedRawEchoesSnapshot(storedRaw: string | undefined, snapshot: DevCodeStudioSnapshot): boolean {
+  if (!storedRaw?.trim()) return false;
+  try {
+    return storedRaw === serializeDevCodeStudioSnapshot(ensureOpenTabs(snapshot));
+  } catch {
+    return false;
+  }
+}
 
 setupMonaco();
 
@@ -180,6 +191,7 @@ function keyTargetIsMonacoEditor(): boolean {
 
 export function DevelopmentCodeStudio({
   projectId,
+  workspaceReady = true,
   storedRaw,
   onStoredChange,
   onError,
@@ -227,9 +239,19 @@ export function DevelopmentCodeStudio({
     }
   }, [editorThemeChoice]);
 
+  const lastProjectIdRef = useRef<string | undefined>(projectId);
+
+  /** Hidrata a partir do banco/rascunho quando o projeto carrega — não reaplica eco do `onStoredChange`. */
   useEffect(() => {
+    if (projectId && !workspaceReady) return;
+    if (lastProjectIdRef.current !== projectId) {
+      lastProjectIdRef.current = projectId;
+      setSnapshot(resolveInitialStudioSnapshot(storedRaw, projectId));
+      return;
+    }
+    if (storedRawEchoesSnapshot(storedRaw, snapshotRef.current)) return;
     setSnapshot(resolveInitialStudioSnapshot(storedRaw, projectId));
-  }, [projectId, storedRaw]);
+  }, [projectId, workspaceReady, storedRaw]);
 
   useEffect(() => {
     snapshotRef.current = snapshot;
@@ -297,7 +319,7 @@ export function DevelopmentCodeStudio({
       onStoredChange(raw);
       writeStudioDraftToBrowser(projectId, raw);
       if (saveTimer.current) clearTimeout(saveTimer.current);
-      if (!projectId) return;
+      if (!projectId || !workspaceReady) return;
       saveTimer.current = setTimeout(() => {
         onSavingChange?.(true);
         void patchProjectWorkspace(projectId, { fieldId: DEV_CODE_STUDIO_FIELD_ID, value: raw })
@@ -305,7 +327,7 @@ export function DevelopmentCodeStudio({
           .finally(() => onSavingChange?.(false));
       }, 700);
     },
-    [projectId, onStoredChange, onError, onSavingChange]
+    [projectId, workspaceReady, onStoredChange, onError, onSavingChange]
   );
 
   const updateSnapshot = useCallback(
@@ -321,12 +343,17 @@ export function DevelopmentCodeStudio({
 
   const syncedLocalToDbRef = useRef<string | null>(null);
 
+  useEffect(() => {
+    syncedLocalToDbRef.current = null;
+  }, [projectId]);
+
   /** Ao vincular projeto, envia rascunho (navegador) ao workspace no banco se o servidor estiver vazio. */
   useEffect(() => {
     if (!projectId) {
       syncedLocalToDbRef.current = null;
       return;
     }
+    if (!workspaceReady) return;
     if (syncedLocalToDbRef.current === projectId) return;
 
     const fromServer = storedRaw?.trim() ? parseDevCodeStudioSnapshot(storedRaw) : null;
@@ -349,7 +376,7 @@ export function DevelopmentCodeStudio({
     void patchProjectWorkspace(projectId, { fieldId: DEV_CODE_STUDIO_FIELD_ID, value: raw }).catch((err) =>
       onError(err instanceof Error ? err.message : "Falha ao salvar workspace no banco.")
     );
-  }, [projectId, storedRaw, onError, onStoredChange]);
+  }, [projectId, workspaceReady, storedRaw, onError, onStoredChange]);
 
   const runEditorAction = (actionId: string) => {
     const ed = editorRef.current;

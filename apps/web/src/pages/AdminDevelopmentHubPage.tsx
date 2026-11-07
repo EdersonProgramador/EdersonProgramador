@@ -84,7 +84,12 @@ export function AdminDevelopmentHubPage() {
   const navItem = DEVELOPMENT_OPERATION_NAV.flatMap((s) => s.items).find((i) => i.adminPath === adminPath);
 
   if (view === "editor") {
-    const studioRaw = typeof fields[DEV_CODE_STUDIO_FIELD_ID] === "string" ? fields[DEV_CODE_STUDIO_FIELD_ID] : undefined;
+    const studioRaw =
+      projectId && loading
+        ? undefined
+        : typeof fields[DEV_CODE_STUDIO_FIELD_ID] === "string"
+          ? fields[DEV_CODE_STUDIO_FIELD_ID]
+          : undefined;
     return (
       <div className="space-y-3">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
@@ -115,6 +120,7 @@ export function AdminDevelopmentHubPage() {
             <DevelopmentCodeStudio
             key={projectId || "local"}
             projectId={projectId || undefined}
+            workspaceReady={!projectId || !loading}
             storedRaw={studioRaw}
             onStoredChange={(raw) => setFields((prev) => ({ ...prev, [DEV_CODE_STUDIO_FIELD_ID]: raw }))}
             onError={setError}
