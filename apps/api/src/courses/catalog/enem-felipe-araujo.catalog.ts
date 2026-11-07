@@ -80,33 +80,34 @@ function buildLessons(
   return lessons;
 }
 
-const FILMES_1 = [
+/** Ordem dos filmes conforme PDF oficial Felipe Araújo. */
+const FILMES_CRONOGRAMA = [
   "Preciosa - Uma História de Esperança",
-  "Uma prova de amor Mother",
+  "Uma prova de amor",
+  "Guerras do Brasil.doc",
+  "Mother",
   "Entre os Muros da Escola",
   "Coringa",
-  "Guerras do Brasil.doc"
-];
-
-const FILMES_2 = [
   "Democracia em Vertigem",
   "Interestelar",
-  "A Rede Social",
   "Bastardos Inglórios",
-  "As Sufragistas",
+  "Parasita",
   "Os suspeitos",
   "Uma Noite de 12 Anos",
-  "Quanto Tempo o Tempo Tem",
+  "As Sufragistas",
   "Nise: O Coração da Loucura",
   "Filhos da Esperança",
-  "Getúlio",
+  "Quanto Tempo o Tempo Tem",
   "Vida Maria (Curta / Animação)",
-  "12 Anos de Escravidão",
-  "Parasita",
-  "Horas de Desespero"
+  "Getúlio",
+  "Horas de Desespero",
+  "A Rede Social",
+  "12 Anos de Escravidão"
 ];
 
+/** Biologia — genética, fisiologia e citologia na ordem do PDF. */
 const BIO_GENETICA = [
+  "Introdução à Citologia: Célula Eucarionte X Procarionte",
   "Citogenética e os componentes do núcleo",
   "Divisão Celular: Mitose e Meiose",
   "Código Genético e a Síntese Proteica",
@@ -125,20 +126,19 @@ const BIO_GENETICA = [
   "Matriz extracelular",
   "Anticorpos, Vacina e Soro",
   "Homeostase e Morfostase",
-  "Sistema Cardiovascular e Linfático",
-  "Sistema Urinário e Sistema Excretor",
   "Sistema Nervoso/Sensorial e Sistema Músculo-Esquelético",
-  "Introdução à Citologia: Célula Eucarionte X Procarionte"
+  "Sistema Cardiovascular e Linfático",
+  "Sistema Urinário e Sistema Excretor"
 ];
 
 const BIO_ECOLOGIA = [
-  "Ciclos Biogeoquímicos (água, carbono, oxigênio, nitrogênio e fósforo)",
-  "Relações Ecológicas Harmônicas e Desarmônicas",
+  "Ecologia das Populações: Fatores abióticos, Habitat e Nicho Ecológico",
+  "Ecologia das Populações: Dinâmica Populacional e Potencial Biótico",
   "Cadeia e Teia Alimentar",
   "Pirâmide Ecológica e Produtividade nos Ecossistemas",
   "Bioacumulação / Magnificação Trófica",
-  "Ecologia das Populações: Fatores abióticos, Habitat e Nicho Ecológico",
-  "Ecologia das Populações: Dinâmica Populacional e Potencial Biótico",
+  "Relações Ecológicas Harmônicas e Desarmônicas",
+  "Ciclos Biogeoquímicos (água, carbono, oxigênio, nitrogênio e fósforo)",
   "Paleontologia, Fósseis e Órgãos Vestigiais",
   "Teorias Evolucionistas: Lamarckismo, Darwinismo e Neodarwinismo",
   "Equilíbrio de Hardy-Weinberg"
@@ -272,17 +272,17 @@ const SOCIOLOGIA = [
 ];
 
 const GEO_FISICA = [
+  "Escala Cartográfica",
   "Eras Geológicas e Estrutura interna da Terra",
   "Formação e Tipos de Solos",
   "Impactos Ambientais nos Solos",
-  "Escala Cartográfica",
-  "Tipos de Chuvas",
-  "Climograma",
+  "Atmosfera",
+  "Elementos e Fatores do Clima",
   "Pressão atmosférica",
   "Tipos de Ventos",
-  "Atmosfera",
+  "Tipos de Chuvas",
   "Climas do Mundo",
-  "Elementos e Fatores do Clima",
+  "Climograma",
   "Fenômenos e Mudanças Climáticas",
   "Biomas Brasileiros",
   "Domínios Morfoclimáticos",
@@ -304,78 +304,78 @@ const GEO_HUMANA = [
   "Migrações Internacionais e o Brasil",
   "Migrações Internas no Brasil",
   "Características Gerais da População brasileira",
-  "Modelos de Produção Industrial",
   "Revoluções Industriais",
+  "Modelos de Produção Industrial",
   "Industrialização no Brasil: A evolução da Atividade Industrial",
   "Regiões Industrializadas do Brasil e do Mundo",
   "Cinturões Verdes, Agricultura Irrigada e Agroecologia",
-  "Estrutura Fundiária, Reforma Agrária e os Conflitos no Campo",
   "Transgênicos e Orgânicos",
   "Modernização Agrícola e Complexos Agroindustriais",
   "A Agropecuária e o Agronegócio no Brasil",
+  "Estrutura Fundiária, Reforma Agrária e os Conflitos no Campo",
   "Transporte no Brasil e Mobilidade Urbana",
-  "As questões ambientais no Brasil e a Ação Antrópica",
   "DIT e Fases do Capitalismo",
-  "Amazônia",
   "Geopolítica do pós-guerra: A velha ordem mundial",
   "Globalização",
   "Blocos Econômicos I",
   "Blocos Econômicos II",
+  "Desafios do Século XXI e Organismos Internacionais",
+  "Geopolítica: Regionalização Mundial",
+  "EUA: Superpotência Global",
+  "O Socialismo de Mercado na China",
   "Tensões Geopolíticas Atuais: AMÉRICA",
+  "Tensões Geopolíticas Atuais: EUROPA",
+  "Tensões Geopolíticas Atuais: ÁFRICA",
+  "Tensões Geopolíticas Atuais: ÁSIA",
+  "Tensões Geopolíticas Atuais: ORIENTE MÉDIO I",
+  "Tensões Geopolíticas Atuais: ORIENTE MÉDIO II",
   "Terrorismo no Mundo Atual",
   "Geopolítica e Meio Ambiente",
-  "Geopolítica: Regionalização Mundial",
-  "Tensões Geopolíticas Atuais: EUROPA",
-  "Tensões Geopolíticas Atuais: ÁSIA",
-  "Tensões Geopolíticas Atuais: ÁFRICA",
-  "Tensões Geopolíticas Atuais: ORIENTE MÉDIO I",
-  "O Socialismo de Mercado na China",
-  "EUA: Superpotência Global",
-  "Desafios do Século XXI e Organismos Internacionais",
-  "Tensões Geopolíticas Atuais: ORIENTE MÉDIO II"
+  "As questões ambientais no Brasil e a Ação Antrópica",
+  "Amazônia"
 ];
 
 const HIST_GERAL = [
-  "Expansão Marítima e o Descobrimento da América",
-  "A Revolução de Avis e a Formação de Portugal",
   "A História dos Hebreus e a Civilização Hebraica",
-  "Os Reinos Africanos",
   "Feudalismo e Cultura Medieval",
   "Igreja Católica na Idade Média",
+  "Os Reinos Africanos",
   "Peste Negra, Guerra dos 100 anos e Declínio Feudal",
+  "A Revolução de Avis e a Formação de Portugal",
   "Absolutismo e Mercantilismo",
+  "Expansão Marítima e o Descobrimento da América",
+  "A Civilização Maia, O Império Asteca e o Império Inca",
   "Iluminismo e Liberalismo",
   "Revoluções Inglesas",
   "Independência dos EUA e a Guerra de Secessão",
   "Primavera dos Povos",
-  "Tratado de Versalhes",
   "Primeira Guerra Mundial",
+  "Tratado de Versalhes",
   "Fascismo, Nazismo e Franquismo",
   "Guerra Civil Espanhola",
   "Guerra Fria",
   "Independência da Indochina e Guerra do Vietnã",
   "Descolonização da África e da Ásia",
-  "Primavera Árabe",
-  "A Civilização Maia, O Império Asteca e o Império Inca"
+  "Primavera Árabe"
 ];
 
 const HIST_BR = [
-  "A Pré-História Do Brasil: Do Povoamento às Sociedades",
-  "A Expansão Marítima e Comercial e o Descobrimento do Brasil",
   "América Espanhola e América Inglesa",
-  "Povos Indígenas No Brasil: Identidade Indígena",
-  "O Tráfico Negreiro e a Diáspora Africana",
-  "Capitanias Hereditárias e o Governo-Geral",
+  "A Expansão Marítima e Comercial e o Descobrimento do Brasil",
+  "A Pré-História Do Brasil: Do Povoamento às Sociedades",
   "As Feitorias e o Pau-Brasil",
-  "União Ibérica e as Invasões Estrangeiras",
-  "Entradas, Bandeiras E Monções",
-  "Brasil Colônia: Expansão Territorial Brasileira",
+  "Povos Indígenas No Brasil: Identidade Indígena",
+  "Capitanias Hereditárias e o Governo-Geral",
   "Os jesuítas no Brasil",
+  "O Tráfico Negreiro e a Diáspora Africana",
   "O Ciclo da Cana-de-Açúcar e a Economia Açucareira",
   "Brasil Colônia: Atividades Econômicas Complementares",
   "Comércio Triangular",
-  "Mineração e o Período Pombalino",
   "Os Quilombos e a Resistência Negra",
+  "União Ibérica e as Invasões Estrangeiras",
+  "Brasil Colônia: Expansão Territorial Brasileira",
+  "Entradas, Bandeiras E Monções",
+  "Mineração e o Período Pombalino",
   "Revoltas Nativistas",
   "Revoltas Separatistas",
   "A chegada da Família Real e o Período Joanino",
@@ -393,23 +393,33 @@ const HIST_BR = [
 ];
 
 const ESPANHOL = [
+  "Estrategia de lectura en español",
+  "Interpretación de texto",
   "Introducción a la cultura hispanoamericana",
   "Los verbos",
   "El Presente del Indicativo",
+  "Las prendas de vestir",
   "Los colores",
   "Los contrarios",
   "Sitios turísticos y comerciales",
   "Heterosemánticos",
   "Las profesiones",
   "El cuerpo humano",
+  "La familia",
   "Los artículos y el género",
   "Los adverbios",
+  "Los materiales",
   "Pretéritos del Indicativo",
   "Apócope",
+  "Las finanzas",
   "Las preposiciones",
+  "Los animales",
   "Los números",
+  "Las horas",
   "Las conjunciones",
+  "Los fenómenos naturales",
   "Muy x mucho",
+  "Las medicinas",
   "Tilde diacrítica",
   "Sustantivos abstractos – Verbos gustar, parecer, encantar",
   "Partes y objetos de la casa",
@@ -417,22 +427,12 @@ const ESPANHOL = [
   "Los pronombres",
   "El Futuro Imperfecto y el Condicional",
   "El Subjuntivo",
+  "Expresiones lingüísticas",
   "Textos Periodísticos",
   "Historietas y cómics",
+  "Análisis de Fotos y Pinturas",
   "Falsos Amigos en español 1",
-  "Estrategia de lectura en español",
-  "Interpretación de texto",
-  "Las prendas de vestir",
-  "La familia",
-  "Expresiones lingüísticas",
-  "Las medicinas",
-  "Los fenómenos naturales",
-  "Las horas",
-  "Los animales",
-  "Las finanzas",
-  "Los materiales",
-  "Falsos Amigos en español 2",
-  "Análisis de Fotos y Pinturas"
+  "Falsos Amigos en español 2"
 ];
 
 const LINGUAGENS = [
@@ -448,60 +448,59 @@ const LINGUAGENS = [
   "Inclusão Digital e Acesso Democrático",
   "Padrão estético contemporâneo",
   "Influência da mídia no corpo",
+  "Exercício Físico e Saúde",
+  "Condicionamento e Esforço Físico",
   "Obesidade",
+  "Vivência Crítica e Emancipada do Lazer",
+  "Práticas Corporais e Autonomia",
+  "O Corpo Como Expressão Artística e Cultural",
+  "Dança e Educação",
+  "Danças Folclóricas",
+  "Danças Africanas",
+  "O papel Social do Funk no Brasil",
+  "O Rap como Manifestação Cultural",
+  "O samba",
+  "Capoeira",
+  "O papel social do Esporte",
   "Atletismo",
   "Basquetebol",
   "Futebol / Futsal",
   "Ginástica artística",
   "Handebol",
   "Voleibol",
-  "O papel Social do Funk no Brasil",
-  "O papel social do Esporte",
+  "Esportes Adaptados",
   "Lutas",
   "Jogos",
-  "Brincadeiras",
-  "O samba",
-  "O Rap como Manifestação Cultural",
-  "Exercício Físico e Saúde",
-  "Condicionamento e Esforço Físico",
-  "Vivência Crítica e Emancipada do Lazer",
-  "Práticas Corporais e Autonomia",
-  "O Corpo Como Expressão Artística e Cultural",
-  "Dança e Educação",
-  "Capoeira",
-  "Esportes Adaptados",
-  "Danças Folclóricas",
-  "Danças Africanas"
+  "Brincadeiras"
 ];
 
 const REDACAO = [
-  "Introdução: Funções e Estratégias",
-  "Tese: Funções e Estratégias",
-  "Conclusão: Funções e Estratégias",
-  "Título: Funções e Estratégias",
-  "Análise de Redações Exemplares 1",
-  "Análise de Redações Exemplares 2",
   "Estrutura Dissertativa: Microestrutura e macroestrutura",
   "Métodos de raciocínio: indução e dedução",
   "Métodos de raciocínio: dialética e falhas na argumentação",
   "Concisão no Parágrafo e Progressão Textual",
-  "O Tema na Redação do ENEM: Particularidades, Interpretação e Delimitação",
   "Projeto de Texto e Marca de Autoria na Produção Textual",
+  "O Tema na Redação do ENEM: Particularidades, Interpretação e Delimitação",
   "Fuga do Tema X Tangência",
   "Aspectos formais relevantes e Gramática Aplicada à Redação",
-  "Mecanismos Estruturais no Desenvolvimento",
   "Uso da vírgula: regra geral, casos especiais e exercícios",
   "Uso da crase: regra geral, casos especiais e exercícios",
+  "Título: Funções e Estratégias",
+  "Introdução: Funções e Estratégias",
+  "Tese: Funções e Estratégias",
+  "Mecanismos Estruturais no Desenvolvimento",
+  "Conclusão: Funções e Estratégias",
+  "Análise de Redações Exemplares 1",
+  "Análise de Redações Exemplares 2",
   "Folha de redação ENEM — orientações oficiais"
 ];
 
 const TEMAS_REDACAO = [
-  "Os efeitos da desinformação e da espetacularização midiática nas sociedades contemporâneas",
   "Desafios para a conciliação da Biotecnologia e a Ética",
-  "Os limites entre humor e ofensa",
   "A exploração trabalhista na sociedade moderna",
+  "Os efeitos da desinformação e da espetacularização midiática nas sociedades contemporâneas",
+  "Os limites entre humor e ofensa",
   "Cibercondria – a doença da era digital",
-  "Ensino sobre gênero e diversidade sexual nas escolas: necessidade ou doutrinação?",
   "Desafios da alfabetização tecnológica para os idosos",
   "Êxodo rural e suas consequências sociais",
   "Aleitamento materno em questão no Brasil",
@@ -509,29 +508,30 @@ const TEMAS_REDACAO = [
   "A importância da educação financeira na vida do cidadão",
   "Desaparecimento de pessoas no Brasil",
   "O ensino da história e cultura africana no Brasil: conquistas e desafios",
-  "Doenças negligenciadas pela indústria farmacêutica: causas e consequências",
-  "A educação como solução para ressocialização de detentos: utopia ou realidade?",
   "Limites entre a liberdade de expressão e o politicamente correto",
   "Caminhos para combater a epidemia de crack no Brasil",
   "Humanização no Atendimento à Saúde",
   "Os efeitos da má gestão hídrica no setor energético brasileiro",
   "Os desafios da produção artística no Brasil",
+  "Doenças negligenciadas pela indústria farmacêutica: causas e consequências",
   "A tecnologia no combate à criminalidade",
   "Lixo eletrônico e impactos socioambientais",
   "A sociedade atual e as relações de trabalho: o fenômeno da uberização",
-  "O futuro do trabalho: automação e aspectos sociais",
-  "As fronteiras simbólicas e exclusão dos sujeitos na sociedade atual",
   "Perigos da obsolescência programada",
   "Tatuagem: modismo ou formação de identidade",
+  "O futuro do trabalho: automação e aspectos sociais",
   "Os desafios dos professores brasileiros na contemporaneidade",
   "Preservação da Amazônia: Desafio brasileiro ou internacional?",
+  "As fronteiras simbólicas e exclusão dos sujeitos na sociedade atual",
+  "Ensino sobre gênero e diversidade sexual nas escolas: necessidade ou doutrinação?",
   "O desperdício de alimentos no Brasil",
   "A importância do movimento feminista na luta pelos direitos das mulheres",
   "Adoção de crianças no Brasil: avanços e desafios",
-  "Os fatores motivadores da violência escolar",
   "O uso de celular em sala de aula: ferramenta de aprendizagem ou distração?",
   "Os bens culturais digitais tendem a enfraquecer os bens culturais tradicionais?",
-  "Preservação do patrimônio histórico cultural brasileiro"
+  "Preservação do patrimônio histórico cultural brasileiro",
+  "Os fatores motivadores da violência escolar",
+  "A educação como solução para ressocialização de detentos: utopia ou realidade?"
 ];
 
 export const ENEM_FELIPE_ARAUJO_CATALOG: EnemCronogramaCatalog = {
@@ -541,7 +541,7 @@ export const ENEM_FELIPE_ARAUJO_CATALOG: EnemCronogramaCatalog = {
     "Trilha completa baseada no cronograma F3lipearaujo: metas e filmes, Ciências da Natureza, Matemática, Humanas, Linguagens, Redação, competências e temas de prática.",
   coverUrl: "/course-covers/enem-cronograma-felipe-araujo.png",
   sortOrder: 5,
-  catalogVersion: 1,
+  catalogVersion: 2,
   modules: [
     {
       title: "Introdução",
@@ -571,8 +571,7 @@ export const ENEM_FELIPE_ARAUJO_CATALOG: EnemCronogramaCatalog = {
       title: "Metas",
       lessons: buildLessons("metas", [
         { sectionTitle: "Metas", sectionSortOrder: 1, topics: ["Metas de estudo"] },
-        { sectionTitle: "Filmes recomendados", sectionSortOrder: 2, topics: FILMES_1 },
-        { sectionTitle: "Filmes recomendados (continuação)", sectionSortOrder: 3, topics: FILMES_2 }
+        { sectionTitle: "Filmes recomendados", sectionSortOrder: 2, topics: FILMES_CRONOGRAMA }
       ])
     },
     {
@@ -618,8 +617,8 @@ export const ENEM_FELIPE_ARAUJO_CATALOG: EnemCronogramaCatalog = {
           sectionSortOrder: 1,
           topics: HIST_GERAL,
           extraForTopic: {
-            "Primavera Árabe":
-              "<p><em>Nota do cronograma:</em> sugere-se iniciar o estudo da História do Brasil a partir do módulo seguinte.</p>"
+            "Peste Negra, Guerra dos 100 anos e Declínio Feudal":
+              "<p><em>Nota do cronograma:</em> sugere-se iniciar o estudo da História do Brasil neste tópico.</p>"
           }
         }
       ])
@@ -640,7 +639,13 @@ export const ENEM_FELIPE_ARAUJO_CATALOG: EnemCronogramaCatalog = {
         {
           sectionTitle: "Textos em inglês",
           sectionSortOrder: 1,
-          topics: ["Journalistic texts", "Comic strips and cartoons", "Technical texts", "Advertisements", "Interrogative adverbs"]
+          topics: [
+            "Interrogative adverbs",
+            "Journalistic texts",
+            "Comic strips and cartoons",
+            "Technical texts",
+            "Advertisements"
+          ]
         }
       ])
     },
