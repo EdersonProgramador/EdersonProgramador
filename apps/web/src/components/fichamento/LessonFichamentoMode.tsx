@@ -47,18 +47,25 @@ export function LessonFichamentoMode({
     telegramMessageMap
   });
 
+  const breadcrumbTrail =
+    item.breadcrumb.length > 2 ? item.breadcrumb.slice(-2).join(" › ") : item.breadcrumb.join(" › ");
+
   return (
     <article className="course-study-fichamento-mode panel">
       <header className="course-study-fichamento-mode__head">
-        <div className="min-w-0 flex-1">
-          <p className="course-text-subtle text-xs">{item.breadcrumb.join(" › ")}</p>
-          <h2 className="mt-1 truncate text-lg font-bold text-[var(--course-fg)] sm:text-xl">{displayTitle}</h2>
-          <p className="mt-1 flex items-center gap-1.5 text-xs font-medium text-brand-primary">
+        <div className="course-study-fichamento-mode__head-titles min-w-0">
+          <p className="course-study-fichamento-mode__breadcrumb course-text-subtle text-xs" title={item.breadcrumb.join(" › ")}>
+            {breadcrumbTrail}
+          </p>
+          <h2 className="course-study-fichamento-mode__title mt-1 text-lg font-bold text-[var(--course-fg)] sm:text-xl">
+            {displayTitle}
+          </h2>
+          <p className="course-study-fichamento-mode__mode-label mt-1 flex items-center gap-1.5 text-xs font-medium text-brand-primary">
             <LayoutPanelLeft className="h-4 w-4 shrink-0" aria-hidden />
-            {COURSES_UI.study.fichamentoModeTitle}
+            <span>{COURSES_UI.study.fichamentoModeTitle}</span>
           </p>
         </div>
-        <div className="flex shrink-0 flex-wrap items-center gap-2">
+        <div className="course-study-fichamento-mode__head-actions">
           {onToggleStudyFocus ? (
             <button
               type="button"
