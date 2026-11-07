@@ -89,9 +89,9 @@ export function AdminDevelopmentHubPage() {
       <div className="space-y-3">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
           <label className="flex min-w-0 flex-wrap items-center gap-2">
-            <span className="shrink-0 text-[var(--app-text-muted)]">Projeto (salvar no workspace)</span>
+            <span className="shrink-0 text-[var(--app-text-muted)]">Projeto (salvar no banco)</span>
             <select className="input max-w-md min-w-[12rem] flex-1" value={projectId} onChange={(e) => onProjectChange(e.target.value)}>
-              <option value="">Local — sem persistência no projeto</option>
+              <option value="">Rascunho local (navegador)</option>
               {projects.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.title}

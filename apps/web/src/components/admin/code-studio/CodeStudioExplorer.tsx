@@ -422,7 +422,7 @@ export const CodeStudioExplorer = forwardRef<CodeStudioExplorerHandle, CodeStudi
           </div>
         ) : null}
         <ul className="dev-code-studio__tree">{tree.map((node) => renderNode(node, 0))}</ul>
-        {snapshot.files.length === 0 ? (
+        {snapshot.files.length === 0 && snapshot.folders.length === 0 ? (
           <p className="dev-code-studio__explorer-empty">
             Workspace vazio. Crie um arquivo pela barra de ações acima ou pelo menu Arquivo → Criar arquivo… e informe o nome.
           </p>

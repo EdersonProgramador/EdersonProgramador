@@ -285,6 +285,7 @@ export {
   languageFromPath,
   openFileInTab,
   pinTabForFile,
+  prepareDevCodeStudioSnapshotForStorage,
   renamePathInSnapshot,
   setActiveOpenFile,
   uniqueFileNameInDirectory,

@@ -126,6 +126,51 @@ function cursorLabel(editor: MonacoEditor.IStandaloneCodeEditor | null): string 
 }
 
 const EDITOR_THEME_KEY = "dev-code-studio-editor-theme";
+const STUDIO_DRAFT_KEY_PREFIX = "dev-code-studio-draft:";
+
+function studioDraftStorageKey(projectId: string | undefined): string {
+  return `${STUDIO_DRAFT_KEY_PREFIX}${projectId || "local"}`;
+}
+
+function readStudioDraftFromBrowser(projectId: string | undefined): DevCodeStudioSnapshot | null {
+  try {
+    const raw = localStorage.getItem(studioDraftStorageKey(projectId));
+    if (!raw?.trim()) return null;
+    return parseDevCodeStudioSnapshot(raw);
+  } catch {
+    return null;
+  }
+}
+
+function writeStudioDraftToBrowser(projectId: string | undefined, raw: string): void {
+  try {
+    localStorage.setItem(studioDraftStorageKey(projectId), raw);
+  } catch {
+    /* quota / privado */
+  }
+}
+
+function snapshotHasWorkspaceContent(s: DevCodeStudioSnapshot): boolean {
+  return s.files.length > 0 || s.folders.length > 0;
+}
+
+function resolveInitialStudioSnapshot(storedRaw: string | undefined, projectId: string | undefined): DevCodeStudioSnapshot {
+  if (storedRaw?.trim()) {
+    const fromParent = parseDevCodeStudioSnapshot(storedRaw);
+    if (fromParent && snapshotHasWorkspaceContent(fromParent)) return ensureOpenTabs(fromParent);
+  }
+  const projectDraft = projectId ? readStudioDraftFromBrowser(projectId) : null;
+  if (projectDraft && snapshotHasWorkspaceContent(projectDraft)) return ensureOpenTabs(projectDraft);
+  const localDraft = readStudioDraftFromBrowser(undefined);
+  if (localDraft && snapshotHasWorkspaceContent(localDraft)) return ensureOpenTabs(localDraft);
+  if (storedRaw?.trim()) {
+    const fromParent = parseDevCodeStudioSnapshot(storedRaw);
+    if (fromParent) return ensureOpenTabs(fromParent);
+  }
+  const fallbackDraft = readStudioDraftFromBrowser(projectId);
+  if (fallbackDraft) return ensureOpenTabs(fallbackDraft);
+  return ensureOpenTabs(defaultDevCodeStudioSnapshot());
+}
 
 function keyTargetIsMonacoEditor(): boolean {
   const el = document.activeElement;
@@ -155,16 +200,14 @@ export function DevelopmentCodeStudio({
   const editorRef = useRef<MonacoEditor.IStandaloneCodeEditor | null>(null);
   const paneRef = useRef<HTMLDivElement | null>(null);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const snapshotRef = useRef<DevCodeStudioSnapshot>(defaultDevCodeStudioSnapshot());
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const multiFileInputRef = useRef<HTMLInputElement | null>(null);
   const folderInputRef = useRef<HTMLInputElement | null>(null);
   const explorerRef = useRef<CodeStudioExplorerHandle | null>(null);
   const [editorHeightPx, setEditorHeightPx] = useState(EDITOR_MIN_PX);
 
-  const initial = useMemo(
-    () => ensureOpenTabs(parseDevCodeStudioSnapshot(storedRaw) ?? defaultDevCodeStudioSnapshot()),
-    [storedRaw]
-  );
+  const initial = useMemo(() => resolveInitialStudioSnapshot(storedRaw, projectId), [storedRaw, projectId]);
 
   const [snapshot, setSnapshot] = useState<DevCodeStudioSnapshot>(initial);
   const [cursor, setCursor] = useState("Ln 1, Col 1");
@@ -185,8 +228,28 @@ export function DevelopmentCodeStudio({
   }, [editorThemeChoice]);
 
   useEffect(() => {
-    setSnapshot(ensureOpenTabs(parseDevCodeStudioSnapshot(storedRaw) ?? defaultDevCodeStudioSnapshot()));
+    setSnapshot(resolveInitialStudioSnapshot(storedRaw, projectId));
   }, [projectId, storedRaw]);
+
+  useEffect(() => {
+    snapshotRef.current = snapshot;
+  }, [snapshot]);
+
+  /** Persiste rascunho local e envia ao projeto se o save debounced ainda estiver pendente. */
+  useEffect(() => {
+    const onPageHide = () => {
+      const raw = serializeDevCodeStudioSnapshot(ensureOpenTabs(snapshotRef.current));
+      writeStudioDraftToBrowser(projectId, raw);
+      if (saveTimer.current) {
+        clearTimeout(saveTimer.current);
+        saveTimer.current = null;
+      }
+      if (!projectId) return;
+      void patchProjectWorkspace(projectId, { fieldId: DEV_CODE_STUDIO_FIELD_ID, value: raw });
+    };
+    window.addEventListener("pagehide", onPageHide);
+    return () => window.removeEventListener("pagehide", onPageHide);
+  }, [projectId]);
 
   useLayoutEffect(() => {
     const el = paneRef.current;
@@ -232,6 +295,7 @@ export function DevelopmentCodeStudio({
     (next: DevCodeStudioSnapshot) => {
       const raw = serializeDevCodeStudioSnapshot(ensureOpenTabs(next));
       onStoredChange(raw);
+      writeStudioDraftToBrowser(projectId, raw);
       if (saveTimer.current) clearTimeout(saveTimer.current);
       if (!projectId) return;
       saveTimer.current = setTimeout(() => {
@@ -254,6 +318,38 @@ export function DevelopmentCodeStudio({
     },
     [persist]
   );
+
+  const syncedLocalToDbRef = useRef<string | null>(null);
+
+  /** Ao vincular projeto, envia rascunho (navegador) ao workspace no banco se o servidor estiver vazio. */
+  useEffect(() => {
+    if (!projectId) {
+      syncedLocalToDbRef.current = null;
+      return;
+    }
+    if (syncedLocalToDbRef.current === projectId) return;
+
+    const fromServer = storedRaw?.trim() ? parseDevCodeStudioSnapshot(storedRaw) : null;
+    if (fromServer && snapshotHasWorkspaceContent(fromServer)) {
+      syncedLocalToDbRef.current = projectId;
+      return;
+    }
+
+    const candidate = resolveInitialStudioSnapshot(storedRaw, projectId);
+    if (!snapshotHasWorkspaceContent(candidate)) {
+      syncedLocalToDbRef.current = projectId;
+      return;
+    }
+
+    syncedLocalToDbRef.current = projectId;
+    const raw = serializeDevCodeStudioSnapshot(candidate);
+    onStoredChange(raw);
+    writeStudioDraftToBrowser(projectId, raw);
+    setSnapshot(candidate);
+    void patchProjectWorkspace(projectId, { fieldId: DEV_CODE_STUDIO_FIELD_ID, value: raw }).catch((err) =>
+      onError(err instanceof Error ? err.message : "Falha ao salvar workspace no banco.")
+    );
+  }, [projectId, storedRaw, onError, onStoredChange]);
 
   const runEditorAction = (actionId: string) => {
     const ed = editorRef.current;
@@ -1020,6 +1116,7 @@ Terminal integrado em breve — use o editor para snippets do lançamento`}
         <span>UTF-8</span>
         <span>Spaces: 2</span>
         <span className="dev-code-studio__status-grow">{cursor}</span>
+        <span>{projectId ? "Projeto vinculado" : "Rascunho neste navegador"}</span>
         <span>Monaco · estilo vscode.dev</span>
       </footer>
     </div>

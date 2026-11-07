@@ -1,6 +1,6 @@
 /** Workspace — editor de código do pilar Desenvolvimento. */
 
-import { migrateSnapshotToV2 } from "./development-code-studio-fs.js";
+import { migrateSnapshotToV2, prepareDevCodeStudioSnapshotForStorage } from "./development-code-studio-fs.js";
 
 export const DEV_CODE_STUDIO_FIELD_ID = "product:dev:code-studio";
 
@@ -59,5 +59,5 @@ export function parseDevCodeStudioSnapshot(raw: unknown): DevCodeStudioSnapshot 
 }
 
 export function serializeDevCodeStudioSnapshot(snapshot: DevCodeStudioSnapshot): string {
-  return JSON.stringify(snapshot);
+  return JSON.stringify(prepareDevCodeStudioSnapshotForStorage(snapshot));
 }

@@ -397,6 +397,42 @@ export function renamePathInSnapshot(snapshot: DevCodeStudioSnapshot, oldPath: s
   return { ...snapshot, folders: ensureFolderChain(snapshot, folderParentPath(newP)) };
 }
 
+/**
+ * Normaliza caminhos e garante `folders` coerente com arquivos antes de persistir (API / local).
+ */
+export function prepareDevCodeStudioSnapshotForStorage(snapshot: DevCodeStudioSnapshot): DevCodeStudioSnapshot {
+  const s = ensureOpenTabs(snapshot);
+  const files = s.files.map((f) => ({
+    ...f,
+    path: f.path.replace(/\\/g, "/"),
+    language: f.language ?? languageFromPath(f.path)
+  }));
+  const folderMap = new Map<string, DevCodeStudioFolder>();
+  for (const folder of s.folders) {
+    const path = folder.path.replace(/\\/g, "/").replace(/\/+$/, "");
+    if (!path) continue;
+    folderMap.set(path, { id: folderIdForPath(path), path });
+  }
+  let snap: DevCodeStudioSnapshot = {
+    ...s,
+    files,
+    folders: Array.from(folderMap.values()).sort((a, b) => a.path.localeCompare(b.path))
+  };
+  for (const f of files) {
+    snap = { ...snap, folders: ensureFolderChain(snap, folderParentPath(f.path)) };
+  }
+  for (const folder of snap.folders) {
+    const path = folder.path.replace(/\\/g, "/");
+    if (!path) continue;
+    let p = folderParentPath(path);
+    while (p) {
+      snap = { ...snap, folders: ensureFolderChain(snap, p) };
+      p = folderParentPath(p);
+    }
+  }
+  return ensureOpenTabs(snap);
+}
+
 export function migrateSnapshotToV2(raw: unknown): DevCodeStudioSnapshot | null {
   if (!raw || typeof raw !== "object") return null;
   const parsed = raw as Record<string, unknown>;
