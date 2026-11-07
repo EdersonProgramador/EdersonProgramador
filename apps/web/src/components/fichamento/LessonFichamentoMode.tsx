@@ -1,24 +1,18 @@
 import { COURSES_UI } from "@ederson-agencia/shared";
 import { ChevronLeft, ChevronRight, LayoutPanelLeft, X } from "lucide-react";
-import { parseYoutubeVideoId, youtubeEmbedUrl } from "../../lib/youtube";
+import type { TelegramConfig } from "../../courses/telegram";
+import { LessonConsumo, lessonHasConsumableMaterial, type LessonConsumoItem } from "./LessonConsumo";
 import { LessonFichamentoBlock } from "./LessonFichamentoBlock";
-
-type CurriculumItemLite = {
-  slug: string;
-  id: string;
-  title: string;
-  type: "document" | "video" | "article";
-  breadcrumb: string[];
-  prev: string | null;
-  next: string | null;
-};
 
 type LessonFichamentoModeProps = {
   courseSlug: string;
-  item: CurriculumItemLite;
+  item: LessonConsumoItem & { breadcrumb: string[]; prev: string | null; next: string | null };
   displayTitle: string;
+  noteHtml?: string;
   videoSrc: string | null;
   pdfSrc: string | null;
+  telegram: TelegramConfig;
+  telegramMessageMap: Record<string, number>;
   fichamentoJson?: string | null;
   fichamentoHtml?: string | null;
   onExitLessonView: () => void;
@@ -30,16 +24,24 @@ export function LessonFichamentoMode({
   courseSlug,
   item,
   displayTitle,
+  noteHtml,
   videoSrc,
   pdfSrc,
+  telegram,
+  telegramMessageMap,
   fichamentoJson,
   fichamentoHtml,
   onExitLessonView,
   onPrev,
   onNext
 }: LessonFichamentoModeProps) {
-  const youtubeId = videoSrc ? parseYoutubeVideoId(videoSrc) : null;
-  const hasMedia = Boolean(pdfSrc || (item.type === "video" && videoSrc));
+  const hasConsumo = lessonHasConsumableMaterial(item, {
+    pdfSrc,
+    videoSrc,
+    noteHtml,
+    telegram,
+    telegramMessageMap
+  });
 
   return (
     <article className="course-study-fichamento-mode panel">
@@ -72,50 +74,33 @@ export function LessonFichamentoMode({
         </div>
       </header>
 
-      {!hasMedia ? (
+      {!hasConsumo ? (
         <p className="course-text-muted border-b border-[var(--app-border)] px-4 py-3 text-sm sm:px-6">
           {COURSES_UI.study.fichamentoModeNoMedia}
         </p>
       ) : null}
 
-      <div
-        className={`course-study-fichamento-mode__grid ${hasMedia ? "has-media" : "editor-only"}`}
-      >
-        {hasMedia ? (
-          <div className="course-study-fichamento-mode__media">
-            {pdfSrc ? (
-              <object data={pdfSrc} type="application/pdf" className="course-study-fichamento-mode__pdf">
-                <p className="course-text-muted p-4 text-sm">{COURSES_UI.study.pdfFallback}</p>
-              </object>
-            ) : null}
-            {item.type === "video" ? (
-              <>
-                {youtubeId ? (
-                  <div className="course-study-fichamento-mode__video-wrap">
-                    <iframe
-                      title={displayTitle}
-                      className="h-full w-full border-0"
-                      src={youtubeEmbedUrl(youtubeId)}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      allowFullScreen
-                      referrerPolicy="strict-origin-when-cross-origin"
-                    />
-                  </div>
-                ) : videoSrc ? (
-                  <video
-                    controls
-                    playsInline
-                    preload="metadata"
-                    className="course-study-fichamento-mode__video-native"
-                  >
-                    <source src={videoSrc} type="video/mp4" />
-                  </video>
-                ) : null}
-              </>
-            ) : null}
-          </div>
-        ) : null}
+      <div className="course-study-fichamento-mode__grid has-consumo">
+        <div className="course-study-fichamento-mode__consumo">
+          <p className="course-study-fichamento-mode__consumo-label">{COURSES_UI.study.fichamentoModeConsumoLabel}</p>
+          <LessonConsumo
+            courseSlug={courseSlug}
+            item={item}
+            displayTitle={displayTitle}
+            noteHtml={noteHtml}
+            videoSrc={videoSrc}
+            pdfSrc={pdfSrc}
+            telegram={telegram}
+            telegramMessageMap={telegramMessageMap}
+            mediaClassName="course-study-fichamento-mode__media-stack space-y-4"
+            pdfClassName="course-study-fichamento-mode__pdf"
+            videoWrapClassName="course-study-fichamento-mode__video-wrap"
+            videoNativeClassName="course-study-fichamento-mode__video-native"
+            proseClassName="course-lesson-prose course-study-fichamento-mode__prose text-sm"
+          />
+        </div>
         <div className="course-study-fichamento-mode__editor">
+          <p className="course-study-fichamento-mode__editor-label">{COURSES_UI.study.fichamentoLessonTitle}</p>
           <LessonFichamentoBlock
             courseSlug={courseSlug}
             lessonSlug={item.slug}

@@ -758,31 +758,54 @@ html[data-theme="day"] .course-study__section-block[open] {
   grid-template-columns: 1fr;
 }
 
-.course-study-fichamento-mode__grid.has-media {
-  grid-template-rows: auto 1fr;
+.course-study-fichamento-mode__grid.has-consumo {
+  grid-template-rows: minmax(240px, 42vh) 1fr;
 }
 
 @media (min-width: 1024px) {
-  .course-study-fichamento-mode__grid.has-media {
+  .course-study-fichamento-mode__grid.has-consumo {
     grid-template-rows: unset;
-    grid-template-columns: minmax(300px, 1.08fr) minmax(340px, 1fr);
+    grid-template-columns: minmax(320px, 1.1fr) minmax(360px, 1fr);
   }
 }
 
-.course-study-fichamento-mode__media {
+.course-study-fichamento-mode__consumo-label,
+.course-study-fichamento-mode__editor-label {
+  margin: 0 0 0.5rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--course-subtle);
+}
+
+.course-study-fichamento-mode__consumo {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  background: #000;
+  padding: 0.75rem 1rem;
+  overflow: hidden;
   border-bottom: 1px solid var(--app-border);
+  background: var(--course-surface-main);
 }
 
 @media (min-width: 1024px) {
-  .course-study-fichamento-mode__media {
+  .course-study-fichamento-mode__consumo {
     border-bottom: none;
     border-right: 1px solid var(--app-border);
-    min-height: 360px;
+    padding: 1rem 1.25rem;
   }
+}
+
+.course-study-fichamento-mode__consumo-inner {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.course-study-fichamento-mode__media-stack .course-study-fichamento-mode__video-wrap {
+  background: #000;
 }
 
 .course-study-fichamento-mode__video-wrap {
@@ -836,7 +859,13 @@ html[data-theme="day"] .course-study__section-block[open] {
   flex-direction: column;
   min-height: 0;
   padding: 0.75rem 1rem 1.25rem;
-  overflow: auto;
+  overflow: hidden;
+}
+
+.course-study-fichamento-mode__prose {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--app-border);
 }
 
 .course-study-fichamento-mode__editor .fichamento-lesson-block {

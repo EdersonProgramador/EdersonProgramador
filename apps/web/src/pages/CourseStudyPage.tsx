@@ -28,20 +28,15 @@ import {
   tanarBiblePageForLesson
 } from "@ederson-agencia/shared";
 import { ApiError, apiAssetUrl, apiGet, apiPost, apiPut } from "../api";
-import { isYoutubeUrl, parseYoutubeVideoId, youtubeEmbedUrl } from "../lib/youtube";
-import {
-  telegramLessonUrl,
-  telegramMessageId,
-  telegramSumarioUrl,
-  type TelegramConfig
-} from "../courses/telegram";
+import { isYoutubeUrl } from "../lib/youtube";
+import type { TelegramConfig } from "../courses/telegram";
 import { ThemeToggle } from "../components/theme/ThemeToggle";
 import { useAcademySession, useAuthStore } from "../stores/authStore";
 import { FichamentoWorkspace } from "../components/fichamento/FichamentoWorkspace";
 import { LessonFichamentoBlock } from "../components/fichamento/LessonFichamentoBlock";
+import { LessonConsumo } from "../components/fichamento/LessonConsumo";
 import { LessonFichamentoMode } from "../components/fichamento/LessonFichamentoMode";
 import { CourseLibraryView } from "../components/library/CourseLibraryView";
-import { enhanceLessonProseHtml } from "../lib/scripture-prose";
 import "../styles/course-certificate.css";
 import "../styles/course-library.css";
 import "../styles/course-study.css";
@@ -657,6 +652,7 @@ export function CourseStudyPage() {
               courseSlug={courseSlug}
               item={fichamentoModeItem}
               displayTitle={activeLessonNote?.displayTitle ?? fichamentoModeItem.title}
+              noteHtml={activeLessonNote?.html ?? payload.lessonNotes[fichamentoModeItem.slug]?.html}
               videoSrc={
                 videoFile(fichamentoModeItem.id) ? apiAssetUrl(videoFile(fichamentoModeItem.id)!) : null
               }
@@ -665,6 +661,8 @@ export function CourseStudyPage() {
                 payload.curriculum.documentBase,
                 payload.videoManifest.files
               )}
+              telegram={payload.telegram}
+              telegramMessageMap={payload.telegramMessageMap}
               fichamentoJson={fichamento?.lessons[fichamentoModeItem.slug]?.docJson}
               fichamentoHtml={fichamento?.lessons[fichamentoModeItem.slug]?.docHtml}
               onExitLessonView={() => goLesson(fichamentoModeItem.slug)}
@@ -773,13 +771,6 @@ function lessonKindLabel(
   if (isYoutube) return COURSES_UI.study.lessonYoutube;
   if (hasVideo) return COURSES_UI.study.lessonVideo;
   return COURSES_UI.study.lessonTelegram;
-}
-
-function rewriteCourseLibraryLinks(html: string, courseSlug: string): string {
-  return html.replace(
-    /href="(biblioteca\/[^"]+)"/g,
-    (_, path: string) => `href="${ACADEMY_APP_BASE}/cursos/${courseSlug}/${path}"`
-  );
 }
 
 function TocLessonLink({
@@ -1186,55 +1177,6 @@ function ModuleSummary({
   );
 }
 
-function TelegramPanel({
-  item,
-  telegram,
-  messageMap,
-  primary
-}: {
-  item: CurriculumItem;
-  telegram: TelegramConfig;
-  messageMap: Record<string, number>;
-  primary?: boolean;
-}) {
-  const url = telegramLessonUrl(item, telegram, messageMap);
-  const sumario = telegramSumarioUrl(telegram);
-  if (!url) return null;
-  const msgId = telegramMessageId(item, telegram, messageMap);
-
-  return (
-    <section
-      className={`course-study__telegram ${primary ? "course-study__telegram--primary" : ""}`}
-      aria-label="Aula no Telegram"
-    >
-      <p className="text-sm">{primary ? COURSES_UI.study.telegramPrimary : COURSES_UI.study.telegramBackup}</p>
-      <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-        <a
-          className="btn-primary inline-flex min-h-11 w-full items-center justify-center sm:w-auto"
-          href={url}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          {COURSES_UI.study.telegramOpen}
-        </a>
-        {sumario ? (
-          <a
-            className="btn-secondary inline-flex min-h-11 w-full items-center justify-center sm:w-auto"
-            href={sumario}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {COURSES_UI.study.telegramIndex}
-          </a>
-        ) : null}
-      </div>
-      <p className="course-text-faint mt-2 text-xs">
-        {COURSES_UI.study.telegramRef}: <code className="text-brand-primary">{msgId}</code> · {item.id}
-      </p>
-    </section>
-  );
-}
-
 function resolveCourseMediaUrl(url: string): string {
   if (/^https?:\/\//i.test(url)) return url;
   return apiAssetUrl(url.startsWith("/") ? url : `/${url}`);
@@ -1280,8 +1222,6 @@ function LessonPanel({
 }) {
   const title = note?.displayTitle ?? item.title;
   const pdfSrc = lessonPdfSrc(item, documentBase, mediaFiles);
-  const youtubeId = videoSrc ? parseYoutubeVideoId(videoSrc) : null;
-  const useTelegramPrimary = item.type === "document" || (!videoSrc && telegram.enabled);
 
   return (
     <article className="panel p-4 sm:p-6 md:p-8">
@@ -1298,49 +1238,19 @@ function LessonPanel({
         ) : null}
       </div>
 
-      {pdfSrc || item.type === "video" ? (
-        <div className="mt-6 space-y-4">
-          {pdfSrc ? (
-            <object data={pdfSrc} type="application/pdf" className="h-[50vh] w-full rounded-lg bg-white/5">
-              <p className="course-text-muted text-sm">{COURSES_UI.study.pdfFallback}</p>
-            </object>
-          ) : null}
-          {item.type === "video" ? (
-            <>
-              {youtubeId ? (
-                <div className="aspect-video w-full overflow-hidden rounded-lg bg-black">
-                  <iframe
-                    title={title}
-                    className="h-full w-full border-0"
-                    src={youtubeEmbedUrl(youtubeId)}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    allowFullScreen
-                    referrerPolicy="strict-origin-when-cross-origin"
-                  />
-                </div>
-              ) : videoSrc ? (
-                <video controls playsInline preload="metadata" className="w-full rounded-lg bg-black">
-                  <source src={videoSrc} type="video/mp4" />
-                </video>
-              ) : null}
-            </>
-          ) : null}
-          {useTelegramPrimary && item.type !== "article" ? (
-            <TelegramPanel item={item} telegram={telegram} messageMap={telegramMessageMap} primary />
-          ) : item.type === "video" && videoSrc ? (
-            <TelegramPanel item={item} telegram={telegram} messageMap={telegramMessageMap} />
-          ) : null}
-        </div>
-      ) : null}
-
-      {note?.html ? (
-        <div
-          className="course-lesson-prose mt-6 border-t border-[var(--app-border)] pt-6 text-sm"
-          dangerouslySetInnerHTML={{
-            __html: enhanceLessonProseHtml(rewriteCourseLibraryLinks(note.html, courseSlug))
-          }}
+      <div className="mt-6">
+        <LessonConsumo
+          courseSlug={courseSlug}
+          item={item}
+          displayTitle={title}
+          noteHtml={note?.html}
+          videoSrc={videoSrc}
+          pdfSrc={pdfSrc}
+          telegram={telegram}
+          telegramMessageMap={telegramMessageMap}
+          proseClassName="course-lesson-prose mt-6 border-t border-[var(--app-border)] pt-6 text-sm"
         />
-      ) : null}
+      </div>
 
       {fichamentoSlot}
 
