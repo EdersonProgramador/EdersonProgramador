@@ -646,9 +646,10 @@
 }
 
 .dev-code-studio__tree-rename-input {
-  min-width: 0;
+  min-width: 5.5rem;
   flex: 1;
   max-width: 100%;
+  width: 100%;
   padding: 0.05rem 0.25rem;
   font-size: 0.75rem;
   line-height: 1.25;
@@ -707,6 +708,8 @@
 
 .dev-code-studio__tree-create {
   flex: 1;
+  min-width: 0;
+  width: 100%;
 }
 
 .dev-code-studio__explorer-empty {

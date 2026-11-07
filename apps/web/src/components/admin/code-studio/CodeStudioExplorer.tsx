@@ -97,16 +97,16 @@ export const CodeStudioExplorer = forwardRef<CodeStudioExplorerHandle, CodeStudi
     return () => cancelAnimationFrame(t);
   }, [renameTarget]);
 
+  /** Foca ao abrir criação — não reexecutar a cada keystroke (evita select() apagar o draft). */
   useEffect(() => {
     if (!createInput) return;
     const t = requestAnimationFrame(() => {
       const el = createInputRef.current;
       if (!el) return;
       el.focus();
-      el.select();
     });
     return () => cancelAnimationFrame(t);
-  }, [createInput]);
+  }, [createInput?.mode, createInput?.parentDir]);
 
   /** Mostrar a pasta alvo ao criar (expandir ancestors). */
   useEffect(() => {

@@ -698,7 +698,7 @@ export function DevelopmentCodeStudio({
       const key = e.key;
       const t = e.target;
       if (t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement) {
-        if (key === "F2" || key === "Delete" || key === "Backspace") return;
+        return;
       }
 
       if (e.ctrlKey && e.key === "s") {
