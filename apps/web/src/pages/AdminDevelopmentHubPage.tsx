@@ -15,6 +15,7 @@ import { DevelopmentStackPicker } from "../components/admin/DevelopmentStackPick
 const DevelopmentCodeStudio = lazy(() =>
   import("../components/admin/DevelopmentCodeStudio").then((m) => ({ default: m.DevelopmentCodeStudio }))
 );
+import { mergeProjectWorkspaceFields, stripStudioFieldWhileLoading } from "../lib/dev-code-studio-workspace-fields";
 import { AdminPillarStatsHubPage } from "./AdminPillarStatsHubPage";
 
 type ProjectOption = { id: string; title: string };
@@ -52,9 +53,10 @@ export function AdminDevelopmentHubPage() {
   const loadFields = useCallback(async (id: string) => {
     setLoading(true);
     setError(null);
+    setFields((prev) => stripStudioFieldWhileLoading(prev));
     try {
       const ws = await getProjectWorkspace(id);
-      setFields(ws.workspace.fields);
+      setFields((prev) => mergeProjectWorkspaceFields(prev, ws.workspace.fields));
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Erro ao carregar projeto.");
     } finally {

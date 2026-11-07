@@ -5,6 +5,7 @@ import { ApiError, apiGet } from "../api";
 import { getProjectWorkspace } from "../api/project-workspace-api";
 import { ADMIN_BASE } from "../components/admin/AdminOperationsLayout";
 import { DevelopmentCodeStudio } from "../components/admin/DevelopmentCodeStudio";
+import { mergeProjectWorkspaceFields, stripStudioFieldWhileLoading } from "../lib/dev-code-studio-workspace-fields";
 
 type ProjectOption = { id: string; title: string };
 
@@ -36,9 +37,10 @@ export function AdminCodeStudioFullPage() {
   const loadFields = useCallback(async (id: string) => {
     setLoading(true);
     setError(null);
+    setFields((prev) => stripStudioFieldWhileLoading(prev));
     try {
       const ws = await getProjectWorkspace(id);
-      setFields(ws.workspace.fields);
+      setFields((prev) => mergeProjectWorkspaceFields(prev, ws.workspace.fields));
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Erro ao carregar projeto.");
     } finally {

@@ -285,6 +285,14 @@ export function DevelopmentCodeStudio({
 
   const studio = useMemo(() => ensureOpenTabs(snapshot), [snapshot]);
 
+  const persistenceStatus = useMemo(() => {
+    if (!projectId) return { label: "Rascunho neste navegador", pending: false };
+    if (!workspaceReady) return { label: "Aguardando projeto…", pending: true };
+    return { label: "Projeto vinculado", pending: false };
+  }, [projectId, workspaceReady]);
+
+  const workspaceReadyRef = useRef(workspaceReady);
+
   const activeFile = studio.openFileId ? studio.files.find((f) => f.id === studio.openFileId) ?? null : null;
 
   const openTabs = studio.openTabs?.tabs ?? [];
@@ -377,6 +385,23 @@ export function DevelopmentCodeStudio({
       onError(err instanceof Error ? err.message : "Falha ao salvar workspace no banco.")
     );
   }, [projectId, workspaceReady, storedRaw, onError, onStoredChange]);
+
+  /** Envia ao banco edições feitas enquanto `workspaceReady` ainda era false (debounce não foi agendado). */
+  useEffect(() => {
+    const wasReady = workspaceReadyRef.current;
+    workspaceReadyRef.current = workspaceReady;
+    const justBecameReady = workspaceReady && !wasReady;
+    if (!justBecameReady || !projectId) return;
+    const snap = ensureOpenTabs(snapshotRef.current);
+    if (!snapshotHasWorkspaceContent(snap)) return;
+    const raw = serializeDevCodeStudioSnapshot(snap);
+    if (storedRawEchoesSnapshot(storedRaw, snap)) return;
+    if (saveTimer.current) return;
+    onSavingChange?.(true);
+    void patchProjectWorkspace(projectId, { fieldId: DEV_CODE_STUDIO_FIELD_ID, value: raw })
+      .catch((err) => onError(err instanceof Error ? err.message : "Falha ao salvar workspace no banco."))
+      .finally(() => onSavingChange?.(false));
+  }, [workspaceReady, projectId, storedRaw, onError, onSavingChange]);
 
   const runEditorAction = (actionId: string) => {
     const ed = editorRef.current;
@@ -912,7 +937,7 @@ export function DevelopmentCodeStudio({
   };
 
   return (
-    <div className="dev-code-studio" data-theme={shellUi}>
+    <div className="dev-code-studio" data-theme={shellUi} aria-busy={persistenceStatus.pending || undefined}>
       <input
         ref={fileInputRef}
         type="file"
@@ -1143,7 +1168,16 @@ Terminal integrado em breve — use o editor para snippets do lançamento`}
         <span>UTF-8</span>
         <span>Spaces: 2</span>
         <span className="dev-code-studio__status-grow">{cursor}</span>
-        <span>{projectId ? "Projeto vinculado" : "Rascunho neste navegador"}</span>
+        <span
+          className={persistenceStatus.pending ? "dev-code-studio__status-pending" : undefined}
+          title={
+            persistenceStatus.pending
+              ? "Carregando workspace do banco; alterações passam a sincronizar ao concluir"
+              : undefined
+          }
+        >
+          {persistenceStatus.label}
+        </span>
         <span>Monaco · estilo vscode.dev</span>
       </footer>
     </div>

@@ -1290,6 +1290,21 @@
   min-width: 6rem;
 }
 
+.dev-code-studio__status-pending {
+  opacity: 0.92;
+  animation: dev-code-studio-status-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes dev-code-studio-status-pulse {
+  0%,
+  100% {
+    opacity: 0.75;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
 @media (max-width: 640px) {
   .dev-code-studio__explorer {
     display: none;
