@@ -1,5 +1,5 @@
 import { COURSES_UI } from "@ederson-agencia/shared";
-import { ChevronLeft, ChevronRight, LayoutPanelLeft, Maximize2, Minimize2, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, LayoutPanelLeft, Maximize2, Minimize2, Search, X } from "lucide-react";
 import type { TelegramConfig } from "../../courses/telegram";
 import { LessonConsumo, lessonHasConsumableMaterial, type LessonConsumoItem } from "./LessonConsumo";
 import { LessonFichamentoBlock } from "./LessonFichamentoBlock";
@@ -16,6 +16,7 @@ type LessonFichamentoModeProps = {
   fichamentoJson?: string | null;
   fichamentoHtml?: string | null;
   onExitLessonView: () => void;
+  onOpenPesquisaMode?: () => void;
   onPrev?: () => void;
   onNext?: () => void;
   studyFocusMode?: boolean;
@@ -34,6 +35,7 @@ export function LessonFichamentoMode({
   fichamentoJson,
   fichamentoHtml,
   onExitLessonView,
+  onOpenPesquisaMode,
   onPrev,
   onNext,
   studyFocusMode = false,
@@ -91,6 +93,12 @@ export function LessonFichamentoMode({
             <button type="button" className="btn-secondary min-h-9 text-xs" onClick={onNext}>
               {COURSES_UI.study.fichamentoModeNext}
               <ChevronRight className="ml-0.5 inline h-4 w-4" />
+            </button>
+          ) : null}
+          {onOpenPesquisaMode ? (
+            <button type="button" className="btn-secondary min-h-9 text-xs" onClick={onOpenPesquisaMode}>
+              <Search className="mr-1 inline h-4 w-4" aria-hidden />
+              {COURSES_UI.study.pesquisaModeOpen}
             </button>
           ) : null}
           <button type="button" className="btn-primary min-h-9 text-xs" onClick={onExitLessonView}>

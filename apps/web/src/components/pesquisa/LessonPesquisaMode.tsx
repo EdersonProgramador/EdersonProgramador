@@ -1,5 +1,5 @@
 import { COURSES_UI } from "@ederson-agencia/shared";
-import { ChevronLeft, ChevronRight, ExternalLink, Search, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, ExternalLink, LayoutPanelLeft, Search, X } from "lucide-react";
 import { FormEvent, useCallback, useMemo, useState } from "react";
 import {
   buildLessonGoogleSearchUrl,
@@ -20,6 +20,7 @@ type Props = {
   item: LessonPesquisaItem;
   displayTitle: string;
   onExitLessonView: () => void;
+  onOpenFichamentoMode?: () => void;
   onPrev?: () => void;
   onNext?: () => void;
 };
@@ -37,6 +38,7 @@ export function LessonPesquisaMode({
   item,
   displayTitle,
   onExitLessonView,
+  onOpenFichamentoMode,
   onPrev,
   onNext
 }: Props) {
@@ -121,6 +123,12 @@ export function LessonPesquisaMode({
             <ExternalLink className="mr-1 inline h-4 w-4" aria-hidden />
             {COURSES_UI.study.pesquisaOpenExternal}
           </a>
+          {onOpenFichamentoMode ? (
+            <button type="button" className="btn-secondary min-h-9 text-xs" onClick={onOpenFichamentoMode}>
+              <LayoutPanelLeft className="mr-1 inline h-4 w-4" aria-hidden />
+              {COURSES_UI.study.fichamentoModeOpen}
+            </button>
+          ) : null}
           <button type="button" className="btn-primary min-h-9 text-xs" onClick={onExitLessonView}>
             <X className="mr-1 inline h-4 w-4" />
             {COURSES_UI.study.pesquisaModeExit}

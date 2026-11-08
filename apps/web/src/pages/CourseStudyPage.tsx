@@ -765,6 +765,7 @@ export function CourseStudyPage() {
               item={pesquisaModeItem}
               displayTitle={activeLessonNote?.displayTitle ?? pesquisaModeItem.title}
               onExitLessonView={() => goLesson(pesquisaModeItem.slug)}
+              onOpenFichamentoMode={() => goLesson(fichamentoAulaPath(pesquisaModeItem.slug))}
               onPrev={
                 pesquisaModeItem.prev ? () => goLesson(pesquisaAulaPath(pesquisaModeItem.prev!)) : undefined
               }
@@ -799,6 +800,7 @@ export function CourseStudyPage() {
               fichamentoJson={fichamento?.lessons[fichamentoModeItem.slug]?.docJson}
               fichamentoHtml={fichamento?.lessons[fichamentoModeItem.slug]?.docHtml}
               onExitLessonView={() => goLesson(fichamentoModeItem.slug)}
+              onOpenPesquisaMode={() => goLesson(pesquisaAulaPath(fichamentoModeItem.slug))}
               onPrev={
                 fichamentoModeItem.prev
                   ? () => goLesson(fichamentoAulaPath(fichamentoModeItem.prev))
