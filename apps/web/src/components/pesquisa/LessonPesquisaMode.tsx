@@ -79,7 +79,12 @@ export function LessonPesquisaMode({
             {COURSES_UI.study.pesquisaOpenExternal}
           </a>
           {onOpenFichamentoMode ? (
-            <button type="button" className="btn-secondary min-h-9 text-xs" onClick={onOpenFichamentoMode}>
+            <button
+              type="button"
+              className="btn-secondary min-h-9 text-xs"
+              title={COURSES_UI.study.pesquisaHandoffFichamentoHint}
+              onClick={onOpenFichamentoMode}
+            >
               <LayoutPanelLeft className="mr-1 inline h-4 w-4" aria-hidden />
               {COURSES_UI.study.fichamentoModeOpen}
             </button>
@@ -92,6 +97,8 @@ export function LessonPesquisaMode({
       </header>
 
       <LessonPesquisaPanel
+        key={item.slug}
+        lessonSlug={item.slug}
         displayTitle={displayTitle}
         breadcrumb={item.breadcrumb}
         variant="full"

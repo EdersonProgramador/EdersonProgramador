@@ -2,6 +2,7 @@ import { COURSES_UI } from "@ederson-agencia/shared";
 import { ChevronLeft, ChevronRight, LayoutPanelLeft, Maximize2, Minimize2, Search, X } from "lucide-react";
 import { useState } from "react";
 import type { TelegramConfig } from "../../courses/telegram";
+import { consumePesquisaHandoffToFichamento } from "../../lib/lesson-pesquisa-session";
 import { LessonPesquisaPanel } from "../pesquisa/LessonPesquisaPanel";
 import { LessonConsumo, lessonHasConsumableMaterial, type LessonConsumoItem } from "./LessonConsumo";
 import { LessonFichamentoBlock } from "./LessonFichamentoBlock";
@@ -45,7 +46,9 @@ export function LessonFichamentoMode({
   studyFocusMode = false,
   onToggleStudyFocus
 }: LessonFichamentoModeProps) {
-  const [consumoView, setConsumoView] = useState<FichamentoConsumoView>("material");
+  const [consumoView, setConsumoView] = useState<FichamentoConsumoView>(() =>
+    consumePesquisaHandoffToFichamento(item.slug) ? "pesquisa" : "material"
+  );
 
   const hasConsumo = lessonHasConsumableMaterial(item, {
     pdfSrc,
@@ -168,6 +171,8 @@ export function LessonFichamentoMode({
             )
           ) : (
             <LessonPesquisaPanel
+              key={item.slug}
+              lessonSlug={item.slug}
               displayTitle={displayTitle}
               breadcrumb={item.breadcrumb}
               variant="embed"

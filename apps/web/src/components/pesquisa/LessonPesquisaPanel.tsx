@@ -1,11 +1,12 @@
 import { COURSES_UI } from "@ederson-agencia/shared";
 import { Search } from "lucide-react";
-import { FormEvent, useCallback, useMemo, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   buildLessonGoogleSearchUrl,
   defaultLessonSearchQuery,
   type LessonPesquisaTab
 } from "../../lib/lesson-google-pesquisa";
+import { loadLessonPesquisaSession, saveLessonPesquisaSession } from "../../lib/lesson-pesquisa-session";
 
 const TABS: { id: LessonPesquisaTab; label: string }[] = [
   { id: "all", label: COURSES_UI.study.pesquisaTabAll },
@@ -17,6 +18,7 @@ const TABS: { id: LessonPesquisaTab; label: string }[] = [
 ];
 
 type Props = {
+  lessonSlug: string;
   displayTitle: string;
   breadcrumb: string[];
   variant?: "full" | "embed";
@@ -24,7 +26,19 @@ type Props = {
   onOpenFullscreen?: () => void;
 };
 
+function initialPesquisaState(lessonSlug: string, anchorQuery: string) {
+  const saved = loadLessonPesquisaSession(lessonSlug);
+  if (saved) return saved;
+  return {
+    draftQuery: anchorQuery,
+    activeQuery: anchorQuery,
+    tab: "all" as LessonPesquisaTab,
+    iframeGeneration: 0
+  };
+}
+
 export function LessonPesquisaPanel({
+  lessonSlug,
   displayTitle,
   breadcrumb,
   variant = "full",
@@ -33,10 +47,30 @@ export function LessonPesquisaPanel({
 }: Props) {
   const anchorQuery = useMemo(() => defaultLessonSearchQuery(displayTitle, breadcrumb), [displayTitle, breadcrumb]);
 
-  const [draftQuery, setDraftQuery] = useState(anchorQuery);
-  const [activeQuery, setActiveQuery] = useState(anchorQuery);
-  const [tab, setTab] = useState<LessonPesquisaTab>("all");
-  const [iframeGeneration, setIframeGeneration] = useState(0);
+  const initialRef = useRef(initialPesquisaState(lessonSlug, anchorQuery));
+  const [draftQuery, setDraftQuery] = useState(initialRef.current.draftQuery);
+  const [activeQuery, setActiveQuery] = useState(initialRef.current.activeQuery);
+  const [tab, setTab] = useState<LessonPesquisaTab>(initialRef.current.tab);
+  const [iframeGeneration, setIframeGeneration] = useState(initialRef.current.iframeGeneration);
+
+  useEffect(() => {
+    const saved = loadLessonPesquisaSession(lessonSlug);
+    if (saved) {
+      setDraftQuery(saved.draftQuery);
+      setActiveQuery(saved.activeQuery);
+      setTab(saved.tab);
+      setIframeGeneration(saved.iframeGeneration);
+      return;
+    }
+    setDraftQuery(anchorQuery);
+    setActiveQuery(anchorQuery);
+    setTab("all");
+    setIframeGeneration(0);
+  }, [lessonSlug, anchorQuery]);
+
+  useEffect(() => {
+    saveLessonPesquisaSession(lessonSlug, { draftQuery, activeQuery, tab, iframeGeneration });
+  }, [lessonSlug, draftQuery, activeQuery, tab, iframeGeneration]);
 
   const iframeSrc = useMemo(() => buildLessonGoogleSearchUrl(activeQuery, tab), [activeQuery, tab]);
   const iframeKey = `${tab}-${iframeGeneration}-${activeQuery}`;

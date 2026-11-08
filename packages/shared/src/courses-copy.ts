@@ -152,6 +152,8 @@ export const COURSES_UI = {
     fichamentoModeOpen: "Modo fichamento",
     pesquisaModeOpen: "Pesquisa",
     pesquisaModeTitle: "Modo pesquisa — Google focado no assunto da aula",
+    pesquisaHandoffFichamentoHint:
+      "Ao abrir o modo fichamento, a pesquisa continua na coluna Material (mesma consulta e aba).",
     pesquisaModeExit: "Aula completa",
     pesquisaModePrev: "Aula anterior",
     pesquisaModeNext: "Próxima aula",

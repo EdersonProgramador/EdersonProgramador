@@ -39,6 +39,7 @@ import { LessonFichamentoBlock } from "../components/fichamento/LessonFichamento
 import { LessonConsumo } from "../components/fichamento/LessonConsumo";
 import { LessonFichamentoMode } from "../components/fichamento/LessonFichamentoMode";
 import { LessonPesquisaMode } from "../components/pesquisa/LessonPesquisaMode";
+import { markPesquisaHandoffToFichamento } from "../lib/lesson-pesquisa-session";
 import { CourseLibraryView } from "../components/library/CourseLibraryView";
 import "../styles/course-certificate.css";
 import "../styles/course-library.css";
@@ -765,7 +766,10 @@ export function CourseStudyPage() {
               item={pesquisaModeItem}
               displayTitle={activeLessonNote?.displayTitle ?? pesquisaModeItem.title}
               onExitLessonView={() => goLesson(pesquisaModeItem.slug)}
-              onOpenFichamentoMode={() => goLesson(fichamentoAulaPath(pesquisaModeItem.slug))}
+              onOpenFichamentoMode={() => {
+                markPesquisaHandoffToFichamento(pesquisaModeItem.slug);
+                goLesson(fichamentoAulaPath(pesquisaModeItem.slug));
+              }}
               onPrev={
                 pesquisaModeItem.prev ? () => goLesson(pesquisaAulaPath(pesquisaModeItem.prev!)) : undefined
               }
