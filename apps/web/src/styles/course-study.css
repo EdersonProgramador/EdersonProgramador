@@ -964,6 +964,40 @@ html[data-theme="day"] .course-study__section-block[open] {
   color: var(--course-subtle);
 }
 
+.course-study-fichamento-mode__consumo-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+}
+
+.course-study-fichamento-mode__consumo-tab {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--app-border);
+  border-radius: 9999px;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--course-subtle);
+  background: transparent;
+  cursor: pointer;
+}
+
+.course-study-fichamento-mode__consumo-tab.is-active {
+  border-color: rgb(var(--brand-primary-rgb, 59 130 246) / 0.35);
+  background: rgb(var(--brand-primary-rgb, 59 130 246) / 0.1);
+  color: var(--course-fg);
+}
+
+.course-study-fichamento-mode__consumo-empty {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
 .course-study-fichamento-mode__consumo {
   display: flex;
   flex-direction: column;
@@ -1376,4 +1410,62 @@ html[data-theme="day"] .course-study__section-block[open] {
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 0.5rem;
+}
+
+.course-study-pesquisa-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.course-study-pesquisa-panel--full {
+  flex: 1;
+  min-height: 0;
+}
+
+.course-study-pesquisa-panel--embed {
+  min-height: 0;
+}
+
+.course-study-pesquisa-mode__toolbar--embed {
+  flex-shrink: 0;
+  padding: 0;
+  border-bottom: none;
+  background: transparent;
+}
+
+.course-study-pesquisa-mode__toolbar--embed .course-study-pesquisa-mode__search-input {
+  min-height: 2.25rem;
+  font-size: 0.8125rem;
+}
+
+.course-study-pesquisa-mode__toolbar--embed .course-study-pesquisa-mode__search-btn {
+  min-height: 2.25rem;
+  padding-inline: 0.75rem;
+}
+
+.course-study-pesquisa-mode__toolbar--embed .course-study-pesquisa-mode__tabs {
+  margin-top: 0.5rem;
+}
+
+.course-study-pesquisa-panel__embed-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.35rem;
+}
+
+.course-study-pesquisa-mode__frame-wrap--embed {
+  flex: 1;
+  min-height: 12rem;
+  margin-top: 0.5rem;
+  border: 1px solid var(--app-border);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.course-study-pesquisa-mode__frame--embed {
+  min-height: 100%;
+  height: 100%;
 }

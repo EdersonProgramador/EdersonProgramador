@@ -800,7 +800,7 @@ export function CourseStudyPage() {
               fichamentoJson={fichamento?.lessons[fichamentoModeItem.slug]?.docJson}
               fichamentoHtml={fichamento?.lessons[fichamentoModeItem.slug]?.docHtml}
               onExitLessonView={() => goLesson(fichamentoModeItem.slug)}
-              onOpenPesquisaMode={() => goLesson(pesquisaAulaPath(fichamentoModeItem.slug))}
+              onOpenPesquisaFullscreen={() => goLesson(pesquisaAulaPath(fichamentoModeItem.slug))}
               onPrev={
                 fichamentoModeItem.prev
                   ? () => goLesson(fichamentoAulaPath(fichamentoModeItem.prev))

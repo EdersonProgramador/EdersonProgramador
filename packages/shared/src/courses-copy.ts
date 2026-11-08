@@ -167,6 +167,8 @@ export const COURSES_UI = {
     pesquisaTabScholar: "Acadêmico",
     pesquisaTabBooks: "Livros",
     pesquisaOpenExternal: "Abrir no Google",
+    pesquisaOpenFullscreen: "Pesquisa em tela cheia",
+    fichamentoConsumoTabsLabel: "Material da aula ou pesquisa",
     pesquisaIframeHint:
       "Resultados carregados do Google com base no título da aula. Se o quadro ficar em branco, o navegador bloqueou o iframe — use «Abrir no Google».",
     fichamentoModeExit: "Aula completa",
