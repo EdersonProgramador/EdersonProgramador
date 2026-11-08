@@ -38,6 +38,7 @@ import { FichamentoWorkspace } from "../components/fichamento/FichamentoWorkspac
 import { LessonFichamentoBlock } from "../components/fichamento/LessonFichamentoBlock";
 import { LessonConsumo } from "../components/fichamento/LessonConsumo";
 import { LessonFichamentoMode } from "../components/fichamento/LessonFichamentoMode";
+import { LessonPesquisaMode } from "../components/pesquisa/LessonPesquisaMode";
 import { CourseLibraryView } from "../components/library/CourseLibraryView";
 import "../styles/course-certificate.css";
 import "../styles/course-library.css";
@@ -117,6 +118,14 @@ function isFichamentoImmersiveSubPath(subPath: string): boolean {
   );
 }
 
+function isPesquisaAulaSubPath(subPath: string): boolean {
+  return /^pesquisa\/aula\/.+/.test(subPath);
+}
+
+function isStudyImmersiveSubPath(subPath: string): boolean {
+  return isFichamentoImmersiveSubPath(subPath) || isPesquisaAulaSubPath(subPath);
+}
+
 function readSidebarCollapsedPreference(): boolean {
   if (typeof window === "undefined") return false;
   try {
@@ -137,6 +146,11 @@ export function CourseStudyPage() {
     ? decodeURIComponent(fichamentoAulaMatch[1].replace(/\+/g, " "))
     : "";
   const isLessonFichamentoMode = Boolean(fichamentoLessonSlug);
+  const pesquisaAulaMatch = subPath.match(/^pesquisa\/aula\/(.+)$/);
+  const pesquisaLessonSlug = pesquisaAulaMatch
+    ? decodeURIComponent(pesquisaAulaMatch[1].replace(/\+/g, " "))
+    : "";
+  const isLessonPesquisaMode = Boolean(pesquisaLessonSlug);
   const isCertificateView = subPath === "certificado";
   const isBonusPath = subPath.startsWith("bonus/");
   const libraryBookMatch = subPath.match(/^biblioteca\/([^/]+)(?:\/p\/(\d+))?$/);
@@ -152,6 +166,7 @@ export function CourseStudyPage() {
     !moduleFichamentoMatch &&
     !isCourseFichamento &&
     !fichamentoAulaMatch &&
+    !pesquisaAulaMatch &&
     !isBonusPath &&
     !isLibraryList &&
     !libraryBookMatch
@@ -190,11 +205,11 @@ export function CourseStudyPage() {
     }
   }, [sidebarDesktopCollapsed]);
 
-  const isFichamentoImmersiveRoute = isFichamentoImmersiveSubPath(subPath);
-  const studyImmersive = studyFocusMode || isFichamentoImmersiveRoute;
+  const isStudyImmersiveRoute = isStudyImmersiveSubPath(subPath);
+  const studyImmersive = studyFocusMode || isStudyImmersiveRoute;
 
   useEffect(() => {
-    if (isFichamentoImmersiveSubPath(subPath)) {
+    if (isStudyImmersiveSubPath(subPath)) {
       setSidebarOpen(false);
       setSidebarDesktopCollapsed(true);
     } else {
@@ -260,7 +275,8 @@ export function CourseStudyPage() {
   const bySlug = useMemo(() => new Map(items.map((i) => [i.slug, i])), [items]);
   const activeItem = lessonSlug ? bySlug.get(lessonSlug) : undefined;
   const fichamentoModeItem = fichamentoLessonSlug ? bySlug.get(fichamentoLessonSlug) : undefined;
-  const noteLessonSlug = activeItem?.slug ?? fichamentoModeItem?.slug;
+  const pesquisaModeItem = pesquisaLessonSlug ? bySlug.get(pesquisaLessonSlug) : undefined;
+  const noteLessonSlug = activeItem?.slug ?? fichamentoModeItem?.slug ?? pesquisaModeItem?.slug;
 
   useEffect(() => {
     if (!courseSlug || !noteLessonSlug || !payload) {
@@ -315,6 +331,7 @@ export function CourseStudyPage() {
   }, [isCertificateView, courseSlug, certificate]);
 
   const fichamentoAulaPath = useCallback((lessonSlug: string) => `fichamento/aula/${encodeURIComponent(lessonSlug)}`, []);
+  const pesquisaAulaPath = useCallback((lessonSlug: string) => `pesquisa/aula/${encodeURIComponent(lessonSlug)}`, []);
 
   const goLesson = useCallback(
     (slug: string) => {
@@ -384,17 +401,29 @@ export function CourseStudyPage() {
   }, [moduleRepetitions]);
 
   useEffect(() => {
-    const navItem = fichamentoModeItem ?? activeItem;
+    const navItem = fichamentoModeItem ?? pesquisaModeItem ?? activeItem;
     const onKey = (e: KeyboardEvent) => {
       if (!navItem || e.target instanceof HTMLInputElement) return;
-      const targetSlug = (slug: string) =>
-        isLessonFichamentoMode ? fichamentoAulaPath(slug) : slug;
+      const targetSlug = (slug: string) => {
+        if (isLessonFichamentoMode) return fichamentoAulaPath(slug);
+        if (isLessonPesquisaMode) return pesquisaAulaPath(slug);
+        return slug;
+      };
       if (e.key === "ArrowLeft" && navItem.prev) goLesson(targetSlug(navItem.prev));
       if (e.key === "ArrowRight" && navItem.next) goLesson(targetSlug(navItem.next));
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [activeItem, fichamentoModeItem, isLessonFichamentoMode, goLesson, fichamentoAulaPath]);
+  }, [
+    activeItem,
+    fichamentoModeItem,
+    pesquisaModeItem,
+    isLessonFichamentoMode,
+    isLessonPesquisaMode,
+    goLesson,
+    fichamentoAulaPath,
+    pesquisaAulaPath
+  ]);
 
   const filteredItems = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -587,7 +616,11 @@ export function CourseStudyPage() {
                           ? tanarBiblePageForLesson(item.slug, item.sectionTitle)
                           : null
                       }
-                      isActive={lessonSlug === item.slug || fichamentoLessonSlug === item.slug}
+                      isActive={
+                        lessonSlug === item.slug ||
+                        fichamentoLessonSlug === item.slug ||
+                        pesquisaLessonSlug === item.slug
+                      }
                       isDone={completed.has(item.slug)}
                       hasVideo={Boolean(videoFile(item.id))}
                       isYoutube={isYoutubeUrl(videoFile(item.id))}
@@ -601,7 +634,7 @@ export function CourseStudyPage() {
               <TocTree
                 items={items}
                 bonus={payload.bonusContent}
-                activeSlug={fichamentoLessonSlug || lessonSlug || subPath}
+                activeSlug={fichamentoLessonSlug || pesquisaLessonSlug || lessonSlug || subPath}
                 completed={completed}
                 showBiblePages={payload.course.slug === TANAR_COURSE.slug}
                 moduleRepsByNumber={moduleRepsByNumber}
@@ -719,6 +752,26 @@ export function CourseStudyPage() {
             ) : (
               <p className="course-text-muted text-sm">{COURSES_UI.study.certificateReadyBody}</p>
             )
+          ) : isLessonPesquisaMode && !pesquisaModeItem && courseSlug && payload ? (
+            <article className="panel p-6">
+              <p className="text-sm text-red-400">{COURSES_UI.study.pesquisaModeLessonNotFound}</p>
+              <p className="course-text-faint mt-2 font-mono text-xs">{pesquisaLessonSlug}</p>
+              <button type="button" className="btn-secondary mt-4" onClick={() => goLesson("")}>
+                {COURSES_UI.study.fichamentoBackLesson}
+              </button>
+            </article>
+          ) : isLessonPesquisaMode && pesquisaModeItem && courseSlug && payload ? (
+            <LessonPesquisaMode
+              item={pesquisaModeItem}
+              displayTitle={activeLessonNote?.displayTitle ?? pesquisaModeItem.title}
+              onExitLessonView={() => goLesson(pesquisaModeItem.slug)}
+              onPrev={
+                pesquisaModeItem.prev ? () => goLesson(pesquisaAulaPath(pesquisaModeItem.prev!)) : undefined
+              }
+              onNext={
+                pesquisaModeItem.next ? () => goLesson(pesquisaAulaPath(pesquisaModeItem.next!)) : undefined
+              }
+            />
           ) : isLessonFichamentoMode && !fichamentoModeItem && courseSlug && payload ? (
             <article className="panel p-6">
               <p className="text-sm text-red-400">{COURSES_UI.study.fichamentoModeLessonNotFound}</p>
@@ -807,11 +860,35 @@ export function CourseStudyPage() {
                   initialHtml={fichamento?.lessons[activeItem.slug]?.docHtml}
                 />
               }
+              onOpenPesquisaMode={() => goLesson(pesquisaAulaPath(activeItem.slug))}
               onOpenFichamentoMode={() => goLesson(fichamentoAulaPath(activeItem.slug))}
             />
           ) : null}
 
-          {fichamentoModeItem && isLessonFichamentoMode ? (
+          {pesquisaModeItem && isLessonPesquisaMode ? (
+            <nav className="mt-4 flex flex-col-reverse gap-3 border-t border-white/10 pt-4 sm:flex-row sm:flex-wrap sm:justify-between lg:hidden">
+              {pesquisaModeItem.prev ? (
+                <button
+                  type="button"
+                  className="btn-secondary inline-flex w-full min-h-11 items-center justify-center gap-1 sm:w-auto"
+                  onClick={() => goLesson(pesquisaAulaPath(pesquisaModeItem.prev!))}
+                >
+                  <ChevronLeft className="h-4 w-4" /> Anterior
+                </button>
+              ) : (
+                <span className="hidden sm:block" />
+              )}
+              {pesquisaModeItem.next ? (
+                <button
+                  type="button"
+                  className="btn-primary inline-flex w-full min-h-11 items-center justify-center gap-1 sm:w-auto"
+                  onClick={() => goLesson(pesquisaAulaPath(pesquisaModeItem.next!))}
+                >
+                  Próxima <ChevronRight className="h-4 w-4" />
+                </button>
+              ) : null}
+            </nav>
+          ) : fichamentoModeItem && isLessonFichamentoMode ? (
             <nav className="mt-4 flex flex-col-reverse gap-3 border-t border-white/10 pt-4 sm:flex-row sm:flex-wrap sm:justify-between lg:hidden">
               {fichamentoModeItem.prev ? (
                 <button
@@ -861,7 +938,7 @@ export function CourseStudyPage() {
         </main>
       </div>
 
-      {studyFocusMode && !isFichamentoImmersiveRoute ? (
+      {studyFocusMode && !isStudyImmersiveRoute ? (
         <button
           type="button"
           className="course-study__focus-exit btn-secondary"
@@ -1326,6 +1403,7 @@ function LessonPanel({
   done,
   onToggleDone,
   fichamentoSlot,
+  onOpenPesquisaMode,
   onOpenFichamentoMode
 }: {
   courseSlug: string;
@@ -1339,6 +1417,7 @@ function LessonPanel({
   done: boolean;
   onToggleDone: (done: boolean) => void;
   fichamentoSlot?: ReactNode;
+  onOpenPesquisaMode?: () => void;
   onOpenFichamentoMode?: () => void;
 }) {
   const title = note?.displayTitle ?? item.title;
@@ -1352,10 +1431,19 @@ function LessonPanel({
           <h2 className="mt-2 text-xl font-bold text-[var(--course-fg)]">{title}</h2>
           <p className="mt-1 font-mono text-sm text-brand-primary">{item.id}</p>
         </div>
-        {onOpenFichamentoMode ? (
-          <button type="button" className="btn-primary shrink-0 text-sm" onClick={onOpenFichamentoMode}>
-            {COURSES_UI.study.fichamentoModeOpen}
-          </button>
+        {onOpenPesquisaMode || onOpenFichamentoMode ? (
+          <div className="course-study__lesson-head-actions shrink-0">
+            {onOpenPesquisaMode ? (
+              <button type="button" className="btn-secondary text-sm" onClick={onOpenPesquisaMode}>
+                {COURSES_UI.study.pesquisaModeOpen}
+              </button>
+            ) : null}
+            {onOpenFichamentoMode ? (
+              <button type="button" className="btn-primary text-sm" onClick={onOpenFichamentoMode}>
+                {COURSES_UI.study.fichamentoModeOpen}
+              </button>
+            ) : null}
+          </div>
         ) : null}
       </div>
 
