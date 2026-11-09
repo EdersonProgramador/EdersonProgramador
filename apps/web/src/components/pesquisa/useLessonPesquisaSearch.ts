@@ -1,6 +1,6 @@
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  buildLessonGoogleSearchUrl,
+  buildLessonPesquisaIframeUrl,
   defaultLessonSearchQuery,
   type LessonPesquisaTab
 } from "../../lib/lesson-google-pesquisa";
@@ -45,7 +45,10 @@ export function useLessonPesquisaSearch(lessonSlug: string, displayTitle: string
     saveLessonPesquisaSession(lessonSlug, { draftQuery, activeQuery, tab, iframeGeneration });
   }, [lessonSlug, draftQuery, activeQuery, tab, iframeGeneration]);
 
-  const iframeSrc = useMemo(() => buildLessonGoogleSearchUrl(activeQuery, tab), [activeQuery, tab]);
+  const iframeSrc = useMemo(
+    () => buildLessonPesquisaIframeUrl(activeQuery, tab, { displayTitle, breadcrumb }),
+    [activeQuery, tab, displayTitle, breadcrumb]
+  );
   const iframeKey = `${tab}-${iframeGeneration}-${activeQuery}`;
 
   const submitSearch = useCallback(
