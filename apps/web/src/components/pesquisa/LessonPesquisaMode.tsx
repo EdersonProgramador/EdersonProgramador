@@ -1,8 +1,8 @@
 import { COURSES_UI } from "@ederson-agencia/shared";
-import { ChevronLeft, ChevronRight, ExternalLink, LayoutPanelLeft, Search, X } from "lucide-react";
-import { useMemo } from "react";
-import { buildLessonGoogleSearchUrl, defaultLessonSearchQuery } from "../../lib/lesson-google-pesquisa";
+import { ChevronLeft, ChevronRight, ExternalLink, LayoutPanelLeft, X } from "lucide-react";
 import { LessonPesquisaPanel } from "./LessonPesquisaPanel";
+import { LessonPesquisaSearchForm } from "./LessonPesquisaSearchForm";
+import { useLessonPesquisaSearch } from "./useLessonPesquisaSearch";
 
 type LessonPesquisaItem = {
   slug: string;
@@ -30,13 +30,10 @@ export function LessonPesquisaMode({
   onPrev,
   onNext
 }: Props) {
+  const search = useLessonPesquisaSearch(item.slug, displayTitle, item.breadcrumb);
+
   const breadcrumbTrail =
     item.breadcrumb.length > 2 ? item.breadcrumb.slice(-2).join(" › ") : item.breadcrumb.join(" › ");
-
-  const iframeSrc = useMemo(
-    () => buildLessonGoogleSearchUrl(defaultLessonSearchQuery(displayTitle, item.breadcrumb), "all"),
-    [displayTitle, item.breadcrumb]
-  );
 
   return (
     <article className="course-study-pesquisa-mode panel">
@@ -51,10 +48,13 @@ export function LessonPesquisaMode({
           <h2 className="course-study-pesquisa-mode__title mt-1 text-lg font-bold text-[var(--course-fg)] sm:text-xl">
             {displayTitle}
           </h2>
-          <p className="course-study-pesquisa-mode__mode-label mt-1 flex items-center gap-1.5 text-xs font-medium text-brand-primary">
-            <Search className="h-4 w-4 shrink-0" aria-hidden />
-            <span>{COURSES_UI.study.pesquisaModeTitle}</span>
-          </p>
+          <form className="course-study-pesquisa-mode__head-search mt-2 max-w-3xl" onSubmit={search.onFormSubmit}>
+            <LessonPesquisaSearchForm
+              search={search}
+              inputId="lesson-pesquisa-query-full"
+              variant="header"
+            />
+          </form>
         </div>
         <div className="course-study-pesquisa-mode__head-actions">
           {item.prev && onPrev ? (
@@ -71,7 +71,7 @@ export function LessonPesquisaMode({
           ) : null}
           <a
             className="btn-secondary min-h-9 text-xs"
-            href={iframeSrc}
+            href={search.iframeSrc}
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -103,6 +103,8 @@ export function LessonPesquisaMode({
         breadcrumb={item.breadcrumb}
         variant="full"
         searchInputId="lesson-pesquisa-query-full"
+        search={search}
+        searchFormPlacement="none"
       />
     </article>
   );

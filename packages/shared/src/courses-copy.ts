@@ -78,6 +78,7 @@ export const COURSES_UI = {
   },
   study: {
     loading: "Carregando trilha…",
+    loadRetry: "Tentar novamente",
     sidebarEyebrow: "Trilha de estudos",
     sidebarSubtitle: "Módulos e aulas na ordem recomendada",
     sidebarCollapse: "Recolher trilha",

@@ -227,7 +227,7 @@ export function CourseStudyPage() {
     return () => window.removeEventListener("keydown", onKey);
   }, [studyImmersive, studyFocusMode]);
 
-  const loadCoursePayload = useCallback(async (bustCache = false) => {
+  const loadCoursePayload = useCallback(async (bustCache = false, retriedNetwork = false) => {
     if (!courseSlug) return;
     try {
       const suffix = bustCache ? `?v=${Date.now()}` : "";
@@ -242,6 +242,11 @@ export function CourseStudyPage() {
     } catch (err) {
       if (err instanceof ApiError && err.status === 501) {
         setError("content-not-configured");
+        return;
+      }
+      if (err instanceof ApiError && err.status === 0 && !retriedNetwork) {
+        await new Promise((resolve) => window.setTimeout(resolve, 2800));
+        await loadCoursePayload(true, true);
         return;
       }
       setError(err instanceof Error ? err.message : "Erro ao carregar curso.");
@@ -446,11 +451,24 @@ export function CourseStudyPage() {
 
   if (error) {
     const notConfigured = error === "content-not-configured";
+    const isNetwork = error.startsWith("Sem conexão com a API");
     return (
       <div className="mx-auto max-w-lg px-4 py-16 text-center">
         <p className="text-red-300">
           {notConfigured ? COURSES_UI.catalog.contentNotReady : error}
         </p>
+        {isNetwork ? (
+          <button
+            type="button"
+            className="btn-primary mt-4 inline-flex min-h-11 items-center"
+            onClick={() => {
+              setError(null);
+              void loadCoursePayload(true);
+            }}
+          >
+            {COURSES_UI.study.loadRetry}
+          </button>
+        ) : null}
         {notConfigured && courseSlug !== FL_COURSE.slug ? (
           <Link to={`${ACADEMY_APP_BASE}/cursos/${FL_COURSE.slug}`} className="btn-primary mt-4 inline-flex min-h-11 items-center">
             {COURSES_UI.catalog.openFlTrail}

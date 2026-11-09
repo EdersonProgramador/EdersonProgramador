@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight, LayoutPanelLeft, Maximize2, Minimize2, Searc
 import { useState } from "react";
 import type { TelegramConfig } from "../../courses/telegram";
 import { consumePesquisaHandoffToFichamento } from "../../lib/lesson-pesquisa-session";
-import { LessonPesquisaPanel } from "../pesquisa/LessonPesquisaPanel";
+import { LessonPesquisaPanelWithState } from "../pesquisa/LessonPesquisaPanel";
 import { LessonConsumo, lessonHasConsumableMaterial, type LessonConsumoItem } from "./LessonConsumo";
 import { LessonFichamentoBlock } from "./LessonFichamentoBlock";
 
@@ -104,15 +104,17 @@ export function LessonFichamentoMode({
               <ChevronRight className="ml-0.5 inline h-4 w-4" />
             </button>
           ) : null}
-          <button
-            type="button"
-            className={`btn-secondary min-h-9 text-xs${consumoView === "pesquisa" ? " ring-2 ring-brand-primary/40" : ""}`}
-            aria-pressed={consumoView === "pesquisa"}
-            onClick={() => setConsumoView((view) => (view === "pesquisa" ? "material" : "pesquisa"))}
-          >
-            <Search className="mr-1 inline h-4 w-4" aria-hidden />
-            {COURSES_UI.study.pesquisaModeOpen}
-          </button>
+          {consumoView === "pesquisa" ? (
+            <button type="button" className="btn-secondary min-h-9 text-xs" onClick={() => setConsumoView("material")}>
+              <LayoutPanelLeft className="mr-1 inline h-4 w-4" aria-hidden />
+              {COURSES_UI.study.fichamentoModeConsumoLabel}
+            </button>
+          ) : (
+            <button type="button" className="btn-secondary min-h-9 text-xs" onClick={() => setConsumoView("pesquisa")}>
+              <Search className="mr-1 inline h-4 w-4" aria-hidden />
+              {COURSES_UI.study.pesquisaModeOpen}
+            </button>
+          )}
           <button type="button" className="btn-primary min-h-9 text-xs" onClick={onExitLessonView}>
             <X className="mr-1 inline h-4 w-4" />
             {COURSES_UI.study.fichamentoModeExit}
@@ -121,34 +123,13 @@ export function LessonFichamentoMode({
       </header>
 
       <div className="course-study-fichamento-mode__grid has-consumo">
-        <div className="course-study-fichamento-mode__consumo">
-          <div
-            className="course-study-fichamento-mode__consumo-tabs"
-            role="tablist"
-            aria-label={COURSES_UI.study.fichamentoConsumoTabsLabel}
-          >
-            <button
-              type="button"
-              role="tab"
-              aria-selected={consumoView === "material"}
-              className={`course-study-fichamento-mode__consumo-tab${consumoView === "material" ? " is-active" : ""}`}
-              onClick={() => setConsumoView("material")}
-            >
-              {COURSES_UI.study.fichamentoModeConsumoLabel}
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={consumoView === "pesquisa"}
-              className={`course-study-fichamento-mode__consumo-tab${consumoView === "pesquisa" ? " is-active" : ""}`}
-              onClick={() => setConsumoView("pesquisa")}
-            >
-              <Search className="mr-1 inline h-3.5 w-3.5" aria-hidden />
-              {COURSES_UI.study.pesquisaModeOpen}
-            </button>
-          </div>
+        <div
+          className={`course-study-fichamento-mode__consumo${consumoView === "pesquisa" ? " course-study-fichamento-mode__consumo--pesquisa" : ""}`}
+        >
           {consumoView === "material" ? (
             hasConsumo ? (
+              <>
+              <p className="course-study-fichamento-mode__consumo-label">{COURSES_UI.study.fichamentoModeConsumoLabel}</p>
               <LessonConsumo
                 courseSlug={courseSlug}
                 item={item}
@@ -164,19 +145,21 @@ export function LessonFichamentoMode({
                 videoNativeClassName="course-study-fichamento-mode__video-native"
                 proseClassName="course-lesson-prose course-study-fichamento-mode__prose text-sm"
               />
+              </>
             ) : (
               <p className="course-text-muted course-study-fichamento-mode__consumo-empty text-sm leading-relaxed">
                 {COURSES_UI.study.fichamentoModeNoMedia}
               </p>
             )
           ) : (
-            <LessonPesquisaPanel
+            <LessonPesquisaPanelWithState
               key={item.slug}
               lessonSlug={item.slug}
               displayTitle={displayTitle}
               breadcrumb={item.breadcrumb}
               variant="embed"
               searchInputId={`fichamento-pesquisa-${item.slug}`}
+              searchFormPlacement="none"
               onOpenFullscreen={onOpenPesquisaFullscreen}
             />
           )}

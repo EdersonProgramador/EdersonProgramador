@@ -113,18 +113,32 @@ client.interceptors.request.use((config) => {
   return config;
 });
 
+function isAxiosNetworkFailure(error: unknown): boolean {
+  if (!axios.isAxiosError(error)) return false;
+  if (error.response) return false;
+  const code = error.code ?? "";
+  const msg = error.message ?? "";
+  return code === "ERR_NETWORK" || code === "ECONNABORTED" || msg === "Network Error";
+}
+
+function networkFailureMessage(): string {
+  return "Sem conexão com a API. Verifique a internet ou aguarde o servidor acordar (Render gratuito pode levar ~30s) e tente de novo.";
+}
+
 client.interceptors.response.use(
   (response) => response,
   (error) => {
-    const status = error.response?.status ?? 500;
+    const networkFailure = isAxiosNetworkFailure(error);
+    const status = error.response?.status ?? (networkFailure ? 0 : 500);
     const data = error.response?.data;
-    const message =
-      (typeof data === "object" && data !== null && "message" in data && typeof data.message === "string"
-        ? data.message
-        : null) ??
-      (typeof data === "string" ? data : null) ??
-      error.message ??
-      "Erro de comunicação com a API.";
+    const message = networkFailure
+      ? networkFailureMessage()
+      : ((typeof data === "object" && data !== null && "message" in data && typeof data.message === "string"
+          ? data.message
+          : null) ??
+        (typeof data === "string" ? data : null) ??
+        error.message ??
+        "Erro de comunicação com a API.");
     const path = String(error.config?.url ?? "");
     const isAuthAttempt = path.includes("/auth/login") || path.includes("/auth/register");
     if (status === 401 && !isAuthAttempt && typeof window !== "undefined") {
