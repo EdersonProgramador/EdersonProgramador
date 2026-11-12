@@ -8,11 +8,15 @@ const funnel = LAUNCH_FUNNEL_COPY;
 
 const ANCHOR_PRICE: Record<string, string> = {
   essential: "R$ 7.900",
-  professional: "R$ 15.900",
-  advanced: "R$ 29.900"
+  professional: "R$ 19.900",
+  advanced: "R$ 36.900"
 };
 
-const SLOTS = [8, 5, 3];
+const TIER_SLOT_KEY: Record<string, keyof typeof funnel.pricingFunnel.packageSlots> = {
+  essential: "essential",
+  professional: "professional",
+  advanced: "advanced"
+};
 
 export function OfferPackages() {
   const capture = useLeadCaptureOptional();
@@ -25,8 +29,8 @@ export function OfferPackages() {
   }
 
   return (
-    <div className="mt-10">
-      <p className="text-center text-sm font-bold uppercase tracking-wide text-orange-300">{funnel.pricingFunnel.promoBadge}</p>
+    <div className="offer-packages offer-packages--black-november mt-10">
+      <p className="offer-packages__promo text-center text-sm font-black uppercase tracking-wide">{funnel.pricingFunnel.promoBadge}</p>
       <p className="mt-2 text-center text-xs text-white/45">{funnel.pricingFunnel.installmentNote}</p>
 
       <div className="mt-12 grid gap-6 lg:grid-cols-3">
@@ -40,8 +44,13 @@ export function OfferPackages() {
                 recommended ? "border-emerald-500/50 ring-1 ring-emerald-500/30" : ""
               }`}
             >
-              <span className="funnel-lote-badge">{funnel.scarcity.label}</span>
-              <p className="funnel-slots mt-3">{SLOTS[index] ?? 5} vagas neste lote</p>
+              <span className="funnel-lote-badge funnel-lote-badge--black-november">{funnel.scarcity.label}</span>
+              <p className="funnel-slots funnel-slots--led mt-3">
+                <span className="funnel-slots__text">
+                  {funnel.pricingFunnel.packageSlots[TIER_SLOT_KEY[tier.id] ?? "essential"]} vagas disponíveis em{" "}
+                  {funnel.scarcity.slotsDeadline}
+                </span>
+              </p>
               <h3 className="mt-4 font-display text-xl font-black uppercase text-white">{tier.name}</h3>
               <p className="mt-1 text-sm font-medium text-white/55">{tier.tagline}</p>
               <p className="funnel-price-strike mt-5">Consultoria avulsa a partir de {anchor}</p>

@@ -12,11 +12,11 @@ export const JOURNEY_PHASES: ReadonlyArray<{
   shortLabel: string;
   daysPlanned: number;
 }> = [
-  { key: "IDEA", label: "Da ideia ao projeto", shortLabel: "Diagnóstico", daysPlanned: 7 },
-  { key: "PLAN", label: "Do projeto ao planejamento", shortLabel: "Especificação", daysPlanned: 10 },
-  { key: "BUILD", label: "Do planejamento ao desenvolvimento", shortLabel: "Implementação", daysPlanned: 14 },
-  { key: "QA", label: "Do desenvolvimento aos testes", shortLabel: "Qualidade", daysPlanned: 7 },
-  { key: "LAUNCH", label: "Dos testes ao lançamento", shortLabel: "Implantação", daysPlanned: 5 }
+  { key: "IDEA", label: "Ideia", shortLabel: "Diagnóstico", daysPlanned: 7 },
+  { key: "PLAN", label: "Plano de negócio", shortLabel: "Escopo", daysPlanned: 10 },
+  { key: "BUILD", label: "MVP", shortLabel: "Build", daysPlanned: 14 },
+  { key: "QA", label: "Lançamento", shortLabel: "Go-live", daysPlanned: 7 },
+  { key: "LAUNCH", label: "Validação", shortLabel: "Resultado", daysPlanned: 5 }
 ];
 
 const TIER_DELIVERABLES: Record<PackageTierId, Record<JourneyPhaseKey, readonly string[]>> = {
@@ -66,21 +66,21 @@ export const PACKAGE_TIER_CONFIG: Record<
   { name: string; tagline: string; totalValueCents: number; entryPercent: number }
 > = {
   essential: {
-    name: "Essencial",
+    name: "START",
     tagline: "Para validar uma ideia",
-    totalValueCents: 590_000,
+    totalValueCents: 470_000,
     entryPercent: 40
   },
   professional: {
-    name: "Profissional",
+    name: "BUSINESS",
     tagline: "Para construir um produto mais completo",
-    totalValueCents: 1_290_000,
+    totalValueCents: 1_570_000,
     entryPercent: 40
   },
   advanced: {
-    name: "Avançado",
+    name: "ENTERPRISE",
     tagline: "Para projetos de maior complexidade",
-    totalValueCents: 2_490_000,
+    totalValueCents: 3_070_000,
     entryPercent: 40
   },
   partnership: {
@@ -99,6 +99,16 @@ export function parsePackageTier(value: unknown): PackageTierId | null {
 
 export function packageTierLabel(tier: PackageTierId): string {
   return PACKAGE_TIER_CONFIG[tier].name;
+}
+
+/** Tiers exibidos na landing e em leads (sem parceria). */
+export const PACKAGE_TIER_SALES_IDS = ["essential", "professional", "advanced"] as const;
+
+export function packageTierSelectOptions(): Array<{ value: PackageTierId; label: string }> {
+  return PACKAGE_TIER_SALES_IDS.map((id) => ({
+    value: id,
+    label: packageTierLabel(id)
+  }));
 }
 
 export function entryValueCentsForTier(tier: PackageTierId): number {

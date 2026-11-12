@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import {
   AGENCY_APP_BASE,
   packageTierLabel,
+  packageTierSelectOptions,
   parsePackageTier,
   type PackageTierId
 } from "@ederson-agencia/shared";
@@ -148,9 +149,11 @@ export function ConvertLeadModal({ lead, onClose, onConverted }: ConvertLeadModa
               }}
               disabled={busy}
             >
-              <option value="essential">Essencial</option>
-              <option value="professional">Profissional</option>
-              <option value="advanced">Avançado</option>
+              {packageTierSelectOptions().map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
             </select>
           </label>
         </form>

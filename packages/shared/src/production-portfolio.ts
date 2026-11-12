@@ -6,6 +6,8 @@ export type PortfolioProductionItem = {
   tags: string[];
   /** Logo servida pelo front (ex.: /portfolio/atlly.ico) */
   logoUrl?: string;
+  /** Fallback remoto se o asset local não carregar (deploy / cache). */
+  logoUrlFallback?: string;
   /** Logo horizontal — ocupa mais largura no card de case */
   logoWide?: boolean;
 };
@@ -18,16 +20,6 @@ export type PortfolioGithubItem = {
   url: string;
   demoUrl?: string;
 };
-
-export const AGENCY_META = {
-  name: "Ederson Programador",
-  domain: "https://edersonprogramador.com.br",
-  tagline: "Soluções digitais que geram resultados",
-  github: "https://github.com/EdersonProgramador",
-  /** PDF oficial — servido em /public */
-  resumePath: "/curriculo-ederson-almeida.pdf",
-  resumeLabel: "Currículo (PDF)"
-} as const;
 
 /** Sites e produtos já publicados */
 export const PORTFOLIO_PRODUCTION: PortfolioProductionItem[] = [
@@ -57,6 +49,8 @@ export const PORTFOLIO_PRODUCTION: PortfolioProductionItem[] = [
     url: "https://paz-church-ananindeua.vercel.app",
     tags: ["Site em produção", "Institucional", "Vercel"],
     logoUrl: "/portfolio/paz-church-ananindeua.png",
+    logoUrlFallback:
+      "https://paz-church-ananindeua.vercel.app/logo-pazchurchananindeua-9dc3104f-74c5-44ba-af12-06a3856a8947.png",
     logoWide: true
   }
 ];

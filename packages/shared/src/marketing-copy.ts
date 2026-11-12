@@ -21,10 +21,10 @@ export const MARKETING_COPY = {
       promise:
         "Transformar sua ideia em um aplicativo funcional, com percurso técnico claro do planejamento à implantação.",
       includes:
-        "Pacote Essencial, Profissional ou Avançado — cada um com diagnóstico, escopo, desenvolvimento, testes e implantação conforme contrato.",
+        "Pacotes START, BUSINESS ou ENTERPRISE — cada um com diagnóstico, escopo, desenvolvimento, testes e implantação conforme contrato.",
       bonuses: "Benefícios complementares por pacote (validação, lançamento, evolução e transferência técnica).",
       investment:
-        "Referências iniciais: R$ 5.900 (Essencial), R$ 12.900 (Profissional) e a partir de R$ 24.900 (Avançado), sujeitas à avaliação de escopo.",
+        "Black November: R$ 4.700 (START), R$ 15.700 (BUSINESS) e R$ 30.700 (ENTERPRISE), sujeitos à avaliação de escopo.",
       guarantee:
         "Garantia de conformidade técnica: 30 dias após entrega e aceite para correção de defeitos previstos no contrato, respeitada a legislação aplicável."
     }
@@ -77,7 +77,7 @@ export const MARKETING_COPY = {
 
   stats: [
     { value: "5", label: "Etapas", emphasis: "Da ideia ao lançamento", href: "#processo" },
-    { value: "3", label: "Pacotes", emphasis: "Essencial · Profissional · Avançado", href: "#pacotes" },
+    { value: "3", label: "Pacotes", emphasis: "START · BUSINESS · ENTERPRISE", href: "#pacotes" },
     { value: "2+", label: "Em produção", emphasis: "Cases publicados", href: "#producao" },
     { value: "30d", label: "Conformidade", emphasis: "Garantia contratual", href: "#garantia" }
   ],
@@ -154,7 +154,7 @@ export const MARKETING_COPY = {
     label: "Base comum",
     title: "O que todos os pacotes observam",
     subtitle:
-      "Conteúdo específico de cada tier está descrito nos cartões Essencial, Profissional e Avançado. Itens não listados no contrato não fazem parte do escopo.",
+      "Conteúdo específico de cada tier está descrito nos cartões START, BUSINESS e ENTERPRISE. Itens não listados no contrato não fazem parte do escopo.",
     note:
       "Publicação em lojas, infraestrutura dedicada, integrações com custo de terceiros e manutenção contínua são tratados expressamente na proposta e no contrato.",
     items: [
@@ -172,11 +172,11 @@ export const MARKETING_COPY = {
     items: [
       {
         title: "Validação e evolução",
-        text: "Checklist de validação da ideia e mapa de evolução do produto (Essencial e superiores, conforme escopo)."
+        text: "Checklist de validação da ideia e mapa de evolução do produto (START e superiores, conforme escopo)."
       },
       {
         title: "Lançamento",
-        text: "Checklist de preparação, testes e etapas para disponibilização (Profissional e superiores, conforme escopo)."
+        text: "Checklist de preparação, testes e etapas para disponibilização (BUSINESS e superiores, conforme escopo)."
       },
       {
         title: "Transferência técnica",
@@ -187,12 +187,12 @@ export const MARKETING_COPY = {
 
   packages: {
     label: "Pacotes",
-    title: "Essencial, Profissional e Avançado",
+    title: "START, BUSINESS e ENTERPRISE",
     subtitle:
       "Preços iniciais sugeridos por projeto, sujeitos à avaliação de escopo. Escolha o pacote mais adequado ao momento do seu negócio.",
     comparison: {
       title: "Comparativo dos pacotes",
-      columns: ["Essencial", "Profissional", "Avançado"] as const,
+      columns: ["START", "BUSINESS", "ENTERPRISE"] as const,
       rows: [
         {
           feature: "Diagnóstico e planejamento",
@@ -232,21 +232,21 @@ export const MARKETING_COPY = {
         },
         {
           feature: "Investimento inicial",
-          essential: "R$ 5.900",
-          professional: "R$ 12.900",
-          advanced: "R$ 24.900+"
+          essential: "R$ 4.700",
+          professional: "R$ 15.700",
+          advanced: "R$ 30.700"
         }
       ]
     },
     tiers: [
       {
         id: "essential",
-        name: "Essencial",
+        name: "START",
         badge: "Entrada",
         tagline: "Para validar uma ideia",
         audience:
           "Indicado para empreendedores que precisam transformar uma ideia em um MVP — produto mínimo viável — para testar a solução com usuários reais.",
-        price: "R$ 5.900",
+        price: "R$ 4.700",
         priceNote: "Preço inicial sugerido por projeto, sujeito à avaliação de escopo.",
         deliverables: [
           "Diagnóstico inicial do projeto",
@@ -263,13 +263,13 @@ export const MARKETING_COPY = {
       },
       {
         id: "professional",
-        name: "Profissional",
+        name: "BUSINESS",
         badge: "Recomendado",
         recommended: true,
         tagline: "Para construir um produto mais completo",
         audience:
           "Indicado para empresas e empreendedores que necessitam de aplicativo ou sistema com fluxos mais completos e funcionalidades integradas.",
-        price: "R$ 12.900",
+        price: "R$ 15.700",
         priceNote: "Preço inicial sugerido por projeto, sujeito à avaliação de escopo.",
         deliverables: [
           "Diagnóstico e levantamento de requisitos",
@@ -288,12 +288,12 @@ export const MARKETING_COPY = {
       },
       {
         id: "advanced",
-        name: "Avançado",
+        name: "ENTERPRISE",
         badge: "Personalizado",
         tagline: "Para projetos de maior complexidade",
         audience:
           "Indicado para empresas que necessitam de solução personalizada, com múltiplos módulos, regras de negócio específicas ou integrações mais complexas.",
-        price: "A partir de R$ 24.900",
+        price: "R$ 30.700",
         priceNote: "Investimento definido após análise técnica.",
         deliverables: [
           "Descoberta e análise aprofundada do negócio",
@@ -318,9 +318,9 @@ export const MARKETING_COPY = {
     subtitle:
       "Os valores não garantem que qualquer aplicativo possa ser entregue por esses preços. São referências para projetos de escopo controlado.",
     rows: [
-      { offer: "Pacote Essencial", range: "R$ 5.900" },
-      { offer: "Pacote Profissional", range: "R$ 12.900" },
-      { offer: "Pacote Avançado", range: "A partir de R$ 24.900" },
+      { offer: "Pacote START", range: "R$ 4.700" },
+      { offer: "Pacote BUSINESS", range: "R$ 15.700" },
+      { offer: "Pacote ENTERPRISE", range: "R$ 30.700" },
       { offer: "Manutenção e evolução contínua", range: "Proposta mensal" }
     ],
     disclaimer:
@@ -414,7 +414,7 @@ export const MARKETING_COPY = {
   faq: [
     {
       q: "O que é o App do Zero ao Lançamento?",
-      a: "Serviço de desenvolvimento sob medida da Ederson Programador: três pacotes (Essencial, Profissional e Avançado) que cobrem diagnóstico, desenvolvimento, testes e implantação conforme contrato."
+      a: "Serviço de desenvolvimento sob medida da Ederson Programador: três pacotes (START, BUSINESS e ENTERPRISE) que cobrem diagnóstico, desenvolvimento, testes e implantação conforme contrato."
     },
     {
       q: "Preciso saber programar?",
@@ -422,7 +422,7 @@ export const MARKETING_COPY = {
     },
     {
       q: "Qual a diferença entre os pacotes?",
-      a: "Essencial entrega MVP para validação (referência R$ 5.900). Profissional cobre produto mais completo com integrações previstas (R$ 12.900). Avançado trata complexidade e personalização (a partir de R$ 24.900)."
+      a: "START entrega MVP para validação (R$ 4.700). BUSINESS cobre produto mais completo com integrações previstas (R$ 15.700). ENTERPRISE trata complexidade e personalização (R$ 30.700)."
     },
     {
       q: "Publicação na App Store ou Play Store está incluída?",

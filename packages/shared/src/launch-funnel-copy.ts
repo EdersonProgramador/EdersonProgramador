@@ -121,9 +121,9 @@ export const LAUNCH_FUNNEL_COPY = {
         "Follow-up enviado!"
       ],
       valueTemplates: [
-        "Pacote Essencial",
-        "Pacote Profissional",
-        "Pacote Avançado",
+        "Pacote START",
+        "Pacote BUSINESS",
+        "Pacote ENTERPRISE",
         "MVP · escopo fechado",
         "Proposta · {name}",
         "Reunião agendada · {name}"
@@ -133,10 +133,10 @@ export const LAUNCH_FUNNEL_COPY = {
       titles: ["Contrato assinado!", "Entrada confirmada!", "Vaga reservada!", "Marco 1 liberado!"],
       valueTemplates: [
         "Entrada confirmada",
-        "Pacote Profissional",
+        "Pacote BUSINESS",
         "Kick-off agendado",
         "{name} · contrato ativo",
-        "Essencial · assinado"
+        "START · assinado"
       ]
     }
   },
@@ -153,7 +153,7 @@ export const LAUNCH_FUNNEL_COPY = {
       { src: "/funnel/avatars/client-02.jpg", alt: "Empreendedor após implantação do app" },
       { src: "/funnel/avatars/client-03.jpg", alt: "Cliente feliz com suporte e entrega" },
       { src: "/funnel/avatars/client-04.jpg", alt: "Gestor validando o sistema em produção" },
-      { src: "/funnel/avatars/client-05.jpg", alt: "Cliente recomendando o pacote Profissional" },
+      { src: "/funnel/avatars/client-05.jpg", alt: "Cliente recomendando o pacote BUSINESS" },
       { src: "/funnel/avatars/client-06.jpg", alt: "Fundador após lançamento do MVP" },
       { src: "/funnel/avatars/client-07.jpg", alt: "Cliente satisfeita com prazo e escopo" },
       { src: "/funnel/avatars/client-08.jpg", alt: "Parceiro com projeto publicado" }
@@ -253,9 +253,10 @@ export const LAUNCH_FUNNEL_COPY = {
   ],
 
   scarcity: {
-    label: "Lote 1 · Encerrando",
+    label: "Black November · Lote 1",
     title: "Vagas limitadas pra novos projetos neste mês",
     slotsLeft: 12,
+    slotsDeadline: "21 de novembro",
     body:
       "Pra manter qualidade, fechamos um número fixo de contratos por lote. Cadastrou, entrou na fila de diagnóstico e na sequência automática.",
     cta: "QUERO COMEÇAR HOJE",
@@ -263,9 +264,14 @@ export const LAUNCH_FUNNEL_COPY = {
   },
 
   pricingFunnel: {
-    promoBadge: "Aniversário do método · condição por tempo limitado",
+    promoBadge: "Black November · condição por tempo limitado",
     installmentNote: "Pagamento por marcos — entrada + entregas (ex.: 40% / 30% / 30%)",
-    secure: "🔒 Dados LGPD · Proposta formal · Sem compromisso na primeira conversa"
+    secure: "🔒 Dados LGPD · Proposta formal · Sem compromisso na primeira conversa",
+    packageSlots: {
+      essential: 9,
+      professional: 6,
+      advanced: 3
+    } as const
   },
 
   captureModal: {

@@ -187,6 +187,8 @@ export {
 export {
   PACKAGE_TIER_CONFIG,
   PACKAGE_TIER_IDS,
+  PACKAGE_TIER_SALES_IDS,
+  packageTierSelectOptions,
   JOURNEY_PHASES,
   JOURNEY_PHASE_KEYS,
   PHASE_STATUS_LABELS,
@@ -481,14 +483,9 @@ export {
 } from "./launch-operation-phases.js";
 export { LEGAL_NOTICES } from "./legal-notices.js";
 
-export {
-  AGENCY_META,
-  PORTFOLIO_GITHUB,
-  PORTFOLIO_PRODUCTION,
-  PORTFOLIO_REPOS,
-  type PortfolioGithubItem,
-  type PortfolioProductionItem
-} from "./portfolio.js";
+export { AGENCY_META } from "./agency-meta.js";
+export { PORTFOLIO_GITHUB, PORTFOLIO_PRODUCTION, PORTFOLIO_REPOS } from "./production-portfolio.js";
+export type { PortfolioGithubItem, PortfolioProductionItem } from "./production-portfolio.js";
 
 export function formatBRL(cents: number): string {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(cents / 100);

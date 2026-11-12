@@ -540,9 +540,9 @@ function LandingPageContent() {
                   aria-label="Pacote de interesse"
                 >
                   <option value="">Pacote de interesse (opcional)</option>
-                  <option value="essential">Essencial — validar ideia (ref. R$ 5.900)</option>
-                  <option value="professional">Profissional — produto completo (ref. R$ 12.900)</option>
-                  <option value="advanced">Avançado — maior complexidade (a partir de R$ 24.900)</option>
+                  <option value="essential">START — validar ideia (ref. R$ 4.700)</option>
+                  <option value="professional">BUSINESS — produto completo (ref. R$ 15.700)</option>
+                  <option value="advanced">ENTERPRISE — maior complexidade (ref. R$ 30.700)</option>
                 </select>
                 <input className="input" name="name" placeholder="Nome" required autoComplete="name" />
                 <input className="input" type="email" name="email" placeholder="E-mail" required autoComplete="email" />

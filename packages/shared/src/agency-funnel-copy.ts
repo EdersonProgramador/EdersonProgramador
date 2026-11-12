@@ -94,7 +94,7 @@ export const AGENCY_FUNNEL_COPY = {
     applyInstitutional: "Preencher com dados institucionais",
     applyInstitutionalForce: "Restaurar tudo da landing",
     applyInstitutionalHint:
-      "Importa live, pacotes (Essencial/Profissional/Avançado), contrato e checkout a partir de MARKETING_COPY / página principal."
+      "Importa live, pacotes (START/BUSINESS/ENTERPRISE), contrato e checkout a partir de MARKETING_COPY / página principal."
   }
 } as const;
 

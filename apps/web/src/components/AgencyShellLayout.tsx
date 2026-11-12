@@ -1,10 +1,10 @@
+import { useEffect } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { AGENCY_PROFILE_PATH, loginPathForContext } from "@ederson-agencia/shared";
 import { LogOut } from "lucide-react";
 import { AgencyNav } from "./portal/AgencyNav";
 import { ProfileAvatarNavLink } from "./profile/ProfileAvatarCircle";
 import { BrandLogo } from "./brand/BrandLogo";
-import { ThemeToggle } from "./theme/ThemeToggle";
 import { useAgencySession, useAuthStore } from "../stores/authStore";
 
 export function AgencyShellLayout({ title }: { title: string }) {
@@ -15,8 +15,16 @@ export function AgencyShellLayout({ title }: { title: string }) {
   const user = session?.user;
   const agencyLogin = loginPathForContext("agency");
 
+  useEffect(() => {
+    document.body.classList.add("agency-funnel-active");
+    document.documentElement.setAttribute("data-theme", "night");
+    return () => {
+      document.body.classList.remove("agency-funnel-active");
+    };
+  }, []);
+
   return (
-    <div className="surface-light min-h-screen bg-[var(--app-bg-solid)] text-[var(--app-text)]">
+    <div className="agency-shell agency-shell--funnel landing-shell landing-shell--commercial landing-shell--funnel-aggressive min-h-screen relative text-[var(--app-text)]">
       <header className="app-shell-header sticky top-0 z-50 border-b border-[var(--app-border)]">
         <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:py-4">
           <div className="min-w-0">
@@ -26,7 +34,6 @@ export function AgencyShellLayout({ title }: { title: string }) {
             </p>
           </div>
           <div className="flex min-w-0 shrink-0 items-center justify-end gap-2 sm:gap-3">
-            <ThemeToggle compact />
             {user ? (
               <>
                 <AgencyNav user={user} />

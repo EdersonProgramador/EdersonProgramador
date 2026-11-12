@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { AGENCY_APP_BASE, parsePackageTier, type PackageTierId } from "@ederson-agencia/shared";
+import {
+  AGENCY_APP_BASE,
+  packageTierSelectOptions,
+  parsePackageTier,
+  type PackageTierId
+} from "@ederson-agencia/shared";
 import { ApiError, apiGet, apiPost } from "../../api";
 import { AgencyAdminModal } from "./AgencyAdminModal";
 
@@ -205,9 +210,11 @@ export function CreateProjectModal({ open, onClose, onCreated }: CreateProjectMo
               }}
               disabled={busy}
             >
-              <option value="essential">Essencial</option>
-              <option value="professional">Profissional</option>
-              <option value="advanced">Avançado</option>
+              {packageTierSelectOptions().map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
             </select>
           </label>
         </form>

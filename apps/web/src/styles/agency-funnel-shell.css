@@ -1,0 +1,55 @@
+/* Painel da agência — alinhado ao funil comercial (landing) */
+
+body.agency-funnel-active {
+  background: #050505;
+  background-image: none;
+}
+
+.agency-shell.agency-shell--funnel .app-shell-header {
+  background: rgb(6 6 6 / 0.92);
+  border-bottom-color: var(--funnel-border, rgb(255 255 255 / 0.08));
+  backdrop-filter: blur(10px);
+}
+
+.agency-shell.agency-shell--funnel .app-shell-header p {
+  color: rgb(148 163 184 / 0.95);
+}
+
+.agency-shell.agency-shell--funnel .agency-admin-sidebar__panel {
+  background: #0c0c0f;
+  border-color: rgb(255 255 255 / 0.08);
+  box-shadow: none;
+}
+
+.agency-shell.agency-shell--funnel .agency-admin-sidebar__pillar-block {
+  border-top-color: rgb(255 255 255 / 0.08);
+}
+
+.agency-shell.agency-shell--funnel .input,
+.agency-shell.agency-shell--funnel select.input,
+.agency-shell.agency-shell--funnel textarea.input {
+  background: #0a0a0c;
+  border-color: rgb(255 255 255 / 0.1);
+  color: #f8fafc;
+}
+
+.agency-shell.agency-shell--funnel .btn-primary {
+  background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
+  border-color: rgb(34 197 94 / 0.45);
+  color: #052e16;
+}
+
+.agency-shell.agency-shell--funnel .btn-primary:hover {
+  filter: brightness(1.06);
+}
+
+.agency-shell.agency-shell--funnel .btn-secondary {
+  background: rgb(255 255 255 / 0.04);
+  border-color: rgb(255 255 255 / 0.1);
+  color: #e2e8f0;
+}
+
+.agency-shell.agency-shell--funnel .btn-secondary:hover {
+  background: rgb(255 255 255 / 0.07);
+  border-color: rgb(52 211 153 / 0.35);
+}

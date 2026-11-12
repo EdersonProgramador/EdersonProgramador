@@ -118,7 +118,7 @@ export const CADASTRO_COPY = {
 
   stats: [
     { value: "5", label: "Etapas", detail: "Ideia → lançamento" },
-    { value: "3+", label: "Pacotes", detail: "Essencial a Avançado" },
+    { value: "3+", label: "Pacotes", detail: "START a ENTERPRISE" },
     { value: "90 min", label: "Live", detail: "Aula gratuita" }
   ] as const,
 

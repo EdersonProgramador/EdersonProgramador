@@ -4,6 +4,7 @@ import {
   AGENCY_APP_BASE,
   formatBRL,
   packageTierLabel,
+  packageTierSelectOptions,
   parsePackageTier,
   projectProgressPercent,
   type PackageTierId
@@ -495,9 +496,11 @@ export function AdminLeadsPage() {
                   }}
                 >
                   <option value="">Definir pacote…</option>
-                  <option value="essential">Essencial</option>
-                  <option value="professional">Profissional</option>
-                  <option value="advanced">Avançado</option>
+                  {packageTierSelectOptions().map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
                 </select>
                 <label className="flex cursor-pointer items-center gap-2 text-xs">
                   <input
