@@ -149,6 +149,7 @@ export type ContractPhaseKey = (typeof CONTRACT_DEFAULTS.phases)[number]["key"];
 export { BRAND_IDENTITY } from "./brand.js";
 export { CONTRACT_COPY } from "./contract-copy.js";
 export { MARKETING_COPY } from "./marketing-copy.js";
+export { LAUNCH_FUNNEL_COPY } from "./launch-funnel-copy.js";
 export { SEED_LAUNCH_COPY, SEED_LAUNCH_PATH } from "./seed-launch-copy.js";
 export { CADASTRO_COPY, CADASTRO_PATH, CADASTRO_PUBLIC_URL } from "./cadastro-copy.js";
 export {

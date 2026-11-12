@@ -32,12 +32,12 @@ export const MARKETING_COPY = {
 
   aida: {
     attention: {
-      eyebrow: "App do Zero ao Lançamento",
-      title: "Desenvolvimento sob medida, da ideia à implantação.",
+      eyebrow: "Lançamentos digitais · produtos físicos · apps",
+      title: "Do modelo de negócio ao lançamento — com software sob medida.",
       subtitle:
-        "Aplicativos e sistemas para empreendedores e empresas — com escopo definido, pacotes claros e acompanhamento técnico em todas as fases.",
-      ctaPrimary: "Solicitar proposta",
-      ctaSecondary: "Ver como funciona"
+        "Junte validação de oferta, captura de leads e desenvolvimento estruturado: da ideia e do Canvas de negócio ao MVP publicado, com pacotes claros e contrato formal.",
+      ctaPrimary: "Garantir vaga e proposta",
+      ctaSecondary: "Ver jornada até o lançamento"
     },
     interest: {
       label: "Para quem é",
@@ -94,9 +94,9 @@ export const MARKETING_COPY = {
 
   process: {
     label: "Como funciona",
-    title: "Cinco etapas até o lançamento do seu aplicativo",
+    title: "Cinco etapas: da ideia à validação",
     subtitle:
-      "Do diagnóstico à implantação, com entregas combinadas e critérios de aceite formalizados no contrato.",
+      "Ideia, plano de negócio, MVP, lançamento e validação — entregas por marco e critérios de aceite no contrato.",
     body:
       "Cada fase avança após alinhamento: requisitos de negócio viram especificação, arquitetura e software testado no escopo acordado.",
     punchline:
@@ -104,43 +104,48 @@ export const MARKETING_COPY = {
     steps: [
       {
         phase: "01",
-        title: "Da ideia ao projeto",
+        title: "Ideia",
         days: "Diagnóstico",
-        text: "Compreensão do problema, do público-alvo e da proposta de valor do aplicativo.",
+        text: "Compreensão do problema, do público-alvo e da proposta de valor — base para decidir o próximo passo.",
         deliverables: ["Diagnóstico do projeto", "Mapa do problema e personas", "Proposta de valor do produto"],
-        mood: "trust" as const
+        mood: "trust" as const,
+        tier: "iniciante" as const
       },
       {
         phase: "02",
-        title: "Do projeto ao planejamento",
-        days: "Especificação",
-        text: "Definição de funcionalidades, requisitos, escopo, prioridades e arquitetura técnica.",
+        title: "Plano de negócio",
+        days: "Escopo",
+        text: "Definição de funcionalidades, prioridades, escopo fechado e arquitetura antes de desenvolver.",
         deliverables: ["Documento de escopo e prioridades", "Planejamento técnico", "Interfaces das telas principais"],
-        mood: "desire" as const
+        mood: "desire" as const,
+        tier: "estrategia" as const
       },
       {
         phase: "03",
-        title: "Do planejamento ao desenvolvimento",
-        days: "Implementação",
-        text: "Construção da solução, implementação das funcionalidades e validação da experiência de uso.",
+        title: "MVP",
+        days: "Build",
+        text: "Construção do núcleo do produto, integrações previstas e validação da experiência no ambiente de homologação.",
         deliverables: ["Desenvolvimento conforme escopo", "Integrações previstas", "Ambiente de homologação"],
-        mood: "logic" as const
+        mood: "logic" as const,
+        tier: "construcao" as const
       },
       {
         phase: "04",
-        title: "Do desenvolvimento aos testes",
-        days: "Qualidade",
-        text: "Verificação de fluxos, correção de falhas e validação dos requisitos acordados.",
-        deliverables: ["Testes funcionais no escopo", "Correções de conformidade", "Registro de aceite por marco"],
-        mood: "vault" as const
+        title: "Lançamento",
+        days: "Go-live",
+        text: "Testes, correções, implantação em produção e, quando contratado, publicação nas plataformas definidas.",
+        deliverables: ["Testes funcionais no escopo", "Implantação acordada", "Documentação de uso"],
+        mood: "vault" as const,
+        tier: "impulso" as const
       },
       {
         phase: "05",
-        title: "Dos testes ao lançamento",
-        days: "Implantação",
-        text: "Preparação do ambiente de produção e, quando contratado, publicação nas plataformas definidas.",
-        deliverables: ["Implantação acordada", "Documentação de uso", "Entrega técnica e transferência"],
-        mood: "launch" as const
+        title: "Validação",
+        days: "Resultado",
+        text: "Produto no ar, aceite formal e primeiros sinais de validação com usuários reais — pronto para evoluir.",
+        deliverables: ["Registro de aceite por marco", "Entrega técnica e transferência", "Checklist pós-lançamento"],
+        mood: "launch" as const,
+        tier: "maestria" as const
       }
     ]
   },

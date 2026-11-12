@@ -3,6 +3,8 @@
 @import "./styles/theme-surfaces.css";
 @import "./styles/theme-tailwind-bridge.css";
 @import "./styles/landing-day.css";
+@import "./styles/landing-commerce.css";
+@import "./styles/landing-funnel-aggressive.css";
 
 @tailwind base;
 @tailwind components;

@@ -1,6 +1,6 @@
 import type { PortfolioProductionItem } from "@ederson-agencia/shared";
 import { Globe } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type ProductionProjectLogoProps = {
   site: PortfolioProductionItem;
@@ -10,9 +10,15 @@ type ProductionProjectLogoProps = {
 export function ProductionProjectLogo({ site, className = "" }: ProductionProjectLogoProps) {
   const [failed, setFailed] = useState(false);
   const src = site.logoUrl?.trim();
+  const wide = site.logoWide === true;
 
-  const shell =
-    "flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-white p-1.5 shadow-sm";
+  useEffect(() => {
+    setFailed(false);
+  }, [src]);
+
+  const shell = wide
+    ? "flex h-12 w-[7.25rem] shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-white px-2 py-1.5 shadow-sm"
+    : "flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-white p-1.5 shadow-sm";
 
   if (!src || failed) {
     return (
@@ -25,11 +31,12 @@ export function ProductionProjectLogo({ site, className = "" }: ProductionProjec
   return (
     <div className={`${shell} ${className}`}>
       <img
+        key={src}
         src={src}
         alt={`Logo ${site.name}`}
-        width={48}
+        width={wide ? 116 : 48}
         height={48}
-        className="h-full w-full object-contain"
+        className="h-full w-full object-contain object-left"
         loading="lazy"
         decoding="async"
         onError={() => setFailed(true)}

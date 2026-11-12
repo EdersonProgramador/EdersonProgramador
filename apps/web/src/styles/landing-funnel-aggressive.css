@@ -1,0 +1,662 @@
+/* Funil agressivo — LP estilo comunidade / low ticket (referência visual) */
+
+.landing-shell--funnel-aggressive .site-nav__bar--funnel .site-nav__links {
+  mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+}
+
+.landing-shell--funnel-aggressive .site-nav__bar--funnel .site-nav__logo-slot {
+  max-width: min(12rem, 28vw);
+}
+
+@media (min-width: 1536px) {
+  .landing-shell--funnel-aggressive .site-nav__bar--funnel .site-nav__logo-slot {
+    max-width: var(--logo-slot-w, 16.5rem);
+  }
+}
+
+.landing-shell--funnel-aggressive {
+  --funnel-accent: #22c55e;
+  --funnel-accent-hot: #f97316;
+  --funnel-bg: #050505;
+  --funnel-card: #0c0c0f;
+  --funnel-border: rgb(255 255 255 / 0.08);
+  background: var(--funnel-bg) !important;
+  color: #fafafa;
+}
+
+.landing-shell--funnel-aggressive .cinema-grid {
+  display: none;
+}
+
+.landing-shell--funnel-aggressive .section-ambient .landing-section-grid {
+  display: none !important;
+}
+
+.landing-shell--funnel-aggressive .section-ambient > div[class*="blur-3xl"] {
+  display: none !important;
+}
+
+.landing-shell--funnel-aggressive .funnel-section {
+  background: #060606;
+  position: relative;
+  isolation: isolate;
+}
+
+.landing-shell--funnel-aggressive .funnel-section .pro-headline,
+.landing-shell--funnel-aggressive .funnel-section h2,
+.landing-shell--funnel-aggressive .funnel-section h3 {
+  color: #f8fafc;
+}
+
+.landing-shell--funnel-aggressive .funnel-section p,
+.landing-shell--funnel-aggressive .funnel-section li {
+  color: rgb(203 213 225 / 0.92);
+}
+
+.landing-shell--funnel-aggressive .funnel-section .section-label {
+  color: rgb(52 211 153 / 0.95);
+}
+
+.landing-shell--funnel-aggressive .panel,
+.landing-shell--funnel-aggressive .panel-glow {
+  background: #0c0c0f;
+  border-color: rgb(255 255 255 / 0.08);
+  box-shadow: none;
+}
+
+.landing-shell--funnel-aggressive .mood-glow-orb {
+  display: none !important;
+}
+
+.landing-shell--funnel-aggressive .funnel-hero .hero-stat,
+.landing-shell--funnel-aggressive .funnel-hero .glass-metric {
+  background: #0c0c0f !important;
+  border: 1px solid rgb(255 255 255 / 0.08);
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.landing-shell--funnel-aggressive .funnel-hero .hero-stat::before {
+  display: none;
+}
+
+.landing-shell--funnel-aggressive .funnel-hero .hero-stat__label,
+.landing-shell--funnel-aggressive .funnel-hero .hero-stat__emphasis {
+  color: rgb(148 163 184 / 0.95);
+}
+
+.landing-shell--funnel-aggressive.landing-shell--premium #topo .hero-title-gradient {
+  @apply bg-gradient-to-br from-white via-green-100 to-emerald-400/90 bg-clip-text text-transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Marquee ✦ */
+.funnel-marquee {
+  @apply overflow-hidden border-y py-3;
+  border-color: var(--funnel-border);
+  background: #000;
+}
+
+.funnel-marquee__track {
+  display: flex;
+  width: max-content;
+  gap: 0.75rem;
+  animation: funnel-marquee 28s linear infinite;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.55);
+}
+
+.funnel-marquee__sym {
+  color: var(--funnel-accent);
+}
+
+@keyframes funnel-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Hero VSL */
+.funnel-hero {
+  @apply relative overflow-hidden pb-12 pt-[calc(var(--hero-nav-offset,6rem)+1rem)];
+  background: radial-gradient(ellipse 80% 60% at 50% -20%, rgb(34 197 94 / 0.15), transparent 55%),
+    linear-gradient(180deg, #0a0a0a 0%, #050505 100%);
+}
+
+.funnel-hero__headline {
+  @apply font-display text-xl font-extrabold uppercase leading-tight tracking-tight text-white sm:text-2xl md:text-3xl lg:text-[2.1rem];
+  text-wrap: balance;
+}
+
+.funnel-hero__sub {
+  @apply mt-4 max-w-2xl text-sm leading-relaxed text-white/65 sm:text-base;
+}
+
+.funnel-vsl {
+  @apply relative mt-8 overflow-hidden rounded-2xl border-2;
+  border-color: color-mix(in srgb, var(--funnel-accent) 50%, transparent);
+  box-shadow: 0 0 60px rgb(34 197 94 / 0.12);
+  aspect-ratio: 16 / 9;
+  background: #111;
+}
+
+.funnel-vsl__overlay {
+  @apply absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-black/55 p-6 text-center backdrop-blur-[2px];
+}
+
+.funnel-vsl__play {
+  @apply inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-bold uppercase tracking-wide text-black;
+  background: linear-gradient(135deg, #4ade80, #22c55e);
+  box-shadow: 0 0 40px rgb(34 197 94 / 0.45);
+}
+
+.funnel-vsl__play:hover {
+  filter: brightness(1.08);
+}
+
+.funnel-vsl iframe {
+  @apply h-full w-full border-0;
+}
+
+/* Notificações de venda */
+.funnel-toast-stack {
+  @apply pointer-events-none fixed bottom-20 right-3 z-40 flex max-w-[17rem] flex-col gap-2 sm:right-6;
+}
+
+.funnel-toast {
+  @apply animate-fade-up rounded-xl border px-4 py-3 text-left text-xs shadow-lg;
+  border-color: var(--funnel-border);
+  background: #0c0c0f;
+  box-shadow: 0 8px 28px rgb(0 0 0 / 0.55);
+}
+
+.funnel-toast--sale {
+  border-color: rgb(34 197 94 / 0.4);
+}
+
+.funnel-toast--pix {
+  border-color: rgb(56 189 248 / 0.35);
+}
+
+.funnel-toast__title {
+  @apply font-bold text-white;
+}
+
+.funnel-toast__value {
+  @apply mt-0.5 text-emerald-400;
+}
+
+.funnel-toast__time {
+  @apply mt-1 text-[10px] text-white/45;
+}
+
+/* Pipeline — crescente psicológica: clareza → estratégia → construção → ação → maestria (6em7) */
+.funnel-pipeline-card {
+  background:
+    linear-gradient(
+      118deg,
+      rgb(56 189 248 / 0.06) 0%,
+      rgb(99 102 241 / 0.05) 28%,
+      rgb(167 139 250 / 0.05) 52%,
+      rgb(249 115 22 / 0.06) 78%,
+      rgb(34 197 94 / 0.08) 100%
+    ),
+    #0a0a0a !important;
+}
+
+.funnel-pipeline {
+  @apply relative flex flex-wrap items-center justify-center gap-y-3;
+}
+
+.funnel-pipeline__unit {
+  @apply flex items-center justify-center;
+}
+
+.funnel-pipeline__step {
+  @apply relative flex flex-col items-center justify-center gap-1 overflow-hidden rounded-xl border px-3 py-2.5 text-center text-[11px] font-bold uppercase tracking-wide sm:gap-1.5 sm:px-4 sm:py-3 sm:text-xs;
+  --step-accent: #94a3b8;
+  --step-text: rgb(255 255 255 / 0.45);
+  --step-border: rgb(255 255 255 / 0.1);
+  --step-bg: var(--funnel-card);
+  --step-glow: rgb(148 163 184 / 0.2);
+  --step-led: rgb(148 163 184 / 0.5);
+  border-color: var(--step-border);
+  background: var(--step-bg);
+  color: var(--step-text);
+  min-width: 4.5rem;
+  transition:
+    border-color 0.35s ease,
+    color 0.35s ease,
+    box-shadow 0.35s ease,
+    background 0.35s ease;
+}
+
+/* Iniciante — azul céu (clareza, curiosidade) */
+.funnel-pipeline__step--iniciante {
+  --step-accent: #38bdf8;
+  --step-glow: rgb(56 189 248 / 0.45);
+  --step-led: rgb(125 211 252 / 0.65);
+}
+
+/* Estratégia — índigo (planejamento, confiança) */
+.funnel-pipeline__step--estrategia {
+  --step-accent: #818cf8;
+  --step-glow: rgb(129 140 248 / 0.45);
+  --step-led: rgb(165 180 252 / 0.65);
+}
+
+/* Construção — violeta (foco, transformação) */
+.funnel-pipeline__step--construcao {
+  --step-accent: #a78bfa;
+  --step-glow: rgb(167 139 250 / 0.45);
+  --step-led: rgb(196 181 253 / 0.65);
+}
+
+/* Impulso — laranja (ação, lançamento) */
+.funnel-pipeline__step--impulso {
+  --step-accent: #fb923c;
+  --step-glow: rgb(251 146 60 / 0.5);
+  --step-led: rgb(253 186 116 / 0.7);
+}
+
+/* Maestria — verde + ouro (validação, prosperidade / 6em7) */
+.funnel-pipeline__step--maestria {
+  --step-accent: #4ade80;
+  --step-glow: rgb(74 222 128 / 0.55);
+  --step-led: rgb(250 204 21 / 0.75);
+}
+
+@media (min-width: 640px) {
+  .funnel-pipeline__step {
+    min-width: 5.25rem;
+    font-size: 0.75rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .funnel-pipeline__step {
+    min-width: 5.75rem;
+  }
+}
+
+.funnel-pipeline__step-icon {
+  @apply relative z-[1] flex items-center justify-center;
+  color: var(--step-accent);
+  opacity: 0.5;
+  transition:
+    opacity 0.35s ease,
+    transform 0.35s ease,
+    filter 0.35s ease;
+}
+
+.funnel-pipeline__step--done .funnel-pipeline__step-icon,
+.funnel-pipeline__step--active .funnel-pipeline__step-icon,
+.funnel-pipeline__step--victory .funnel-pipeline__step-icon {
+  opacity: 1;
+}
+
+.funnel-pipeline__step--active .funnel-pipeline__step-icon {
+  transform: translateY(-1px);
+  filter: drop-shadow(0 0 10px var(--step-glow));
+}
+
+.funnel-pipeline__step-label {
+  @apply relative z-[1] leading-tight;
+}
+
+.funnel-pipeline__step--pending {
+  --step-text: rgb(255 255 255 / 0.38);
+  --step-border: rgb(255 255 255 / 0.08);
+  opacity: 0.85;
+}
+
+.funnel-pipeline__step--done {
+  --step-text: var(--step-accent);
+  border-color: color-mix(in srgb, var(--step-accent) 55%, transparent);
+  background: color-mix(in srgb, var(--step-accent) 11%, #0c0c0f);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--step-accent) 22%, transparent);
+}
+
+.funnel-pipeline__step--active {
+  --step-text: #f8fafc;
+  border-color: var(--step-accent);
+  background: color-mix(in srgb, var(--step-accent) 18%, #0c0c0f);
+  box-shadow:
+    0 0 28px var(--step-glow),
+    inset 0 0 14px color-mix(in srgb, var(--step-accent) 25%, transparent);
+}
+
+.funnel-pipeline__step-led {
+  @apply pointer-events-none absolute inset-0 opacity-0;
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    transparent 38%,
+    var(--step-led) 50%,
+    transparent 62%,
+    transparent 100%
+  );
+  transform: translateX(-120%);
+}
+
+.funnel-pipeline__step--active .funnel-pipeline__step-led {
+  opacity: 1;
+  animation: funnel-pipeline-led-sweep 0.95s ease-in-out infinite;
+}
+
+.funnel-pipeline__connector {
+  @apply relative mx-1 hidden h-0.5 w-4 overflow-hidden rounded-full sm:mx-1.5 sm:inline-block sm:w-6 md:w-8;
+  background: rgb(255 255 255 / 0.1);
+}
+
+.funnel-pipeline__connector-beam {
+  @apply absolute inset-0;
+  background: linear-gradient(90deg, transparent, var(--link-mid, #22c55e), transparent);
+  transform: translateX(-100%);
+  opacity: 0;
+}
+
+.funnel-pipeline__connector--link-0.funnel-pipeline__connector--lit .funnel-pipeline__connector-beam {
+  --link-mid: #60a5fa;
+  background: linear-gradient(90deg, #38bdf8, #818cf8);
+}
+
+.funnel-pipeline__connector--link-1.funnel-pipeline__connector--lit .funnel-pipeline__connector-beam {
+  background: linear-gradient(90deg, #818cf8, #a78bfa);
+}
+
+.funnel-pipeline__connector--link-2.funnel-pipeline__connector--lit .funnel-pipeline__connector-beam {
+  background: linear-gradient(90deg, #a78bfa, #fb923c);
+}
+
+.funnel-pipeline__connector--link-3.funnel-pipeline__connector--lit .funnel-pipeline__connector-beam {
+  background: linear-gradient(90deg, #fb923c, #4ade80, #facc15);
+}
+
+.funnel-pipeline__connector--lit .funnel-pipeline__connector-beam {
+  opacity: 1;
+  animation: funnel-pipeline-connector-fill 0.5s ease forwards;
+}
+
+.funnel-pipeline__step-check {
+  @apply absolute -right-1 -top-1 z-[2] flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-black;
+  background: linear-gradient(135deg, #facc15, #22c55e);
+  color: #0a0a0a;
+  box-shadow: 0 0 16px rgb(250 204 21 / 0.65);
+  animation: funnel-pipeline-check-pop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.funnel-pipeline--victory {
+  animation: funnel-pipeline-victory-glow 1.8s ease-in-out infinite;
+}
+
+.funnel-pipeline__step--victory.funnel-pipeline__step--maestria {
+  --step-text: #fef9c3;
+  border-color: #facc15;
+  background: linear-gradient(145deg, rgb(34 197 94 / 0.28), rgb(250 204 21 / 0.16));
+  box-shadow:
+    0 0 40px rgb(74 222 128 / 0.55),
+    0 0 56px rgb(250 204 21 / 0.32);
+  animation: funnel-pipeline-step-victory 0.85s ease-in-out infinite alternate;
+}
+
+.funnel-pipeline__victory-banner {
+  @apply relative mt-6 overflow-hidden rounded-xl border px-4 py-4 text-center;
+  border-color: rgb(250 204 21 / 0.4);
+  background: linear-gradient(
+    95deg,
+    rgb(56 189 248 / 0.08),
+    rgb(129 140 248 / 0.1) 35%,
+    rgb(251 146 60 / 0.1) 65%,
+    rgb(34 197 94 / 0.16) 100%
+  );
+  animation: funnel-pipeline-banner-in 0.5s ease-out;
+}
+
+.funnel-pipeline__victory-sparkles {
+  @apply pointer-events-none absolute inset-0;
+  background-image:
+    radial-gradient(circle at 18% 40%, rgb(250 204 21 / 0.45) 0 2px, transparent 3px),
+    radial-gradient(circle at 72% 28%, rgb(74 222 128 / 0.55) 0 2px, transparent 3px),
+    radial-gradient(circle at 44% 78%, rgb(56 189 248 / 0.4) 0 2px, transparent 3px),
+    radial-gradient(circle at 88% 62%, rgb(250 204 21 / 0.35) 0 1.5px, transparent 2.5px);
+  animation: funnel-pipeline-sparkle 1.2s linear infinite;
+}
+
+.funnel-pipeline__victory-title {
+  @apply relative z-[1] font-display text-base font-black uppercase tracking-wide sm:text-lg;
+  background: linear-gradient(90deg, #86efac, #fde047, #fbbf24);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: none;
+  filter: drop-shadow(0 0 18px rgb(74 222 128 / 0.35));
+}
+
+.funnel-pipeline__victory-sub {
+  @apply relative z-[1] mt-2 text-xs text-white/65 sm:text-sm;
+}
+
+@keyframes funnel-pipeline-led-sweep {
+  from {
+    transform: translateX(-120%);
+  }
+  to {
+    transform: translateX(120%);
+  }
+}
+
+@keyframes funnel-pipeline-connector-fill {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes funnel-pipeline-check-pop {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes funnel-pipeline-step-victory {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.03);
+  }
+}
+
+@keyframes funnel-pipeline-victory-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 0 rgb(34 197 94 / 0));
+  }
+  50% {
+    filter: drop-shadow(0 0 18px rgb(34 197 94 / 0.35));
+  }
+}
+
+@keyframes funnel-pipeline-banner-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes funnel-pipeline-sparkle {
+  0%,
+  100% {
+    opacity: 0.65;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .funnel-pipeline__step--active .funnel-pipeline__step-led,
+  .funnel-pipeline__connector--lit .funnel-pipeline__connector-beam,
+  .funnel-pipeline--victory,
+  .funnel-pipeline__step--victory,
+  .funnel-pipeline__victory-sparkles {
+    animation: none !important;
+  }
+}
+
+/* Comunidade */
+.funnel-community-kicker {
+  @apply text-center font-mono text-xs uppercase tracking-[0.55em] text-white/45;
+}
+
+.funnel-member-pill {
+  @apply inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold;
+  border-color: var(--funnel-accent);
+  color: var(--funnel-accent);
+}
+
+/* Avatar strip */
+.funnel-avatar-strip {
+  @apply flex gap-3 overflow-x-auto py-4 [scrollbar-width:none];
+}
+
+.funnel-avatar-strip--center {
+  @apply flex-wrap justify-center overflow-x-visible py-2 sm:gap-4;
+  max-width: 36rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (min-width: 640px) {
+  .funnel-avatar-strip--center {
+    max-width: none;
+  }
+}
+
+.funnel-avatar {
+  @apply flex h-14 w-14 shrink-0 items-center justify-center rounded-full border-2 text-[10px] font-bold uppercase;
+  border-color: rgb(255 255 255 / 0.15);
+  background: linear-gradient(145deg, #1a1a1f, #0d0d10);
+  color: rgb(255 255 255 / 0.7);
+}
+
+.funnel-avatar--case {
+  border-color: color-mix(in srgb, var(--funnel-accent) 35%, transparent);
+  color: var(--funnel-accent);
+}
+
+.funnel-avatar--photo {
+  @apply overflow-hidden border-emerald-500/35 p-0;
+  background: #111;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.4);
+}
+
+.funnel-avatar--photo img {
+  @apply h-full w-full object-cover;
+}
+
+.funnel-avatar-marquee__track {
+  display: flex;
+  width: max-content;
+  gap: 0.75rem;
+  animation: funnel-avatar-scroll 36s linear infinite;
+  padding: 0.25rem 0;
+}
+
+@keyframes funnel-avatar-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.funnel-case-card {
+  @apply rounded-2xl border;
+  border-color: var(--funnel-border);
+  background: var(--funnel-card);
+}
+
+.funnel-social-proof {
+  padding-bottom: calc(3.5rem + env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 640px) {
+  .funnel-toast-stack {
+    bottom: 5.5rem;
+  }
+}
+
+/* Benefícios */
+.funnel-benefit-card {
+  @apply rounded-2xl border p-5;
+  border-color: var(--funnel-border);
+  background: var(--funnel-card);
+}
+
+.funnel-benefit-card h3 {
+  @apply mt-3 font-display text-base font-bold text-white;
+}
+
+/* Pricing agressivo */
+.funnel-lote-badge {
+  @apply inline-block rounded-md px-2 py-1 text-[10px] font-black uppercase tracking-wider;
+  background: var(--funnel-accent-hot);
+  color: #000;
+}
+
+.funnel-price-strike {
+  @apply text-sm text-white/45 line-through;
+}
+
+.funnel-price-now {
+  @apply font-display text-4xl font-black text-emerald-400;
+}
+
+.funnel-slots {
+  @apply text-xs font-bold uppercase tracking-wide text-orange-400;
+}
+
+/* Sticky CTA */
+.funnel-sticky-cta {
+  @apply fixed bottom-0 left-0 right-0 z-50 border-t p-3 backdrop-blur-md sm:hidden;
+  border-color: var(--funnel-border);
+  background: rgb(5 5 5 / 0.92);
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+
+/* Topics scroll */
+.funnel-topics {
+  @apply flex gap-2 overflow-x-auto py-6 [scrollbar-width:none];
+}
+
+.funnel-topic-chip {
+  @apply shrink-0 rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-wide;
+  border-color: var(--funnel-border);
+  background: #111;
+  color: rgb(255 255 255 / 0.65);
+}
+
+/* Spaced brand */
+.funnel-spaced-brand {
+  @apply font-display text-2xl font-black tracking-widest text-white sm:text-3xl;
+}

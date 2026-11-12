@@ -88,6 +88,15 @@ const envSchema = z
       (value) => (typeof value === "string" && value.trim() ? value.trim() : undefined),
       z.string().min(6).optional()
     ),
+    /** Webhook n8n — dispara ao criar lead (captura / landing / lançamento). */
+    N8N_LEAD_WEBHOOK_URL: z.preprocess(
+      (value) => (typeof value === "string" && value.trim() ? value.trim() : undefined),
+      z.string().url().optional()
+    ),
+    N8N_LEAD_WEBHOOK_SECRET: z.preprocess(
+      (value) => (typeof value === "string" && value.trim() ? value.trim() : undefined),
+      z.string().min(8).optional()
+    ),
     /** URL base da API Leadlovers para push de blueprint (opcional). */
     LEADLOVERS_API_URL: z.preprocess(
       (value) => (typeof value === "string" && value.trim() ? value.trim().replace(/\/$/, "") : undefined),

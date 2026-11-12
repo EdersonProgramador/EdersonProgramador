@@ -6,6 +6,8 @@ export type PortfolioProductionItem = {
   tags: string[];
   /** Logo servida pelo front (ex.: /portfolio/atlly.ico) */
   logoUrl?: string;
+  /** Logo horizontal — ocupa mais largura no card de case */
+  logoWide?: boolean;
 };
 
 export type PortfolioGithubItem = {
@@ -46,6 +48,16 @@ export const PORTFOLIO_PRODUCTION: PortfolioProductionItem[] = [
     url: "https://nacionaldivulga.com.br",
     tags: ["Site em produção", "Portal"],
     logoUrl: "/portfolio/nacionaldivulga.svg"
+  },
+  {
+    kind: "production",
+    name: "Paz Church Ananindeua",
+    description:
+      "Site institucional da igreja em Ananindeua — presença digital, conteúdo e navegação otimizada para mobile, publicado na Vercel.",
+    url: "https://paz-church-ananindeua.vercel.app",
+    tags: ["Site em produção", "Institucional", "Vercel"],
+    logoUrl: "/portfolio/paz-church-ananindeua.png",
+    logoWide: true
   }
 ];
 

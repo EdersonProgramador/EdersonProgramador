@@ -3,6 +3,7 @@ import { z } from "zod";
 import {
   AGENCY_META,
   CONTRACT_DEFAULTS,
+  LAUNCH_FUNNEL_COPY,
   PORTFOLIO_GITHUB,
   PORTFOLIO_PRODUCTION
 } from "@ederson-agencia/shared";
@@ -15,6 +16,7 @@ import { registerSeedLaunchClient } from "../agency/seed-launch-signup.js";
 import { prisma } from "../prisma.js";
 import { ensureAcademyTestUser } from "../seed-academy-test-user.js";
 import { env } from "../env.js";
+import { notifyN8nLeadWebhook } from "../integrations/n8n-lead-webhook.js";
 
 const ACADEMY_STORE_CUSTOMER_MARKER = "__academy_store__";
 
@@ -26,7 +28,18 @@ const leadSchema = z.object({
   message: z.string().min(10),
   budgetHint: z.string().optional(),
   packageTier: z.enum(["essential", "professional", "advanced"]).optional(),
-  source: z.enum(["landing", "seed_launch", "cadastro", "portal"]).optional()
+  source: z
+    .enum(["landing", "seed_launch", "cadastro", "portal", "lead_popup", "launch_lp"])
+    .optional()
+});
+
+const leadCaptureSchema = z.object({
+  name: z.string().min(2).max(120),
+  email: z.string().email(),
+  phone: z.string().min(8).max(40),
+  packageTier: z.enum(["essential", "professional", "advanced"]).optional(),
+  campaign: z.string().max(80).optional(),
+  consentLgpd: z.literal(true)
 });
 
 export async function registerPublicRoutes(app: FastifyInstance) {
@@ -295,6 +308,41 @@ export async function registerPublicRoutes(app: FastifyInstance) {
     })
   );
 
+  app.post("/public/leads/capture", async (request, reply) => {
+    const body = leadCaptureSchema.parse(request.body);
+    const message = `[Captura rápida — popup]\nInteresse em ${body.packageTier ?? "pacote a definir"}.\nLGPD: consentimento em ${new Date().toISOString()}${body.campaign ? `\nCampanha: ${body.campaign}` : ""}`;
+    const lead = await prisma.lead.create({
+      data: {
+        name: body.name.trim(),
+        email: body.email.trim().toLowerCase(),
+        phone: body.phone.trim(),
+        message,
+        packageTier: body.packageTier,
+        source: "lead_popup"
+      }
+    });
+
+    void notifyN8nLeadWebhook(
+      {
+        id: lead.id,
+        name: lead.name,
+        email: lead.email,
+        phone: lead.phone,
+        source: lead.source,
+        packageTier: lead.packageTier,
+        message: lead.message,
+        createdAt: lead.createdAt,
+        campaign: body.campaign
+      },
+      request.log
+    );
+
+    return reply.code(201).send({
+      id: lead.id,
+      message: LAUNCH_FUNNEL_COPY.captureModal.success
+    });
+  });
+
   app.post("/public/leads", async (request, reply) => {
     const body = leadSchema.parse(request.body);
     const lead = await prisma.lead.create({
@@ -309,6 +357,20 @@ export async function registerPublicRoutes(app: FastifyInstance) {
         source: body.source ?? "landing"
       }
     });
+
+    void notifyN8nLeadWebhook(
+      {
+        id: lead.id,
+        name: lead.name,
+        email: lead.email,
+        phone: lead.phone,
+        source: lead.source,
+        packageTier: lead.packageTier,
+        message: lead.message,
+        createdAt: lead.createdAt
+      },
+      request.log
+    );
 
     return reply.code(201).send({
       id: lead.id,

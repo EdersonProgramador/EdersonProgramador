@@ -1,0 +1,291 @@
+/* Landing comercial — camada UI (hierarquia, cards, faixas, modal)
+   Alinhada a boas práticas: tipografia clara, um accent, ritmo 4/8px, contraste AA. */
+
+.landing-shell--commercial {
+  --ui-radius: 1rem;
+  --ui-radius-lg: 1.25rem;
+  --ui-border: color-mix(in srgb, var(--app-border, rgb(148 163 184 / 0.35)) 100%, transparent);
+  --ui-surface: var(--app-panel, rgb(15 23 42 / 0.92));
+  --ui-muted: var(--app-text-muted, rgb(148 163 184));
+  --ui-cta-urgent: #ea580c;
+  --ui-cta-urgent-deep: #c2410c;
+}
+
+/* Modo SaaS premium — hero claro, tipografia sólida, sombras suaves */
+.landing-shell--premium #topo.pro-hero--premium .mesh-hero {
+  background-color: #fafbfc;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgb(14 165 233 / 0.14), transparent 60%),
+    linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+}
+
+html:not([data-theme="day"]) .landing-shell--premium #topo.pro-hero--premium .mesh-hero {
+  background-color: #0b1220;
+  background-image:
+    radial-gradient(ellipse 70% 55% at 50% -10%, rgb(14 165 233 / 0.22), transparent 58%),
+    linear-gradient(180deg, #111827 0%, #020617 100%);
+}
+
+.landing-shell--premium #topo.pro-hero--premium .mesh-hero-glow {
+  opacity: 0.35;
+}
+
+.landing-shell--premium #topo .hero-title-gradient {
+  @apply bg-none text-[var(--app-text)];
+  -webkit-text-fill-color: unset;
+}
+
+html[data-theme="day"] .landing-shell--premium #topo .hero-title-gradient {
+  color: #0f172a;
+}
+
+.landing-shell--premium #topo .pro-hero-copy {
+  color: var(--app-text-muted);
+}
+
+.landing-shell--premium .ui-badge--accent {
+  background: rgb(255 255 255 / 0.9);
+  color: #0369a1;
+  border-color: rgb(14 165 233 / 0.35);
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.06);
+}
+
+html:not([data-theme="day"]) .landing-shell--premium .ui-badge--accent {
+  background: rgb(14 165 233 / 0.12);
+  color: #7dd3fc;
+}
+
+.landing-shell--premium .pro-mockup--commercial .pro-mockup-ring {
+  background: linear-gradient(135deg, rgb(14 165 233 / 0.35), rgb(99 102 241 / 0.22));
+  box-shadow: 0 20px 50px -18px rgb(15 23 42 / 0.35);
+}
+
+html[data-theme="day"] .landing-shell--premium .pro-mockup-step {
+  background: #ffffff;
+  color: #334155;
+  border-color: rgb(226 232 240);
+}
+
+html[data-theme="day"] .landing-shell--premium .pro-mockup-step .font-medium {
+  color: #0f172a;
+}
+
+/* CTA conversão (urgência ética) */
+.btn-primary--conversion {
+  @apply py-3.5 text-[0.9375rem];
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.12),
+    0 8px 24px -4px color-mix(in srgb, var(--brand-primary, #38bdf8) 45%, transparent);
+}
+
+.btn-primary--conversion:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 2px 4px rgb(0 0 0 / 0.14),
+    0 12px 32px -6px color-mix(in srgb, var(--brand-primary, #38bdf8) 55%, transparent);
+}
+
+.btn-primary--urgent {
+  background: linear-gradient(135deg, #f97316 0%, var(--ui-cta-urgent) 45%, var(--ui-cta-urgent-deep) 100%);
+  box-shadow: 0 8px 28px -6px rgb(234 88 12 / 0.55);
+}
+
+.btn-primary--urgent:hover {
+  filter: brightness(1.06);
+  box-shadow: 0 12px 36px -8px rgb(234 88 12 / 0.6);
+}
+
+.ui-urgency-chip {
+  @apply mt-4 inline-flex max-w-full flex-wrap items-center gap-2 rounded-xl border px-3 py-2 text-xs;
+  border-color: color-mix(in srgb, var(--ui-cta-urgent) 35%, var(--ui-border));
+  background: color-mix(in srgb, var(--ui-cta-urgent) 6%, var(--app-bg-solid));
+  color: var(--ui-cta-urgent);
+}
+
+.ui-urgency-chip__dot {
+  @apply h-1.5 w-1.5 rounded-full;
+  background: var(--ui-cta-urgent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-cta-urgent) 25%, transparent);
+  animation: urgency-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes urgency-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.ui-cta-band--urgent {
+  border-color: color-mix(in srgb, var(--ui-cta-urgent) 35%, transparent);
+  background: linear-gradient(
+    95deg,
+    color-mix(in srgb, var(--ui-cta-urgent) 10%, var(--app-bg-solid, #020617)) 0%,
+    var(--app-bg-solid, #020617) 40%,
+    color-mix(in srgb, var(--brand-primary, #38bdf8) 8%, var(--app-bg-solid, #020617)) 100%
+  );
+}
+
+html[data-theme="day"] .landing-shell--premium .ui-cta-band--urgent {
+  background: linear-gradient(95deg, #fff7ed 0%, #ffffff 42%, #eff6ff 100%);
+}
+
+.landing-shell--commercial .section-ambient .landing-section-grid {
+  opacity: 0.08;
+}
+
+.landing-shell--commercial .section-ambient > div:last-child {
+  opacity: 0.35;
+}
+
+/* —— Navbar comercial —— */
+.site-nav--commercial.is-scrolled,
+.site-nav--commercial:not(.is-scrolled) {
+  border-bottom-color: var(--ui-border);
+}
+
+.site-nav--commercial .btn-primary {
+  @apply rounded-xl px-4 py-2.5 text-sm shadow-none;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.2);
+}
+
+/* —— Hero —— */
+.pro-hero--commercial .mesh-hero-glow {
+  animation: none;
+  opacity: 0.55;
+}
+
+.pro-hero--commercial .hero-title-gradient {
+  @apply from-[var(--app-text,white)] via-sky-100/95 to-sky-400/80;
+}
+
+.ui-trust-row {
+  @apply mt-6 flex flex-wrap gap-2;
+}
+
+.ui-badge {
+  @apply inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium;
+  border-color: var(--ui-border);
+  background: color-mix(in srgb, var(--ui-surface) 88%, transparent);
+  color: var(--ui-muted);
+}
+
+.ui-badge--accent {
+  border-color: color-mix(in srgb, var(--brand-primary, #38bdf8) 35%, transparent);
+  color: color-mix(in srgb, var(--brand-primary, #38bdf8) 90%, white);
+  background: color-mix(in srgb, var(--brand-primary, #38bdf8) 8%, transparent);
+}
+
+/* —— Cards (semântica tipo “card/body”) —— */
+.ui-card {
+  @apply rounded-2xl border bg-[var(--ui-surface)] shadow-sm transition duration-300;
+  border-color: var(--ui-border);
+}
+
+.ui-card:hover {
+  border-color: color-mix(in srgb, var(--brand-primary, #38bdf8) 22%, var(--ui-border));
+}
+
+.ui-card--body {
+  @apply p-5 sm:p-6;
+}
+
+.ui-card--pricing {
+  @apply flex h-full flex-col;
+}
+
+.ui-card--pricing.ui-card--featured {
+  border-color: color-mix(in srgb, var(--brand-primary, #38bdf8) 45%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--brand-primary, #38bdf8) 20%, transparent),
+    0 20px 50px -24px color-mix(in srgb, var(--brand-primary, #38bdf8) 35%, transparent);
+}
+
+.ui-card__price {
+  @apply font-display text-3xl font-bold tracking-tight;
+  color: var(--brand-primary-deep, #0ea5e9);
+}
+
+html[data-theme="day"] .landing-shell--commercial .ui-card__price {
+  color: #0369a1;
+}
+
+/* —— Marquee comercial —— */
+.ui-marquee {
+  @apply border-y bg-[var(--app-bg-solid,#020617)] py-3.5;
+  border-color: var(--ui-border);
+}
+
+.ui-marquee__track {
+  @apply flex gap-10 text-sm font-medium tracking-normal;
+  color: var(--ui-muted);
+}
+
+/* —— Faixas CTA / escassez —— */
+.ui-cta-band {
+  @apply border-y py-12 sm:py-14;
+  border-color: color-mix(in srgb, var(--brand-primary, #38bdf8) 25%, transparent);
+  background: linear-gradient(
+    100deg,
+    color-mix(in srgb, var(--brand-primary, #38bdf8) 6%, var(--app-bg-solid, #020617)) 0%,
+    var(--app-bg-solid, #020617) 45%,
+    color-mix(in srgb, var(--brand-indigo, #818cf8) 5%, var(--app-bg-solid, #020617)) 100%
+  );
+}
+
+html[data-theme="day"] .landing-shell--commercial .ui-cta-band {
+  background: linear-gradient(100deg, #e0f2fe 0%, #f8fafc 50%, #eef2ff 100%);
+}
+
+/* —— Modal captação —— */
+.ui-modal-panel {
+  @apply rounded-2xl border p-6 sm:p-7;
+  border-color: var(--ui-border);
+  background: var(--app-bg-solid, #0f172a);
+  box-shadow: 0 25px 60px -20px rgb(0 0 0 / 0.65);
+}
+
+html[data-theme="day"] .landing-shell--commercial .ui-modal-panel {
+  background: #ffffff;
+}
+
+.ui-field-label {
+  @apply mb-1.5 block text-xs font-semibold uppercase tracking-wide;
+  color: var(--ui-muted);
+}
+
+/* —— Seção valor (oferta) —— */
+.ui-value-grid {
+  @apply mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3;
+}
+
+.ui-section-intro--center {
+  @apply mx-auto max-w-3xl text-center;
+}
+
+.ui-section-intro--center .section-label {
+  @apply justify-center;
+}
+
+.pro-mockup--commercial .pro-mockup-ring {
+  box-shadow: 0 16px 48px rgb(0 0 0 / 0.35);
+}
+
+.pro-mockup-steps {
+  @apply space-y-2.5;
+}
+
+.pro-mockup-step {
+  @apply flex items-center gap-3 rounded-xl border px-3 py-2.5 text-left text-sm;
+  border-color: var(--ui-border);
+  background: rgb(255 255 255 / 0.03);
+  color: rgb(255 255 255 / 0.82);
+}
+
+.pro-mockup-step__num {
+  @apply flex h-7 w-7 shrink-0 items-center justify-center rounded-lg font-mono text-[11px] font-semibold;
+  background: color-mix(in srgb, var(--brand-primary, #38bdf8) 15%, transparent);
+  color: var(--brand-primary-soft, #7dd3fc);
+}
