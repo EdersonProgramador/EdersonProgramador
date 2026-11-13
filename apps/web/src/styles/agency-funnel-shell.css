@@ -53,3 +53,83 @@ body.agency-funnel-active {
   background: rgb(255 255 255 / 0.07);
   border-color: rgb(52 211 153 / 0.35);
 }
+
+/* Centro de notificações */
+.agency-notifications__trigger {
+  position: relative;
+}
+
+.agency-notifications__badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 1.1rem;
+  height: 1.1rem;
+  padding: 0 0.25rem;
+  border-radius: 999px;
+  background: #22c55e;
+  color: #052e16;
+  font-size: 0.625rem;
+  font-weight: 800;
+  line-height: 1.1rem;
+  text-align: center;
+  box-shadow: 0 0 0 2px #060606;
+}
+
+.agency-notifications__panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.35rem);
+  z-index: 80;
+  width: min(22rem, calc(100vw - 2rem));
+  max-height: min(24rem, 70vh);
+  display: flex;
+  flex-direction: column;
+  border-radius: 0.75rem;
+  border: 1px solid rgb(255 255 255 / 0.1);
+  background: #0c0c0f;
+  box-shadow: 0 16px 48px -12px rgb(0 0 0 / 0.65);
+}
+
+.agency-notifications__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.75rem 0.85rem;
+  border-bottom: 1px solid rgb(255 255 255 / 0.08);
+}
+
+.agency-notifications__list {
+  overflow-y: auto;
+  padding: 0.35rem;
+  margin: 0;
+  list-style: none;
+}
+
+.agency-notifications__empty {
+  padding: 1.25rem 0.85rem;
+  text-align: center;
+}
+
+.agency-notifications__item {
+  display: flex;
+  gap: 0.65rem;
+  padding: 0.65rem 0.55rem;
+  border-radius: 0.5rem;
+  border: 1px solid transparent;
+}
+
+.agency-notifications__item.is-unread {
+  border-color: rgb(34 197 94 / 0.35);
+  background: rgb(34 197 94 / 0.06);
+}
+
+.agency-notifications__item.is-read {
+  opacity: 0.75;
+}
+
+.agency-notifications__item + .agency-notifications__item {
+  margin-top: 0.15rem;
+}

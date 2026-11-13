@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useSearchParams } from "react-router-dom";
 import {
   AGENCY_APP_BASE,
   BRANDING_LEGACY_PATH_ALIASES,
@@ -8,20 +8,13 @@ import {
   FORMULA_LEGACY_PATH_ALIASES,
   FORMULA_OPERATION_NAV,
   formulaNavFlatItems,
-  MARKETING_LEGACY_PATH_ALIASES,
-  MARKETING_OPERATION_NAV,
-  marketingNavFlatItems,
   OPERATION_PILLAR_NAV,
   type OperationPillarNav
 } from "@ederson-agencia/shared";
-import { FolderKanban, Megaphone, Monitor, UserRound, Users, type LucideIcon } from "lucide-react";
+import { FolderKanban, Megaphone, Monitor, UserRound, Users, Workflow, type LucideIcon } from "lucide-react";
 import { DevelopmentPillarSidebarNav } from "./DevelopmentPillarSidebarNav";
 import { PillarSidebarNav } from "./PillarSidebarNav";
-import {
-  BRANDING_SIDEBAR_ICONS,
-  FORMULA_SIDEBAR_ICONS,
-  MARKETING_SIDEBAR_ICONS
-} from "./pillar-sidebar-icons";
+import { BRANDING_SIDEBAR_ICONS, FORMULA_SIDEBAR_ICONS } from "./pillar-sidebar-icons";
 import "../../styles/agency-admin.css";
 
 const ADMIN_BASE = `${AGENCY_APP_BASE}/admin`;
@@ -40,13 +33,18 @@ const PROJECTS_ITEM: NavItem = {
   icon: FolderKanban
 };
 
+/** Pilares na sidebar desktop — Marketing fica só em Comercial & configuração. */
+const OPERATION_SIDEBAR_PILLARS = OPERATION_PILLAR_NAV.filter((p) => p.id !== "marketing");
+
 const COMMERCIAL_ITEMS: NavItem[] = [
+  { to: `${ADMIN_BASE}/marketing`, end: true, label: "Marketing", icon: Megaphone },
   { to: `${ADMIN_BASE}/funil`, end: false, label: "Funil comercial", icon: Megaphone },
+  { to: `${ADMIN_BASE}/automacoes`, end: false, label: "Automações", icon: Workflow },
   { to: `${ADMIN_BASE}/leads`, end: false, label: "Leads", icon: Users },
   { to: `${ADMIN_BASE}/clientes`, end: false, label: "Clientes", icon: UserRound }
 ];
 
-function pillarFlatMobileItems(pillarLabel: string, items: ReturnType<typeof marketingNavFlatItems>, icon: LucideIcon): NavItem[] {
+function pillarFlatMobileItems(pillarLabel: string, items: ReturnType<typeof brandingNavFlatItems>, icon: LucideIcon): NavItem[] {
   return items.map((item) => ({
     to: `${ADMIN_BASE}/${item.adminPath}`,
     end: false,
@@ -59,7 +57,6 @@ function flatMobileItems(): NavItem[] {
   return [
     PROJECTS_ITEM,
     ...pillarFlatMobileItems("Branding", brandingNavFlatItems(), Monitor),
-    ...pillarFlatMobileItems("Marketing", marketingNavFlatItems(), Megaphone),
     ...pillarFlatMobileItems("Desenvolvimento", developmentNavFlatItems(), Monitor),
     ...pillarFlatMobileItems("Fórmula L.", formulaNavFlatItems(), Monitor),
     ...COMMERCIAL_ITEMS
@@ -78,18 +75,6 @@ function PillarSidebarFor({ pillar }: { pillar: OperationPillarNav }) {
           legacyAliases={BRANDING_LEGACY_PATH_ALIASES}
           iconById={BRANDING_SIDEBAR_ICONS}
           defaultIcon={Monitor}
-        />
-      );
-    case "marketing":
-      return (
-        <PillarSidebarNav
-          pillarId={pillar.id}
-          pillarLabel={pillar.pillarLabel}
-          tone="marketing"
-          sections={MARKETING_OPERATION_NAV}
-          legacyAliases={MARKETING_LEGACY_PATH_ALIASES}
-          iconById={MARKETING_SIDEBAR_ICONS}
-          defaultIcon={Megaphone}
         />
       );
     case "desenvolvimento":
@@ -112,9 +97,12 @@ function PillarSidebarFor({ pillar }: { pillar: OperationPillarNav }) {
 }
 
 function AdminNavLink({ to, end, label, icon: Icon }: NavItem) {
+  const [searchParams] = useSearchParams();
+  const projectId = searchParams.get("project")?.trim();
+  const toResolved = projectId ? `${to}?project=${encodeURIComponent(projectId)}` : to;
   return (
     <NavLink
-      to={to}
+      to={toResolved}
       end={end}
       className={({ isActive }) => `agency-admin-nav-link${isActive ? " is-active" : ""}`}
     >
@@ -141,7 +129,7 @@ export function AdminOperationsLayout() {
             <nav className="flex flex-col gap-0.5">
               <AdminNavLink {...PROJECTS_ITEM} />
             </nav>
-            {OPERATION_PILLAR_NAV.map((pillar) => (
+            {OPERATION_SIDEBAR_PILLARS.map((pillar) => (
               <PillarSidebarFor key={pillar.id} pillar={pillar} />
             ))}
           </div>

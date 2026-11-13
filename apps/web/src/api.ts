@@ -16,14 +16,20 @@ const TOKEN_KEYS: Record<AuthContext, string> = {
 };
 const LEGACY_TOKEN_KEY = "ea_token";
 
-/** Render/Vercel às vezes gravam só o host — sem https o browser não resolve a API. */
+/**
+ * Render/Vercel às vezes gravam só o host — sem https o browser não resolve a API.
+ * A Fastify API não usa prefixo `/api`; com `VITE_API_URL=.../api` o axios monta `/api/agency/...` e dá 404.
+ */
 export function normalizeApiBaseUrl(raw: string | undefined): string {
   const trimmed = (raw ?? "").trim();
   if (!trimmed) return "";
-  if (/^https?:\/\//i.test(trimmed) || trimmed.startsWith("//")) {
-    return trimmed.replace(/\/$/, "");
+  let url = trimmed;
+  if (!/^https?:\/\//i.test(url) && !url.startsWith("//")) {
+    url = `https://${url}`;
   }
-  return `https://${trimmed.replace(/\/$/, "")}`;
+  url = url.replace(/\/$/, "");
+  url = url.replace(/\/api$/i, "");
+  return url.replace(/\/$/, "");
 }
 
 /** API pública em produção (Render) — fallback quando VITE_API_URL não foi definido no build. */

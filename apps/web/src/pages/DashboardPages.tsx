@@ -13,6 +13,7 @@ import { ADMIN_BASE } from "../components/admin/AdminOperationsLayout";
 import { AGENCY_FUNNEL_COPY } from "@ederson-agencia/shared";
 import { CreateProjectModal } from "../components/admin/CreateProjectModal";
 import { ConvertLeadModal } from "../components/admin/ConvertLeadModal";
+import { AdminAutomationEditor } from "../components/admin/AdminAutomationEditor";
 import { AdminFunnelEditor } from "../components/portal/AdminFunnelEditor";
 import "../styles/agency-admin.css";
 import { ClientFunnelPanel } from "../components/portal/ClientFunnelPanel";
@@ -314,7 +315,7 @@ function useAdminDashboardPayload() {
   return { stats, clients, clientsError };
 }
 
-function AdminPageHead({ title, description }: { title: string; description: string }) {
+export function AdminPageHead({ title, description }: { title: string; description: string }) {
   return (
     <header className="agency-admin-page-head">
       <h1>{title}</h1>
@@ -403,6 +404,18 @@ export function AdminFunnelPage() {
         description="Live, pacotes, contrato e checkout — o que o cliente vê na Área do cliente."
       />
       <AdminFunnelEditor showHeader={false} />
+    </div>
+  );
+}
+
+export function AdminAutomationsPage() {
+  return (
+    <div className="space-y-6">
+      <AdminPageHead
+        title="Automações"
+        description="Fluxos multi-provedor — mesmas regras de negócio de ferramentas como Brevo, Resend, n8n ou Leadlovers."
+      />
+      <AdminAutomationEditor />
     </div>
   );
 }

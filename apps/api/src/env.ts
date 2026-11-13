@@ -126,6 +126,50 @@ const envSchema = z
       (value) => (typeof value === "string" && value.trim() ? value.trim() : undefined),
       z.string().optional()
     ),
+    BREVO_API_KEY: z.preprocess(
+      (value) => (typeof value === "string" && value.trim() ? value.trim() : undefined),
+      z.string().optional()
+    ),
+    BREVO_LIST_ID: z.preprocess(
+      (value) => (typeof value === "string" && value.trim() ? value.trim() : undefined),
+      z.string().optional()
+    ),
+    BREVO_SENDER_EMAIL: z.preprocess(
+      (value) => (typeof value === "string" && value.trim() ? value.trim() : undefined),
+      z.string().email().optional()
+    ),
+    BREVO_SENDER_NAME: z.preprocess(
+      (value) => (typeof value === "string" && value.trim() ? value.trim() : undefined),
+      z.string().optional()
+    ),
+    BREVO_WEBHOOK_SECRET: z.preprocess(
+      (value) => (typeof value === "string" && value.trim() ? value.trim() : undefined),
+      z.string().min(8).optional()
+    ),
+    BREVO_SMS_SENDER: z.preprocess(
+      (value) => (typeof value === "string" && value.trim() ? value.trim() : undefined),
+      z.string().min(2).max(11).optional()
+    ),
+    MESSAGING_WHATSAPP_WEBHOOK_URL: z.preprocess(
+      (value) => (typeof value === "string" && value.trim() ? value.trim() : undefined),
+      z.string().url().optional()
+    ),
+    MESSAGING_CONTACT_PROVIDER: z.preprocess(
+      (value) => (typeof value === "string" && value.trim() ? value.trim() : undefined),
+      z.enum(["auto", "brevo", "leadlovers", "webhook", "none"]).optional()
+    ),
+    MESSAGING_EMAIL_PROVIDER: z.preprocess(
+      (value) => (typeof value === "string" && value.trim() ? value.trim() : undefined),
+      z.enum(["auto", "resend", "brevo", "smtp", "none"]).optional()
+    ),
+    MESSAGING_EVENT_PROVIDER: z.preprocess(
+      (value) => (typeof value === "string" && value.trim() ? value.trim() : undefined),
+      z.enum(["auto", "brevo", "webhook", "none"]).optional()
+    ),
+    MESSAGING_EVENT_WEBHOOK_URL: z.preprocess(
+      (value) => (typeof value === "string" && value.trim() ? value.trim() : undefined),
+      z.string().url().optional()
+    ),
     API_PUBLIC_URL: z.preprocess(
       (value) => (typeof value === "string" && value.trim() ? value.trim().replace(/\/$/, "") : undefined),
       z.string().min(8).optional()

@@ -6,6 +6,7 @@
 @import "./styles/landing-commerce.css";
 @import "./styles/landing-funnel-aggressive.css";
 @import "./styles/agency-funnel-shell.css";
+@import "./styles/marketing-platform-hub.css";
 
 @tailwind base;
 @tailwind components;

@@ -36,6 +36,7 @@ import { CoursesCatalogPage } from "./pages/CoursesCatalogPage";
 import { AdminCourseContentPage } from "./pages/AdminCourseContentPage";
 import { AdminCoursesPage } from "./pages/AdminCoursesPage";
 import {
+  AdminAutomationsPage,
   AdminClientsPage,
   AdminFunnelPage,
   AdminLeadsPage,
@@ -43,6 +44,16 @@ import {
   ClientDashboard,
   FreelancerDashboard
 } from "./pages/DashboardPages";
+import {
+  AdminMarketingCampaignsPage,
+  AdminMarketingCdpPage,
+  AdminMarketingChannelsPage,
+  AdminMarketingCrmPage,
+  AdminMarketingPlatformHubPage,
+  AdminMarketingIntegrationsPage,
+  AdminMarketingLoyaltyPage,
+  AdminMarketingTransactionalPage
+} from "./pages/AdminMarketingPlatformPages";
 import { AdminBrandbookPage } from "./pages/AdminBrandbookPage";
 import { AdminFormulaSimuladorPage } from "./pages/AdminFormulaSimuladorPage";
 import { AdminLaunchPlanPdfPage } from "./pages/AdminLaunchPlanPdfPage";
@@ -136,7 +147,16 @@ export default function App() {
                 <Route path="operacao/produto-oferta" element={<AdminProductOfferPage />} />
                 <Route path="operacao/launch-kit" element={<AdminLaunchKitPage />} />
                 <Route path="operacao/:phaseId" element={<AdminLaunchPhasePage />} />
+                <Route path="marketing" element={<AdminMarketingPlatformHubPage />} />
+                <Route path="marketing/campanhas" element={<AdminMarketingCampaignsPage />} />
+                <Route path="marketing/transacional" element={<AdminMarketingTransactionalPage />} />
+                <Route path="marketing/crm" element={<AdminMarketingCrmPage />} />
+                <Route path="marketing/cdp" element={<AdminMarketingCdpPage />} />
+                <Route path="marketing/canais" element={<AdminMarketingChannelsPage />} />
+                <Route path="marketing/integracoes" element={<AdminMarketingIntegrationsPage />} />
+                <Route path="marketing/fidelidade" element={<AdminMarketingLoyaltyPage />} />
                 <Route path="funil" element={<AdminFunnelPage />} />
+                <Route path="automacoes" element={<AdminAutomationsPage />} />
                 <Route path="leads" element={<AdminLeadsPage />} />
                 <Route path="clientes" element={<AdminClientsPage />} />
               </Route>

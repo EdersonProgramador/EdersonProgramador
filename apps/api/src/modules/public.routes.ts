@@ -16,9 +16,28 @@ import { registerSeedLaunchClient } from "../agency/seed-launch-signup.js";
 import { prisma } from "../prisma.js";
 import { ensureAcademyTestUser } from "../seed-academy-test-user.js";
 import { env } from "../env.js";
+import { notifyAdminsOfNewLead } from "../agency/notifications.js";
+import { dispatchAutomationEvent } from "../automation/dispatch.js";
+import { upsertMarketingContactProfile } from "../marketing/cdp-contact.js";
 import { notifyN8nLeadWebhook } from "../integrations/n8n-lead-webhook.js";
 
 const ACADEMY_STORE_CUSTOMER_MARKER = "__academy_store__";
+
+function touchCdpFromLead(lead: {
+  email: string;
+  name: string;
+  phone?: string | null;
+  source?: string | null;
+  packageTier?: string | null;
+}) {
+  void upsertMarketingContactProfile({
+    email: lead.email,
+    name: lead.name,
+    phone: lead.phone,
+    source: lead.source,
+    packageTier: lead.packageTier
+  });
+}
 
 const leadSchema = z.object({
   name: z.string().min(2),
@@ -183,7 +202,7 @@ export async function registerPublicRoutes(app: FastifyInstance) {
       ? `Interesse no programa: ${courseTitle} (${body.courseSlug}).`
       : "Interesse geral na vitrine Academia.";
 
-    await prisma.lead.create({
+    const lead = await prisma.lead.create({
       data: {
         name: body.name.trim(),
         email: body.email.trim().toLowerCase(),
@@ -192,6 +211,23 @@ export async function registerPublicRoutes(app: FastifyInstance) {
         source: "academy_sales"
       }
     });
+    void notifyAdminsOfNewLead(lead, request.log);
+    touchCdpFromLead(lead);
+    dispatchAutomationEvent(
+      "lead.created",
+      {
+        lead: {
+          id: lead.id,
+          name: lead.name,
+          email: lead.email,
+          phone: lead.phone,
+          source: lead.source,
+          packageTier: lead.packageTier,
+          message: lead.message
+        }
+      },
+      request.log
+    );
 
     return reply.code(201).send({
       message: "Recebemos seus dados. Em breve enviamos a proposta no e-mail informado."
@@ -336,6 +372,24 @@ export async function registerPublicRoutes(app: FastifyInstance) {
       },
       request.log
     );
+    void notifyAdminsOfNewLead(lead, request.log);
+    touchCdpFromLead(lead);
+    dispatchAutomationEvent(
+      "lead.popup",
+      {
+        lead: {
+          id: lead.id,
+          name: lead.name,
+          email: lead.email,
+          phone: lead.phone,
+          source: lead.source,
+          packageTier: lead.packageTier,
+          message: lead.message
+        },
+        meta: { campaign: body.campaign }
+      },
+      request.log
+    );
 
     return reply.code(201).send({
       id: lead.id,
@@ -368,6 +422,23 @@ export async function registerPublicRoutes(app: FastifyInstance) {
         packageTier: lead.packageTier,
         message: lead.message,
         createdAt: lead.createdAt
+      },
+      request.log
+    );
+    void notifyAdminsOfNewLead(lead, request.log);
+    touchCdpFromLead(lead);
+    dispatchAutomationEvent(
+      "lead.created",
+      {
+        lead: {
+          id: lead.id,
+          name: lead.name,
+          email: lead.email,
+          phone: lead.phone,
+          source: lead.source,
+          packageTier: lead.packageTier,
+          message: lead.message
+        }
       },
       request.log
     );
@@ -427,7 +498,7 @@ export async function registerPublicRoutes(app: FastifyInstance) {
       return reply.code(404).send({ message: "Lançamento não encontrado." });
     }
 
-    await prisma.lead.create({
+    const lead = await prisma.lead.create({
       data: {
         name: body.name.trim(),
         email: body.email.trim().toLowerCase(),
@@ -437,6 +508,23 @@ export async function registerPublicRoutes(app: FastifyInstance) {
         projectId: undefined
       }
     });
+    void notifyAdminsOfNewLead(lead, request.log);
+    touchCdpFromLead(lead);
+    dispatchAutomationEvent(
+      "lead.created",
+      {
+        lead: {
+          id: lead.id,
+          name: lead.name,
+          email: lead.email,
+          phone: lead.phone,
+          source: lead.source,
+          packageTier: lead.packageTier,
+          message: lead.message
+        }
+      },
+      request.log
+    );
 
     return reply.code(201).send({
       ok: true,

@@ -10,6 +10,7 @@ import {
   PACKAGE_TIER_CONFIG,
   PACKAGE_TIER_IDS,
   nextUpgradeTier,
+  packageTierLabel,
   parsePackageTier,
   type PackageTierId
 } from "@ederson-agencia/shared";
@@ -33,7 +34,12 @@ import {
   resolveFunnelPackages,
   tierPricingFromConfig
 } from "../agency/funnel-config.js";
-import { notifyAgencyUser } from "../agency/notifications.js";
+import {
+  notifyAdminsOfNewLead,
+  notifyAgencyAdmins,
+  notifyAgencyUser,
+  unreadNotificationCount
+} from "../agency/notifications.js";
 import {
   loadProjectWorkspace,
   patchProjectWorkspaceField,
@@ -51,6 +57,9 @@ import {
   renderAllLaunchTemplates
 } from "@ederson-agencia/shared";
 import { env } from "../env.js";
+import { dispatchAutomationEvent } from "../automation/dispatch.js";
+import { upsertMarketingContactProfile } from "../marketing/cdp-contact.js";
+import { onCheckoutLoyalty } from "../marketing/loyalty.js";
 import { buildLaunchPageSnapshot, slugifyLaunchTitle } from "../agency/launch-page.js";
 import { sendLaunchTemplateEmail } from "../mail/send-launch-template-email.js";
 import { pushHotmartProductDraft } from "../agency/hotmart-sync.js";
@@ -246,6 +255,48 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
       where: { id: lead.id },
       data: { status: "WON", projectId: project.id, packageTier: tier }
     });
+
+    void notifyAgencyUser({
+      userId: client.id,
+      projectId: project.id,
+      kind: "project",
+      title: "Projeto criado",
+      body: `${body.projectTitle} — pacote ${packageTierLabel(tier)}. Acompanhe contrato e checkout na área do cliente.`
+    });
+    void notifyAgencyAdmins(
+      {
+        projectId: project.id,
+        kind: "lead_converted",
+        title: "Lead convertido em projeto",
+        body: `${lead.name} virou projeto para ${client.email} (${packageTierLabel(tier)}).`
+      },
+      request.log
+    );
+    void upsertMarketingContactProfile({
+      email: client.email,
+      name: client.name,
+      phone: client.phone,
+      source: lead.source ?? "lead_convert",
+      packageTier: tier
+    });
+    dispatchAutomationEvent(
+      "client.hired",
+      {
+        lead: {
+          id: lead.id,
+          name: lead.name,
+          email: lead.email,
+          phone: lead.phone,
+          source: lead.source,
+          packageTier: tier,
+          message: lead.message,
+          status: "WON"
+        },
+        user: { id: client.id, name: client.name, email: client.email },
+        project: { id: project.id, title: body.projectTitle, packageTier: tier, clientId: client.id }
+      },
+      request.log
+    );
 
     return { project };
   });
@@ -709,6 +760,38 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
         data: { freelancerId: body.freelancerId },
         include: projectInclude
       });
+      void notifyAgencyUser({
+        userId: body.freelancerId,
+        projectId: project.id,
+        kind: "assignment",
+        title: "Você foi alocado em um projeto",
+        body: project.title
+      });
+    }
+    void notifyAgencyUser({
+      userId: body.clientId,
+      projectId: project.id,
+      kind: "project",
+      title: "Novo projeto aberto",
+      body: `${body.title} — pacote ${packageTierLabel(body.packageTier)}.`
+    });
+    const client = await prisma.user.findUnique({ where: { id: body.clientId } });
+    if (client) {
+      void upsertMarketingContactProfile({
+        email: client.email,
+        name: client.name,
+        phone: client.phone,
+        source: "admin_project",
+        packageTier: body.packageTier
+      });
+      dispatchAutomationEvent(
+        "client.hired",
+        {
+          user: { id: client.id, name: client.name, email: client.email },
+          project: { id: project.id, title: body.title, packageTier: body.packageTier, clientId: client.id }
+        },
+        request.log
+      );
     }
     return reply.code(201).send({ project });
   });
@@ -743,6 +826,15 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
       data: body,
       include: projectInclude
     });
+    if (body.freelancerId && body.freelancerId !== project.freelancerId) {
+      void notifyAgencyUser({
+        userId: body.freelancerId,
+        projectId: project.id,
+        kind: "assignment",
+        title: "Alocação em projeto",
+        body: `Você foi designado para ${project.title}.`
+      });
+    }
     return { project: updated };
   });
 
@@ -786,6 +878,23 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
         clientMessage: body.clientMessage?.trim()
       }
     });
+    void notifyAgencyAdmins(
+      {
+        projectId: project.id,
+        kind: "upgrade_request",
+        title: "Solicitação de upgrade",
+        body: `${project.title}: ${packageTierLabel(current)} → ${packageTierLabel(body.toTier)}.`
+      },
+      request.log
+    );
+    dispatchAutomationEvent(
+      "upgrade.requested",
+      {
+        project: { id: project.id, title: project.title, packageTier: current, clientId: project.clientId },
+        meta: { fromTier: current, toTier: body.toTier, upgradeId: upgrade.id }
+      },
+      request.log
+    );
     return reply.code(201).send({ upgrade });
   });
 
@@ -815,6 +924,28 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
       where: { id: row.projectId },
       include: projectInclude
     });
+    if (project?.clientId) {
+      const approved = body.status === "APPROVED";
+      void notifyAgencyUser({
+        userId: project.clientId,
+        projectId: project.id,
+        kind: "upgrade_response",
+        title: approved ? "Upgrade aprovado" : "Upgrade não aprovado",
+        body: approved
+          ? `Seu projeto passou para ${packageTierLabel(row.toTier as PackageTierId)}.`
+          : body.adminNote?.trim() || "Entre em contato com a equipe para mais detalhes."
+      });
+    }
+    dispatchAutomationEvent(
+      "upgrade.resolved",
+      {
+        project: project
+          ? { id: project.id, title: project.title, packageTier: project.packageTier, clientId: project.clientId }
+          : { id: row.projectId, title: "", packageTier: row.toTier, clientId: null },
+        meta: { status: body.status, fromTier: row.fromTier, toTier: row.toTier, upgradeId: row.id }
+      },
+      request.log
+    );
     return { upgrade, project };
   });
 
@@ -872,14 +1003,48 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
       include: { deliverables: { orderBy: { sortOrder: "asc" } } }
     });
 
+    const phasePayload = {
+      projectId: project.id,
+      kind: "phase" as const,
+      title: `Etapa: ${phase.label}`,
+      body: `Situação: ${body.status?.replace(/_/g, " ") ?? "atualizada"}.`
+    };
+
     if (body.status && (isAdmin || isFreelancer) && project.clientId) {
       await notifyAgencyUser({
         userId: project.clientId,
-        projectId: project.id,
-        kind: "phase",
-        title: `Etapa atualizada: ${phase.label}`,
-        body: `Nova situação: ${body.status.replace(/_/g, " ")}.`
+        ...phasePayload
       });
+    }
+
+    if (body.status === "WAITING_APPROVAL" && (isAdmin || isFreelancer)) {
+      void notifyAgencyAdmins(
+        {
+          ...phasePayload,
+          title: "Aprovação de etapa solicitada",
+          body: `${project.title} — ${phase.label} aguarda o cliente.`
+        },
+        request.log
+      );
+    }
+
+    if (body.status === "APPROVED" && isClient) {
+      void notifyAgencyAdmins(
+        {
+          ...phasePayload,
+          title: "Cliente aprovou etapa",
+          body: `${project.title} — ${phase.label} liberada para seguir.`
+        },
+        request.log
+      );
+      if (project.freelancerId) {
+        void notifyAgencyUser({
+          userId: project.freelancerId,
+          ...phasePayload,
+          title: "Etapa aprovada pelo cliente",
+          body: `${phase.label} — pode avançar a entrega.`
+        });
+      }
     }
 
     if (body.status === "APPROVED") {
@@ -892,6 +1057,17 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
           data: { status: "IN_PROGRESS" }
         });
       }
+    }
+
+    if (body.status) {
+      dispatchAutomationEvent(
+        "phase.updated",
+        {
+          project: { id: project.id, title: project.title, packageTier: project.packageTier, clientId: project.clientId },
+          meta: { phaseId: phase.id, phaseLabel: phase.label, status: body.status }
+        },
+        request.log
+      );
     }
 
     return { phase: updated };
@@ -931,13 +1107,40 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
     });
 
     if (body.status === "DONE" && project.clientId) {
-      await notifyAgencyUser({
-        userId: project.clientId,
+      const deliverablePayload = {
         projectId: project.id,
-        kind: "deliverable",
+        kind: "deliverable" as const,
         title: "Entregável concluído",
         body: `${deliverable.label} foi marcado como concluído pela equipe.`
+      };
+      await notifyAgencyUser({
+        userId: project.clientId,
+        ...deliverablePayload
       });
+      void notifyAgencyAdmins(
+        {
+          ...deliverablePayload,
+          body: `${project.title}: ${deliverable.label} concluído.`
+        },
+        request.log
+      );
+      dispatchAutomationEvent(
+        "deliverable.done",
+        {
+          project: {
+            id: project.id,
+            title: project.title,
+            packageTier: project.packageTier,
+            clientId: project.clientId
+          },
+          meta: {
+            deliverableId: deliverable.id,
+            deliverableLabel: deliverable.label,
+            phaseId: deliverable.phaseId
+          }
+        },
+        request.log
+      );
     }
 
     return { deliverable: updated };
@@ -1066,6 +1269,41 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
       data: { packageTier: tier, status: "WON", projectId: project.id }
     });
 
+    void notifyAgencyAdmins(
+      {
+        projectId: project.id,
+        kind: "hire",
+        title: "Nova contratação (funil)",
+        body: `${user.name} escolheu ${packageTierLabel(tier)}. Aguardando assinatura do contrato.`
+      },
+      request.log
+    );
+    void upsertMarketingContactProfile({
+      email: user.email,
+      name: user.name,
+      phone: user.phone ?? null,
+      source: "client_hire",
+      packageTier: tier
+    });
+    dispatchAutomationEvent(
+      "client.hired",
+      {
+        lead: {
+          id: lead.id,
+          name: lead.name ?? user.name,
+          email: lead.email,
+          phone: lead.phone,
+          source: lead.source,
+          packageTier: tier,
+          message: lead.message,
+          status: "WON"
+        },
+        user: { id: user.id, name: user.name, email: user.email },
+        project: { id: project.id, title: project.title, packageTier: tier, clientId: user.id }
+      },
+      request.log
+    );
+
     const pkg = resolveFunnelPackages(configRow).find((p) => p.id === tier);
     return reply.code(201).send({
       project,
@@ -1137,9 +1375,31 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
         title: "Contrato assinado",
         body: "Prossiga para o checkout (entrada) para liberar a jornada de desenvolvimento."
       });
+      void notifyAgencyAdmins(
+        {
+          projectId: project.id,
+          kind: "contract",
+          title: "Contrato assinado pelo cliente",
+          body: `${project.title} — liberar checkout se necessário.`
+        },
+        request.log
+      );
     } catch (notifyError) {
       request.log.warn({ err: notifyError, projectId: project.id }, "Falha ao criar notificação pós-assinatura");
     }
+    dispatchAutomationEvent(
+      "contract.signed",
+      {
+        user: { id: user.id, name: user.name, email },
+        project: {
+          id: updated.id,
+          title: updated.title,
+          packageTier: updated.packageTier,
+          clientId: updated.clientId
+        }
+      },
+      request.log
+    );
     return {
       project: updated,
       contractVersion: AGENCY_CONTRACT_VERSION,
@@ -1166,6 +1426,29 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
       title: "Checkout registrado",
       body: "Sua jornada de desenvolvimento foi liberada. Acompanhe as etapas abaixo."
     });
+    void notifyAgencyAdmins(
+      {
+        projectId: project.id,
+        kind: "checkout",
+        title: "Checkout concluído",
+        body: `${updated.title} — projeto ativo na jornada.`
+      },
+      request.log
+    );
+    dispatchAutomationEvent(
+      "checkout.completed",
+      {
+        user: { id: user.id, name: user.name, email: user.email },
+        project: {
+          id: updated.id,
+          title: updated.title,
+          packageTier: updated.packageTier,
+          clientId: updated.clientId
+        }
+      },
+      request.log
+    );
+    void onCheckoutLoyalty(user.email, user.name);
     return {
       project: updated,
       message: "Checkout concluído. Projeto ativo."
@@ -1174,12 +1457,15 @@ export async function registerAgencyRoutes(app: FastifyInstance) {
 
   app.get("/agency/notifications", async (request) => {
     const user = request.agencyUser!;
-    const rows = await prisma.agencyNotification.findMany({
-      where: { userId: user.id },
-      orderBy: { createdAt: "desc" },
-      take: 40
-    });
-    return { notifications: rows };
+    const [rows, unreadCount] = await Promise.all([
+      prisma.agencyNotification.findMany({
+        where: { userId: user.id },
+        orderBy: { createdAt: "desc" },
+        take: 50
+      }),
+      unreadNotificationCount(user.id)
+    ]);
+    return { notifications: rows, unreadCount };
   });
 
   app.post("/agency/notifications/mark-all-read", async (request) => {

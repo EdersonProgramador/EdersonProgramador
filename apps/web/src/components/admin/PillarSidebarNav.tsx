@@ -2,6 +2,7 @@ import { useCallback, useEffect, useId, useMemo, useState, type ReactNode } from
 import { NavLink, useLocation } from "react-router-dom";
 import {
   AGENCY_APP_BASE,
+  operationSectionNavItemActive,
   type OperationPillarTone,
   type OperationSectionNav,
   type OperationSectionNavItem
@@ -30,18 +31,6 @@ function adminPathFromLocation(pathname: string): string {
   return pathname.slice(idx + marker.length).split("?")[0] ?? "";
 }
 
-function navItemActive(
-  currentAdminPath: string,
-  itemAdminPath: string,
-  legacyAliases: Record<string, string>
-): boolean {
-  if (currentAdminPath === itemAdminPath) return true;
-  for (const [legacy, canonical] of Object.entries(legacyAliases)) {
-    if (canonical === itemAdminPath && currentAdminPath === legacy) return true;
-  }
-  return false;
-}
-
 function readCollapsedMap(): Record<string, boolean> {
   try {
     const raw = localStorage.getItem(COLLAPSE_STORAGE_KEY);
@@ -66,7 +55,7 @@ function pillarHasActiveRoute(
 ): boolean {
   for (const section of sections) {
     for (const item of section.items) {
-      if (navItemActive(currentAdminPath, item.adminPath, legacyAliases)) return true;
+      if (operationSectionNavItemActive(currentAdminPath, item, legacyAliases)) return true;
     }
   }
   for (const legacy of Object.keys(legacyAliases)) {
@@ -165,7 +154,7 @@ export function PillarSidebarNav({
                     key={item.adminPath}
                     to={`${ADMIN_BASE}/${item.adminPath}${projectQuery}`}
                     className={() => {
-                      const active = navItemActive(currentAdminPath, item.adminPath, legacyAliases);
+                      const active = operationSectionNavItemActive(currentAdminPath, item, legacyAliases);
                       return `agency-admin-nav-link agency-admin-nav-link--${toneClass}${active ? " is-active" : ""}`;
                     }}
                   >

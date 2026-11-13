@@ -149,6 +149,45 @@ export type ContractPhaseKey = (typeof CONTRACT_DEFAULTS.phases)[number]["key"];
 export { BRAND_IDENTITY } from "./brand.js";
 export { CONTRACT_COPY } from "./contract-copy.js";
 export { MARKETING_COPY } from "./marketing-copy.js";
+export {
+  MARKETING_PLATFORM_AUDIENCES,
+  MARKETING_PLATFORM_CHANNELS,
+  MARKETING_PLATFORM_FEATURES,
+  MARKETING_PLATFORM_RESOURCES,
+  type MarketingCampaignChannel,
+  type MarketingCampaignStatus
+} from "./marketing-platform-hub.js";
+export {
+  MARKETING_LEAD_SOURCE_OPTIONS,
+  marketingAudienceTierOptions
+} from "./marketing-audience.js";
+export {
+  AUTOMATION_ACTION_IDS,
+  AUTOMATION_ACTION_OPTIONS,
+  AUTOMATION_TRIGGER_IDS,
+  AUTOMATION_TRIGGER_OPTIONS,
+  BREVO_CAPABILITY_MATRIX,
+  MARKETING_CAPABILITY_MATRIX,
+  MARKETING_INTEGRATION_CATALOG,
+  MESSAGING_CONTACT_PROVIDERS,
+  MESSAGING_EMAIL_PROVIDERS,
+  MESSAGING_EVENT_PROVIDERS,
+  defaultLeadCaptureAutomation,
+  defaultLeadPopupAutomation,
+  defaultClientHiredAutomation,
+  defaultContractSignedAutomation,
+  defaultCheckoutCompletedAutomation,
+  DEFAULT_MARKETING_AUTOMATION_FACTORIES,
+  normalizeAutomationActionType,
+  type AutomationActionId,
+  type AutomationStep,
+  type AutomationTriggerFilter,
+  type AutomationTriggerId,
+  type MarketingAutomationDto,
+  type MessagingContactProvider,
+  type MessagingEmailProvider,
+  type MessagingEventProvider
+} from "./marketing-automation.js";
 export { LAUNCH_FUNNEL_COPY } from "./launch-funnel-copy.js";
 export { SEED_LAUNCH_COPY, SEED_LAUNCH_PATH } from "./seed-launch-copy.js";
 export { CADASTRO_COPY, CADASTRO_PATH, CADASTRO_PUBLIC_URL } from "./cadastro-copy.js";

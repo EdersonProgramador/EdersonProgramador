@@ -363,6 +363,85 @@ model Project {
   updatedAt        DateTime @updatedAt
 }
 
+model MarketingAutomation {
+  id                String   @id @default(cuid())
+  name              String
+  description       String?
+  enabled           Boolean  @default(true)
+  trigger           String
+  triggerFilterJson Json?
+  stepsJson         Json
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  runs              MarketingAutomationRun[]
+
+  @@index([enabled, trigger])
+}
+
+model MarketingAutomationRun {
+  id           String   @id @default(cuid())
+  automationId String
+  automation   MarketingAutomation @relation(fields: [automationId], references: [id], onDelete: Cascade)
+  status       String   @default("RUNNING")
+  triggerEvent String
+  contextJson  Json
+  error        String?
+  startedAt    DateTime @default(now())
+  finishedAt   DateTime?
+  logs         MarketingAutomationLog[]
+
+  @@index([automationId, startedAt])
+}
+
+model MarketingContactProfile {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String?
+  phone         String?
+  attributesJson Json?
+  sourcesJson   Json?
+  lastEventAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model MarketingCampaign {
+  id              String    @id @default(cuid())
+  name            String
+  channel         String    @default("email")
+  status          String    @default("DRAFT")
+  subject         String?
+  bodyHtml        String?
+  audienceFilterJson Json?
+  scheduledAt     DateTime?
+  sentAt          DateTime?
+  statsJson       Json?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model LoyaltyProgramConfig {
+  id        String   @id @default("default")
+  enabled   Boolean  @default(false)
+  name      String   @default("Programa Ederson")
+  tiersJson Json?
+  rulesJson Json?
+  updatedAt DateTime @updatedAt
+}
+
+model MarketingAutomationLog {
+  id         String   @id @default(cuid())
+  runId      String
+  run        MarketingAutomationRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  stepIndex  Int
+  actionType String
+  status     String
+  detail     String?
+  createdAt  DateTime @default(now())
+
+  @@index([runId])
+}
+
 model AgencyFunnelConfig {
   id                  String    @id @default("default")
   livePublished       Boolean   @default(false)

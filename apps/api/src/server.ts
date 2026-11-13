@@ -7,6 +7,8 @@ import { ZodError } from "zod";
 import { env } from "./env.js";
 import { isAllowedCorsOrigin, resolveAllowedOrigins } from "./cors-origins.js";
 import { registerAgencyRoutes } from "./modules/agency.routes.js";
+import { registerAutomationRoutes } from "./modules/automation.routes.js";
+import { registerMarketingPlatformRoutes } from "./modules/marketing-platform.routes.js";
 import { registerAuthRoutes } from "./modules/auth.routes.js";
 import { registerCoursesAdminContentRoutes } from "./modules/courses-admin-content.routes.js";
 import { registerCoursesAdminRoutes } from "./modules/courses-admin.routes.js";
@@ -19,10 +21,21 @@ import { ensureSeedCourses } from "./seed-courses.js";
 import { prisma } from "./prisma.js";
 import { ensureAcademyTestUser } from "./seed-academy-test-user.js";
 import { ensureSeedAdmin } from "./seed-admin.js";
+import { ensureDefaultMarketingAutomations } from "./automation/ensure-defaults.js";
+import { ensureLoyaltyProgramDefault, evaluateMarketingSetup } from "./marketing/marketing-setup.js";
 
 const app = Fastify({
   logger: true,
   trustProxy: true
+});
+
+/** Front com VITE_API_URL terminando em `/api` envia `/api/agency/...`; rotas reais não têm esse prefixo. */
+app.addHook("onRequest", async (request) => {
+  const url = request.url;
+  if (url === "/api" || url.startsWith("/api/")) {
+    const rewritten = url === "/api" ? "/" : url.slice(4) || "/";
+    request.raw.url = rewritten;
+  }
 });
 
 const allowedOrigins = resolveAllowedOrigins();
@@ -107,7 +120,9 @@ app.get("/health", async () => {
     service: "ederson-agencia-api",
     features: {
       agencyFunnelAdmin: true,
-      seedLaunchSignup: true
+      seedLaunchSignup: true,
+      marketingPlatform: true,
+      marketingAutomation: true
     },
     adminUsers,
     adminBootstrap: env.ADMIN_BOOTSTRAP,
@@ -119,6 +134,8 @@ await registerPublicRoutes(app);
 await registerInboundWebhookRoutes(app);
 await registerAuthRoutes(app);
 await registerAgencyRoutes(app);
+await registerAutomationRoutes(app);
+await registerMarketingPlatformRoutes(app);
 await registerCoursesRoutes(app);
 await registerFichamentoRoutes(app);
 await registerCourseLibraryRoutes(app);
@@ -149,5 +166,14 @@ void (async () => {
     } catch (err) {
       app.log.warn({ err }, "Sync da conta de teste aluno@gmail.com não concluído");
     }
+  }
+
+  try {
+    await ensureLoyaltyProgramDefault();
+    await ensureDefaultMarketingAutomations();
+    const report = await evaluateMarketingSetup();
+    app.log.info({ ready: report.ready, score: `${report.score}/${report.total}` }, "Marketing bootstrap");
+  } catch (err) {
+    app.log.warn({ err }, "Bootstrap marketing não concluído");
   }
 })();

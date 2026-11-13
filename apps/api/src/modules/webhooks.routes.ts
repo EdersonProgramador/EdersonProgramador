@@ -6,7 +6,8 @@ import {
   isPurchaseLikeEvent,
   type WebhookProviderId
 } from "../agency/webhook-ingress.js";
-import { notifyAgencyUser } from "../agency/notifications.js";
+import { notifyAgencyAdmins } from "../agency/notifications.js";
+import { dispatchAutomationEvent } from "../automation/dispatch.js";
 import { loadProjectWorkspace } from "../agency/project-workspace-persist.js";
 import { verifyInboundWebhookAuth } from "../agency/webhook-auth.js";
 
@@ -59,19 +60,23 @@ export async function registerInboundWebhookRoutes(app: FastifyInstance) {
     });
 
     if (isPurchaseLikeEvent(eventType)) {
-      const admins = await prisma.user.findMany({
-        where: { role: "ADMIN", status: "ACTIVE" },
-        select: { id: true }
-      });
-      for (const admin of admins) {
-        await notifyAgencyUser({
-          userId: admin.id,
+      await notifyAgencyAdmins(
+        {
           projectId: project.id,
           kind: "webhook_purchase",
           title: `Venda (${params.provider}) — ${project.title}`,
           body: `Evento ${eventType} registrado no workspace do projeto.`
-        });
-      }
+        },
+        request.log
+      );
+      dispatchAutomationEvent(
+        "webhook.purchase",
+        {
+          project: { id: project.id, title: project.title, clientId: project.clientId },
+          meta: { provider: params.provider, eventType, eventId: event.id }
+        },
+        request.log
+      );
     }
 
     return { received: true, eventId: event.id, eventType };
