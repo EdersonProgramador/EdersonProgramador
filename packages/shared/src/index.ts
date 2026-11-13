@@ -274,6 +274,13 @@ export {
   type BrandingNavSection
 } from "./branding-operation-nav.js";
 export {
+  BRANDING_APPROVAL_GATES,
+  BRANDING_FINAL_DELIVERABLES,
+  BRANDING_PROCESS_INTRO,
+  BRANDING_PROCESS_STEPS,
+  type BrandingProcessStep
+} from "./branding-process-overview.js";
+export {
   DEVELOPMENT_LEGACY_PATH_ALIASES,
   DEVELOPMENT_OPERATION_NAV,
   developmentNavFlatItems,

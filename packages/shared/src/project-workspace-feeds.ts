@@ -15,6 +15,7 @@ export const PROJECT_WORKSPACE_FEED_RULES: readonly ProjectWorkspaceFeedRule[] =
     sourceFieldIds: [
       "product:offer:promessa-fl",
       "branding:plataforma:posicionamento:declaracao",
+      "branding:estrategia:posicionamento:proposta-valor",
       "branding:plataforma:proposito:texto",
       "branding:diagnostico:persona:resumo"
     ]
@@ -55,6 +56,7 @@ export const PROJECT_WORKSPACE_FEED_RULES: readonly ProjectWorkspaceFeedRule[] =
     sourceFieldIds: [
       "product:core:nome",
       "branding:identidade:verbal:naming-opcoes",
+      "branding:alinhamento:briefing:notas",
       "branding:diagnostico:briefing:notas"
     ]
   },

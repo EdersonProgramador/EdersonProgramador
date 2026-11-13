@@ -21,7 +21,7 @@ export function AdminBrandingHubPage() {
   const navItem = BRANDING_OPERATION_NAV.flatMap((s) => s.items).find((i) => i.id === view);
 
   if (view !== "estatistica" || !navItem) {
-    return <Navigate to={`${ADMIN_BASE}/operacao/branding/diagnostico${q}`} replace />;
+    return <Navigate to={`${ADMIN_BASE}/operacao/branding/alinhamento${q}`} replace />;
   }
 
   return (

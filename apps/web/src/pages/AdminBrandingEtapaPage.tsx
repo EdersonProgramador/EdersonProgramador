@@ -118,7 +118,7 @@ export function AdminBrandingEtapaPage() {
   }
 
   if (!etapaId || !etapa) {
-    return <Navigate to={`${ADMIN_BASE}/operacao/branding/diagnostico`} replace />;
+    return <Navigate to={`${ADMIN_BASE}/operacao/branding/alinhamento`} replace />;
   }
 
   const prevEtapa = adjacentBrandingEtapa(etapa.id as BrandingEtapaId, "prev");
@@ -177,7 +177,7 @@ export function AdminBrandingEtapaPage() {
         ) : null}
       </div>
 
-      {etapa.id === "identidade" ? (
+      {etapa.id === "identidade-visual" ? (
         <BrandCanvaStudioPanel
           fields={data}
           projectId={projectId || undefined}
@@ -188,7 +188,7 @@ export function AdminBrandingEtapaPage() {
         />
       ) : null}
 
-      {projectId && etapa.id === "plataforma" ? (
+      {projectId && (etapa.id === "plataforma" || etapa.id === "estrategia") ? (
         <div className="panel space-y-2 p-4 sm:p-5">
           <h2 className="text-sm font-semibold text-[var(--app-text)]">Projeções sincronizadas (piloto)</h2>
           <p className="text-xs text-[var(--app-text-muted)]">

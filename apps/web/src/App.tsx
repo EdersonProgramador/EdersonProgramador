@@ -59,6 +59,7 @@ import { AdminFormulaSimuladorPage } from "./pages/AdminFormulaSimuladorPage";
 import { AdminLaunchPlanPdfPage } from "./pages/AdminLaunchPlanPdfPage";
 import { AdminMarketingPlanejamentoPage } from "./pages/AdminMarketingPlanejamentoPage";
 import { AdminBrandingEtapaPage } from "./pages/AdminBrandingEtapaPage";
+import { AdminBrandingProcessPage } from "./pages/AdminBrandingProcessPage";
 import { AdminProductOfferPage } from "./pages/AdminProductOfferPage";
 import { AdminLaunchKitPage } from "./pages/AdminLaunchKitPage";
 import { AdminLaunchPhasePage } from "./pages/AdminLaunchPhasePage";
@@ -117,6 +118,7 @@ export default function App() {
                   <Route key={item.id} path={item.adminPath} element={<AdminMarketingHubPage />} />
                 ))}
                 <Route path="operacao/branding/estatistica" element={<AdminBrandingHubPage />} />
+                <Route path="operacao/branding/processo" element={<AdminBrandingProcessPage />} />
                 <Route path="operacao/branding/brandbook" element={<AdminBrandbookPage />} />
                 <Route path="operacao/branding/:etapaId" element={<AdminBrandingEtapaPage />} />
                 <Route path="operacao/desenvolvimento/stack" element={<AdminDevelopmentHubPage />} />

@@ -1,14 +1,22 @@
 import {
   BarChart3,
+  BookOpen,
+  Building2,
   ClipboardList,
   Code2,
   Database,
+  GitBranch,
+  LineChart,
+  MessageSquare,
   Monitor,
   Package,
   Palette,
+  Pencil,
   Radio,
   Rocket,
+  Scale,
   Server,
+  Sparkles,
   Target,
   Workflow,
   type LucideIcon
@@ -29,10 +37,20 @@ export const MARKETING_SIDEBAR_ICONS: Record<string, LucideIcon> = {
 
 export const BRANDING_SIDEBAR_ICONS: Record<string, LucideIcon> = {
   estatistica: BarChart3,
-  diagnostico: ClipboardList,
-  plataforma: Target,
-  identidade: Palette,
-  implementacao: Package
+  processo: BookOpen,
+  alinhamento: ClipboardList,
+  diagnostico: GitBranch,
+  estrategia: Target,
+  plataforma: Sparkles,
+  arquitetura: Building2,
+  naming: Pencil,
+  "identidade-verbal": MessageSquare,
+  "identidade-visual": Palette,
+  experiencia: Monitor,
+  implementacao: Package,
+  governanca: Scale,
+  medicao: LineChart,
+  brandbook: BookOpen
 };
 
 export const DEVELOPMENT_SIDEBAR_ICONS: Record<string, LucideIcon> = {

@@ -10,6 +10,7 @@ import {
   type BrandingNamingStudioValue,
   type BrandingPaletteValue
 } from "./branding-studio.js";
+import { BRANDING_ETAPAS_DATA } from "./branding-etapas.js";
 
 export type BrandingEtapaId = string;
 
@@ -77,8 +78,8 @@ export type BrandingFieldValue =
 
 export type BrandingWorkspaceData = Record<string, BrandingFieldValue>;
 
-/** Conteúdo esvaziado — a sequência será redefinida pela agência. */
-export const BRANDING_ETAPAS: readonly BrandingEtapaDef[] = [];
+/** 12 etapas do sistema profissional de criação de marcas. */
+export const BRANDING_ETAPAS: readonly BrandingEtapaDef[] = BRANDING_ETAPAS_DATA;
 
 export function getBrandingEtapa(id: string): BrandingEtapaDef | undefined {
   return BRANDING_ETAPAS.find((e) => e.id === id);
