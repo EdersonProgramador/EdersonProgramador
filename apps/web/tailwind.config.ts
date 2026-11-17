@@ -27,7 +27,7 @@ export default {
       },
       fontFamily: {
         sans: ["DM Sans", "Segoe UI", "system-ui", "sans-serif"],
-        display: ["Syne", "DM Sans", "sans-serif"],
+        display: ["DM Sans", "Segoe UI", "sans-serif"],
         mono: ["IBM Plex Mono", "ui-monospace", "monospace"]
       },
       boxShadow: {

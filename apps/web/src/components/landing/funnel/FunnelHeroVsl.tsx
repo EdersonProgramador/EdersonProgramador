@@ -19,8 +19,13 @@ export function FunnelHeroVsl() {
   return (
     <section id="topo" className="funnel-hero scroll-mt-0" data-mood-track="trust">
       <div className="landing-container relative z-[1] flex flex-col items-center text-center">
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-400/90">{vsl.pretitle}</p>
-        <h1 className="funnel-hero__headline mx-auto mt-3 max-w-4xl">{vsl.headline}</h1>
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-400/90">
+          Da ideia ao lançamento com <span className="funnel-hero__neon">maestria</span>
+        </p>
+        <h1 className="funnel-hero__headline mx-auto mt-3 max-w-4xl">
+          Descubra como <mark className="funnel-hero__mark">empresários</mark> e pessoas comuns estão
+          transformando ideias simples em <mark className="funnel-hero__mark">negócios lucrativos</mark>.
+        </h1>
         <p className="funnel-hero__sub mx-auto">{vsl.subhead}</p>
 
         <div className="funnel-vsl mx-auto mt-8 w-full max-w-3xl">
@@ -44,7 +49,7 @@ export function FunnelHeroVsl() {
                 <p className="max-w-md text-sm text-white/80">{vsl.videoHint}</p>
               ) : (
                 <div className="max-w-lg space-y-2 px-2">
-                  <p className="font-display text-lg font-extrabold uppercase leading-snug tracking-tight text-white sm:text-xl md:text-2xl">
+                  <p className="font-display text-xl font-bold leading-snug tracking-[-0.02em] text-white sm:text-2xl">
                     {vsl.overlayHeadline}
                   </p>
                   <p className="text-sm leading-relaxed text-white/75 sm:text-base">{vsl.overlaySubhead}</p>

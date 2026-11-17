@@ -18,16 +18,16 @@ export const LAUNCH_FUNNEL_COPY = {
   ],
 
   heroVsl: {
-    pretitle: "Da ideia ao lançamento sem enrolação",
+    pretitle: "Da ideia ao lançamento com maestria",
     headline:
-      "COLOQUE SEU APP, PORTAL OU FUNIL NO AR — COM PACOTE FECHADO, MARCO A MARCO, DO ZERO ATÉ A PRIMEIRA VERSÃO PUBLICADA!",
+      "Descubra como empresários e pessoas comuns estão transformando ideias simples em negócios lucrativos.",
     subhead:
-      "Bora para um diagnóstico de 30 minutos comigo? Assista ao vídeo, entende o processo e só avança se fizer sentido pro seu negócio.",
+      "Diagnóstico de 30 minutos: você entende o processo e só avança se fizer sentido para o negócio.",
     videoCta: "Ativar som",
     videoHint: "Clique para assistir com áudio e ver como funciona a jornada.",
     /** Overlay quando o VSL ainda não está embutido — headline comercial, não texto técnico. */
-    overlayHeadline: "Parceria fechada começa com um diagnóstico claro.",
-    overlaySubhead: "Reserve sua vaga, alinhe o escopo e avance só se fizer sentido pro seu negócio.",
+    overlayHeadline: "Diagnóstico claro. Parceria fechada.",
+    overlaySubhead: "Reserve sua vaga, alinhe o escopo e avance só se fizer sentido.",
     youtubeLabel: "Mais vídeos no YouTube",
     /** Defina VITE_FUNNEL_VSL_YOUTUBE_ID no front ou troque aqui. */
     youtubeVideoId: "",
