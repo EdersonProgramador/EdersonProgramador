@@ -52,6 +52,25 @@ export const PORTFOLIO_PRODUCTION: PortfolioProductionItem[] = [
     logoUrlFallback:
       "https://paz-church-ananindeua.vercel.app/logo-pazchurchananindeua-9dc3104f-74c5-44ba-af12-06a3856a8947.png",
     logoWide: true
+  },
+  {
+    kind: "production",
+    name: "Ministério Almeida Church",
+    description:
+      "Presença digital e sistema administrativo da igreja — conteúdo, navegação mobile e painel operacional, publicado na Vercel.",
+    url: "https://ministerio-almeida-church.vercel.app/",
+    tags: ["Site em produção", "Institucional", "Vercel"],
+    logoUrlFallback: "https://ministerio-almeida-church.vercel.app/icons/icon-192x192.png"
+  },
+  {
+    kind: "production",
+    name: "Baruc Shopping",
+    description:
+      "Shopping online com catálogo, navegação e operação de e-commerce — vitrine digital em produção.",
+    url: "https://www.barucshopping.com.br/",
+    tags: ["Site em produção", "E-commerce"],
+    logoUrl: "/portfolio/baruc-shopping.svg",
+    logoUrlFallback: "https://www.barucshopping.com.br/logo-baruc.svg"
   }
 ];
 

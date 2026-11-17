@@ -82,7 +82,7 @@ export const SEED_LAUNCH_COPY = {
     title: "Método aplicado em projetos reais",
     stats: [
       { value: "5", label: "Etapas", detail: "Ideia → implantação" },
-      { value: "2+", label: "Produção", detail: "Cases publicados" },
+      { value: "5+", label: "Produção", detail: "Cases publicados" },
       { value: "90", label: "Minutos", detail: "Aula ao vivo" }
     ]
   },

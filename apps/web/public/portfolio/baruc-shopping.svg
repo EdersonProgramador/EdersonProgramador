@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" role="img" aria-label="Baruc Shopping">
+  <defs>
+    <linearGradient id="gold" x1="12" y1="8" x2="52" y2="56" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F5E6A8"/>
+      <stop offset="0.45" stop-color="#D4AF37"/>
+      <stop offset="1" stop-color="#A8841C"/>
+    </linearGradient>
+  </defs>
+  <!-- Minimal gold shopping bag — brand icon from the Baruc arts -->
+  <path
+    d="M20 24h24l-2.2 26.5a3 3 0 0 1-3 2.5H25.2a3 3 0 0 1-3-2.5L20 24Z"
+    stroke="url(#gold)"
+    stroke-width="3.2"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M26 24c0-5.2 3.4-9 6-9s6 3.8 6 9"
+    stroke="url(#gold)"
+    stroke-width="3.2"
+    stroke-linecap="round"
+  />
+  <path d="M20 24h24" stroke="url(#gold)" stroke-width="3.2" stroke-linecap="round"/>
+</svg>
