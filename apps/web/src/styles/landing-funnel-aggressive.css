@@ -164,9 +164,10 @@
   @apply h-full w-full border-0;
 }
 
-/* Notificações de venda */
+/* Notificações de venda — um por vez, canto superior direito abaixo do menu */
 .funnel-toast-stack {
-  @apply pointer-events-none fixed bottom-20 right-3 z-40 flex max-w-[17rem] flex-col gap-2 sm:right-6;
+  @apply pointer-events-none fixed right-3 z-40 flex w-[min(17rem,calc(100vw-1.5rem))] justify-center sm:right-6;
+  top: calc(4.25rem + env(safe-area-inset-top, 0px));
 }
 
 .funnel-toast {
@@ -602,7 +603,7 @@
 
 @media (min-width: 640px) {
   .funnel-toast-stack {
-    bottom: 5.5rem;
+    top: calc(4.75rem + env(safe-area-inset-top, 0px));
   }
 }
 

@@ -10,6 +10,8 @@ export type PortfolioProductionItem = {
   logoUrlFallback?: string;
   /** Logo horizontal — ocupa mais largura no card de case */
   logoWide?: boolean;
+  /** Fundo do container: logos claras precisam de shell escuro. */
+  logoShell?: "light" | "dark";
 };
 
 export type PortfolioGithubItem = {
@@ -60,7 +62,8 @@ export const PORTFOLIO_PRODUCTION: PortfolioProductionItem[] = [
       "Presença digital e sistema administrativo da igreja — conteúdo, navegação mobile e painel operacional, publicado na Vercel.",
     url: "https://ministerio-almeida-church.vercel.app/",
     tags: ["Site em produção", "Institucional", "Vercel"],
-    logoUrlFallback: "https://ministerio-almeida-church.vercel.app/icons/icon-192x192.png"
+    logoUrl: "/portfolio/ministerio-almeida-church.svg",
+    logoShell: "dark"
   },
   {
     kind: "production",
@@ -80,7 +83,8 @@ export const PORTFOLIO_PRODUCTION: PortfolioProductionItem[] = [
     url: "https://nyconsulting.vercel.app/",
     tags: ["Site em produção", "Institucional", "Vercel"],
     logoUrl: "/portfolio/ny-consulting.png",
-    logoUrlFallback: "https://nyconsulting.vercel.app/images/NYC.png"
+    logoUrlFallback: "https://nyconsulting.vercel.app/images/NYC.png",
+    logoShell: "dark"
   }
 ];
 

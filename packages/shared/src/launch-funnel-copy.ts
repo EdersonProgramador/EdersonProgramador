@@ -25,6 +25,9 @@ export const LAUNCH_FUNNEL_COPY = {
       "Bora para um diagnóstico de 30 minutos comigo? Assista ao vídeo, entende o processo e só avança se fizer sentido pro seu negócio.",
     videoCta: "Ativar som",
     videoHint: "Clique para assistir com áudio e ver como funciona a jornada.",
+    /** Overlay quando o VSL ainda não está embutido — headline comercial, não texto técnico. */
+    overlayHeadline: "Parceria fechada começa com um diagnóstico claro.",
+    overlaySubhead: "Reserve sua vaga, alinhe o escopo e avance só se fizer sentido pro seu negócio.",
     youtubeLabel: "Mais vídeos no YouTube",
     /** Defina VITE_FUNNEL_VSL_YOUTUBE_ID no front ou troque aqui. */
     youtubeVideoId: "",

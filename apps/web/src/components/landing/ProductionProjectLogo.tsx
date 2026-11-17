@@ -16,6 +16,7 @@ export function ProductionProjectLogo({ site, className = "" }: ProductionProjec
   const candidates = useMemo(() => logoCandidates(site), [site.logoUrl, site.logoUrlFallback]);
   const [index, setIndex] = useState(0);
   const wide = site.logoWide === true;
+  const darkShell = site.logoShell === "dark";
   const src = candidates[index] ?? "";
   const exhausted = candidates.length === 0 || index >= candidates.length;
 
@@ -23,13 +24,16 @@ export function ProductionProjectLogo({ site, className = "" }: ProductionProjec
     setIndex(0);
   }, [site.logoUrl, site.logoUrlFallback]);
 
+  const shellTone = darkShell
+    ? "border-white/15 bg-[#0c0c0c]"
+    : "border-white/10 bg-white";
   const shell = wide
-    ? "flex h-12 w-[7.25rem] shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-white px-2 py-1.5 shadow-sm"
-    : "flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-white p-1.5 shadow-sm";
+    ? `flex h-12 w-[7.25rem] shrink-0 items-center justify-center overflow-hidden rounded-xl border ${shellTone} px-2 py-1.5 shadow-sm`
+    : `flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border ${shellTone} p-1.5 shadow-sm`;
 
   if (exhausted) {
     return (
-      <div className={`${shell} bg-blue-deep/80 text-blue-glow ${className}`} aria-hidden>
+      <div className={`${shell} text-blue-glow ${className}`} aria-hidden>
         <Globe className="h-6 w-6" />
       </div>
     );
@@ -43,7 +47,7 @@ export function ProductionProjectLogo({ site, className = "" }: ProductionProjec
         alt={`Logo ${site.name}`}
         width={wide ? 116 : 48}
         height={48}
-        className="h-full w-full object-contain object-left"
+        className="h-full w-full object-contain object-center"
         loading="eager"
         decoding="async"
         referrerPolicy="no-referrer"

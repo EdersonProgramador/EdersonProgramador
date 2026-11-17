@@ -18,12 +18,12 @@ export function FunnelHeroVsl() {
 
   return (
     <section id="topo" className="funnel-hero scroll-mt-0" data-mood-track="trust">
-      <div className="landing-container relative z-[1]">
+      <div className="landing-container relative z-[1] flex flex-col items-center text-center">
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-400/90">{vsl.pretitle}</p>
-        <h1 className="funnel-hero__headline mt-3 max-w-4xl">{vsl.headline}</h1>
-        <p className="funnel-hero__sub">{vsl.subhead}</p>
+        <h1 className="funnel-hero__headline mx-auto mt-3 max-w-4xl">{vsl.headline}</h1>
+        <p className="funnel-hero__sub mx-auto">{vsl.subhead}</p>
 
-        <div className="funnel-vsl mt-8 max-w-3xl">
+        <div className="funnel-vsl mx-auto mt-8 w-full max-w-3xl">
           {embedSrc ? (
             <iframe
               title="Apresentação App do Zero ao Lançamento"
@@ -35,14 +35,21 @@ export function FunnelHeroVsl() {
             <div
               className="funnel-vsl__overlay"
               style={{
-                backgroundImage: `linear-gradient(rgb(0 0 0 / 0.5), rgb(0 0 0 / 0.65)), url('/og-image.svg')`,
+                backgroundImage: `linear-gradient(rgb(0 0 0 / 0.55), rgb(0 0 0 / 0.72)), url('/funnel/parceria-fechada.svg')`,
                 backgroundSize: "cover",
                 backgroundPosition: "center"
               }}
             >
-              <p className="max-w-md text-sm text-white/80">
-                {videoId ? vsl.videoHint : "Configure VITE_FUNNEL_VSL_YOUTUBE_ID ou reserve sua vaga para receber o vídeo por WhatsApp."}
-              </p>
+              {videoId ? (
+                <p className="max-w-md text-sm text-white/80">{vsl.videoHint}</p>
+              ) : (
+                <div className="max-w-lg space-y-2 px-2">
+                  <p className="font-display text-lg font-extrabold uppercase leading-snug tracking-tight text-white sm:text-xl md:text-2xl">
+                    {vsl.overlayHeadline}
+                  </p>
+                  <p className="text-sm leading-relaxed text-white/75 sm:text-base">{vsl.overlaySubhead}</p>
+                </div>
+              )}
               <button
                 type="button"
                 className="funnel-vsl__play"
@@ -62,13 +69,13 @@ export function FunnelHeroVsl() {
           href="https://www.youtube.com/@edersonprogramador"
           target="_blank"
           rel="noreferrer"
-          className="mt-4 inline-flex items-center gap-2 text-xs font-semibold text-white/50 hover:text-white"
+          className="mt-4 inline-flex items-center justify-center gap-2 text-xs font-semibold text-white/50 hover:text-white"
         >
           <Youtube className="h-4 w-4" aria-hidden />
           {vsl.youtubeLabel}
         </a>
 
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+        <div className="mt-8 flex w-full max-w-xl flex-col items-center justify-center gap-3 sm:flex-row sm:flex-wrap">
           {capture ? (
             <button
               type="button"

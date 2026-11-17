@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Ministério Almeida Church">
+  <rect width="64" height="64" rx="14" fill="#1e2535"/>
+  <path fill="#944000" d="M32 10c1.1 0 2 .9 2 2v8h8c1.1 0 2 .9 2 2s-.9 2-2 2h-8v22c0 1.1-.9 2-2 2s-2-.9-2-2V24h-8c-1.1 0-2-.9-2-2s.9-2 2-2h8v-8c0-1.1.9-2 2-2z"/>
+  <circle cx="32" cy="50" r="3.2" fill="#f5f5f7"/>
+</svg>

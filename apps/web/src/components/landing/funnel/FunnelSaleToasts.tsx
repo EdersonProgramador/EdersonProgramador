@@ -11,8 +11,13 @@ export type FunnelSaleToast = {
   time: string;
 };
 
-const MAX_VISIBLE = 3;
 const RECENT_LIMIT = 8;
+/** Tempo visível de cada popup. */
+const VISIBLE_MS = 2000;
+/** Pausa aleatória entre um popup e o próximo (após sumir). */
+const GAP_MIN_MS = 6500;
+const GAP_MAX_MS = 14000;
+const FIRST_DELAY_MS = 1800;
 
 function randomInt(min: number, max: number) {
   return min + Math.floor(Math.random() * (max - min + 1));
@@ -55,7 +60,12 @@ function buildRandomToast(recent: Set<string>): FunnelSaleToast {
 
   while (recent.has(fp) && attempts < 12) {
     title = pickOne(source.titles, title);
-    value = fillTemplate(pickOne(source.valueTemplates), pickOne(variants.firstNames), pickOne(variants.cities), randomInt(120, 984));
+    value = fillTemplate(
+      pickOne(source.valueTemplates),
+      pickOne(variants.firstNames),
+      pickOne(variants.cities),
+      randomInt(120, 984)
+    );
     fp = toastFingerprint({ title, value });
     attempts += 1;
   }
@@ -72,53 +82,55 @@ function buildRandomToast(recent: Set<string>): FunnelSaleToast {
 }
 
 export function FunnelSaleToasts() {
-  const [toasts, setToasts] = useState<FunnelSaleToast[]>([]);
+  const [toast, setToast] = useState<FunnelSaleToast | null>(null);
   const recentRef = useRef<string[]>([]);
+  const timersRef = useRef<number[]>([]);
 
-  const pushToast = useCallback(() => {
-    const recent = new Set(recentRef.current);
-    const next = buildRandomToast(recent);
-    const fp = toastFingerprint(next);
-    recentRef.current = [...recentRef.current, fp].slice(-RECENT_LIMIT);
-    setToasts((prev) => [...prev, next].slice(-MAX_VISIBLE));
+  const clearTimers = useCallback(() => {
+    for (const id of timersRef.current) window.clearTimeout(id);
+    timersRef.current = [];
+  }, []);
+
+  const schedule = useCallback((fn: () => void, ms: number) => {
+    const id = window.setTimeout(fn, ms);
+    timersRef.current.push(id);
+    return id;
   }, []);
 
   useEffect(() => {
-    const firstDelay = window.setTimeout(pushToast, 1200);
-    let intervalId: number | undefined;
+    let cancelled = false;
 
-    const scheduleNext = () => {
-      const delay = randomInt(3200, 5600);
-      intervalId = window.setTimeout(() => {
-        pushToast();
-        scheduleNext();
-      }, delay);
+    const showOne = () => {
+      if (cancelled) return;
+      const recent = new Set(recentRef.current);
+      const next = buildRandomToast(recent);
+      recentRef.current = [...recentRef.current, toastFingerprint(next)].slice(-RECENT_LIMIT);
+      setToast(next);
+
+      schedule(() => {
+        if (cancelled) return;
+        setToast(null);
+        schedule(showOne, randomInt(GAP_MIN_MS, GAP_MAX_MS));
+      }, VISIBLE_MS);
     };
 
-    const startId = window.setTimeout(scheduleNext, randomInt(2800, 4200));
+    schedule(showOne, FIRST_DELAY_MS);
 
     return () => {
-      window.clearTimeout(firstDelay);
-      window.clearTimeout(startId);
-      if (intervalId !== undefined) window.clearTimeout(intervalId);
+      cancelled = true;
+      clearTimers();
     };
-  }, [pushToast]);
+  }, [clearTimers, schedule]);
 
-  if (toasts.length === 0) return null;
+  if (!toast) return null;
 
   return (
-    <div className="funnel-toast-stack" aria-live="polite" aria-relevant="additions">
-      {toasts.map((toast, i) => (
-        <div
-          key={toast.id}
-          className={`funnel-toast funnel-toast--${toast.type} animate-fade-up`}
-          style={{ animationDelay: `${i * 60}ms` }}
-        >
-          <p className="funnel-toast__title">{toast.title}</p>
-          <p className="funnel-toast__value">{toast.value}</p>
-          <p className="funnel-toast__time">{toast.time}</p>
-        </div>
-      ))}
+    <div className="funnel-toast-stack" aria-live="polite" aria-relevant="additions text">
+      <div key={toast.id} className={`funnel-toast funnel-toast--${toast.type} animate-fade-up`}>
+        <p className="funnel-toast__title">{toast.title}</p>
+        <p className="funnel-toast__value">{toast.value}</p>
+        <p className="funnel-toast__time">{toast.time}</p>
+      </div>
     </div>
   );
 }
