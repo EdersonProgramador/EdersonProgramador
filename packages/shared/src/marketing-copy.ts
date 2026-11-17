@@ -78,7 +78,7 @@ export const MARKETING_COPY = {
   stats: [
     { value: "5", label: "Etapas", emphasis: "Da ideia ao lançamento", href: "#processo" },
     { value: "3", label: "Pacotes", emphasis: "START · BUSINESS · ENTERPRISE", href: "#pacotes" },
-    { value: "5+", label: "Em produção", emphasis: "Cases publicados", href: "#producao" },
+    { value: "6+", label: "Em produção", emphasis: "Cases publicados", href: "#producao" },
     { value: "30d", label: "Conformidade", emphasis: "Garantia contratual", href: "#garantia" }
   ],
 

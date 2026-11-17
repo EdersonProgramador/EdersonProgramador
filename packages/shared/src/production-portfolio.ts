@@ -71,6 +71,16 @@ export const PORTFOLIO_PRODUCTION: PortfolioProductionItem[] = [
     tags: ["Site em produção", "E-commerce"],
     logoUrl: "/portfolio/baruc-shopping.svg",
     logoUrlFallback: "https://www.barucshopping.com.br/logo-baruc.svg"
+  },
+  {
+    kind: "production",
+    name: "Nylander Consulting",
+    description:
+      "Site institucional de consultoria jurídica empresarial, tributária e contratual — presença digital em Belém e em todo o Brasil, publicado na Vercel.",
+    url: "https://nyconsulting.vercel.app/",
+    tags: ["Site em produção", "Institucional", "Vercel"],
+    logoUrl: "/portfolio/ny-consulting.png",
+    logoUrlFallback: "https://nyconsulting.vercel.app/images/NYC.png"
   }
 ];
 
