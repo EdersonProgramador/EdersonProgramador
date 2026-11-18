@@ -15,23 +15,22 @@ export type ParsedSequenceStep = MarketingDripStep;
 
 export function parseSequenceJson(json: unknown): ParsedSequenceStep[] {
   if (!Array.isArray(json)) return [];
-  return json
-    .map((raw) => {
-      if (!raw || typeof raw !== "object") return null;
-      const o = raw as Record<string, unknown>;
-      const dayOffset = Number(o.dayOffset ?? 0);
-      const channel = String(o.channel ?? "email");
-      const bodyHtml = String(o.bodyHtml ?? "").trim();
-      if (!bodyHtml || !["email", "whatsapp", "sms"].includes(channel)) return null;
-      return {
-        dayOffset: Number.isFinite(dayOffset) ? Math.max(0, Math.floor(dayOffset)) : 0,
-        channel: channel as ParsedSequenceStep["channel"],
-        subject: typeof o.subject === "string" ? o.subject : undefined,
-        bodyHtml
-      };
-    })
-    .filter((s): s is ParsedSequenceStep => Boolean(s))
-    .sort((a, b) => a.dayOffset - b.dayOffset);
+  const steps: ParsedSequenceStep[] = [];
+  for (const raw of json) {
+    if (!raw || typeof raw !== "object") continue;
+    const o = raw as Record<string, unknown>;
+    const dayOffset = Number(o.dayOffset ?? 0);
+    const channel = String(o.channel ?? "email");
+    const bodyHtml = String(o.bodyHtml ?? "").trim();
+    if (!bodyHtml || !["email", "whatsapp", "sms"].includes(channel)) continue;
+    steps.push({
+      dayOffset: Number.isFinite(dayOffset) ? Math.max(0, Math.floor(dayOffset)) : 0,
+      channel: channel as ParsedSequenceStep["channel"],
+      ...(typeof o.subject === "string" ? { subject: o.subject } : {}),
+      bodyHtml
+    });
+  }
+  return steps.sort((a, b) => a.dayOffset - b.dayOffset);
 }
 
 function addDays(base: Date, days: number) {
