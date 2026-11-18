@@ -52,13 +52,22 @@ export async function executeAutomationStep(
       return res.skipped ? { status: "skipped", detail: res.detail } : res.ok ? { status: "ok" } : { status: "error", detail: res.detail };
     }
     case "message.send": {
-      const email = ctx.lead?.email ?? ctx.user?.email;
-      if (!email) return { status: "skipped", detail: "sem e-mail" };
+      const toInbox = String(cfg.to ?? "") === "inbox";
+      const email = toInbox
+        ? env.LEAD_NOTIFY_EMAIL || env.ADMIN_EMAIL
+        : (ctx.lead?.email ?? ctx.user?.email);
+      if (!email) return { status: "skipped", detail: toInbox ? "LEAD_NOTIFY_EMAIL/ADMIN_EMAIL ausente" : "sem e-mail" };
       const subject = interpolateTemplate(String(cfg.subject ?? "Mensagem"), ctx);
       const html = interpolateTemplate(String(cfg.html ?? "<p></p>"), ctx);
       const templateId = Number(cfg.templateId ?? 0);
       const res = await sendTransactionalMessage(
-        { to: email, name: ctx.lead?.name ?? ctx.user?.name, subject, html, templateId: templateId > 0 ? templateId : undefined },
+        {
+          to: email,
+          name: toInbox ? env.ADMIN_NAME : (ctx.lead?.name ?? ctx.user?.name),
+          subject,
+          html,
+          templateId: templateId > 0 ? templateId : undefined
+        },
         cfg,
         log
       );
@@ -73,8 +82,13 @@ export async function executeAutomationStep(
       return res.skipped ? { status: "skipped", detail: res.detail } : res.ok ? { status: "ok" } : { status: "error", detail: res.detail };
     }
     case "message.whatsapp": {
-      const phone = ctx.lead?.phone ?? (ctx.meta?.phone as string | undefined);
-      if (!phone?.trim()) return { status: "skipped", detail: "sem telefone" };
+      const toInbox = String(cfg.to ?? "") === "inbox";
+      const phone = toInbox
+        ? env.LEAD_NOTIFY_WHATSAPP
+        : (ctx.lead?.phone ?? (ctx.meta?.phone as string | undefined));
+      if (!phone?.trim()) {
+        return { status: "skipped", detail: toInbox ? "LEAD_NOTIFY_WHATSAPP ausente" : "sem telefone" };
+      }
       const text = interpolateTemplate(String(cfg.text ?? cfg.content ?? ""), ctx);
       if (!text.trim()) return { status: "skipped", detail: "texto vazio" };
       const res = await sendWhatsAppMessage(

@@ -16,8 +16,10 @@ import { registerSeedLaunchClient } from "../agency/seed-launch-signup.js";
 import { prisma } from "../prisma.js";
 import { ensureAcademyTestUser } from "../seed-academy-test-user.js";
 import { env } from "../env.js";
+import { notifyLeadInboxChannels } from "../agency/lead-inbox-notify.js";
 import { notifyAdminsOfNewLead } from "../agency/notifications.js";
 import { dispatchAutomationEvent } from "../automation/dispatch.js";
+import { enrollLeadInAcquisitionFlow } from "../marketing/campaign-drip.js";
 import { upsertMarketingContactProfile } from "../marketing/cdp-contact.js";
 import { notifyN8nLeadWebhook } from "../integrations/n8n-lead-webhook.js";
 
@@ -48,7 +50,15 @@ const leadSchema = z.object({
   budgetHint: z.string().optional(),
   packageTier: z.enum(["essential", "professional", "advanced"]).optional(),
   source: z
-    .enum(["landing", "seed_launch", "cadastro", "portal", "lead_popup", "launch_lp"])
+    .enum([
+      "landing",
+      "seed_launch",
+      "cadastro",
+      "portal",
+      "lead_popup",
+      "launch_lp",
+      "qualification_quiz"
+    ])
     .optional()
 });
 
@@ -373,6 +383,19 @@ export async function registerPublicRoutes(app: FastifyInstance) {
       request.log
     );
     void notifyAdminsOfNewLead(lead, request.log);
+    void notifyLeadInboxChannels(
+      {
+        id: lead.id,
+        name: lead.name,
+        email: lead.email,
+        phone: lead.phone,
+        source: lead.source,
+        packageTier: lead.packageTier,
+        message: lead.message
+      },
+      request.log
+    );
+    void enrollLeadInAcquisitionFlow(lead, request.log);
     touchCdpFromLead(lead);
     dispatchAutomationEvent(
       "lead.popup",
@@ -426,6 +449,19 @@ export async function registerPublicRoutes(app: FastifyInstance) {
       request.log
     );
     void notifyAdminsOfNewLead(lead, request.log);
+    void notifyLeadInboxChannels(
+      {
+        id: lead.id,
+        name: lead.name,
+        email: lead.email,
+        phone: lead.phone,
+        source: lead.source,
+        packageTier: lead.packageTier,
+        message: lead.message
+      },
+      request.log
+    );
+    void enrollLeadInAcquisitionFlow(lead, request.log);
     touchCdpFromLead(lead);
     dispatchAutomationEvent(
       "lead.created",

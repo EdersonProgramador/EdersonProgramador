@@ -409,15 +409,41 @@ model MarketingCampaign {
   id              String    @id @default(cuid())
   name            String
   channel         String    @default("email")
+  // BLAST | ACQUISITION | REMARKETING | FOLLOW_UP
+  kind            String    @default("BLAST")
   status          String    @default("DRAFT")
   subject         String?
   bodyHtml        String?
   audienceFilterJson Json?
+  // Sequência [{ dayOffset, channel, subject?, bodyHtml }]
+  sequenceJson    Json?
   scheduledAt     DateTime?
   sentAt          DateTime?
   statsJson       Json?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
+  enrollments     MarketingCampaignEnrollment[]
+}
+
+model MarketingCampaignEnrollment {
+  id          String   @id @default(cuid())
+  campaignId  String
+  campaign    MarketingCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  email       String
+  leadId      String?
+  // FIRST_CONTACT | REMARKETING | FOLLOW_UP
+  level       String
+  stepIndex   Int      @default(0)
+  status      String   @default("ACTIVE")
+  enrolledAt  DateTime @default(now())
+  nextSendAt  DateTime?
+  lastSentAt  DateTime?
+  metaJson    Json?
+
+  @@unique([campaignId, email])
+  @@index([status, nextSendAt])
+  @@index([email])
+  @@index([level])
 }
 
 model LoyaltyProgramConfig {

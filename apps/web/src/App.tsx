@@ -23,6 +23,7 @@ import { ShellLayout } from "./components/ShellLayout";
 import { LandingPage } from "./pages/LandingPage";
 import { LaunchPublicPage } from "./pages/LaunchPublicPage";
 import { CadastroPage } from "./pages/CadastroPage";
+import { QualificationFormPage } from "./pages/QualificationFormPage";
 import { AgencyLoginPage } from "./pages/LoginPage";
 import { AcademyLoginPage } from "./pages/AcademyLoginPage";
 import { CertificateVerifyPage } from "./pages/CertificateVerifyPage";
@@ -91,6 +92,7 @@ export default function App() {
         <Route index element={<LandingPage />} />
         <Route path="l/:slug" element={<LaunchPublicPage />} />
         <Route path="cadastro" element={<CadastroPage />} />
+        <Route path="formulario" element={<QualificationFormPage />} />
         <Route path="lancamento" element={<Navigate to="/cadastro" replace />} />
         <Route path="cursos" element={<AcademyPublicSalesPage />} />
         <Route path="cursos/carrinho" element={<AcademyCartPage />} />

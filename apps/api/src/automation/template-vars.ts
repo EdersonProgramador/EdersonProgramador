@@ -21,6 +21,7 @@ function buildVarMap(ctx: AutomationContext): Record<string, string> {
     LEAD_NAME: lead?.name ?? "",
     LEAD_EMAIL: lead?.email ?? "",
     LEAD_PHONE: lead?.phone ?? "",
+    LEAD_MESSAGE: lead?.message ?? "",
     LEAD_SOURCE: lead?.source ?? "",
     PACKAGE_TIER: tier ? packageTierLabel(tier) : lead?.packageTier ?? "",
     PROJECT_TITLE: project?.title ?? "",

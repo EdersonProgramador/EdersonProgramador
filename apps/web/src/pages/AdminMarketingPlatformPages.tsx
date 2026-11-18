@@ -2,9 +2,15 @@ import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   AGENCY_APP_BASE,
+  MARKETING_AUDIENCE_LEVEL_OPTIONS,
+  MARKETING_CAMPAIGN_KINDS,
   MARKETING_CAPABILITY_MATRIX,
   MARKETING_LEAD_SOURCE_OPTIONS,
-  marketingAudienceTierOptions
+  defaultSequenceForKind,
+  marketingAudienceTierOptions,
+  type MarketingAudienceLevel,
+  type MarketingCampaignKind,
+  type MarketingDripStep
 } from "@ederson-agencia/shared";
 import { ApiError, apiGet, apiPatch, apiPost } from "../api";
 import { AdminMarketingPlatformShell, useAdminProjectScope } from "../components/admin/admin-project-scope";
@@ -76,27 +82,58 @@ export function AdminMarketingPlatformHubPage() {
 
 type CampaignChannel = "email" | "sms" | "whatsapp";
 
-type AudienceFilter = { source?: string; packageTier?: string; limit?: number };
+type AudienceFilter = {
+  source?: string;
+  packageTier?: string;
+  limit?: number;
+  selectAll?: boolean;
+  level?: MarketingAudienceLevel;
+};
 
 type Campaign = {
   id: string;
   name: string;
   channel: CampaignChannel;
+  kind?: MarketingCampaignKind | string;
   status: string;
   subject: string | null;
   bodyHtml: string | null;
   audienceFilterJson: AudienceFilter | null;
+  sequenceJson?: MarketingDripStep[] | null;
   scheduledAt: string | null;
   sentAt: string | null;
   statsJson: { sent?: number; failed?: number; total?: number; skippedNoPhone?: number } | null;
+  _count?: { enrollments?: number };
 };
 
-function buildAudienceFilter(source: string, packageTier: string, limit: number): AudienceFilter {
+type EnrollmentRow = {
+  id: string;
+  email: string;
+  level: string;
+  stepIndex: number;
+  status: string;
+  nextSendAt: string | null;
+  lastSentAt: string | null;
+};
+
+function buildAudienceFilter(
+  source: string,
+  packageTier: string,
+  limit: number,
+  level: MarketingAudienceLevel | "",
+  selectAll: boolean
+): AudienceFilter {
   return {
     ...(source ? { source } : {}),
     ...(packageTier ? { packageTier } : {}),
+    ...(level ? { level } : {}),
+    ...(selectAll ? { selectAll: true } : {}),
     limit
   };
+}
+
+function kindLabel(kind?: string) {
+  return MARKETING_CAMPAIGN_KINDS.find((k) => k.id === kind)?.label ?? kind ?? "Avulso";
 }
 
 function AudienceFilterFields({
@@ -173,21 +210,44 @@ export function AdminMarketingCampaignsPage() {
   const { withProjectQuery } = useAdminProjectScope();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [kindFilter, setKindFilter] = useState<"ALL" | MarketingCampaignKind>("ALL");
   const [name, setName] = useState("");
   const [subject, setSubject] = useState("");
   const [bodyHtml, setBodyHtml] = useState("<p>Olá,</p><p>Conteúdo da campanha.</p>");
   const [draftChannel, setDraftChannel] = useState<CampaignChannel>("email");
+  const [draftKind, setDraftKind] = useState<MarketingCampaignKind>("ACQUISITION");
   const [audienceSource, setAudienceSource] = useState("");
   const [audienceTier, setAudienceTier] = useState("");
-  const [audienceLimit, setAudienceLimit] = useState(200);
+  const [audienceLimit, setAudienceLimit] = useState(2000);
+  const [audienceLevel, setAudienceLevel] = useState<MarketingAudienceLevel | "">("FIRST_CONTACT");
+  const [selectAll, setSelectAll] = useState(true);
   const [audienceCount, setAudienceCount] = useState<number | null>(null);
+  const [sequence, setSequence] = useState<MarketingDripStep[]>(defaultSequenceForKind("ACQUISITION"));
+  const [enrollments, setEnrollments] = useState<EnrollmentRow[]>([]);
+  const [byLevel, setByLevel] = useState<{ level: string; count: number }[]>([]);
   const [msg, setMsg] = useState<string | null>(null);
 
   const selected = campaigns.find((c) => c.id === selectedId) ?? null;
   const activeChannel = selected?.channel ?? draftChannel;
+  const visible = kindFilter === "ALL" ? campaigns : campaigns.filter((c) => c.kind === kindFilter);
 
   const load = useCallback(() => {
     void apiGet<{ campaigns: Campaign[] }>("/agency/admin/marketing/campaigns").then((r) => setCampaigns(r.campaigns));
+  }, []);
+
+  const loadEnrollments = useCallback((campaignId: string) => {
+    void apiGet<{ enrollments: EnrollmentRow[]; byLevel: { level: string; count: number }[]; sequence: MarketingDripStep[] }>(
+      `/agency/admin/marketing/campaigns/${campaignId}/enrollments`
+    )
+      .then((r) => {
+        setEnrollments(r.enrollments);
+        setByLevel(r.byLevel);
+        if (r.sequence?.length) setSequence(r.sequence);
+      })
+      .catch(() => {
+        setEnrollments([]);
+        setByLevel([]);
+      });
   }, []);
 
   useEffect(() => {
@@ -197,6 +257,8 @@ export function AdminMarketingCampaignsPage() {
   useEffect(() => {
     if (!selectedId) {
       setAudienceCount(null);
+      setEnrollments([]);
+      setByLevel([]);
       return;
     }
     const qs = new URLSearchParams({
@@ -208,14 +270,29 @@ export function AdminMarketingCampaignsPage() {
     void apiGet<{ count: number }>(`/agency/admin/marketing/campaigns/${selectedId}/audience?${qs}`).then((r) =>
       setAudienceCount(r.count)
     );
-  }, [selectedId, activeChannel, audienceSource, audienceTier, audienceLimit, campaigns]);
+    loadEnrollments(selectedId);
+  }, [selectedId, activeChannel, audienceSource, audienceTier, audienceLimit, campaigns, loadEnrollments]);
 
   function selectCampaign(c: Campaign) {
     setSelectedId(c.id);
     const f = c.audienceFilterJson ?? {};
     setAudienceSource(f.source ?? "");
     setAudienceTier(f.packageTier ?? "");
-    setAudienceLimit(f.limit ?? 200);
+    setAudienceLimit(f.limit ?? 2000);
+    setAudienceLevel(f.level ?? "");
+    setSelectAll(Boolean(f.selectAll));
+    setSequence(c.sequenceJson?.length ? c.sequenceJson : defaultSequenceForKind((c.kind as MarketingCampaignKind) || "BLAST"));
+  }
+
+  async function bootstrapDrip() {
+    setMsg(null);
+    try {
+      const res = await apiPost<{ message: string }>("/agency/admin/marketing/campaigns/bootstrap-drip", {});
+      load();
+      setMsg(res.message);
+    } catch (e) {
+      setMsg(e instanceof ApiError ? e.message : "Erro ao criar campanhas padrão");
+    }
   }
 
   async function create() {
@@ -224,14 +301,16 @@ export function AdminMarketingCampaignsPage() {
     try {
       await apiPost("/agency/admin/marketing/campaigns", {
         name,
+        kind: draftKind,
         subject: draftChannel === "email" ? subject : name,
-        bodyHtml,
+        bodyHtml: sequence[0]?.bodyHtml ?? bodyHtml,
         channel: draftChannel,
-        audienceFilter: buildAudienceFilter(audienceSource, audienceTier, audienceLimit)
+        sequence: draftKind === "BLAST" ? undefined : sequence,
+        audienceFilter: buildAudienceFilter(audienceSource, audienceTier, audienceLimit, audienceLevel, selectAll)
       });
       setName("");
       load();
-      setMsg("Campanha criada (rascunho).");
+      setMsg("Campanha criada.");
     } catch (e) {
       setMsg(e instanceof ApiError ? e.message : "Erro");
     }
@@ -243,14 +322,52 @@ export function AdminMarketingCampaignsPage() {
     try {
       await apiPatch(`/agency/admin/marketing/campaigns/${selected.id}`, {
         channel: selected.channel,
+        kind: selected.kind,
         subject: selected.subject,
         bodyHtml: selected.bodyHtml,
-        audienceFilter: buildAudienceFilter(audienceSource, audienceTier, audienceLimit)
+        sequence: selected.kind === "BLAST" ? null : sequence,
+        audienceFilter: buildAudienceFilter(audienceSource, audienceTier, audienceLimit, audienceLevel, selectAll)
       });
       load();
+      loadEnrollments(selected.id);
       setMsg("Campanha atualizada.");
     } catch (e) {
       setMsg(e instanceof ApiError ? e.message : "Erro");
+    }
+  }
+
+  async function enrollAll() {
+    if (!selected) return;
+    setMsg(null);
+    try {
+      const res = await apiPost<{ message: string }>(`/agency/admin/marketing/campaigns/${selected.id}/enroll-leads`, {
+        level: audienceLevel || undefined,
+        limit: audienceLimit
+      });
+      load();
+      loadEnrollments(selected.id);
+      setMsg(res.message);
+    } catch (e) {
+      setMsg(e instanceof ApiError ? e.message : "Erro ao matricular leads");
+    }
+  }
+
+  async function processDue() {
+    setMsg(null);
+    try {
+      const res = await apiPost<{ message: string; drip?: { processed: number } }>(
+        "/agency/admin/marketing/campaigns/process-due",
+        {}
+      );
+      if (selectedId) loadEnrollments(selectedId);
+      load();
+      setMsg(
+        res.drip
+          ? `${res.message} · ${res.drip.processed} disparo(s) da sequência processado(s).`
+          : res.message
+      );
+    } catch (e) {
+      setMsg(e instanceof ApiError ? e.message : "Erro ao processar fila");
     }
   }
 
@@ -262,7 +379,7 @@ export function AdminMarketingCampaignsPage() {
         channel: selected.channel,
         subject: selected.subject,
         bodyHtml: selected.bodyHtml,
-        audienceFilter: buildAudienceFilter(audienceSource, audienceTier, audienceLimit)
+        audienceFilter: buildAudienceFilter(audienceSource, audienceTier, audienceLimit, audienceLevel, selectAll)
       });
       const res = await apiPost<{ message: string; stats?: Campaign["statsJson"] }>(
         `/agency/admin/marketing/campaigns/${selected.id}/send`,
@@ -280,25 +397,105 @@ export function AdminMarketingCampaignsPage() {
     setCampaigns((prev) => prev.map((c) => (c.id === selectedId ? { ...c, ...patch } : c)));
   }
 
+  function updateStep(index: number, patch: Partial<MarketingDripStep>) {
+    setSequence((prev) => prev.map((step, i) => (i === index ? { ...step, ...patch } : step)));
+  }
+
+  function addStep() {
+    setSequence((prev) => [
+      ...prev,
+      {
+        dayOffset: (prev[prev.length - 1]?.dayOffset ?? 0) + 2,
+        channel: "email",
+        subject: "Próximo e-mail da sequência",
+        bodyHtml: "<p>Olá {{LEAD_NAME}},</p><p>Continue a jornada.</p>"
+      }
+    ]);
+  }
+
   return (
     <AdminMarketingPlatformShell>
       <AdminPageHead
-        title="Campanhas"
-        description="Audiência por fonte/pacote no CDP — e-mail, SMS (Brevo) e WhatsApp (webhook)."
+        title="Campanhas de aquisição"
+        description="Dispare e-mail e WhatsApp por sequência de datas — aquisição, re-marketing e follow-up."
       />
       <p className="text-sm text-[var(--app-text-muted)]">
+        Lead novo entra na base e é matriculado automaticamente.{" "}
         <Link className="text-emerald-400 hover:underline" to={withProjectQuery(`${ADMIN}/marketing/cdp`)}>
-          Sincronize o CDP
+          CDP
         </Link>{" "}
-        antes do primeiro envio ·{" "}
+        ·{" "}
         <Link className="text-emerald-400 hover:underline" to={withProjectQuery(`${ADMIN}/automacoes`)}>
           automações
-        </Link>{" "}
-        para jornadas transacionais.
+        </Link>
       </p>
+
+      <div className="flex flex-wrap gap-2">
+        <button type="button" className="btn-secondary" onClick={() => void bootstrapDrip()}>
+          Instalar campanhas padrão
+        </button>
+        <button type="button" className="btn-secondary" onClick={() => void processDue()}>
+          Processar disparos vencidos
+        </button>
+        {(["ALL", ...MARKETING_CAMPAIGN_KINDS.map((k) => k.id)] as const).map((id) => (
+          <button
+            key={id}
+            type="button"
+            className={`btn-ghost text-xs ${kindFilter === id ? "ring-1 ring-emerald-500/50" : ""}`}
+            onClick={() => setKindFilter(id)}
+          >
+            {id === "ALL" ? "Todas" : kindLabel(id)}
+          </button>
+        ))}
+      </div>
+
       <div className="panel space-y-3 p-4">
         <h2 className="text-sm font-semibold">Nova campanha</h2>
-        <input className="input w-full" placeholder="Nome" value={name} onChange={(e) => setName(e.target.value)} />
+        <div className="grid gap-3 sm:grid-cols-2">
+          <input className="input w-full sm:col-span-2" placeholder="Nome" value={name} onChange={(e) => setName(e.target.value)} />
+          <label className="block text-sm">
+            Tipo
+            <select
+              className="input mt-1 w-full"
+              value={draftKind}
+              onChange={(e) => {
+                const kind = e.target.value as MarketingCampaignKind;
+                setDraftKind(kind);
+                if (kind !== "BLAST") setSequence(defaultSequenceForKind(kind));
+                const level =
+                  kind === "ACQUISITION"
+                    ? "FIRST_CONTACT"
+                    : kind === "REMARKETING"
+                      ? "REMARKETING"
+                      : kind === "FOLLOW_UP"
+                        ? "FOLLOW_UP"
+                        : "";
+                setAudienceLevel(level);
+              }}
+            >
+              {MARKETING_CAMPAIGN_KINDS.map((k) => (
+                <option key={k.id} value={k.id}>
+                  {k.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block text-sm">
+            Nível da audiência
+            <select
+              className="input mt-1 w-full"
+              value={audienceLevel}
+              onChange={(e) => setAudienceLevel(e.target.value as MarketingAudienceLevel | "")}
+            >
+              <option value="">(definir depois)</option>
+              {MARKETING_AUDIENCE_LEVEL_OPTIONS.map((o) => (
+                <option key={o.id} value={o.id}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
         <AudienceFilterFields
           channel={draftChannel}
           source={audienceSource}
@@ -309,23 +506,82 @@ export function AdminMarketingCampaignsPage() {
           onLimit={setAudienceLimit}
           onChannel={setDraftChannel}
         />
-        {draftChannel === "email" ? (
+        <label className="flex items-center gap-2 text-sm">
+          <input type="checkbox" checked={selectAll} onChange={(e) => setSelectAll(e.target.checked)} />
+          Selecionar todos os leads elegíveis ao matricular
+        </label>
+        {draftKind === "BLAST" && draftChannel === "email" ? (
           <input className="input w-full" placeholder="Assunto" value={subject} onChange={(e) => setSubject(e.target.value)} />
         ) : null}
-        <textarea
-          className="input min-h-[120px] w-full font-mono text-xs"
-          placeholder={draftChannel === "email" ? "HTML do e-mail" : "Texto da mensagem"}
-          value={bodyHtml}
-          onChange={(e) => setBodyHtml(e.target.value)}
-        />
+        {draftKind === "BLAST" ? (
+          <textarea
+            className="input min-h-[120px] w-full font-mono text-xs"
+            placeholder={draftChannel === "email" ? "HTML do e-mail" : "Texto da mensagem"}
+            value={bodyHtml}
+            onChange={(e) => setBodyHtml(e.target.value)}
+          />
+        ) : (
+          <div className="space-y-3 rounded-xl border border-white/10 p-3">
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-white/60">Sequência por data</h3>
+              <button type="button" className="btn-ghost text-xs" onClick={addStep}>
+                + passo
+              </button>
+            </div>
+            {sequence.map((step, index) => (
+              <div key={`${index}-${step.dayOffset}`} className="grid gap-2 rounded-lg bg-black/20 p-3 sm:grid-cols-4">
+                <label className="text-xs">
+                  Dia +
+                  <input
+                    type="number"
+                    min={0}
+                    className="input mt-1 w-full"
+                    value={step.dayOffset}
+                    onChange={(e) => updateStep(index, { dayOffset: Number(e.target.value) })}
+                  />
+                </label>
+                <label className="text-xs">
+                  Canal
+                  <select
+                    className="input mt-1 w-full"
+                    value={step.channel}
+                    onChange={(e) => updateStep(index, { channel: e.target.value as MarketingDripStep["channel"] })}
+                  >
+                    <option value="email">E-mail</option>
+                    <option value="whatsapp">WhatsApp</option>
+                    <option value="sms">SMS</option>
+                  </select>
+                </label>
+                <label className="text-xs sm:col-span-2">
+                  Assunto (e-mail)
+                  <input
+                    className="input mt-1 w-full"
+                    value={step.subject ?? ""}
+                    onChange={(e) => updateStep(index, { subject: e.target.value })}
+                    disabled={step.channel !== "email"}
+                  />
+                </label>
+                <label className="text-xs sm:col-span-4">
+                  Conteúdo
+                  <textarea
+                    className="input mt-1 min-h-[72px] w-full font-mono text-xs"
+                    value={step.bodyHtml}
+                    onChange={(e) => updateStep(index, { bodyHtml: e.target.value })}
+                  />
+                </label>
+              </div>
+            ))}
+          </div>
+        )}
         <button type="button" className="btn-primary" onClick={() => void create()}>
-          Criar rascunho
+          Criar campanha
         </button>
         {msg ? <p className="text-sm text-[var(--app-text-muted)]">{msg}</p> : null}
       </div>
+
       <div className="grid gap-4 lg:grid-cols-2">
         <ul className="space-y-2">
-          {campaigns.map((c) => (
+          {visible.map((c) => (
             <li key={c.id}>
               <button
                 type="button"
@@ -338,7 +594,8 @@ export function AdminMarketingCampaignsPage() {
                 <div>
                   <div className="marketing-platform-card__title">{c.name}</div>
                   <p className="marketing-platform-card__desc">
-                    {c.status} · {c.channel} {c.subject ? `· ${c.subject}` : ""}
+                    {kindLabel(c.kind)} · {c.status} · {c.channel}
+                    {c._count?.enrollments != null ? ` · ${c._count.enrollments} matriculados` : ""}
                     {c.statsJson?.total != null ? ` · ${c.statsJson.sent}/${c.statsJson.total} enviados` : ""}
                   </p>
                 </div>
@@ -348,7 +605,10 @@ export function AdminMarketingCampaignsPage() {
         </ul>
         {selected ? (
           <div className="panel space-y-3 p-4">
-            <h2 className="text-sm font-semibold">Editar: {selected.name}</h2>
+            <h2 className="text-sm font-semibold">
+              {selected.name}{" "}
+              <span className="text-xs font-normal text-white/50">({kindLabel(selected.kind)})</span>
+            </h2>
             <AudienceFilterFields
               channel={selected.channel}
               source={audienceSource}
@@ -359,35 +619,139 @@ export function AdminMarketingCampaignsPage() {
               onLimit={setAudienceLimit}
               onChannel={(ch) => patchSelected({ channel: ch })}
             />
-            {selected.channel === "email" ? (
-              <input
-                className="input w-full"
-                value={selected.subject ?? ""}
-                onChange={(e) => patchSelected({ subject: e.target.value })}
-                placeholder="Assunto"
-              />
-            ) : null}
-            <textarea
-              className="input min-h-[160px] w-full font-mono text-xs"
-              value={selected.bodyHtml ?? ""}
-              onChange={(e) => patchSelected({ bodyHtml: e.target.value })}
-            />
+            <label className="block text-sm">
+              Nível
+              <select
+                className="input mt-1 w-full"
+                value={audienceLevel}
+                onChange={(e) => setAudienceLevel(e.target.value as MarketingAudienceLevel | "")}
+              >
+                <option value="">Todos na matrícula</option>
+                {MARKETING_AUDIENCE_LEVEL_OPTIONS.map((o) => (
+                  <option key={o.id} value={o.id}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={selectAll} onChange={(e) => setSelectAll(e.target.checked)} />
+              Selecionar todos os leads elegíveis
+            </label>
+
+            {selected.kind && selected.kind !== "BLAST" ? (
+              <div className="space-y-2 rounded-xl border border-white/10 p-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-semibold uppercase tracking-wide text-white/60">Sequência</h3>
+                  <button type="button" className="btn-ghost text-xs" onClick={addStep}>
+                    + passo
+                  </button>
+                </div>
+                {sequence.map((step, index) => (
+                  <div key={`sel-${index}`} className="grid gap-2 sm:grid-cols-4">
+                    <input
+                      type="number"
+                      className="input"
+                      value={step.dayOffset}
+                      onChange={(e) => updateStep(index, { dayOffset: Number(e.target.value) })}
+                      title="Dia"
+                    />
+                    <select
+                      className="input"
+                      value={step.channel}
+                      onChange={(e) => updateStep(index, { channel: e.target.value as MarketingDripStep["channel"] })}
+                    >
+                      <option value="email">E-mail</option>
+                      <option value="whatsapp">WhatsApp</option>
+                      <option value="sms">SMS</option>
+                    </select>
+                    <input
+                      className="input sm:col-span-2"
+                      value={step.subject ?? ""}
+                      onChange={(e) => updateStep(index, { subject: e.target.value })}
+                      placeholder="Assunto"
+                    />
+                    <textarea
+                      className="input min-h-[64px] font-mono text-xs sm:col-span-4"
+                      value={step.bodyHtml}
+                      onChange={(e) => updateStep(index, { bodyHtml: e.target.value })}
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <>
+                {selected.channel === "email" ? (
+                  <input
+                    className="input w-full"
+                    value={selected.subject ?? ""}
+                    onChange={(e) => patchSelected({ subject: e.target.value })}
+                    placeholder="Assunto"
+                  />
+                ) : null}
+                <textarea
+                  className="input min-h-[160px] w-full font-mono text-xs"
+                  value={selected.bodyHtml ?? ""}
+                  onChange={(e) => patchSelected({ bodyHtml: e.target.value })}
+                />
+              </>
+            )}
+
             <p className="text-xs text-[var(--app-text-muted)]">
-              Audiência estimada ({selected.channel}): <strong>{audienceCount ?? "…"}</strong> destinatário(s)
+              Audiência CDP ({selected.channel}): <strong>{audienceCount ?? "…"}</strong>
+              {byLevel.length ? (
+                <>
+                  {" "}
+                  · matrículas:{" "}
+                  {byLevel.map((b) => `${b.level} ${b.count}`).join(" · ")}
+                </>
+              ) : null}
             </p>
             <div className="flex flex-wrap gap-2">
               <button type="button" className="btn-secondary" onClick={() => void saveSelected()}>
                 Salvar
               </button>
-              {["DRAFT", "SCHEDULED"].includes(selected.status) ? (
+              <button type="button" className="btn-primary" onClick={() => void enrollAll()}>
+                Matricular leads
+              </button>
+              {selected.kind === "BLAST" && ["DRAFT", "SCHEDULED"].includes(selected.status) ? (
                 <button type="button" className="btn-primary" onClick={() => void sendSelected()}>
                   Enviar agora
                 </button>
               ) : null}
             </div>
+
+            {enrollments.length ? (
+              <div className="max-h-56 overflow-auto rounded-lg border border-white/10">
+                <table className="w-full text-left text-xs">
+                  <thead className="sticky top-0 bg-[#0c0c0f] text-white/50">
+                    <tr>
+                      <th className="px-2 py-1">E-mail</th>
+                      <th className="px-2 py-1">Nível</th>
+                      <th className="px-2 py-1">Passo</th>
+                      <th className="px-2 py-1">Status</th>
+                      <th className="px-2 py-1">Próximo</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {enrollments.map((row) => (
+                      <tr key={row.id} className="border-t border-white/5">
+                        <td className="px-2 py-1">{row.email}</td>
+                        <td className="px-2 py-1">{row.level}</td>
+                        <td className="px-2 py-1">{row.stepIndex + 1}</td>
+                        <td className="px-2 py-1">{row.status}</td>
+                        <td className="px-2 py-1">
+                          {row.nextSendAt ? new Date(row.nextSendAt).toLocaleString("pt-BR") : "—"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : null}
           </div>
         ) : (
-          <p className="text-sm text-[var(--app-text-muted)]">Selecione uma campanha para editar e enviar.</p>
+          <p className="text-sm text-[var(--app-text-muted)]">Selecione uma campanha para gerenciar sequência e matrículas.</p>
         )}
       </div>
     </AdminMarketingPlatformShell>

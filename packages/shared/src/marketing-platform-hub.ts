@@ -6,7 +6,7 @@ export const MARKETING_PLATFORM_FEATURES = [
   {
     id: "campaigns",
     title: "Campanhas e automação",
-    description: "Aumente as conversões com jornadas multicanal. Editor de fluxos e campanhas na agência.",
+    description: "Aquisição, re-marketing e follow-up com sequência de e-mail/WhatsApp por data.",
     adminPath: "marketing/campanhas",
     icon: "megaphone"
   },

@@ -171,9 +171,21 @@ void (async () => {
   try {
     await ensureLoyaltyProgramDefault();
     await ensureDefaultMarketingAutomations();
+    const { ensureDefaultDripCampaigns } = await import("./marketing/campaign-drip.js");
+    await ensureDefaultDripCampaigns(app.log);
     const report = await evaluateMarketingSetup();
     app.log.info({ ready: report.ready, score: `${report.score}/${report.total}` }, "Marketing bootstrap");
   } catch (err) {
     app.log.warn({ err }, "Bootstrap marketing não concluído");
   }
+
+  const dripTickMs = 60_000;
+  setInterval(() => {
+    void import("./marketing/campaign-drip.js")
+      .then(({ processDueCampaignEnrollments }) => processDueCampaignEnrollments(app.log))
+      .catch((err) => app.log.warn({ err }, "Tick de campanhas drip falhou"));
+    void import("./marketing/campaign-send.js")
+      .then(({ processDueScheduledCampaigns }) => processDueScheduledCampaigns(app.log))
+      .catch((err) => app.log.warn({ err }, "Tick de campanhas agendadas falhou"));
+  }, dripTickMs);
 })();

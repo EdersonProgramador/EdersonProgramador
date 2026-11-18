@@ -162,6 +162,18 @@ export {
   marketingAudienceTierOptions
 } from "./marketing-audience.js";
 export {
+  DEFAULT_ACQUISITION_SEQUENCE,
+  DEFAULT_FOLLOW_UP_SEQUENCE,
+  DEFAULT_REMARKETING_SEQUENCE,
+  MARKETING_AUDIENCE_LEVEL_OPTIONS,
+  MARKETING_CAMPAIGN_KINDS,
+  defaultCampaignNameForKind,
+  defaultSequenceForKind,
+  type MarketingAudienceLevel,
+  type MarketingCampaignKind,
+  type MarketingDripStep
+} from "./marketing-campaign-drip.js";
+export {
   AUTOMATION_ACTION_IDS,
   AUTOMATION_ACTION_OPTIONS,
   AUTOMATION_TRIGGER_IDS,
@@ -191,6 +203,14 @@ export {
 export { LAUNCH_FUNNEL_COPY } from "./launch-funnel-copy.js";
 export { SEED_LAUNCH_COPY, SEED_LAUNCH_PATH } from "./seed-launch-copy.js";
 export { CADASTRO_COPY, CADASTRO_PATH, CADASTRO_PUBLIC_URL } from "./cadastro-copy.js";
+export {
+  BR_UF_OPTIONS,
+  QUALIFICATION_FORM_COPY,
+  QUALIFICATION_FORM_PATH,
+  QUALIFICATION_FORM_PUBLIC_URL,
+  QUALIFICATION_STEP_ORDER,
+  type QualificationAnswerKey
+} from "./qualification-form-copy.js";
 export {
   AGENCY_CONTRACT_VERSION,
   AGENCY_FUNNEL_COPY,

@@ -5,6 +5,7 @@ export const MARKETING_LEAD_SOURCE_OPTIONS = [
   { id: "", label: "Todas as fontes" },
   { id: "landing", label: "Landing principal" },
   { id: "lead_popup", label: "Popup do funil" },
+  { id: "qualification_quiz", label: "Quiz de diagnóstico" },
   { id: "academy_sales", label: "Academia / cursos" },
   { id: "launch_lp", label: "LP de lançamento" },
   { id: "client_hire", label: "Contratação (funil)" },

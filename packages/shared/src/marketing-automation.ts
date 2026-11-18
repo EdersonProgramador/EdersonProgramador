@@ -207,6 +207,26 @@ export function defaultLeadCaptureAutomation(): Omit<MarketingAutomationDto, "id
           html: "<p>Olá {{FIRSTNAME}},</p><p>Recebemos seu pedido. Em breve nossa equipe retorna com o próximo passo.</p>"
         }
       },
+      {
+        id: "s3b",
+        type: "message.send",
+        enabled: true,
+        config: {
+          provider: "auto",
+          to: "inbox",
+          subject: "Novo lead — {{LEAD_NAME}}",
+          html: "<p><strong>{{LEAD_NAME}}</strong> · {{LEAD_EMAIL}} · {{LEAD_PHONE}}</p><pre>{{LEAD_MESSAGE}}</pre>"
+        }
+      },
+      {
+        id: "s3c",
+        type: "message.whatsapp",
+        enabled: true,
+        config: {
+          to: "inbox",
+          text: "Novo lead: {{LEAD_NAME}}\n{{LEAD_EMAIL}}\n{{LEAD_PHONE}}\n\n{{LEAD_MESSAGE}}"
+        }
+      },
       { id: "s4", type: "webhook.call", enabled: true, config: { preset: "n8n_lead" } },
       { id: "s5", type: "notify.admins", enabled: true, config: { title: "Novo lead", body: "{{LEAD_NAME}} · {{LEAD_EMAIL}}" } }
     ]

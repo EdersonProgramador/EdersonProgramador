@@ -154,6 +154,20 @@ const envSchema = z
       (value) => (typeof value === "string" && value.trim() ? value.trim() : undefined),
       z.string().url().optional()
     ),
+    /** Inbox de recebimento de leads (e-mail). Fallback: ADMIN_EMAIL. */
+    LEAD_NOTIFY_EMAIL: z.preprocess((value) => {
+      if (typeof value !== "string") return undefined;
+      const trimmed = value.trim().toLowerCase();
+      if (!trimmed) return undefined;
+      return z.string().email().safeParse(trimmed).success ? trimmed : undefined;
+    }, z.string().email().optional()),
+    /** WhatsApp de recebimento (E.164 ou DDI+DDD+número). */
+    LEAD_NOTIFY_WHATSAPP: z.preprocess((value) => {
+      if (typeof value !== "string") return undefined;
+      const digits = value.replace(/\D/g, "");
+      if (digits.length < 10) return undefined;
+      return digits.startsWith("55") ? digits : `55${digits}`;
+    }, z.string().min(12).optional()),
     MESSAGING_CONTACT_PROVIDER: z.preprocess(
       (value) => (typeof value === "string" && value.trim() ? value.trim() : undefined),
       z.enum(["auto", "brevo", "leadlovers", "webhook", "none"]).optional()

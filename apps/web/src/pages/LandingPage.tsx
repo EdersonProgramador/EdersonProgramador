@@ -75,7 +75,8 @@ const LANDING_NAV = [
   { href: "#entregas", label: "Entregáveis" },
   { href: "#pacotes", label: "Pacotes" },
   { href: "#producao", label: "Projetos" },
-  { href: "#contato", label: "Contato" }
+  { href: "#contato", label: "Contato" },
+  { href: "/formulario", label: "Diagnóstico" }
 ] as const;
 
 const NAV_CTA_SHORT = "Reservar vaga";
@@ -100,11 +101,17 @@ function SalesFooter({ onOpenCapture }: { onOpenCapture?: () => void }) {
             </a>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-3">
-            {LANDING_NAV.map((item) => (
-              <a key={item.href} href={item.href} className="text-sm text-white/45 transition hover:text-blue-glow">
-                {item.label}
-              </a>
-            ))}
+            {LANDING_NAV.map((item) =>
+              item.href.startsWith("/") ? (
+                <Link key={item.href} to={item.href} className="text-sm text-white/45 transition hover:text-blue-glow">
+                  {item.label}
+                </Link>
+              ) : (
+                <a key={item.href} href={item.href} className="text-sm text-white/45 transition hover:text-blue-glow">
+                  {item.label}
+                </a>
+              )
+            )}
             <Link to="/login" className="text-sm text-white/45 transition hover:text-blue-glow">
               {copy.loginCta}
             </Link>

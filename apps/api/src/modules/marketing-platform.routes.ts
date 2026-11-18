@@ -1,10 +1,14 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import {
+  MARKETING_AUDIENCE_LEVEL_OPTIONS,
+  MARKETING_CAMPAIGN_KINDS,
   MARKETING_INTEGRATION_CATALOG,
   MARKETING_LEAD_SOURCE_OPTIONS,
   MARKETING_PLATFORM_CHANNELS,
-  marketingAudienceTierOptions
+  defaultSequenceForKind,
+  marketingAudienceTierOptions,
+  type MarketingCampaignKind
 } from "@ederson-agencia/shared";
 import { Prisma } from "@prisma/client";
 import { requireRole } from "../auth.js";
@@ -16,6 +20,12 @@ import {
   executeCampaignSend,
   processDueScheduledCampaigns
 } from "../marketing/campaign-send.js";
+import {
+  ensureDefaultDripCampaigns,
+  enrollAllLeadsByLevel,
+  parseSequenceJson,
+  processDueCampaignEnrollments
+} from "../marketing/campaign-drip.js";
 import { syncMarketingContactsFromLeads } from "../marketing/sync-contacts-from-leads.js";
 import { getLoyaltyRules } from "../marketing/loyalty.js";
 import { evaluateMarketingSetup, missingAutomationTriggers } from "../marketing/marketing-setup.js";
@@ -23,6 +33,14 @@ import { ensureDefaultMarketingAutomations } from "../automation/ensure-defaults
 
 const campaignChannelSchema = z.enum(["email", "sms", "whatsapp", "push"]);
 const campaignStatusSchema = z.enum(["DRAFT", "SCHEDULED", "SENDING", "SENT", "CANCELLED"]);
+const campaignKindSchema = z.enum(["BLAST", "ACQUISITION", "REMARKETING", "FOLLOW_UP"]);
+const audienceLevelSchema = z.enum(["FIRST_CONTACT", "REMARKETING", "FOLLOW_UP", "ALL"]);
+const dripStepSchema = z.object({
+  dayOffset: z.number().int().min(0).max(365),
+  channel: z.enum(["email", "whatsapp", "sms"]),
+  subject: z.string().max(200).optional(),
+  bodyHtml: z.string().min(1).max(50_000)
+});
 
 export async function registerMarketingPlatformRoutes(app: FastifyInstance) {
   app.get("/agency/admin/marketing/setup", async (request) => {
@@ -81,8 +99,29 @@ export async function registerMarketingPlatformRoutes(app: FastifyInstance) {
   app.get("/agency/admin/marketing/campaigns", async (request) => {
     requireRole(request.agencyUser ?? null, ["ADMIN"]);
     void processDueScheduledCampaigns(request.log);
-    const rows = await prisma.marketingCampaign.findMany({ orderBy: { updatedAt: "desc" }, take: 50 });
-    return { campaigns: rows };
+    void processDueCampaignEnrollments(request.log);
+    const rows = await prisma.marketingCampaign.findMany({
+      orderBy: { updatedAt: "desc" },
+      take: 80,
+      include: {
+        _count: { select: { enrollments: true } }
+      }
+    });
+    return {
+      campaigns: rows,
+      kinds: MARKETING_CAMPAIGN_KINDS,
+      levels: MARKETING_AUDIENCE_LEVEL_OPTIONS
+    };
+  });
+
+  app.post("/agency/admin/marketing/campaigns/bootstrap-drip", async (request) => {
+    requireRole(request.agencyUser ?? null, ["ADMIN"]);
+    const result = await ensureDefaultDripCampaigns(request.log);
+    const rows = await prisma.marketingCampaign.findMany({
+      where: { kind: { in: ["ACQUISITION", "REMARKETING", "FOLLOW_UP"] } },
+      orderBy: { kind: "asc" }
+    });
+    return { message: "Campanhas de aquisição / remarketing / follow-up prontas.", ...result, campaigns: rows };
   });
 
   app.post("/agency/admin/marketing/campaigns", async (request, reply) => {
@@ -91,28 +130,38 @@ export async function registerMarketingPlatformRoutes(app: FastifyInstance) {
       .object({
         name: z.string().min(2).max(120),
         channel: campaignChannelSchema.default("email"),
+        kind: campaignKindSchema.default("BLAST"),
         subject: z.string().max(200).optional(),
         bodyHtml: z.string().max(50_000).optional(),
         scheduledAt: z.string().datetime().optional().nullable(),
+        sequence: z.array(dripStepSchema).max(30).optional(),
         audienceFilter: z
           .object({
             source: z.string().optional(),
             packageTier: z.string().optional(),
-            limit: z.number().int().min(1).max(2000).optional()
+            limit: z.number().int().min(1).max(2000).optional(),
+            selectAll: z.boolean().optional(),
+            level: audienceLevelSchema.optional()
           })
           .optional()
       })
       .parse(request.body);
 
+    const sequence =
+      body.sequence ??
+      (body.kind !== "BLAST" ? defaultSequenceForKind(body.kind as MarketingCampaignKind) : undefined);
+
     const row = await prisma.marketingCampaign.create({
       data: {
         name: body.name,
         channel: body.channel,
+        kind: body.kind,
         subject: body.subject,
         bodyHtml: body.bodyHtml,
+        sequenceJson: sequence ? (sequence as unknown as Prisma.InputJsonValue) : undefined,
         audienceFilterJson: (body.audienceFilter ?? {}) as Prisma.InputJsonValue,
-        status: body.scheduledAt ? "SCHEDULED" : "DRAFT",
-        scheduledAt: body.scheduledAt ? new Date(body.scheduledAt) : null
+        status: body.scheduledAt || body.kind !== "BLAST" ? "SCHEDULED" : "DRAFT",
+        scheduledAt: body.scheduledAt ? new Date(body.scheduledAt) : body.kind !== "BLAST" ? new Date() : null
       }
     });
     return reply.code(201).send({ campaign: row });
@@ -125,15 +174,19 @@ export async function registerMarketingPlatformRoutes(app: FastifyInstance) {
       .object({
         name: z.string().min(2).max(120).optional(),
         channel: campaignChannelSchema.optional(),
+        kind: campaignKindSchema.optional(),
         status: campaignStatusSchema.optional(),
         subject: z.string().max(200).optional().nullable(),
         bodyHtml: z.string().max(50_000).optional().nullable(),
         scheduledAt: z.string().datetime().optional().nullable(),
+        sequence: z.array(dripStepSchema).max(30).optional().nullable(),
         audienceFilter: z
           .object({
             source: z.string().optional(),
             packageTier: z.string().optional(),
-            limit: z.number().int().min(1).max(2000).optional()
+            limit: z.number().int().min(1).max(2000).optional(),
+            selectAll: z.boolean().optional(),
+            level: audienceLevelSchema.optional()
           })
           .optional()
       })
@@ -147,16 +200,78 @@ export async function registerMarketingPlatformRoutes(app: FastifyInstance) {
       data: {
         name: body.name,
         channel: body.channel,
+        kind: body.kind,
         status: body.status,
         subject: body.subject,
         bodyHtml: body.bodyHtml,
+        sequenceJson:
+          body.sequence === undefined
+            ? undefined
+            : body.sequence === null
+              ? Prisma.JsonNull
+              : (body.sequence as unknown as Prisma.InputJsonValue),
         audienceFilterJson:
           body.audienceFilter === undefined ? undefined : (body.audienceFilter as Prisma.InputJsonValue),
         scheduledAt: body.scheduledAt === undefined ? undefined : body.scheduledAt ? new Date(body.scheduledAt) : null,
         sentAt: body.status === "SENT" ? new Date() : undefined
       }
     });
-    return { campaign: row };
+    return { campaign: row, sequence: parseSequenceJson(row.sequenceJson) };
+  });
+
+  app.post("/agency/admin/marketing/campaigns/:id/enroll-leads", async (request, reply) => {
+    requireRole(request.agencyUser ?? null, ["ADMIN"]);
+    const params = z.object({ id: z.string() }).parse(request.params);
+    const body = z
+      .object({
+        level: audienceLevelSchema.optional(),
+        limit: z.number().int().min(1).max(5000).optional()
+      })
+      .parse(request.body ?? {});
+    await syncMarketingContactsFromLeads(Math.min(body.limit ?? 2000, 2000));
+    const result = await enrollAllLeadsByLevel(params.id, body, request.log);
+    if (!result.ok) return reply.code(404).send({ message: result.message });
+    return result;
+  });
+
+  app.get("/agency/admin/marketing/campaigns/:id/enrollments", async (request, reply) => {
+    requireRole(request.agencyUser ?? null, ["ADMIN"]);
+    const params = z.object({ id: z.string() }).parse(request.params);
+    const query = z
+      .object({
+        status: z.string().optional(),
+        level: audienceLevelSchema.optional(),
+        limit: z.coerce.number().int().min(1).max(500).default(100)
+      })
+      .parse(request.query);
+    const campaign = await prisma.marketingCampaign.findUnique({ where: { id: params.id } });
+    if (!campaign) return reply.code(404).send({ message: "Campanha não encontrada." });
+    const enrollments = await prisma.marketingCampaignEnrollment.findMany({
+      where: {
+        campaignId: params.id,
+        ...(query.status ? { status: query.status } : {}),
+        ...(query.level && query.level !== "ALL" ? { level: query.level } : {})
+      },
+      orderBy: [{ status: "asc" }, { nextSendAt: "asc" }],
+      take: query.limit
+    });
+    const byLevel = await prisma.marketingCampaignEnrollment.groupBy({
+      by: ["level"],
+      where: { campaignId: params.id },
+      _count: { _all: true }
+    });
+    return {
+      enrollments,
+      sequence: parseSequenceJson(campaign.sequenceJson),
+      byLevel: byLevel.map((r) => ({ level: r.level, count: r._count._all }))
+    };
+  });
+
+  app.post("/agency/admin/marketing/campaigns/process-due", async (request) => {
+    requireRole(request.agencyUser ?? null, ["ADMIN"]);
+    const scheduled = await processDueScheduledCampaigns(request.log);
+    const drip = await processDueCampaignEnrollments(request.log);
+    return { message: "Fila de disparos processada.", drip, scheduled: scheduled ?? null };
   });
 
   app.get("/agency/admin/marketing/campaigns/:id/audience", async (request, reply) => {
