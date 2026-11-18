@@ -1,16 +1,26 @@
 /* Funil agressivo — LP estilo comunidade / low ticket (referência visual) */
 
-.landing-shell--funnel-aggressive .site-nav__bar--funnel .site-nav__links {
-  mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+.funnel-hero__logo-mark {
+  display: block;
+  filter:
+    drop-shadow(0 0 10px rgb(56 189 248 / 0.45))
+    drop-shadow(0 0 28px rgb(59 130 246 / 0.28));
 }
 
-.landing-shell--funnel-aggressive .site-nav__bar--funnel .site-nav__logo-slot {
-  max-width: min(12rem, 28vw);
+.funnel-hero__logo-mark .brand-logo-img--md {
+  display: block;
+  width: auto;
+  height: auto;
+  max-height: 7rem;
+  max-width: min(94vw, 28rem);
+  margin: 0 auto;
+  object-fit: contain;
 }
 
-@media (min-width: 1536px) {
-  .landing-shell--funnel-aggressive .site-nav__bar--funnel .site-nav__logo-slot {
-    max-width: var(--logo-slot-w, 16.5rem);
+@media (min-width: 768px) {
+  .funnel-hero__logo-mark .brand-logo-img--md {
+    max-height: 8.5rem;
+    max-width: min(36rem, 48vw);
   }
 }
 
@@ -124,7 +134,7 @@
 
 /* Hero VSL */
 .funnel-hero {
-  @apply relative overflow-hidden pb-12 pt-[calc(var(--hero-nav-offset,6rem)+1rem)];
+  @apply relative overflow-hidden pb-12 pt-1 sm:pt-1.5;
   background: radial-gradient(ellipse 80% 60% at 50% -20%, rgb(34 197 94 / 0.15), transparent 55%),
     linear-gradient(180deg, #0a0a0a 0%, #050505 100%);
 }
@@ -187,14 +197,14 @@
   @apply h-full w-full border-0;
 }
 
-/* Notificações de venda — um por vez, canto superior direito abaixo do menu */
+/* Notificações de venda — um por vez, canto superior direito */
 .funnel-toast-stack {
-  @apply pointer-events-none fixed right-3 z-40 flex w-[min(17rem,calc(100vw-1.5rem))] justify-center sm:right-6;
-  top: calc(4.25rem + env(safe-area-inset-top, 0px));
+  @apply pointer-events-none fixed right-1.5 z-40 flex w-[min(9.25rem,calc(100vw-7rem))] justify-end sm:right-6 sm:w-[min(17rem,calc(100vw-1.5rem))] sm:justify-center;
+  top: calc(0.35rem + env(safe-area-inset-top, 0px));
 }
 
 .funnel-toast {
-  @apply animate-fade-up rounded-xl border px-4 py-3 text-left text-xs shadow-lg;
+  @apply animate-fade-up rounded-md border px-2 py-1.5 text-left text-[9px] shadow-lg sm:rounded-xl sm:px-4 sm:py-3 sm:text-xs;
   border-color: var(--funnel-border);
   background: #0c0c0f;
   box-shadow: 0 8px 28px rgb(0 0 0 / 0.55);
@@ -209,15 +219,15 @@
 }
 
 .funnel-toast__title {
-  @apply font-bold text-white;
+  @apply font-bold leading-snug text-white;
 }
 
 .funnel-toast__value {
-  @apply mt-0.5 text-emerald-400;
+  @apply mt-0.5 leading-snug text-emerald-400;
 }
 
 .funnel-toast__time {
-  @apply mt-1 text-[10px] text-white/45;
+  @apply mt-0.5 text-[8px] text-white/45 sm:mt-1 sm:text-[10px];
 }
 
 /* Pipeline — crescente psicológica: clareza → estratégia → construção → ação → maestria (6em7) */
@@ -626,7 +636,7 @@
 
 @media (min-width: 640px) {
   .funnel-toast-stack {
-    top: calc(4.75rem + env(safe-area-inset-top, 0px));
+    top: calc(1rem + env(safe-area-inset-top, 0px));
   }
 }
 

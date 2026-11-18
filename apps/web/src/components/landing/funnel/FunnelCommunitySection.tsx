@@ -1,5 +1,6 @@
 import { LAUNCH_FUNNEL_COPY } from "@ederson-agencia/shared";
 import { useLeadCaptureOptional } from "../lead-capture-context";
+import { FunnelMarquee } from "./FunnelMarquee";
 
 const c = LAUNCH_FUNNEL_COPY.community;
 const who = LAUNCH_FUNNEL_COPY.forWho;
@@ -7,13 +8,11 @@ const who = LAUNCH_FUNNEL_COPY.forWho;
 export function FunnelCommunitySection() {
   const capture = useLeadCaptureOptional();
   return (
-    <section id="comunidade" className="funnel-section border-t border-white/[0.06] bg-[#060606] py-14 sm:py-16">
-      <div className="landing-container">
+    <section id="comunidade" className="funnel-section border-t border-white/[0.06] bg-[#060606] pb-14 pt-0 sm:pb-16">
+      <FunnelMarquee />
+      <div className="landing-container pt-14 sm:pt-16">
         <p className="funnel-community-kicker">{c.kicker}</p>
-        <h2 className="funnel-spaced-brand mt-4 text-center">
-          {c.brand} <span className="text-emerald-400">{c.brandSuffix}</span>
-        </h2>
-        <p className="mx-auto mt-4 flex max-w-md justify-center">
+        <p className="mx-auto mt-6 flex max-w-md justify-center">
           <span className="funnel-member-pill">
             {c.memberCount} <span className="text-white/70">{c.memberLabel}</span>
           </span>

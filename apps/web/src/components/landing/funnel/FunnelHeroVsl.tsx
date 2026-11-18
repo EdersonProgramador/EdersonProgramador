@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { ArrowRight, Play, Youtube } from "lucide-react";
 import { LAUNCH_FUNNEL_COPY } from "@ederson-agencia/shared";
+import { BrandLogo } from "../../brand/BrandLogo";
+import { scrollToLandingTop } from "../../../lib/landing-scroll";
 import { useLeadCaptureOptional } from "../lead-capture-context";
 
 const vsl = LAUNCH_FUNNEL_COPY.heroVsl;
@@ -19,6 +21,17 @@ export function FunnelHeroVsl() {
   return (
     <section id="topo" className="funnel-hero scroll-mt-0" data-mood-track="trust">
       <div className="landing-container relative z-[1] flex flex-col items-center text-center">
+        <a
+          href="#topo"
+          className="funnel-hero__logo mb-0.5 inline-flex"
+          aria-label="Ederson Programador — início"
+          onClick={(event) => {
+            event.preventDefault();
+            scrollToLandingTop();
+          }}
+        >
+          <BrandLogo size="md" className="funnel-hero__logo-mark" />
+        </a>
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-400/90">
           Da ideia ao lançamento com <span className="funnel-hero__neon">maestria</span>
         </p>

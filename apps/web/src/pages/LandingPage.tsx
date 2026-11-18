@@ -22,8 +22,6 @@ import { BrandLogo } from "../components/brand/BrandLogo";
 import { OfferPackages } from "../components/landing/OfferPackages";
 import { SectionHeader } from "../components/landing/SectionHeader";
 import { apiPost } from "../api";
-import { scrollToLandingTop } from "../lib/landing-scroll";
-import { FunnelMarquee } from "../components/landing/funnel/FunnelMarquee";
 import { FunnelHeroVsl } from "../components/landing/funnel/FunnelHeroVsl";
 import { FunnelSaleToasts } from "../components/landing/funnel/FunnelSaleToasts";
 import { FunnelCommunitySection } from "../components/landing/funnel/FunnelCommunitySection";
@@ -68,7 +66,7 @@ const PROCESS_TIER_ICON: Record<string, string> = {
   maestria: "bg-emerald-500/15 text-emerald-300"
 };
 
-/** Links completos (mobile / rodapé) */
+/** Links de navegação da landing (rodapé) */
 const LANDING_NAV = [
   { href: "#topo", label: "Vídeo" },
   { href: "#comunidade", label: "Comunidade" },
@@ -80,114 +78,9 @@ const LANDING_NAV = [
   { href: "#contato", label: "Contato" }
 ] as const;
 
-/** Header desktop — poucos itens para não colidir com logo e CTA */
-const LANDING_NAV_HEADER = [
-  { href: "#topo", label: "Vídeo" },
-  { href: "#comunidade", label: "Comunidade" },
-  { href: "#beneficios", label: "Benefícios" },
-  { href: "#pacotes", label: "Pacotes" },
-  { href: "#contato", label: "Contato" }
-] as const;
-
 const NAV_CTA_SHORT = "Reservar vaga";
 
-function SalesNav({ scrolled, onOpenCapture }: { scrolled: boolean; onOpenCapture?: () => void }) {
-  return (
-    <header
-      className={`site-nav site-nav--commercial fixed inset-x-0 top-0 z-50 border-b transition duration-500 ${
-        scrolled ? "is-scrolled border-white/10 bg-black/88" : "border-transparent bg-black/40"
-      } backdrop-blur-xl`}
-    >
-      <div className="landing-container">
-        <div className="site-nav__bar site-nav__bar--funnel relative flex min-w-0 items-center justify-between gap-2 py-3 sm:gap-3 sm:py-3.5 lg:grid lg:grid-cols-[minmax(0,auto)_minmax(0,1fr)_minmax(0,auto)] lg:items-center lg:gap-3 lg:py-3 xl:gap-4 2xl:gap-6">
-          <a
-            href="#topo"
-            className="group relative z-20 min-w-0 shrink-0 lg:justify-self-start lg:self-center"
-            aria-label={`${copy.brand} — voltar ao início`}
-            onClick={(event) => {
-              event.preventDefault();
-              scrollToLandingTop();
-            }}
-          >
-            <BrandLogo size="sm" className="max-w-[11rem] lg:hidden" />
-            <span className="site-nav__logo-slot hidden max-w-[14rem] lg:inline-flex 2xl:max-w-none">
-              <BrandLogo size="md" />
-            </span>
-          </a>
-          <nav
-            className="site-nav__links site-nav__links--center hidden min-w-0 items-center justify-center gap-0.5 overflow-x-auto px-1 lg:col-start-2 lg:flex lg:justify-self-center lg:gap-1 2xl:gap-2"
-            aria-label="Seções da página"
-          >
-            {LANDING_NAV_HEADER.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                className="btn-ghost shrink-0 whitespace-nowrap px-1.5 text-[11px] xl:text-xs 2xl:px-2 2xl:text-sm"
-              >
-                {item.label}
-              </a>
-            ))}
-          </nav>
-          <div className="relative z-20 flex min-w-0 shrink-0 items-center justify-end gap-1 sm:gap-1.5 lg:col-start-3 lg:justify-self-end lg:gap-2 2xl:gap-3">
-            <Link
-              to="/login"
-              className="btn-ghost hidden min-h-10 items-center px-2 text-xs sm:inline-flex lg:text-sm"
-            >
-              {copy.loginCta}
-            </Link>
-            {onOpenCapture ? (
-              <button
-                type="button"
-                className="btn-primary btn-primary--conversion inline-flex min-h-10 max-w-[9.5rem] items-center justify-center truncate px-2.5 py-2 text-[10px] font-bold uppercase leading-tight sm:max-w-none sm:px-3 sm:text-xs xl:min-h-11 xl:px-4 2xl:text-sm"
-                onClick={onOpenCapture}
-              >
-                <span className="2xl:hidden">{NAV_CTA_SHORT}</span>
-                <span className="hidden 2xl:inline">{LAUNCH_FUNNEL_COPY.heroVsl.primaryCta}</span>
-              </button>
-            ) : (
-              <a
-                href="#contato"
-                className="btn-primary inline-flex min-h-11 items-center whitespace-nowrap px-3 py-2 text-xs sm:px-4 sm:py-2.5 lg:text-sm"
-              >
-                Contato
-              </a>
-            )}
-          </div>
-        </div>
-        <nav
-          className="-mx-1 flex gap-1 overflow-x-auto border-t border-white/[0.06] py-2 [scrollbar-width:none] lg:hidden [&::-webkit-scrollbar]:hidden"
-          aria-label="Seções da página (mobile)"
-        >
-          {LANDING_NAV.map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              className="landing-mobile-pill inline-flex min-h-11 shrink-0 items-center rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-2 text-xs font-medium text-white/75 transition hover:border-white/20 hover:text-white"
-            >
-              {item.label}
-            </a>
-          ))}
-          <a
-            href={AGENCY_META.resumePath}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex min-h-11 shrink-0 items-center rounded-full border border-sky-400/25 bg-sky-500/10 px-3.5 py-2 text-xs font-medium text-sky-200/90 transition hover:border-sky-400/40"
-          >
-            Currículo
-          </a>
-          <Link
-            to="/login"
-            className="inline-flex min-h-11 shrink-0 items-center rounded-full border border-white/15 bg-white/[0.06] px-3.5 py-2 text-xs font-medium text-white/90 transition hover:border-white/25"
-          >
-            {copy.loginCta}
-          </Link>
-        </nav>
-      </div>
-    </header>
-  );
-}
-
-function SalesFooter() {
+function SalesFooter({ onOpenCapture }: { onOpenCapture?: () => void }) {
   return (
     <footer className="landing-footer border-t border-white/10 py-14">
       <div className="landing-container space-y-8">
@@ -206,12 +99,28 @@ function SalesFooter() {
               <ExternalLink className="h-3.5 w-3.5" />
             </a>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+          <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-3">
             {LANDING_NAV.map((item) => (
               <a key={item.href} href={item.href} className="text-sm text-white/45 transition hover:text-blue-glow">
                 {item.label}
               </a>
             ))}
+            <Link to="/login" className="text-sm text-white/45 transition hover:text-blue-glow">
+              {copy.loginCta}
+            </Link>
+            {onOpenCapture ? (
+              <button
+                type="button"
+                className="btn-primary btn-primary--conversion inline-flex min-h-10 items-center justify-center px-4 py-2 text-xs font-bold uppercase"
+                onClick={onOpenCapture}
+              >
+                {NAV_CTA_SHORT}
+              </button>
+            ) : (
+              <a href="#contato" className="btn-primary inline-flex min-h-10 items-center px-4 py-2 text-xs font-bold uppercase">
+                {NAV_CTA_SHORT}
+              </a>
+            )}
             <a
               href={AGENCY_META.resumePath}
               target="_blank"
@@ -368,15 +277,7 @@ function LandingPageContent() {
   const [leadStatus, setLeadStatus] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [consent, setConsent] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const [preferredPackage, setPreferredPackage] = useState("");
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   useEffect(() => {
     document.body.classList.add("landing-active");
@@ -439,9 +340,6 @@ function LandingPageContent() {
     <div className="landing-shell landing-shell--commercial landing-shell--funnel-aggressive relative bg-[var(--app-bg-solid)] text-[var(--app-text)]">
 
       <FunnelSaleToasts />
-      <SalesNav scrolled={scrolled} onOpenCapture={() => openCapture()} />
-
-      <FunnelMarquee />
       <FunnelHeroVsl />
       <FunnelCommunitySection />
       <FunnelSocialProofStrip />
@@ -582,7 +480,7 @@ function LandingPageContent() {
       <p className="landing-container border-t border-white/10 py-8 text-center text-[11px] leading-relaxed text-white/40">
         {LAUNCH_FUNNEL_COPY.disclaimer}
       </p>
-      <SalesFooter />
+      <SalesFooter onOpenCapture={() => openCapture()} />
       <FunnelStickyCta />
     </div>
   );
