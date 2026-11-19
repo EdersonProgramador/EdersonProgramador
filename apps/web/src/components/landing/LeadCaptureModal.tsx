@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Loader2, X } from "lucide-react";
 import { LAUNCH_FUNNEL_COPY } from "@ederson-agencia/shared";
 import { submitLeadCapture } from "../../lib/submit-lead-capture";
+import { VipWhatsAppInvite } from "./VipWhatsAppInvite";
 
 const copy = LAUNCH_FUNNEL_COPY.captureModal;
 
@@ -9,20 +10,30 @@ type LeadCaptureModalProps = {
   open: boolean;
   onClose: () => void;
   packageTier?: "essential" | "professional" | "advanced";
+  campaign?: string;
 };
 
-export function LeadCaptureModal({ open, onClose, packageTier }: LeadCaptureModalProps) {
+export function LeadCaptureModal({ open, onClose, packageTier, campaign }: LeadCaptureModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [consent, setConsent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [feedback, setFeedback] = useState<string | null>(null);
+  const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const dismiss = useCallback(() => {
+    const el = dialogRef.current;
+    if (el?.open) el.close();
+    setDone(false);
+    setError(null);
+    setConsent(false);
+    onClose();
+  }, [onClose]);
 
   useEffect(() => {
     const el = dialogRef.current;
     if (!el) return;
     if (open && !el.open) {
-      setFeedback(null);
+      setDone(false);
       setError(null);
       setConsent(false);
       el.showModal();
@@ -41,14 +52,15 @@ export function LeadCaptureModal({ open, onClose, packageTier }: LeadCaptureModa
     setError(null);
     const form = new FormData(event.currentTarget);
     try {
-      const res = await submitLeadCapture({
+      await submitLeadCapture({
         name: String(form.get("name") ?? "").trim(),
         email: String(form.get("email") ?? "").trim(),
         phone: String(form.get("phone") ?? "").trim(),
         packageTier: packageTier ?? undefined,
+        campaign: campaign ?? undefined,
         consentLgpd: true
       });
-      setFeedback(res.message || copy.success);
+      setDone(true);
       event.currentTarget.reset();
       setConsent(false);
     } catch (err) {
@@ -62,29 +74,44 @@ export function LeadCaptureModal({ open, onClose, packageTier }: LeadCaptureModa
     <dialog
       ref={dialogRef}
       className="lead-capture-dialog fixed inset-0 z-[100] m-0 max-h-none max-w-none border-0 bg-transparent p-0 backdrop:bg-black/70"
-      onClose={onClose}
+      onCancel={(e) => {
+        e.preventDefault();
+        dismiss();
+      }}
+      onClose={() => {
+        if (open) onClose();
+      }}
       onClick={(e) => {
-        if (e.target === dialogRef.current) onClose();
+        if (e.target === dialogRef.current) dismiss();
       }}
     >
       <div
-        className="ui-modal-panel lead-capture-panel mx-auto mt-[10vh] w-[min(100%,26rem)]"
+        className={`ui-modal-panel lead-capture-panel${done ? " lead-capture-panel--vip" : " mx-auto mt-[6vh] w-[min(100%,26rem)]"}`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-start justify-between gap-3">
+        <div className="lead-capture-panel__head flex items-start justify-between gap-3">
           <div>
-            <h2 className="font-display text-xl font-semibold text-[var(--app-text)]">{copy.title}</h2>
-            <p className="mt-2 text-sm leading-relaxed text-[var(--app-text-muted)]">{copy.subtitle}</p>
+            <h2 className="font-display text-xl font-semibold text-[var(--app-text)] sm:text-2xl">
+              {done ? "Proposta registrada" : copy.title}
+            </h2>
+            <p className="mt-2 text-sm leading-relaxed text-[var(--app-text-muted)]">
+              {done
+                ? "Recebemos seus dados. Entre no grupo VIP para receber diagnóstico, dicas de MVP e alertas oficiais."
+                : copy.subtitle}
+            </p>
           </div>
-          <button type="button" className="btn-ghost shrink-0 p-2" onClick={onClose} aria-label="Fechar">
+          <button type="button" className="btn-ghost shrink-0 p-2" onClick={dismiss} aria-label="Fechar">
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        {feedback ? (
-          <p className="mt-6 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
-            {feedback}
-          </p>
+        {done ? (
+          <div className="lead-capture-panel__vip-body">
+            <VipWhatsAppInvite compact onWhatsAppClick={dismiss} />
+            <button type="button" className="btn-ghost mt-3 w-full shrink-0 text-sm" onClick={dismiss}>
+              Fechar
+            </button>
+          </div>
         ) : (
           <form className="mt-6 space-y-4" onSubmit={onSubmit}>
             <label className="block">
@@ -135,13 +162,23 @@ export function LeadCaptureModal({ open, onClose, packageTier }: LeadCaptureModa
           </form>
         )}
 
-        <p className="mt-4 text-center text-[11px] text-[var(--app-text-muted)]">
-          Também pode usar o formulário completo na seção{" "}
-          <a href="#contato" className="underline" onClick={onClose}>
-            Contato
-          </a>
-          .
-        </p>
+        {!done ? (
+          <p className="mt-4 text-center text-[11px] text-[var(--app-text-muted)]">
+            Também pode usar o formulário completo na seção{" "}
+            <a
+              href="#contato"
+              className="underline"
+              onClick={(e) => {
+                e.preventDefault();
+                dismiss();
+                window.location.hash = "contato";
+              }}
+            >
+              Contato
+            </a>
+            .
+          </p>
+        ) : null}
       </div>
     </dialog>
   );

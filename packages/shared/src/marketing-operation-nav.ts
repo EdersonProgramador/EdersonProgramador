@@ -1,5 +1,6 @@
-/** Marketing — navegação em seções (aguardando sequência definida). */
+/** Marketing/Comercial — navegação alinhada ao processo operacional. */
 
+import { ADMIN_COMERCIAL_STEPS } from "./admin-operation-ia.js";
 import {
   findOperationSectionNavByAdminPath,
   operationSectionNavFlatItems,
@@ -12,16 +13,14 @@ export type MarketingNavSection = OperationSectionNav;
 
 export const MARKETING_OPERATION_NAV: readonly MarketingNavSection[] = [
   {
-    id: "analisar",
-    sectionLabel: "Analisar",
-    items: [
-      {
-        id: "estatistica",
-        label: "Estatística",
-        adminPath: "operacao/marketing/estatistica",
-        description: "Progresso do workspace (sequência em definição)."
-      }
-    ]
+    id: "comercial",
+    sectionLabel: "Processo comercial",
+    items: ADMIN_COMERCIAL_STEPS.map((step) => ({
+      id: step.id,
+      label: step.stepNumber ? `${step.stepNumber}. ${step.label}` : step.label,
+      adminPath: step.adminPath,
+      description: step.purpose
+    }))
   }
 ] as const;
 
@@ -36,5 +35,12 @@ export function findMarketingNavByAdminPath(adminPath: string): {
   return findOperationSectionNavByAdminPath(MARKETING_OPERATION_NAV, adminPath);
 }
 
-/** Rotas legadas — mapeamento vazio até nova sequência. */
-export const MARKETING_LEGACY_PATH_ALIASES: Record<string, string> = {};
+export const MARKETING_LEGACY_PATH_ALIASES: Record<string, string> = {
+  leads: "comercial/captura",
+  "marketing/cdp": "comercial/captura",
+  "marketing/campanhas": "comercial/nutricao",
+  "marketing/crm": "comercial/vendas",
+  funil: "comercial/vendas",
+  clientes: "comercial/relacionamento",
+  "marketing/fidelidade": "comercial/relacionamento"
+};

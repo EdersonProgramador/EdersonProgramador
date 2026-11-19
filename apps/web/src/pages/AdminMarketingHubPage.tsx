@@ -285,7 +285,7 @@ export function AdminMarketingHubPage() {
             </Link>
             <Link
               className="btn-ghost inline-flex text-sm"
-              to={`${ADMIN_BASE}/operacao/desenvolvimento/front-end?project=${encodeURIComponent(projectId)}`}
+              to={`${ADMIN_BASE}/operacao/desenvolvimento/stack-front-end?project=${encodeURIComponent(projectId)}`}
             >
               Checklist front-end
             </Link>

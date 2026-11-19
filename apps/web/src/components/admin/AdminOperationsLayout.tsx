@@ -1,17 +1,25 @@
 import { NavLink, Outlet, useSearchParams } from "react-router-dom";
 import {
   AGENCY_APP_BASE,
+  ADMIN_OPERATION_BLOCKS,
+  adminComercialStepLabel,
   BRANDING_LEGACY_PATH_ALIASES,
   BRANDING_OPERATION_NAV,
-  brandingNavFlatItems,
-  developmentNavFlatItems,
   FORMULA_LEGACY_PATH_ALIASES,
   FORMULA_OPERATION_NAV,
-  formulaNavFlatItems,
-  OPERATION_PILLAR_NAV,
-  type OperationPillarNav
+  type AdminNavLink
 } from "@ederson-agencia/shared";
-import { FolderKanban, Megaphone, Monitor, UserRound, Users, Workflow, type LucideIcon } from "lucide-react";
+import {
+  Bot,
+  FolderKanban,
+  Home,
+  LayoutTemplate,
+  Monitor,
+  Rocket,
+  Settings2,
+  type LucideIcon
+} from "lucide-react";
+import { AdminProcessBreadcrumb } from "./AdminProcessChrome";
 import { DevelopmentPillarSidebarNav } from "./DevelopmentPillarSidebarNav";
 import { PillarSidebarNav } from "./PillarSidebarNav";
 import { BRANDING_SIDEBAR_ICONS, FORMULA_SIDEBAR_ICONS } from "./pillar-sidebar-icons";
@@ -19,92 +27,42 @@ import "../../styles/agency-admin.css";
 
 const ADMIN_BASE = `${AGENCY_APP_BASE}/admin`;
 
-type NavItem = {
-  to: string;
-  end: boolean;
-  label: string;
-  icon: LucideIcon;
+const LINK_ICONS: Record<string, LucideIcon> = {
+  inicio: Home,
+  agentes: Bot,
+  projetos: FolderKanban,
+  captura: LayoutTemplate,
+  nutricao: Rocket,
+  vendas: LayoutTemplate,
+  relacionamento: LayoutTemplate,
+  branding: Monitor,
+  desenvolvimento: Monitor,
+  formula: Rocket,
+  automacoes: Settings2,
+  integracoes: Settings2,
+  transacional: Settings2
 };
 
-const PROJECTS_ITEM: NavItem = {
-  to: `${ADMIN_BASE}/projetos`,
-  end: true,
-  label: "Projetos",
-  icon: FolderKanban
-};
-
-/** Pilares na sidebar desktop — Marketing fica só em Comercial & configuração. */
-const OPERATION_SIDEBAR_PILLARS = OPERATION_PILLAR_NAV.filter((p) => p.id !== "marketing");
-
-const COMMERCIAL_ITEMS: NavItem[] = [
-  { to: `${ADMIN_BASE}/marketing`, end: true, label: "Marketing", icon: Megaphone },
-  { to: `${ADMIN_BASE}/funil`, end: false, label: "Funil comercial", icon: Megaphone },
-  { to: `${ADMIN_BASE}/automacoes`, end: false, label: "Automações", icon: Workflow },
-  { to: `${ADMIN_BASE}/leads`, end: false, label: "Leads", icon: Users },
-  { to: `${ADMIN_BASE}/clientes`, end: false, label: "Clientes", icon: UserRound }
-];
-
-function pillarFlatMobileItems(pillarLabel: string, items: ReturnType<typeof brandingNavFlatItems>, icon: LucideIcon): NavItem[] {
-  return items.map((item) => ({
-    to: `${ADMIN_BASE}/${item.adminPath}`,
-    end: false,
-    label: `${pillarLabel} · ${item.label}`,
-    icon: icon
-  }));
-}
-
-function flatMobileItems(): NavItem[] {
-  return [
-    PROJECTS_ITEM,
-    ...pillarFlatMobileItems("Branding", brandingNavFlatItems(), Monitor),
-    ...pillarFlatMobileItems("Desenvolvimento", developmentNavFlatItems(), Monitor),
-    ...pillarFlatMobileItems("Fórmula L.", formulaNavFlatItems(), Monitor),
-    ...COMMERCIAL_ITEMS
-  ];
-}
-
-function PillarSidebarFor({ pillar }: { pillar: OperationPillarNav }) {
-  switch (pillar.id) {
-    case "branding":
-      return (
-        <PillarSidebarNav
-          pillarId={pillar.id}
-          pillarLabel={pillar.pillarLabel}
-          tone="branding"
-          sections={BRANDING_OPERATION_NAV}
-          legacyAliases={BRANDING_LEGACY_PATH_ALIASES}
-          iconById={BRANDING_SIDEBAR_ICONS}
-          defaultIcon={Monitor}
-        />
-      );
-    case "desenvolvimento":
-      return <DevelopmentPillarSidebarNav />;
-    case "formula-lancamento":
-      return (
-        <PillarSidebarNav
-          pillarId={pillar.id}
-          pillarLabel={pillar.pillarLabel}
-          tone="formula"
-          sections={FORMULA_OPERATION_NAV}
-          legacyAliases={FORMULA_LEGACY_PATH_ALIASES}
-          iconById={FORMULA_SIDEBAR_ICONS}
-          defaultIcon={Monitor}
-        />
-      );
-    default:
-      return null;
-  }
-}
-
-function AdminNavLink({ to, end, label, icon: Icon }: NavItem) {
+function AdminNavLinkItem({
+  link,
+  end
+}: {
+  link: AdminNavLink;
+  end?: boolean;
+}) {
   const [searchParams] = useSearchParams();
   const projectId = searchParams.get("project")?.trim();
-  const toResolved = projectId ? `${to}?project=${encodeURIComponent(projectId)}` : to;
+  const path = link.adminPath ? `${ADMIN_BASE}/${link.adminPath}` : ADMIN_BASE;
+  const toResolved = projectId ? `${path}?project=${encodeURIComponent(projectId)}` : path;
+  const Icon = LINK_ICONS[link.id] ?? LayoutTemplate;
+  const label = link.stepNumber ? adminComercialStepLabel(link) : link.label;
+
   return (
     <NavLink
       to={toResolved}
-      end={end}
+      end={end ?? !link.adminPath}
       className={({ isActive }) => `agency-admin-nav-link${isActive ? " is-active" : ""}`}
+      title={link.purpose}
     >
       <Icon className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden />
       <span className="agency-admin-nav-link__text">{label}</span>
@@ -112,38 +70,62 @@ function AdminNavLink({ to, end, label, icon: Icon }: NavItem) {
   );
 }
 
+function flatMobileLinks() {
+  return ADMIN_OPERATION_BLOCKS.flatMap((block) =>
+    block.links.map((link) => ({ blockId: block.id, link }))
+  );
+}
+
 export function AdminOperationsLayout() {
-  const flatItems = flatMobileItems();
+  const mobile = flatMobileLinks();
 
   return (
     <div className="agency-admin-layout">
       <aside className="agency-admin-sidebar" aria-label="Menu da administração">
         <div className="agency-admin-mobile-nav lg:hidden">
-          {flatItems.map((item) => (
-            <AdminNavLink key={item.to} {...item} />
+          {mobile.map(({ blockId, link }) => (
+            <AdminNavLinkItem key={`${blockId}-${link.id}`} link={link} />
           ))}
         </div>
         <div className="agency-admin-sidebar__panel agency-admin-sidebar__desktop-nav">
-          <div className="mb-2">
-            <p className="agency-admin-sidebar__label">Operação</p>
-            <nav className="flex flex-col gap-0.5">
-              <AdminNavLink {...PROJECTS_ITEM} />
-            </nav>
-            {OPERATION_SIDEBAR_PILLARS.map((pillar) => (
-              <PillarSidebarFor key={pillar.id} pillar={pillar} />
-            ))}
-          </div>
-          <div className="mb-2 last:mb-0">
-            <p className="agency-admin-sidebar__label">Comercial & configuração</p>
-            <nav className="flex flex-col gap-0.5">
-              {COMMERCIAL_ITEMS.map((item) => (
-                <AdminNavLink key={item.to} {...item} />
-              ))}
-            </nav>
-          </div>
+          {ADMIN_OPERATION_BLOCKS.map((block) => (
+            <div key={block.id} className="mb-3 last:mb-0">
+              <p className="agency-admin-sidebar__label">{block.label}</p>
+              <p className="agency-admin-sidebar__purpose">{block.purpose}</p>
+              <nav className="flex flex-col gap-0.5" aria-label={block.label}>
+                {block.links.map((link) => (
+                  <AdminNavLinkItem key={link.id} link={link} />
+                ))}
+              </nav>
+              {block.id === "entrega" ? (
+                <div className="agency-admin-sidebar__pillar-block">
+                  <PillarSidebarNav
+                    pillarId="branding"
+                    pillarLabel="Branding · fases"
+                    tone="branding"
+                    sections={BRANDING_OPERATION_NAV}
+                    legacyAliases={BRANDING_LEGACY_PATH_ALIASES}
+                    iconById={BRANDING_SIDEBAR_ICONS}
+                    defaultIcon={Monitor}
+                  />
+                  <DevelopmentPillarSidebarNav />
+                  <PillarSidebarNav
+                    pillarId="formula-lancamento"
+                    pillarLabel="Fórmula · fases"
+                    tone="formula"
+                    sections={FORMULA_OPERATION_NAV}
+                    legacyAliases={FORMULA_LEGACY_PATH_ALIASES}
+                    iconById={FORMULA_SIDEBAR_ICONS}
+                    defaultIcon={Monitor}
+                  />
+                </div>
+              ) : null}
+            </div>
+          ))}
         </div>
       </aside>
       <div className="agency-admin-main">
+        <AdminProcessBreadcrumb />
         <Outlet />
       </div>
     </div>

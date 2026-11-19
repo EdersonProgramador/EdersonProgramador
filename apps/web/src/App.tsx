@@ -1,13 +1,12 @@
 import { useEffect } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import {
+  ADMIN_LEGACY_PATH_ALIASES,
   ACADEMY_APP_BASE,
   ACADEMY_STORE_BASE,
   AGENCY_APP_BASE,
   DEVELOPMENT_LEGACY_PATH_ALIASES,
-  developmentNavFlatItems,
-  formulaNavFlatItems,
-  marketingNavFlatItems
+  formulaNavFlatItems
 } from "@ederson-agencia/shared";
 import { AuthSessionBridge } from "./auth/AuthSessionBridge";
 import { AcademyShellLayout } from "./components/AcademyShellLayout";
@@ -38,23 +37,23 @@ import { AdminCourseContentPage } from "./pages/AdminCourseContentPage";
 import { AdminCoursesPage } from "./pages/AdminCoursesPage";
 import {
   AdminAutomationsPage,
-  AdminClientsPage,
-  AdminFunnelPage,
-  AdminLeadsPage,
   AdminProjectsPage,
   ClientDashboard,
   FreelancerDashboard
 } from "./pages/DashboardPages";
 import {
-  AdminMarketingCampaignsPage,
-  AdminMarketingCdpPage,
   AdminMarketingChannelsPage,
-  AdminMarketingCrmPage,
-  AdminMarketingPlatformHubPage,
   AdminMarketingIntegrationsPage,
-  AdminMarketingLoyaltyPage,
   AdminMarketingTransactionalPage
 } from "./pages/AdminMarketingPlatformPages";
+import {
+  AdminComercialCapturaPage,
+  AdminComercialNutricaoPage,
+  AdminComercialRelacionamentoPage,
+  AdminComercialVendasPage
+} from "./pages/AdminComercialPages";
+import { AdminOpsHomePage } from "./pages/AdminOpsHomePage";
+import { AdminAgentsPage } from "./pages/AdminAgentsPage";
 import { AdminBrandbookPage } from "./pages/AdminBrandbookPage";
 import { AdminFormulaSimuladorPage } from "./pages/AdminFormulaSimuladorPage";
 import { AdminLaunchPlanPdfPage } from "./pages/AdminLaunchPlanPdfPage";
@@ -64,8 +63,6 @@ import { AdminBrandingProcessPage } from "./pages/AdminBrandingProcessPage";
 import { AdminProductOfferPage } from "./pages/AdminProductOfferPage";
 import { AdminLaunchKitPage } from "./pages/AdminLaunchKitPage";
 import { AdminLaunchPhasePage } from "./pages/AdminLaunchPhasePage";
-import { AdminMarketingDevPage } from "./pages/AdminMarketingDevPage";
-import { AdminMarketingHubPage } from "./pages/AdminMarketingHubPage";
 import { AdminBrandingHubPage } from "./pages/AdminBrandingHubPage";
 import { AdminDevelopmentHubPage } from "./pages/AdminDevelopmentHubPage";
 import { AdminCodeStudioFullPage } from "./pages/AdminCodeStudioFullPage";
@@ -113,12 +110,14 @@ export default function App() {
             <Route element={<ProtectedRoute realm="agency" roles={["ADMIN"]} />}>
               <Route path="studio/desenvolvimento" element={<AdminCodeStudioFullPage />} />
               <Route path="admin" element={<AdminOperationsLayout />}>
-                <Route index element={<Navigate to="projetos" replace />} />
+                <Route index element={<AdminOpsHomePage />} />
+                <Route path="agentes" element={<AdminAgentsPage />} />
                 <Route path="projetos" element={<AdminProjectsPage />} />
+                <Route path="comercial/captura" element={<AdminComercialCapturaPage />} />
+                <Route path="comercial/nutricao" element={<AdminComercialNutricaoPage />} />
+                <Route path="comercial/vendas" element={<AdminComercialVendasPage />} />
+                <Route path="comercial/relacionamento" element={<AdminComercialRelacionamentoPage />} />
                 <Route path="operacao/marketing/planejamento" element={<AdminMarketingPlanejamentoPage />} />
-                {marketingNavFlatItems().map((item) => (
-                  <Route key={item.id} path={item.adminPath} element={<AdminMarketingHubPage />} />
-                ))}
                 <Route path="operacao/branding/estatistica" element={<AdminBrandingHubPage />} />
                 <Route path="operacao/branding/processo" element={<AdminBrandingProcessPage />} />
                 <Route path="operacao/branding/brandbook" element={<AdminBrandbookPage />} />
@@ -132,9 +131,6 @@ export default function App() {
                 <Route path="operacao/desenvolvimento/stack-pagamentos" element={<AdminDevelopmentHubPage />} />
                 <Route path="operacao/desenvolvimento/stack-email" element={<AdminDevelopmentHubPage />} />
                 <Route path="operacao/desenvolvimento/editor" element={<AdminDevelopmentHubPage />} />
-                <Route path="operacao/desenvolvimento/estatistica" element={<AdminDevelopmentHubPage />} />
-                <Route path="operacao/desenvolvimento/infra" element={<AdminDevelopmentHubPage />} />
-                <Route path="operacao/desenvolvimento/:stackId" element={<AdminMarketingDevPage />} />
                 {Object.entries(DEVELOPMENT_LEGACY_PATH_ALIASES).map(([legacy, canonical]) => (
                   <Route
                     key={legacy}
@@ -142,6 +138,10 @@ export default function App() {
                     element={<Navigate to={`${AGENCY_APP_BASE}/admin/${canonical}`} replace />}
                   />
                 ))}
+                <Route
+                  path="operacao/desenvolvimento/:stackId"
+                  element={<Navigate to={`${AGENCY_APP_BASE}/admin/operacao/desenvolvimento/stack`} replace />}
+                />
                 <Route path="operacao/marketing/:stackId" element={<LegacyMarketingStackRoute />} />
                 <Route path="operacao/formula-lancamento/simulador" element={<AdminFormulaSimuladorPage />} />
                 <Route path="operacao/formula-lancamento/plano-pdf" element={<AdminLaunchPlanPdfPage />} />
@@ -151,18 +151,26 @@ export default function App() {
                 <Route path="operacao/produto-oferta" element={<AdminProductOfferPage />} />
                 <Route path="operacao/launch-kit" element={<AdminLaunchKitPage />} />
                 <Route path="operacao/:phaseId" element={<AdminLaunchPhasePage />} />
-                <Route path="marketing" element={<AdminMarketingPlatformHubPage />} />
-                <Route path="marketing/campanhas" element={<AdminMarketingCampaignsPage />} />
                 <Route path="marketing/transacional" element={<AdminMarketingTransactionalPage />} />
-                <Route path="marketing/crm" element={<AdminMarketingCrmPage />} />
-                <Route path="marketing/cdp" element={<AdminMarketingCdpPage />} />
                 <Route path="marketing/canais" element={<AdminMarketingChannelsPage />} />
                 <Route path="marketing/integracoes" element={<AdminMarketingIntegrationsPage />} />
-                <Route path="marketing/fidelidade" element={<AdminMarketingLoyaltyPage />} />
-                <Route path="funil" element={<AdminFunnelPage />} />
                 <Route path="automacoes" element={<AdminAutomationsPage />} />
-                <Route path="leads" element={<AdminLeadsPage />} />
-                <Route path="clientes" element={<AdminClientsPage />} />
+                {Object.entries(ADMIN_LEGACY_PATH_ALIASES).map(([legacy, canonical]) => (
+                  <Route
+                    key={legacy}
+                    path={legacy}
+                    element={
+                      <Navigate
+                        to={
+                          canonical
+                            ? `${AGENCY_APP_BASE}/admin/${canonical}`
+                            : `${AGENCY_APP_BASE}/admin`
+                        }
+                        replace
+                      />
+                    }
+                  />
+                ))}
               </Route>
             </Route>
             <Route element={<ProtectedRoute realm="agency" roles={["CLIENT"]} />}>

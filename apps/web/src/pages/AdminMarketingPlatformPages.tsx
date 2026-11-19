@@ -4,7 +4,6 @@ import {
   AGENCY_APP_BASE,
   MARKETING_AUDIENCE_LEVEL_OPTIONS,
   MARKETING_CAMPAIGN_KINDS,
-  MARKETING_CAPABILITY_MATRIX,
   MARKETING_LEAD_SOURCE_OPTIONS,
   defaultSequenceForKind,
   marketingAudienceTierOptions,
@@ -21,60 +20,16 @@ import { MarketingPlatformIcon } from "../components/marketing/marketing-platfor
 
 const ADMIN = `${AGENCY_APP_BASE}/admin`;
 
-type MarketingOverview = {
-  contactsTotal: number;
-  campaignsTotal: number;
-  loyaltyEnabled: boolean;
-  providers: Record<string, boolean>;
-};
-
 export function AdminMarketingPlatformHubPage() {
   const { withProjectQuery } = useAdminProjectScope();
-  const [stats, setStats] = useState<MarketingOverview | null>(null);
-  useEffect(() => {
-    void apiGet<MarketingOverview>("/agency/admin/marketing/overview").then(setStats).catch(() => null);
-  }, []);
-
-  const providersOk = stats ? Object.values(stats.providers).some(Boolean) : false;
 
   return (
-    <AdminMarketingPlatformShell showProjections>
+    <AdminMarketingPlatformShell>
       <AdminPageHead
-        title="Plataforma de marketing"
-        description="Funcionalidades, canais e integrações no mesmo ecossistema da agência."
+        title="Comercial"
+        description="Processo em quatro etapas — captura, nutrição, vendas e relacionamento."
       />
-      {stats ? (
-        <ul className="flex flex-wrap gap-3 text-sm text-[var(--app-text-muted)]">
-          <li>
-            CDP: <strong className="text-[var(--app-text)]">{stats.contactsTotal}</strong> contatos
-          </li>
-          <li>
-            Campanhas: <strong className="text-[var(--app-text)]">{stats.campaignsTotal}</strong>
-          </li>
-          <li>
-            E-mail:{" "}
-            <strong className={providersOk ? "text-emerald-400" : "text-amber-400"}>{providersOk ? "provedor ativo" : "configure .env"}</strong>
-          </li>
-          <li>
-            Fidelização:{" "}
-            <strong className="text-[var(--app-text)]">{stats.loyaltyEnabled ? "ativa" : "inativa"}</strong>
-          </li>
-        </ul>
-      ) : null}
       <MarketingSetupPanel withProjectQuery={withProjectQuery} />
-      <div className="marketing-platform__grid marketing-platform__grid--2">
-        {MARKETING_CAPABILITY_MATRIX.map((row) => (
-          <div key={row.pillar} className="marketing-platform-card">
-            <div className="marketing-platform-card__title">{row.pillar}</div>
-            <p className="marketing-platform-card__desc">
-              <strong>No app:</strong> {row.inApp}
-            </p>
-            <p className="marketing-platform-card__desc mt-1">
-              <strong>Externo:</strong> {row.external}
-            </p>
-          </div>
-        ))}
-      </div>
       <MarketingPlatformHub />
     </AdminMarketingPlatformShell>
   );

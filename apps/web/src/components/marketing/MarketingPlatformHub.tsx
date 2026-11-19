@@ -1,120 +1,81 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { AGENCY_APP_BASE, MARKETING_PLATFORM_AUDIENCES, MARKETING_PLATFORM_CHANNELS, MARKETING_PLATFORM_FEATURES, MARKETING_PLATFORM_RESOURCES } from "@ederson-agencia/shared";
+import {
+  AGENCY_APP_BASE,
+  ADMIN_COMERCIAL_STEPS,
+  adminComercialStepLabel
+} from "@ederson-agencia/shared";
+import { apiGet } from "../../api";
 import { useAdminProjectScope } from "../admin/admin-project-scope";
-import { MarketingPlatformIcon } from "./marketing-platform-icons";
 
 const ADMIN = `${AGENCY_APP_BASE}/admin`;
 
+type OpsOverview = {
+  leadsNew: number;
+  enrollmentsDue: number;
+  campaignsActive: number;
+  contactsTotal: number;
+};
+
+/**
+ * Console Comercial — processo em 4 etapas (substitui a landing de features).
+ */
 export function MarketingPlatformHub() {
   const { withProjectQuery } = useAdminProjectScope();
+  const [ops, setOps] = useState<OpsOverview | null>(null);
+
+  useEffect(() => {
+    void apiGet<OpsOverview>("/agency/admin/ops/overview")
+      .then(setOps)
+      .catch(() => setOps(null));
+  }, []);
+
+  const hints: Record<string, string> = {
+    captura: ops ? `${ops.leadsNew} leads novos · ${ops.contactsTotal} no CDP` : "Leads e fontes de entrada",
+    nutricao: ops
+      ? `${ops.campaignsActive} campanhas · ${ops.enrollmentsDue} disparos vencidos`
+      : "Sequências de aquisição e follow-up",
+    vendas: "Pipeline CRM e funil do cliente",
+    relacionamento: "Clientes e fidelização"
+  };
+
   return (
-    <div className="marketing-platform space-y-10">
-      <header className="space-y-2">
-        <h1 className="text-2xl font-bold tracking-tight text-[var(--app-text)]">Marketing e mensageria</h1>
+    <div className="admin-comercial-console space-y-6">
+      <header className="space-y-1">
+        <h2 className="text-lg font-semibold text-[var(--app-text)]">Processo comercial</h2>
         <p className="max-w-2xl text-sm text-[var(--app-text-muted)]">
-          Campanhas, transacional, CRM, dados, fidelização e integrações — mesmo modelo de plataformas como Brevo, com
-          execução no seu painel.
+          Um fluxo único: capture → nutra → venda → relacione. Configure integrações em Sistema.
         </p>
       </header>
 
-      <section className="space-y-4">
-        <h2 className="marketing-platform__section-title">Funcionalidades</h2>
-        <div className="marketing-platform__grid marketing-platform__grid--3">
-          {MARKETING_PLATFORM_FEATURES.map((item) => (
-            <Link key={item.id} to={withProjectQuery(`${ADMIN}/${item.adminPath}`)} className="marketing-platform-card">
-              <div className="marketing-platform-card__icon">
-                <MarketingPlatformIcon name={item.icon} />
-              </div>
-              <div className="min-w-0">
-                <div className="marketing-platform-card__title">{item.title}</div>
-                <p className="marketing-platform-card__desc">{item.description}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      <section className="space-y-4">
-        <h2 className="marketing-platform__section-title">Canais</h2>
-        <div className="marketing-platform__grid marketing-platform__grid--4">
-          {MARKETING_PLATFORM_CHANNELS.map((ch) => (
+      <ol className="grid gap-3 sm:grid-cols-2">
+        {ADMIN_COMERCIAL_STEPS.map((step) => (
+          <li key={step.id}>
             <Link
-              key={ch.id}
-              to={withProjectQuery(`${ADMIN}/marketing/canais#${ch.id}`)}
-              className="marketing-platform-card marketing-platform-card--compact"
+              to={withProjectQuery(`${ADMIN}/${step.adminPath}`)}
+              className="admin-ops-step-card"
             >
-              <div className="marketing-platform-card__icon">
-                <MarketingPlatformIcon name={ch.icon} />
-              </div>
-              <div className="marketing-platform-card__title">{ch.label}</div>
-              <p className="marketing-platform-card__desc">{ch.description}</p>
+              <span className="admin-ops-step-card__num">{step.stepNumber}</span>
+              <span>
+                <span className="admin-ops-step-card__title">{adminComercialStepLabel(step)}</span>
+                <span className="admin-ops-step-card__desc">{hints[step.id] ?? step.purpose}</span>
+              </span>
             </Link>
-          ))}
-        </div>
-      </section>
+          </li>
+        ))}
+      </ol>
 
-      <section className="space-y-4">
-        <h2 className="marketing-platform__section-title">Para quem é</h2>
-        <div className="marketing-platform__grid marketing-platform__grid--2">
-          {MARKETING_PLATFORM_AUDIENCES.map((aud) => (
-            <SnapshotProviderCard
-              key={aud.id}
-              title={aud.title}
-              description={aud.description}
-              icon={aud.icon}
-            />
-          ))}
-        </div>
-      </section>
-
-      <section className="space-y-4">
-        <h2 className="marketing-platform__section-title">Central de conteúdo e ajuda</h2>
-        <div className="marketing-platform__grid marketing-platform__grid--3">
-          {MARKETING_PLATFORM_RESOURCES.map((res) =>
-            "href" in res ? (
-              <a key={res.id} href={res.href} target="_blank" rel="noreferrer" className="marketing-platform-card">
-                <ExternalLinkIcon />
-                <div>
-                  <div className="marketing-platform-card__title">{res.label}</div>
-                  <p className="marketing-platform-card__desc">Abrir em nova aba</p>
-                </div>
-              </a>
-            ) : (
-              <Link key={res.id} to={withProjectQuery(`${ADMIN}/${res.adminPath}`)} className="marketing-platform-card">
-                <div className="marketing-platform-card__icon">
-                  <MarketingPlatformIcon name="plug" />
-                </div>
-                <div>
-                  <div className="marketing-platform-card__title">{res.label}</div>
-                  <p className="marketing-platform-card__desc">Dentro da agência</p>
-                </div>
-              </Link>
-            )
-          )}
-        </div>
-      </section>
-    </div>
-  );
-}
-
-function SnapshotProviderCard({ title, description, icon }: { title: string; description: string; icon: string }) {
-  return (
-    <div className="marketing-platform-card">
-      <div className="marketing-platform-card__icon">
-        <MarketingPlatformIcon name={icon} />
+      <div className="flex flex-wrap gap-2">
+        <Link className="btn-primary" to={withProjectQuery(`${ADMIN}/comercial/captura`)}>
+          Começar na Captura
+        </Link>
+        <Link className="btn-secondary" to={withProjectQuery(`${ADMIN}/comercial/nutricao`)}>
+          Abrir Nutrição
+        </Link>
+        <Link className="btn-ghost" to={withProjectQuery(`${ADMIN}/marketing/integracoes`)}>
+          Integrações (Sistema)
+        </Link>
       </div>
-      <div>
-        <div className="marketing-platform-card__title">{title}</div>
-        <p className="marketing-platform-card__desc">{description}</p>
-      </div>
-    </div>
-  );
-}
-
-function ExternalLinkIcon() {
-  return (
-    <div className="marketing-platform-card__icon">
-      <MarketingPlatformIcon name="mail" />
     </div>
   );
 }

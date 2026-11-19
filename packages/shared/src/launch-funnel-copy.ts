@@ -41,14 +41,38 @@ export const LAUNCH_FUNNEL_COPY = {
     brandSuffix: "Programador®",
     memberCount: "+120",
     memberLabel: "projetos e empreendedores acompanhados",
-    title: "Não é curioso. É pra quem vai executar.",
+    title: "Entre na comunidade",
     body:
-      "Todo dia estratégia nova de produto, funil e entrega técnica. Aqui o foco é um ajudar o outro a colocar oferta no ar — sem guru, sem promessa milagrosa, com contrato e escopo.",
+      "Informe nome, e-mail e WhatsApp. Depois liberamos o acesso ao grupo VIP — silencioso, só a equipe publica.",
     ruleTitle: "A única regra aqui é essa:",
     ruleBody: "Traga contexto de negócio,\ne nós entregamos o software alinhado ao modelo.",
     cta: "Continuar",
-    subtitle:
-      "Para quem não quer só “um site bonito”, mas validar oferta, captar demanda e entregar software alinhado ao modelo de receita."
+    subtitle: "Cadastro no modal · depois o convite VIP no WhatsApp"
+  },
+
+  /** Convite WhatsApp VIP — pós-proposta e seção comunidade. */
+  vipGroup: {
+    eyebrow: "Próximo passo",
+    title: "Entre no grupo VIP do Zero ao Negócio Lucrativo",
+    lead: "Um grupo silencioso: só a equipe publica. Você não recebe conversa paralela, só o que interessa.",
+    benefits: [
+      "Diagnóstico Estratégico",
+      "Dicas de MVP",
+      "Alertas sobre novos projetos",
+      "Ofertas exclusivas"
+    ],
+    cta: "Entrar no grupo VIP no WhatsApp",
+    freeNote: "Gratuito · você sai quando quiser",
+    securityTitle: "Aviso de segurança",
+    securityBody:
+      "Todas as comunicações oficiais são feitas exclusivamente dentro do grupo. Ninguém da equipe do Ederson Programador entra em contato no privado para oferecer cursos, descontos ou pedir dados e pagamentos.",
+    securityWarn:
+      "Se você receber mensagem individual em nome do evento, não clique em links e não faça pagamentos. Golpistas usam os números dos participantes de grupos para aplicar fraudes. Em caso de dúvida, fale com um administrador dentro do grupo.",
+    privacy: "Política de Privacidade",
+    terms: "Termos de Uso",
+    copyright: "© Ederson Programador · Diagnóstico de desenvolvimento",
+    /** Substitua por link real ou defina VITE_VIP_WHATSAPP_GROUP_URL no front. */
+    whatsappUrl: "https://chat.whatsapp.com/"
   },
 
   forWho: {

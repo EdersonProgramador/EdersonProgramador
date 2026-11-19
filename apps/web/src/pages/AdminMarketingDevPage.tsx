@@ -158,7 +158,7 @@ export function AdminMarketingDevPage() {
   if (!stackId || !page) {
     const q = projectId ? `?project=${encodeURIComponent(projectId)}` : "";
     const fallback = isDevelopmentRoute
-      ? `${ADMIN_BASE}/operacao/desenvolvimento/estatistica${q}`
+      ? `${ADMIN_BASE}/operacao/desenvolvimento/stack${q}`
       : `${ADMIN_BASE}/operacao/marketing/estatistica${q}`;
     return <Navigate to={fallback} replace />;
   }

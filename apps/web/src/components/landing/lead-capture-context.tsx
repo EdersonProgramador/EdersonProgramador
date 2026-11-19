@@ -4,7 +4,7 @@ import { LeadCaptureModal } from "./LeadCaptureModal";
 export type LeadCapturePackageTier = "essential" | "professional" | "advanced";
 
 type LeadCaptureContextValue = {
-  openCapture: (opts?: { packageTier?: LeadCapturePackageTier }) => void;
+  openCapture: (opts?: { packageTier?: LeadCapturePackageTier; campaign?: string }) => void;
 };
 
 const LeadCaptureContext = createContext<LeadCaptureContextValue | null>(null);
@@ -22,9 +22,11 @@ export function useLeadCaptureOptional() {
 export function LeadCaptureProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const [tier, setTier] = useState<LeadCapturePackageTier | undefined>();
+  const [campaign, setCampaign] = useState<string | undefined>();
 
-  const openCapture = useCallback((opts?: { packageTier?: LeadCapturePackageTier }) => {
+  const openCapture = useCallback((opts?: { packageTier?: LeadCapturePackageTier; campaign?: string }) => {
     setTier(opts?.packageTier);
+    setCampaign(opts?.campaign);
     setOpen(true);
   }, []);
 
@@ -33,7 +35,12 @@ export function LeadCaptureProvider({ children }: { children: ReactNode }) {
   return (
     <LeadCaptureContext.Provider value={value}>
       {children}
-      <LeadCaptureModal open={open} onClose={() => setOpen(false)} packageTier={tier} />
+      <LeadCaptureModal
+        open={open}
+        onClose={() => setOpen(false)}
+        packageTier={tier}
+        campaign={campaign}
+      />
     </LeadCaptureContext.Provider>
   );
 }

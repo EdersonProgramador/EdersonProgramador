@@ -16,7 +16,6 @@ const DevelopmentCodeStudio = lazy(() =>
   import("../components/admin/DevelopmentCodeStudio").then((m) => ({ default: m.DevelopmentCodeStudio }))
 );
 import { mergeProjectWorkspaceFields, stripStudioFieldWhileLoading } from "../lib/dev-code-studio-workspace-fields";
-import { AdminPillarStatsHubPage } from "./AdminPillarStatsHubPage";
 
 type ProjectOption = { id: string; title: string };
 
@@ -65,7 +64,7 @@ export function AdminDevelopmentHubPage() {
   }, []);
 
   useEffect(() => {
-    if (projectId && (view === "estatistica" || view === "editor" || isStackView(view))) void loadFields(projectId);
+    if (projectId && (view === "editor" || isStackView(view))) void loadFields(projectId);
     else setFields({});
   }, [projectId, view, loadFields]);
 
@@ -74,10 +73,6 @@ export function AdminDevelopmentHubPage() {
     if (nextId) next.set("project", nextId);
     else next.delete("project");
     setSearchParams(next, { replace: true });
-  }
-
-  if (view === "infra") {
-    return <Navigate to={`${ADMIN_BASE}/operacao/fase-3${q}`} replace />;
   }
 
   const stackCategory = view ? devTechStackCategoryByAdminSegment(view) : undefined;
@@ -185,26 +180,5 @@ export function AdminDevelopmentHubPage() {
     );
   }
 
-  if (view !== "estatistica" || !navItem) {
-    return <Navigate to={`${ADMIN_BASE}/operacao/desenvolvimento/stack${q}`} replace />;
-  }
-
-  return (
-    <div className="space-y-6">
-      <header className="agency-admin-page-head">
-        <p className="text-xs font-semibold uppercase tracking-wide text-sky-600 dark:text-sky-300">
-          {navCtx ? (
-            <>
-              {navCtx.pillarLabel} · {navCtx.sectionLabel} · {navCtx.itemLabel}
-            </>
-          ) : (
-            "Desenvolvimento"
-          )}
-        </p>
-        <h1>{navItem.label}</h1>
-        <p>{navItem.description}</p>
-      </header>
-      <AdminPillarStatsHubPage pillar="development" />
-    </div>
-  );
+  return <Navigate to={`${ADMIN_BASE}/operacao/desenvolvimento/stack${q}`} replace />;
 }

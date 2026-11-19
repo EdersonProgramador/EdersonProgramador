@@ -77,6 +77,49 @@ export async function registerMarketingPlatformRoutes(app: FastifyInstance) {
     };
   });
 
+  app.get("/agency/admin/ops/overview", async (request) => {
+    requireRole(request.agencyUser ?? null, ["ADMIN"]);
+    const now = new Date();
+    const [
+      leadsNew,
+      leadsTotal,
+      enrollmentsDue,
+      campaignsActive,
+      contactsTotal,
+      projectsOpen,
+      setup,
+      agentApprovalsPending,
+      agentsDeployed
+    ] = await Promise.all([
+      prisma.lead.count({ where: { status: "NEW" } }),
+      prisma.lead.count(),
+      prisma.marketingCampaignEnrollment.count({
+        where: { status: "ACTIVE", nextSendAt: { lte: now } }
+      }),
+      prisma.marketingCampaign.count({
+        where: { OR: [{ status: "ACTIVE" }, { kind: { in: ["ACQUISITION", "REMARKETING", "FOLLOW_UP"] } }] }
+      }),
+      prisma.marketingContactProfile.count(),
+      prisma.project.count(),
+      evaluateMarketingSetup(),
+      prisma.agencyAgentJob.count({ where: { status: "PENDING_APPROVAL" } }),
+      prisma.agencyAgentDeployment.count({ where: { status: "ACTIVE" } })
+    ]);
+    return {
+      leadsNew,
+      leadsTotal,
+      enrollmentsDue,
+      campaignsActive,
+      contactsTotal,
+      projectsOpen,
+      clientsCount: projectsOpen,
+      agentApprovalsPending,
+      agentsDeployed,
+      setupReady: setup.ready,
+      setupScore: `${setup.score}/${setup.total}`
+    };
+  });
+
   app.get("/agency/admin/marketing/contacts", async (request) => {
     requireRole(request.agencyUser ?? null, ["ADMIN"]);
     const query = z.object({ q: z.string().optional(), limit: z.coerce.number().max(100).default(50) }).parse(request.query);

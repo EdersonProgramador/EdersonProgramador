@@ -34,12 +34,19 @@
 }
 
 .agency-admin-sidebar__label {
-  padding: 0.35rem 0.65rem 0.5rem;
+  padding: 0.35rem 0.65rem 0.15rem;
   font-size: 0.65rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--app-text-subtle);
+}
+
+.agency-admin-sidebar__purpose {
+  padding: 0 0.65rem 0.45rem;
+  font-size: 0.7rem;
+  line-height: 1.35;
+  color: var(--app-text-muted);
 }
 
 .agency-admin-sidebar__pillar-block {
@@ -617,4 +624,983 @@ html[data-theme="dark"] .agency-op-pillar-chip.agency-op-pillar--formula {
 .agency-branding-repeater-row {
   border: 1px dashed var(--app-border);
   background: rgb(139 92 246 / 0.04);
+}
+
+/* ——— Processo operacional (Comando / Comercial) ——— */
+
+.admin-process__crumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  color: var(--app-text-muted);
+}
+
+.admin-process__crumb-link {
+  color: var(--app-text-muted);
+  text-decoration: none;
+}
+
+.admin-process__crumb-link:hover {
+  color: var(--app-text);
+  text-decoration: underline;
+}
+
+.admin-process__crumb-sep {
+  opacity: 0.5;
+}
+
+.admin-process__crumb-current {
+  color: var(--app-text);
+  font-weight: 500;
+}
+
+.admin-process__steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.admin-process__step {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.7rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--app-border);
+  background: var(--app-panel);
+  color: var(--app-text-muted);
+  text-decoration: none;
+  font-size: 0.8125rem;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.admin-process__step:hover {
+  border-color: rgb(16 185 129 / 0.45);
+  color: var(--app-text);
+}
+
+.admin-process__step.is-active {
+  border-color: rgb(16 185 129 / 0.55);
+  background: rgb(16 185 129 / 0.1);
+  color: var(--app-text);
+}
+
+.admin-process__step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  background: rgb(16 185 129 / 0.18);
+  color: rgb(52 211 153);
+}
+
+.admin-process__head {
+  margin-bottom: 0.25rem;
+}
+
+.admin-process__title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--app-text);
+}
+
+.admin-process__desc {
+  margin-top: 0.35rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--app-text-muted);
+}
+
+.admin-process__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+
+.admin-process__tab,
+.admin-process__tab-link {
+  padding: 0.4rem 0.75rem;
+  border-radius: 0.45rem;
+  border: 1px solid transparent;
+  font-size: 0.8125rem;
+  background: transparent;
+  color: var(--app-text-muted);
+  cursor: pointer;
+  text-decoration: none;
+  font: inherit;
+}
+
+.admin-process__tab:hover,
+.admin-process__tab-link:hover {
+  color: var(--app-text);
+  background: var(--app-hover);
+}
+
+.admin-process__tab.is-active {
+  border-color: var(--app-border);
+  background: var(--app-panel);
+  color: var(--app-text);
+  font-weight: 600;
+}
+
+.admin-process .agency-admin-page-head {
+  display: none;
+}
+
+.admin-ops-kpis {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 768px) {
+  .admin-ops-kpis {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.admin-ops-kpi {
+  padding: 0.9rem 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--app-border);
+  background: var(--app-panel);
+}
+
+.admin-ops-kpi__label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--app-text-muted);
+}
+
+.admin-ops-kpi__value {
+  margin-top: 0.35rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--app-text);
+}
+
+.admin-ops-step-card {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 0.9rem 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--app-border);
+  background: var(--app-panel);
+  text-decoration: none;
+  transition: border-color 0.15s ease, background 0.15s ease;
+  height: 100%;
+}
+
+.admin-ops-step-card:hover {
+  border-color: rgb(16 185 129 / 0.45);
+  background: rgb(16 185 129 / 0.06);
+}
+
+.admin-ops-step-card__num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  flex-shrink: 0;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  background: rgb(16 185 129 / 0.16);
+  color: rgb(52 211 153);
+}
+
+.admin-ops-step-card__title {
+  display: block;
+  font-weight: 600;
+  color: var(--app-text);
+}
+
+.admin-ops-step-card__desc {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: var(--app-text-muted);
+}
+
+/* ——— Agentes IA (estilo Agency OS / Viva) ——— */
+
+.admin-agents-flow {
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: 1fr;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+@media (min-width: 768px) {
+  .admin-agents-flow {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.admin-agents-flow__item {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+  padding: 0.75rem 0.85rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--app-border);
+  background: linear-gradient(180deg, rgb(16 185 129 / 0.08), transparent 70%), var(--app-panel);
+}
+
+.admin-agents-flow__n {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: rgb(16 185 129 / 0.2);
+  color: rgb(52 211 153);
+  flex-shrink: 0;
+}
+
+.admin-agents-flow__item strong {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--app-text);
+}
+
+.admin-agents-flow__d {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.75rem;
+  color: var(--app-text-muted);
+}
+
+.admin-agents-section-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--app-text-muted);
+}
+
+.admin-agents-templates {
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .admin-agents-templates {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) {
+  .admin-agents-templates {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+.admin-agents-template {
+  text-align: left;
+  padding: 0.85rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--app-border);
+  background: var(--app-panel);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+}
+
+.admin-agents-template:hover {
+  border-color: rgb(16 185 129 / 0.45);
+  transform: translateY(-1px);
+}
+
+.admin-agents-template.is-active {
+  border-color: rgb(16 185 129 / 0.6);
+  background: rgb(16 185 129 / 0.1);
+  box-shadow: 0 0 0 1px rgb(16 185 129 / 0.2);
+}
+
+.admin-agents-template__role {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgb(52 211 153);
+}
+
+.admin-agents-template__title {
+  display: block;
+  margin-top: 0.25rem;
+  font-weight: 700;
+  color: var(--app-text);
+}
+
+.admin-agents-template__desc {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--app-text-muted);
+}
+
+.admin-agents-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.8125rem;
+  color: var(--app-text-muted);
+}
+
+.admin-agents-list,
+.admin-agents-jobs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.admin-agents-card,
+.admin-agents-job {
+  padding: 0.9rem 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--app-border);
+  background: var(--app-panel);
+}
+
+.admin-agents-card__head,
+.admin-agents-job__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.admin-agents-card__title {
+  font-weight: 700;
+  color: var(--app-text);
+}
+
+.admin-agents-card__meta,
+.admin-agents-card__guard {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--app-text-muted);
+}
+
+.admin-agents-job__body {
+  margin-top: 0.65rem;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  background: var(--app-hover);
+  font-size: 0.8125rem;
+  white-space: pre-wrap;
+  color: var(--app-text);
+  overflow: auto;
+}
+
+.admin-agents-deploy-grid {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: 1fr;
+  max-height: 16rem;
+  overflow: auto;
+}
+
+@media (min-width: 640px) {
+  .admin-agents-deploy-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.admin-agents-deploy-item {
+  display: flex;
+  gap: 0.55rem;
+  align-items: flex-start;
+  padding: 0.55rem 0.65rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--app-border);
+  font-size: 0.8125rem;
+  color: var(--app-text);
+}
+
+@media (min-width: 768px) {
+  .admin-ops-kpis {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) {
+  .admin-ops-kpis {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+/* ——— Agency OS (Viva multi-client) ——— */
+
+.agency-os {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.agency-os-hero {
+  padding: 1rem 1.15rem;
+  border-radius: 0.875rem;
+  border: 1px solid var(--app-border);
+  background:
+    radial-gradient(120% 80% at 0% 0%, rgb(16 185 129 / 0.14), transparent 55%),
+    var(--app-panel);
+}
+
+.agency-os-hero__eyebrow {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgb(52 211 153);
+}
+
+.agency-os-hero h1 {
+  margin-top: 0.25rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--app-text);
+}
+
+.agency-os-hero p {
+  margin-top: 0.35rem;
+  max-width: 42rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--app-text-muted);
+}
+
+.agency-os-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 1024px) {
+  .agency-os-grid {
+    grid-template-columns: minmax(16rem, 22rem) 1fr;
+    align-items: start;
+  }
+}
+
+.agency-os-grid__stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.agency-os-panel {
+  padding: 1rem;
+  border-radius: 0.875rem;
+  border: 1px solid var(--app-border);
+  background: var(--app-panel);
+}
+
+.agency-os-panel__head {
+  margin-bottom: 0.85rem;
+}
+
+.agency-os-panel__head h2 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--app-text);
+}
+
+.agency-os-panel__head p {
+  margin-top: 0.2rem;
+  font-size: 0.8125rem;
+  color: var(--app-text-muted);
+}
+
+.agency-os-book {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  max-height: 36rem;
+  overflow: auto;
+}
+
+.agency-os-client {
+  width: 100%;
+  text-align: left;
+  padding: 0.75rem 0.85rem;
+  border-radius: 0.65rem;
+  border: 1px solid var(--app-border);
+  background: transparent;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.agency-os-client:hover,
+.agency-os-client.is-active {
+  border-color: rgb(16 185 129 / 0.5);
+  background: rgb(16 185 129 / 0.08);
+}
+
+.agency-os-client__top {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  align-items: center;
+  color: var(--app-text);
+}
+
+.agency-os-client__meta,
+.agency-os-client__stats {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--app-text-muted);
+}
+
+.agency-os-client__stats {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.agency-os-client__boot {
+  margin-top: 0.4rem;
+  width: 100%;
+}
+
+.agency-os-pill {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+}
+
+.agency-os-pill--ready {
+  background: rgb(16 185 129 / 0.2);
+  color: rgb(52 211 153);
+}
+
+.agency-os-pill--partial {
+  background: rgb(245 158 11 / 0.2);
+  color: rgb(251 191 36);
+}
+
+.agency-os-pill--needs_bootstrap {
+  background: rgb(244 63 94 / 0.15);
+  color: rgb(251 113 133);
+}
+
+.agency-os-camp-kpis {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+  margin-bottom: 0.75rem;
+}
+
+.agency-os-kpi-label {
+  display: block;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--app-text-muted);
+}
+
+.agency-os-camp-kpis strong {
+  font-size: 1.25rem;
+  color: var(--app-text);
+}
+
+.agency-os-agent-list,
+.agency-os-jobs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.agency-os-agent-row,
+.agency-os-job {
+  padding: 0.7rem 0.8rem;
+  border-radius: 0.65rem;
+  border: 1px solid var(--app-border);
+}
+
+.agency-os-agent-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.agency-os-job__head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.65rem;
+  margin-bottom: 0.45rem;
+}
+
+.agency-os-job__body {
+  margin: 0;
+  padding: 0.65rem;
+  border-radius: 0.45rem;
+  background: var(--app-hover);
+  font-size: 0.75rem;
+  white-space: pre-wrap;
+  overflow: auto;
+  max-height: 14rem;
+  color: var(--app-text);
+}
+
+.agency-os-domain-grid {
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 700px) {
+  .agency-os-domain-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.agency-os-domain {
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.55rem;
+  border: 1px dashed var(--app-border);
+}
+
+.agency-os-domain__title {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(52 211 153);
+  margin-bottom: 0.35rem;
+}
+
+.agency-os-domain ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.agency-os-domain li strong {
+  display: block;
+  font-size: 0.8125rem;
+  color: var(--app-text);
+}
+
+.agency-os-domain li span {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--app-text-muted);
+}
+
+/* ——— Agency OS (Viva multi-client) ——— */
+
+.agency-os {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.agency-os-hero {
+  padding: 1rem 1.15rem;
+  border-radius: 0.875rem;
+  border: 1px solid var(--app-border);
+  background:
+    radial-gradient(120% 80% at 0% 0%, rgb(16 185 129 / 0.14), transparent 55%),
+    var(--app-panel);
+}
+
+.agency-os-hero__eyebrow {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgb(52 211 153);
+}
+
+.agency-os-hero h1 {
+  margin-top: 0.25rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--app-text);
+}
+
+.agency-os-hero p {
+  margin-top: 0.35rem;
+  max-width: 42rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--app-text-muted);
+}
+
+.agency-os-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 1024px) {
+  .agency-os-grid {
+    grid-template-columns: minmax(16rem, 22rem) 1fr;
+    align-items: start;
+  }
+}
+
+.agency-os-grid__stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.agency-os-panel {
+  padding: 1rem;
+  border-radius: 0.875rem;
+  border: 1px solid var(--app-border);
+  background: var(--app-panel);
+}
+
+.agency-os-panel__head {
+  margin-bottom: 0.85rem;
+}
+
+.agency-os-panel__head h2 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--app-text);
+}
+
+.agency-os-panel__head p {
+  margin-top: 0.2rem;
+  font-size: 0.8125rem;
+  color: var(--app-text-muted);
+}
+
+.agency-os-book {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  max-height: 36rem;
+  overflow: auto;
+}
+
+.agency-os-client {
+  width: 100%;
+  text-align: left;
+  padding: 0.75rem 0.85rem;
+  border-radius: 0.65rem;
+  border: 1px solid var(--app-border);
+  background: transparent;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.agency-os-client:hover,
+.agency-os-client.is-active {
+  border-color: rgb(16 185 129 / 0.5);
+  background: rgb(16 185 129 / 0.08);
+}
+
+.agency-os-client__top {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  align-items: center;
+  color: var(--app-text);
+}
+
+.agency-os-client__meta,
+.agency-os-client__stats {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--app-text-muted);
+}
+
+.agency-os-client__stats {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.agency-os-client__boot {
+  margin-top: 0.4rem;
+  width: 100%;
+}
+
+.agency-os-pill {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+}
+
+.agency-os-pill--ready {
+  background: rgb(16 185 129 / 0.2);
+  color: rgb(52 211 153);
+}
+
+.agency-os-pill--partial {
+  background: rgb(245 158 11 / 0.2);
+  color: rgb(251 191 36);
+}
+
+.agency-os-pill--needs_bootstrap {
+  background: rgb(244 63 94 / 0.15);
+  color: rgb(251 113 133);
+}
+
+.agency-os-camp-kpis {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+  margin-bottom: 0.75rem;
+}
+
+.agency-os-kpi-label {
+  display: block;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--app-text-muted);
+}
+
+.agency-os-camp-kpis strong {
+  font-size: 1.25rem;
+  color: var(--app-text);
+}
+
+.agency-os-agent-list,
+.agency-os-jobs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.agency-os-agent-row,
+.agency-os-job {
+  padding: 0.7rem 0.8rem;
+  border-radius: 0.65rem;
+  border: 1px solid var(--app-border);
+}
+
+.agency-os-agent-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.agency-os-job__head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.65rem;
+  margin-bottom: 0.45rem;
+}
+
+.agency-os-job__body {
+  margin: 0;
+  padding: 0.65rem;
+  border-radius: 0.45rem;
+  background: var(--app-hover);
+  font-size: 0.75rem;
+  white-space: pre-wrap;
+  overflow: auto;
+  max-height: 14rem;
+  color: var(--app-text);
+}
+
+.agency-os-domain-grid {
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 700px) {
+  .agency-os-domain-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.agency-os-domain {
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.55rem;
+  border: 1px dashed var(--app-border);
+}
+
+.agency-os-domain__title {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(52 211 153);
+  margin-bottom: 0.35rem;
+}
+
+.agency-os-domain ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.agency-os-domain li strong {
+  display: block;
+  font-size: 0.8125rem;
+  color: var(--app-text);
+}
+
+.agency-os-domain li span {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--app-text-muted);
 }

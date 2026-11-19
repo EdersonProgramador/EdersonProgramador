@@ -567,6 +567,160 @@
   color: var(--funnel-accent);
 }
 
+/* Grupo VIP WhatsApp */
+.vip-invite {
+  @apply rounded-2xl border border-emerald-500/35 bg-emerald-500/[0.06] p-6 text-left sm:p-7;
+}
+
+.vip-invite--compact {
+  @apply border-white/10 bg-white/[0.03] p-3 sm:p-4;
+}
+
+.vip-invite__eyebrow {
+  @apply text-[0.65rem] font-bold uppercase tracking-[0.14em] text-emerald-400;
+}
+
+.vip-invite__title {
+  @apply mt-2 font-display text-xl font-bold leading-snug text-white sm:text-2xl;
+}
+
+.vip-invite--compact .vip-invite__title {
+  @apply mt-1 text-base sm:text-lg;
+}
+
+.vip-invite__lead {
+  @apply mt-3 text-sm leading-relaxed text-white/70;
+}
+
+.vip-invite--compact .vip-invite__lead {
+  @apply mt-2 text-[0.8125rem] leading-snug;
+}
+
+.vip-invite__benefits {
+  @apply mt-5 space-y-2;
+}
+
+.vip-invite--compact .vip-invite__benefits {
+  @apply mt-3 space-y-1.5;
+}
+
+.vip-invite__benefits li {
+  @apply flex items-start gap-2 text-sm font-medium text-white/90;
+}
+
+.vip-invite--compact .vip-invite__benefits li {
+  @apply text-[0.8125rem];
+}
+
+.vip-invite__benefits li::before {
+  content: "✓";
+  @apply mt-0.5 font-bold text-emerald-400;
+}
+
+.vip-invite__cta {
+  @apply mt-6 inline-flex w-full justify-center text-center;
+}
+
+.vip-invite--compact .vip-invite__cta {
+  @apply mt-4;
+}
+
+.vip-invite__free {
+  @apply mt-2 text-center text-xs text-white/55;
+}
+
+.vip-invite__security {
+  @apply mt-6 rounded-xl border border-amber-500/25 bg-amber-500/[0.06] p-4;
+}
+
+.vip-invite--compact .vip-invite__security {
+  @apply mt-3 p-3;
+}
+
+.vip-invite__security-title {
+  @apply flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-amber-200;
+}
+
+.vip-invite__security-body {
+  @apply mt-2 text-xs leading-relaxed text-white/65;
+}
+
+.vip-invite--compact .vip-invite__security-body {
+  @apply mt-1.5 text-[0.7rem] leading-snug;
+}
+
+.vip-invite__security-body--warn {
+  @apply mt-2 text-amber-100/80;
+}
+
+.vip-invite__legal {
+  @apply mt-6 text-center text-[11px] text-white/45;
+}
+
+.vip-invite__legal a {
+  @apply text-white/70 underline-offset-2 hover:underline;
+}
+
+/* Modal VIP: folha quase fullscreen, sem “caixa” cortada */
+.lead-capture-dialog:has(.lead-capture-panel--vip) {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  padding: 0;
+}
+
+.lead-capture-panel--vip {
+  display: flex;
+  flex-direction: column;
+  width: min(100%, 36rem);
+  height: 100dvh;
+  max-height: 100dvh;
+  margin: 0;
+  border-radius: 0;
+  padding: max(0.85rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right))
+    max(0.85rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+  overflow: hidden;
+}
+
+@media (min-width: 640px) {
+  .lead-capture-dialog:has(.lead-capture-panel--vip) {
+    align-items: center;
+    padding: 1.25rem;
+  }
+
+  .lead-capture-panel--vip {
+    width: min(100%, 32rem);
+    height: min(100dvh - 2.5rem, 52rem);
+    max-height: min(100dvh - 2.5rem, 52rem);
+    border-radius: 1rem;
+  }
+}
+
+.lead-capture-panel__vip-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  margin-top: 0.75rem;
+  overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.lead-capture-panel__vip-body .vip-invite {
+  flex: 1;
+}
+
+.lead-capture-panel--vip .lead-capture-panel__head h2 {
+  font-size: 1.15rem;
+}
+
+.lead-capture-panel--vip .lead-capture-panel__head p {
+  margin-top: 0.35rem;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
 /* Avatar strip */
 .funnel-avatar-strip {
   @apply flex gap-3 overflow-x-auto py-4 [scrollbar-width:none];

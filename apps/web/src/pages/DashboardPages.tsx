@@ -69,7 +69,7 @@ const PILLAR_ESTATISTICA_ADMIN_PATH: Record<
 > = {
   branding: "operacao/branding/estatistica",
   marketing: "operacao/marketing/estatistica",
-  development: "operacao/desenvolvimento/estatistica",
+  development: "operacao/desenvolvimento/stack",
   formula: "operacao/formula-lancamento/estatistica"
 };
 

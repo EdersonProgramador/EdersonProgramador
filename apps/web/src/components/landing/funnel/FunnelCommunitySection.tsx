@@ -7,6 +7,7 @@ const who = LAUNCH_FUNNEL_COPY.forWho;
 
 export function FunnelCommunitySection() {
   const capture = useLeadCaptureOptional();
+
   return (
     <section id="comunidade" className="funnel-section border-t border-white/[0.06] bg-[#060606] pb-14 pt-0 sm:pb-16">
       <FunnelMarquee />
@@ -17,7 +18,9 @@ export function FunnelCommunitySection() {
             {c.memberCount} <span className="text-white/70">{c.memberLabel}</span>
           </span>
         </p>
-        <p className="mx-auto mt-8 max-w-2xl text-center text-sm leading-relaxed text-white/65 sm:text-base">{c.body}</p>
+        <p className="mx-auto mt-8 max-w-2xl text-center text-sm leading-relaxed text-white/65 sm:text-base">
+          {c.body}
+        </p>
 
         <RunWhoGrid />
 
@@ -25,7 +28,11 @@ export function FunnelCommunitySection() {
           <p className="text-sm font-bold uppercase tracking-wide text-emerald-300">{c.ruleTitle}</p>
           <p className="mt-3 whitespace-pre-line text-lg font-semibold text-white">{c.ruleBody}</p>
           {capture ? (
-            <button type="button" className="btn-primary btn-primary--urgent mt-6" onClick={() => capture.openCapture()}>
+            <button
+              type="button"
+              className="btn-primary btn-primary--urgent mt-6"
+              onClick={() => capture.openCapture({ campaign: "community_vip" })}
+            >
               {c.cta}
             </button>
           ) : (

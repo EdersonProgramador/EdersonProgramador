@@ -286,6 +286,30 @@ export {
   type MarketingNavSection
 } from "./marketing-operation-nav.js";
 export {
+  ADMIN_COMERCIAL_STEPS,
+  ADMIN_LEGACY_PATH_ALIASES,
+  ADMIN_OPERATION_BLOCKS,
+  adminComercialStepLabel,
+  findAdminNavByAdminPath,
+  resolveAdminCanonicalPath,
+  type AdminNavBlock,
+  type AdminNavBlockId,
+  type AdminNavLink
+} from "./admin-operation-ia.js";
+export {
+  AGENCY_AGENT_BOOTSTRAP_TEMPLATE_IDS,
+  AGENCY_AGENT_TEMPLATES,
+  agencyAgentTemplatesByDomain,
+  getAgencyAgentTemplate,
+  isAgencyAgentTemplateId,
+  proposalPackFromTier,
+  type AgencyAgentDeliverableKind,
+  type AgencyAgentDomain,
+  type AgencyAgentSkill,
+  type AgencyAgentTemplate,
+  type AgencyAgentTemplateId
+} from "./agency-agents.js";
+export {
   BRANDING_LEGACY_PATH_ALIASES,
   BRANDING_OPERATION_NAV,
   brandingNavFlatItems,

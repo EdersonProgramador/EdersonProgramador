@@ -560,3 +560,55 @@ model ProjectPhaseDeliverable {
 
   @@index([phaseId, sortOrder])
 }
+
+// Agente IA da agencia (modelo Viva: build -> tune -> deploy -> approve).
+model AgencyAgent {
+  id              String   @id @default(cuid())
+  name            String
+  templateId      String
+  status          String   @default("DRAFT")
+  sourceProjectId String?
+  brandVoice      String?
+  offerSummary    String?
+  guardrails      String?
+  systemPrompt    String?
+  configJson      Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  deployments     AgencyAgentDeployment[]
+  jobs            AgencyAgentJob[]
+
+  @@index([status, templateId])
+  @@index([sourceProjectId])
+}
+
+model AgencyAgentDeployment {
+  id        String   @id @default(cuid())
+  agentId   String
+  agent     AgencyAgent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  projectId String
+  status    String   @default("ACTIVE")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([agentId, projectId])
+  @@index([projectId, status])
+}
+
+model AgencyAgentJob {
+  id          String   @id @default(cuid())
+  agentId     String
+  agent       AgencyAgent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  projectId   String?
+  kind        String
+  status      String   @default("PENDING_APPROVAL")
+  title       String
+  inputJson   Json?
+  draftJson   Json?
+  decidedAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([status, createdAt])
+  @@index([agentId, status])
+}
