@@ -1,10 +1,10 @@
-/* Funil agressivo — LP estilo comunidade / low ticket (referência visual) */
+﻿/* Funil agressivo — LP estilo comunidade / low ticket (referência visual) */
 
 .funnel-hero__logo-mark {
   display: block;
   filter:
-    drop-shadow(0 0 10px rgb(56 189 248 / 0.45))
-    drop-shadow(0 0 28px rgb(59 130 246 / 0.28));
+    drop-shadow(0 0 10px rgb(79 70 229 / 0.35))
+    drop-shadow(0 0 28px rgb(99 102 241 / 0.22));
 }
 
 .funnel-hero__logo-mark .brand-logo-img--md {
@@ -25,13 +25,22 @@
 }
 
 .landing-shell--funnel-aggressive {
-  --funnel-accent: #22c55e;
-  --funnel-accent-hot: #f97316;
-  --funnel-bg: #050505;
-  --funnel-card: #0c0c0f;
-  --funnel-border: rgb(255 255 255 / 0.08);
+  --funnel-accent: #4f46e5;
+  --funnel-accent-hot: #6366f1;
+  --funnel-bg: #ffffff;
+  --funnel-card: #f8fafc;
+  --funnel-border: rgb(15 23 42 / 0.1);
   background: var(--funnel-bg) !important;
-  color: #fafafa;
+  color: #0f172a;
+}
+
+html[data-theme="night"] .landing-shell--funnel-aggressive {
+  --funnel-accent: #818cf8;
+  --funnel-accent-hot: #a5b4fc;
+  --funnel-bg: #020617;
+  --funnel-card: #0a0f1a;
+  --funnel-border: rgb(255 255 255 / 0.1);
+  color: #f8fafc;
 }
 
 .landing-shell--funnel-aggressive .cinema-grid {
@@ -47,29 +56,55 @@
 }
 
 .landing-shell--funnel-aggressive .funnel-section {
-  background: #060606;
+  background: #ffffff;
   position: relative;
   isolation: isolate;
+}
+
+html[data-theme="night"] .landing-shell--funnel-aggressive .funnel-section {
+  background: #060612;
 }
 
 .landing-shell--funnel-aggressive .funnel-section .pro-headline,
 .landing-shell--funnel-aggressive .funnel-section h2,
 .landing-shell--funnel-aggressive .funnel-section h3 {
+  color: #0f172a;
+}
+
+html[data-theme="night"] .landing-shell--funnel-aggressive .funnel-section .pro-headline,
+html[data-theme="night"] .landing-shell--funnel-aggressive .funnel-section h2,
+html[data-theme="night"] .landing-shell--funnel-aggressive .funnel-section h3 {
   color: #f8fafc;
 }
 
 .landing-shell--funnel-aggressive .funnel-section p,
 .landing-shell--funnel-aggressive .funnel-section li {
+  color: rgb(71 85 105 / 0.95);
+}
+
+html[data-theme="night"] .landing-shell--funnel-aggressive .funnel-section p,
+html[data-theme="night"] .landing-shell--funnel-aggressive .funnel-section li {
   color: rgb(203 213 225 / 0.92);
 }
 
 .landing-shell--funnel-aggressive .funnel-section .section-label {
-  color: rgb(52 211 153 / 0.95);
+  color: #4f46e5;
+}
+
+html[data-theme="night"] .landing-shell--funnel-aggressive .funnel-section .section-label {
+  color: #a5b4fc;
 }
 
 .landing-shell--funnel-aggressive .panel,
 .landing-shell--funnel-aggressive .panel-glow {
-  background: #0c0c0f;
+  background: #ffffff;
+  border-color: rgb(15 23 42 / 0.1);
+  box-shadow: 0 12px 40px rgb(15 23 42 / 0.06);
+}
+
+html[data-theme="night"] .landing-shell--funnel-aggressive .panel,
+html[data-theme="night"] .landing-shell--funnel-aggressive .panel-glow {
+  background: #0a0f1a;
   border-color: rgb(255 255 255 / 0.08);
   box-shadow: none;
 }
@@ -80,10 +115,17 @@
 
 .landing-shell--funnel-aggressive .funnel-hero .hero-stat,
 .landing-shell--funnel-aggressive .funnel-hero .glass-metric {
-  background: #0c0c0f !important;
+  background: #ffffff !important;
+  border: 1px solid rgb(15 23 42 / 0.1);
+  box-shadow: 0 8px 24px rgb(15 23 42 / 0.05);
+  backdrop-filter: none;
+}
+
+html[data-theme="night"] .landing-shell--funnel-aggressive .funnel-hero .hero-stat,
+html[data-theme="night"] .landing-shell--funnel-aggressive .funnel-hero .glass-metric {
+  background: #0a0f1a !important;
   border: 1px solid rgb(255 255 255 / 0.08);
   box-shadow: none;
-  backdrop-filter: none;
 }
 
 .landing-shell--funnel-aggressive .funnel-hero .hero-stat::before {
@@ -92,19 +134,32 @@
 
 .landing-shell--funnel-aggressive .funnel-hero .hero-stat__label,
 .landing-shell--funnel-aggressive .funnel-hero .hero-stat__emphasis {
+  color: rgb(100 116 139 / 0.95);
+}
+
+html[data-theme="night"] .landing-shell--funnel-aggressive .funnel-hero .hero-stat__label,
+html[data-theme="night"] .landing-shell--funnel-aggressive .funnel-hero .hero-stat__emphasis {
   color: rgb(148 163 184 / 0.95);
 }
 
 .landing-shell--funnel-aggressive.landing-shell--premium #topo .hero-title-gradient {
-  @apply bg-gradient-to-br from-white via-green-100 to-emerald-400/90 bg-clip-text text-transparent;
+  @apply bg-gradient-to-br from-slate-900 via-indigo-700 to-indigo-500 bg-clip-text text-transparent;
   -webkit-text-fill-color: transparent;
+}
+
+html[data-theme="night"] .landing-shell--funnel-aggressive.landing-shell--premium #topo .hero-title-gradient {
+  @apply bg-gradient-to-br from-white via-indigo-100 to-indigo-300/90 bg-clip-text text-transparent;
 }
 
 /* Marquee ✦ */
 .funnel-marquee {
   @apply overflow-hidden border-y py-3;
   border-color: var(--funnel-border);
-  background: #000;
+  background: #eef2ff;
+}
+
+html[data-theme="night"] .funnel-marquee {
+  background: #0b1020;
 }
 
 .funnel-marquee__track {
@@ -140,7 +195,7 @@
 }
 
 .funnel-hero__neon {
-  color: #4ade80;
+  color: #818cf8;
   text-shadow:
     0 0 4px rgb(74 222 128 / 0.95),
     0 0 12px rgb(34 197 94 / 0.85),
@@ -185,7 +240,7 @@
 
 .funnel-vsl__play {
   @apply inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-bold uppercase tracking-wide text-black;
-  background: linear-gradient(135deg, #4ade80, #22c55e);
+  background: linear-gradient(135deg, #818cf8, #4f46e5);
   box-shadow: 0 0 40px rgb(34 197 94 / 0.45);
 }
 
@@ -223,7 +278,11 @@
 }
 
 .funnel-toast__value {
-  @apply mt-0.5 leading-snug text-emerald-400;
+  @apply mt-0.5 leading-snug text-indigo-600;
+}
+
+html[data-theme="night"] .funnel-toast__value {
+  @apply text-indigo-300;
 }
 
 .funnel-toast__time {
@@ -301,7 +360,7 @@
 
 /* Maestria — verde + ouro (validação, prosperidade / 6em7) */
 .funnel-pipeline__step--maestria {
-  --step-accent: #4ade80;
+  --step-accent: #818cf8;
   --step-glow: rgb(74 222 128 / 0.55);
   --step-led: rgb(250 204 21 / 0.75);
 }
@@ -391,7 +450,7 @@
 
 .funnel-pipeline__connector-beam {
   @apply absolute inset-0;
-  background: linear-gradient(90deg, transparent, var(--link-mid, #22c55e), transparent);
+  background: linear-gradient(90deg, transparent, var(--link-mid, #4f46e5), transparent);
   transform: translateX(-100%);
   opacity: 0;
 }
@@ -410,7 +469,7 @@
 }
 
 .funnel-pipeline__connector--link-3.funnel-pipeline__connector--lit .funnel-pipeline__connector-beam {
-  background: linear-gradient(90deg, #fb923c, #4ade80, #facc15);
+  background: linear-gradient(90deg, #fb923c, #818cf8, #facc15);
 }
 
 .funnel-pipeline__connector--lit .funnel-pipeline__connector-beam {
@@ -420,7 +479,7 @@
 
 .funnel-pipeline__step-check {
   @apply absolute -right-1 -top-1 z-[2] flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-black;
-  background: linear-gradient(135deg, #facc15, #22c55e);
+  background: linear-gradient(135deg, #facc15, #4f46e5);
   color: #0a0a0a;
   box-shadow: 0 0 16px rgb(250 204 21 / 0.65);
   animation: funnel-pipeline-check-pop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
@@ -569,7 +628,7 @@
 
 /* Grupo VIP WhatsApp */
 .vip-invite {
-  @apply rounded-2xl border border-emerald-500/35 bg-emerald-500/[0.06] p-6 text-left sm:p-7;
+  @apply rounded-2xl border border-indigo-500/35 bg-indigo-500/[0.06] p-6 text-left sm:p-7;
 }
 
 .vip-invite--compact {
@@ -577,7 +636,7 @@
 }
 
 .vip-invite__eyebrow {
-  @apply text-[0.65rem] font-bold uppercase tracking-[0.14em] text-emerald-400;
+  @apply text-[0.65rem] font-bold uppercase tracking-[0.14em] text-indigo-600;
 }
 
 .vip-invite__title {
@@ -614,7 +673,7 @@
 
 .vip-invite__benefits li::before {
   content: "✓";
-  @apply mt-0.5 font-bold text-emerald-400;
+  @apply mt-0.5 font-bold text-indigo-600;
 }
 
 .vip-invite__cta {
@@ -752,7 +811,7 @@
 }
 
 .funnel-avatar--photo {
-  @apply overflow-hidden border-emerald-500/35 p-0;
+  @apply overflow-hidden border-indigo-500/35 p-0;
   background: #111;
   box-shadow: 0 0 0 1px rgb(0 0 0 / 0.4);
 }
@@ -839,7 +898,7 @@
 }
 
 .funnel-price-now {
-  @apply font-display text-4xl font-black text-emerald-400;
+  @apply font-display text-4xl font-black text-indigo-600;
 }
 
 .funnel-slots {
@@ -949,3 +1008,4 @@
 .funnel-spaced-brand {
   @apply font-display text-2xl font-black tracking-widest text-white sm:text-3xl;
 }
+

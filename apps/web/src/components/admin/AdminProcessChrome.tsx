@@ -34,12 +34,12 @@ export function AdminProcessBreadcrumb() {
     pillar &&
     (!ctx?.link.adminPath ||
       relative !== ctx.link.adminPath ||
-      ctx.block.id === "entrega");
+      ctx.block.id === "operacoes");
 
   return (
     <nav className="admin-process__crumb mb-3" aria-label="Processo">
       <Link to={withProjectQuery(ADMIN)} className="admin-process__crumb-link">
-        Comando
+        Amplifica CRM
       </Link>
       {ctx ? (
         <>
@@ -94,8 +94,7 @@ export function AdminProcessChrome({
 }) {
   const { withProjectQuery } = useAdminProjectScope();
   const relative = useAdminRelativePath();
-  const ctx = findAdminNavByAdminPath(relative);
-  const isComercial = ctx?.block.id === "comercial";
+  const isComercial = relative === "comercial" || relative.startsWith("comercial/");
 
   return (
     <div className="admin-process space-y-5">

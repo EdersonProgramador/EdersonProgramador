@@ -1,0 +1,253 @@
+/* Agency login — Amplifica CRM theme (light indigo) */
+.crm-auth-shell {
+  --crm-indigo: #4f46e5;
+  --crm-indigo-hover: #4338ca;
+  --crm-ink: #111827;
+  --crm-muted: #9ca3af;
+  --crm-label: #374151;
+  --crm-line: #f3f4f6;
+  --crm-field: #f9fafb;
+  min-height: 100dvh;
+  background: #ffffff;
+  color: var(--crm-ink);
+  font-family: Poppins, "Segoe UI", system-ui, sans-serif;
+}
+
+.crm-auth-shell .app-shell-header {
+  background: transparent;
+  border-bottom: none;
+  box-shadow: none;
+}
+
+.crm-auth-shell .app-shell-header .btn-ghost {
+  color: var(--crm-muted);
+}
+
+.crm-auth-shell .app-shell-header .btn-ghost:hover {
+  color: var(--crm-indigo);
+  background: rgb(79 70 229 / 0.06);
+}
+
+.crm-auth-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100dvh - 4.5rem);
+  padding: 1.5rem 1rem 3rem;
+}
+
+.crm-auth {
+  width: 100%;
+  max-width: 28rem;
+}
+
+.crm-auth__brand {
+  text-align: center;
+  margin-bottom: 2.25rem;
+}
+
+.crm-auth__mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  margin-bottom: 1.35rem;
+  border-radius: 1rem;
+  background: var(--crm-indigo);
+  color: #fff;
+  box-shadow: 0 12px 28px rgb(79 70 229 / 0.28);
+}
+
+.crm-auth__title {
+  margin: 0;
+  font-size: 2.15rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  color: var(--crm-ink);
+  line-height: 1.1;
+}
+
+.crm-auth__title span {
+  color: var(--crm-indigo);
+  font-style: italic;
+}
+
+.crm-auth__subtitle {
+  margin: 0.55rem 0 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--crm-muted);
+}
+
+.crm-auth__card {
+  background: #fff;
+  border: 1px solid var(--crm-line);
+  border-radius: 2rem;
+  padding: 2rem 1.75rem;
+  box-shadow: 0 1px 2px rgb(17 24 39 / 0.04), 0 16px 40px rgb(17 24 39 / 0.04);
+}
+
+@media (min-width: 640px) {
+  .crm-auth__card {
+    padding: 2.5rem 2.75rem;
+  }
+}
+
+.crm-auth__tabs {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 1.5rem;
+  padding: 0.3rem;
+  border-radius: 1rem;
+  background: var(--crm-field);
+  border: 1px solid var(--crm-line);
+}
+
+.crm-auth__tab {
+  flex: 1;
+  border: 0;
+  border-radius: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--crm-muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.crm-auth__tab.is-active {
+  background: #fff;
+  color: var(--crm-indigo);
+  box-shadow: 0 1px 3px rgb(17 24 39 / 0.08);
+}
+
+.crm-auth__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.crm-auth__label {
+  display: block;
+  margin: 0 0 0.45rem 0.15rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--crm-label);
+}
+
+.crm-auth__field {
+  position: relative;
+}
+
+.crm-auth__icon {
+  position: absolute;
+  inset: 0 auto 0 1rem;
+  display: flex;
+  align-items: center;
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.crm-auth__input {
+  width: 100%;
+  border: 2px solid var(--crm-field);
+  border-radius: 1rem;
+  background: var(--crm-field);
+  color: var(--crm-ink);
+  font-weight: 500;
+  font-size: 0.95rem;
+  padding: 1rem 1rem 1rem 2.75rem;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+}
+
+.crm-auth__input:focus {
+  border-color: var(--crm-indigo);
+  background: #fff;
+  box-shadow: 0 0 0 4px rgb(79 70 229 / 0.12);
+}
+
+.crm-auth__error {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.9rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid #ffe4e6;
+  background: #fff1f2;
+  color: #e11d48;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.crm-auth__error::before {
+  content: "";
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 999px;
+  background: #e11d48;
+  flex-shrink: 0;
+}
+
+.crm-auth__submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  width: 100%;
+  border: 0;
+  border-radius: 1rem;
+  padding: 1rem 1.25rem;
+  background: var(--crm-indigo);
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 12px 28px rgb(79 70 229 / 0.28);
+  transition: background 0.15s, transform 0.1s;
+}
+
+.crm-auth__submit:hover:not(:disabled) {
+  background: var(--crm-indigo-hover);
+}
+
+.crm-auth__submit:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.crm-auth__submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.crm-auth__footer {
+  margin-top: 1.25rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--crm-muted);
+}
+
+.crm-auth__footer a {
+  color: var(--crm-indigo);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.crm-auth__footer a:hover {
+  text-decoration: underline;
+}
+
+.crm-auth__hint {
+  margin-top: 0.75rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #d1d5db;
+}

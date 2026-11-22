@@ -1,5 +1,11 @@
-/** Branding — navegação em seções (12 etapas + visão do processo). */
+/** Branding — Agency Ops lanes + processo de marca (12 etapas) sob Entrega. */
 
+import {
+  AGENCY_OPS_LANE_IDS,
+  agencyOpsDefaultAdminPath,
+  agencyOpsLaneAdminPath,
+  buildAgencyOpsLaneNavSections
+} from "./agency-ops-process-lanes.js";
 import {
   BRANDING_PROCESS_STEPS,
   type BrandingProcessStep
@@ -42,53 +48,24 @@ function etapaItem(step: BrandingProcessStep): BrandingNavItem {
 }
 
 export const BRANDING_OPERATION_NAV: readonly BrandingNavSection[] = [
+  ...buildAgencyOpsLaneNavSections("branding"),
   {
-    id: "analisar",
-    sectionLabel: "Analisar",
+    id: "processo-marca",
+    sectionLabel: "Processo de marca",
     items: [
       {
         id: "estatistica",
         label: "Estatística",
         adminPath: "operacao/branding/estatistica",
-        description: "Progresso das 12 etapas e campos do workspace de marca."
+        description: "Progresso das 12 etapas e campos do workspace."
       },
       {
         id: "processo",
         label: "Visão do processo",
         adminPath: "operacao/branding/processo",
-        description: "Metodologia completa, entregáveis e critérios de aprovação."
-      }
-    ]
-  },
-  {
-    id: "fundar",
-    sectionLabel: "Fundar",
-    items: BRANDING_PROCESS_STEPS.filter((s) => s.order <= 2).map(etapaItem)
-  },
-  {
-    id: "estrategia",
-    sectionLabel: "Estratégia",
-    items: BRANDING_PROCESS_STEPS.filter((s) => s.order >= 3 && s.order <= 5).map(etapaItem)
-  },
-  {
-    id: "criar",
-    sectionLabel: "Criar",
-    items: BRANDING_PROCESS_STEPS.filter((s) => s.order >= 6 && s.order <= 8).map(etapaItem)
-  },
-  {
-    id: "viver",
-    sectionLabel: "Viver",
-    items: BRANDING_PROCESS_STEPS.filter((s) => s.order >= 9 && s.order <= 10).map(etapaItem)
-  },
-  {
-    id: "evoluir",
-    sectionLabel: "Evoluir",
-    items: BRANDING_PROCESS_STEPS.filter((s) => s.order >= 11).map(etapaItem)
-  },
-  {
-    id: "entregar",
-    sectionLabel: "Entregar",
-    items: [
+        description: "Metodologia, entregáveis e critérios de aprovação."
+      },
+      ...BRANDING_PROCESS_STEPS.map(etapaItem),
       {
         id: "brandbook",
         label: "Brandbook PDF",
@@ -97,11 +74,12 @@ export const BRANDING_OPERATION_NAV: readonly BrandingNavSection[] = [
       }
     ]
   }
-] as const;
+] as unknown as readonly BrandingNavSection[];
 
 export const BRANDING_LEGACY_PATH_ALIASES: Record<string, string> = {
   "operacao/branding/identidade": "operacao/branding/identidade-visual",
-  "operacao/branding/plataforma": "operacao/branding/plataforma"
+  "operacao/branding/plataforma": "operacao/branding/plataforma",
+  "operacao/branding": agencyOpsDefaultAdminPath("branding")
 };
 
 export function brandingNavFlatItems(): BrandingNavItem[] {
@@ -114,3 +92,8 @@ export function findBrandingNavByAdminPath(adminPath: string): {
 } | null {
   return findOperationSectionNavByAdminPath(BRANDING_OPERATION_NAV, adminPath);
 }
+
+/** Paths das lanes (registrar no router antes de :etapaId). */
+export const BRANDING_AGENCY_OPS_LANE_PATHS = AGENCY_OPS_LANE_IDS.map((lane) =>
+  agencyOpsLaneAdminPath("branding", lane)
+);

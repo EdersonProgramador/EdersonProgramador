@@ -1,0 +1,9 @@
+node_modules
+.env
+whatsapp_auth_sessions
+whatsapp_auth_info
+whatsapp_polls.json
+whatsapp_interaction_logs.txt
+n8n_interaction_logs.txt
+.git
+.DS_Store

@@ -1,0 +1,1314 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import React, { useState, useMemo, useEffect } from 'react';
+import { 
+  LineChart, 
+  Users, 
+  Briefcase, 
+  DollarSign, 
+  Palette, 
+  Handshake, 
+  Settings, 
+  Menu, 
+  X, 
+  ChevronRight,
+  TrendingUp,
+  Clock,
+  CheckCircle2,
+  Calendar as CalendarIcon,
+  Moon,
+  Sun,
+  Target,
+  Activity,
+  Bell,
+  Database,
+  BarChart3
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { cn } from './lib/utils';
+import { 
+  INITIAL_LEADS, 
+  INITIAL_CLIENTS, 
+  INITIAL_RECEIVABLES, 
+  INITIAL_ART_ORDERS, 
+  INITIAL_PARTNER_REQUESTS, 
+  INITIAL_INTEGRATIONS,
+  INITIAL_USERS,
+  INITIAL_PARTNERS_LIST
+} from './constants';
+import { Lead, Client, Receivable, ArtOrder, PartnerRequest, IntegrationConfig, User, Partner } from './types';
+
+// Views
+import DashboardView from './components/DashboardView';
+import LeadsView from './components/LeadsView';
+import ClientsView from './components/ClientsView';
+import FinanceView from './components/FinanceView';
+import DesignView from './components/DesignView';
+import PartnersView from './components/PartnersView';
+import AdminView from './components/AdminView';
+import LoginView from './components/LoginView';
+import SupportView from './components/SupportView';
+import ProspectingView from './components/prospecting/ProspectingView';
+import VideoWorkflowView from './components/VideoWorkflowView';
+import RecordingWorkflowView from './components/RecordingWorkflowView';
+import DemandsView from './components/DemandsView';
+import PersonalizationView from './components/PersonalizationView';
+import TermsAcceptanceModal from './components/TermsAcceptanceModal';
+import DesignModificationForm from './components/DesignModificationForm';
+import NotificationBell from './components/NotificationBell';
+import GoogleDriveManager from './components/GoogleDriveManager';
+import { SocialPostSchedulerView } from './components/SocialPostSchedulerView';
+import { LogOut, Film, ClipboardList, MessageSquare, HardDrive, CalendarClock } from 'lucide-react';
+import { ChatWindow } from './components/ChatWindow';
+
+import LandingPage from './components/LandingPage';
+import PrivacyPolicy from './components/PrivacyPolicy';
+import TermsOfUse from './components/TermsOfUse';
+import CheckoutSuccess from './components/CheckoutSuccess';
+import CheckoutError from './components/CheckoutError';
+
+type ViewType = 'dashboard' | 'leads' | 'clients' | 'finance' | 'design' | 'videos' | 'recordings' | 'partners' | 'demands' | 'tickets' | 'admin' | 'prospecting' | 'productivity' | 'drive' | 'personalization' | 'social_posts' | 'checkout_success' | 'checkout_error' | 'agency_kpis';
+
+const VALID_VIEWS = new Set<string>([
+  'dashboard', 'leads', 'clients', 'finance', 'design', 'videos', 'recordings', 'partners',
+  'demands', 'tickets', 'admin', 'prospecting', 'productivity', 'drive', 'personalization',
+  'social_posts', 'checkout_success', 'checkout_error', 'agency_kpis'
+]);
+
+function readEmbedBoot() {
+  if (typeof window === 'undefined') {
+    return { embed: false, view: 'dashboard' as ViewType, embedToken: null as string | null };
+  }
+  const params = new URLSearchParams(window.location.search);
+  const raw = params.get('view') || 'dashboard';
+  const view = (VALID_VIEWS.has(raw) ? raw : 'dashboard') as ViewType;
+  return {
+    embed: params.get('embed') === '1',
+    view,
+    embedToken: params.get('embedToken')
+  };
+}
+
+function stripEmbedTokenFromUrl() {
+  if (typeof window === 'undefined') return;
+  const url = new URL(window.location.href);
+  let changed = false;
+  for (const key of ['embedToken', 'embedUser'] as const) {
+    if (url.searchParams.has(key)) {
+      url.searchParams.delete(key);
+      changed = true;
+    }
+  }
+  if (changed) window.history.replaceState({}, '', url.toString());
+}
+
+import { api } from './services/api';
+import { VideoOrder, SupportTicket, DemandTask, AgencyKPI } from './types';
+import ProductivityView from './components/ProductivityView';
+import AgencyKPIsView from './components/AgencyKPIsView';
+import ErrorNotifier from './components/ErrorNotifier';
+import { ToastContainer, toast } from './components/ui/Toast';
+import CookieConsent from './components/CookieConsent';
+import JitsiMeeting from './components/JitsiMeeting';
+
+import { storageService } from './lib/storage';
+import { io } from 'socket.io-client';
+
+const VIEW_LABELS: Record<ViewType, string> = {
+  dashboard: 'Painel',
+  leads: 'Leads',
+  clients: 'Clientes',
+  finance: 'Financeiro',
+  design: 'Design',
+  videos: 'Edição de Vídeo',
+  recordings: 'Gravação de Vídeo',
+  demands: 'Demandas',
+  partners: 'Parceiros',
+  tickets: 'Suporte',
+  prospecting: 'Prospecção',
+  productivity: 'Produtividade',
+  drive: 'Arquivos Drive',
+  personalization: 'Aparência',
+  social_posts: 'Agendamento de Posts',
+  checkout_success: 'Pagamento Confirmado',
+  checkout_error: 'Erro no Pagamento',
+  agency_kpis: 'KPIs da Agência',
+  admin: 'Configurações'
+};
+
+// Configuração da Agência
+const getEnv = (key: string, defaultValue: string) => {
+  return (window as any)._env_?.[key] || import.meta.env[key] || defaultValue;
+};
+
+const DEFAULT_AGENCY_CONFIG = {
+  name: getEnv('VITE_COMPANY_NAME', 'Amplifica CRM'),
+  primaryColor: getEnv('VITE_PRIMARY_COLOR', '#4f46e5'),
+  logoBgColor: '#6366f1',
+  logoUrl: '',
+  currency: 'R$',
+  locale: 'pt-BR'
+};
+
+// Componente de Chat Flutuante Global
+function FloatingChat({ currentUser }: { currentUser: User }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="fixed bottom-8 right-8 z-[9999]">
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className={cn(
+          "w-14 h-14 rounded-2xl flex items-center justify-center shadow-2xl transition-all duration-300 group ring-4 ring-white dark:ring-gray-950",
+          isOpen ? "bg-rose-500 rotate-90" : "bg-indigo-600 hover:bg-indigo-700"
+        )}
+        title="Chat da Equipe"
+      >
+        {isOpen ? <X size={24} className="text-white" /> : <MessageSquare size={24} className="text-white group-hover:scale-110" />}
+        {!isOpen && (
+          <div className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white dark:border-gray-950 animate-pulse"></div>
+        )}
+      </button>
+      
+      <div className={cn(
+        "absolute bottom-20 right-0 w-[350px] sm:w-[400px] h-[550px] sm:h-[600px] transition-all duration-500 origin-bottom-right",
+        isOpen ? "scale-100 opacity-100 translate-y-0" : "scale-0 opacity-0 translate-y-10 pointer-events-none"
+      )}>
+         {isOpen && (
+           <ChatWindow 
+              chatType="team"
+              senderId={currentUser.id}
+              senderName={currentUser.name}
+              ownerId={currentUser.ownerId || currentUser.id}
+              title="Chat da Equipe"
+              onClose={() => setIsOpen(false)}
+           />
+         )}
+      </div>
+    </div>
+  );
+}
+
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { supabase } from './lib/supabaseClient';
+
+export default function App() {
+  const queryClient = useQueryClient();
+  const embedBoot = useMemo(() => readEmbedBoot(), []);
+  const isEmbed = embedBoot.embed;
+  const [agencyConfig, setAgencyConfig] = useState(() => {
+    try {
+      const saved = storageService.getItem('agency_config');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return { ...DEFAULT_AGENCY_CONFIG, ...parsed };
+      }
+    } catch (e) {
+      console.error("Erro ao ler agency_config do storageService:", e);
+    }
+    return DEFAULT_AGENCY_CONFIG;
+  });
+  const [activeView, setActiveView] = useState<ViewType>(embedBoot.view);
+  const [authView, setAuthView] = useState<'landing' | 'login' | 'signup' | 'privacy' | 'terms'>(
+    isEmbed ? 'login' : 'landing'
+  );
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [totalUsers, setTotalUsers] = useState<number | null>(null);
+  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(storageService.getItem('selected_plan') || null);
+  const [stripeSessionId, setStripeSessionId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isEmbed) return;
+    const apply = () => {
+      const next = readEmbedBoot();
+      if (VALID_VIEWS.has(next.view)) setActiveView(next.view);
+    };
+    apply();
+    window.addEventListener('popstate', apply);
+    return () => window.removeEventListener('popstate', apply);
+  }, [isEmbed]);
+
+  const handleStartPlan = async (planId?: string) => {
+    console.log("[DEBUG] handleStartPlan called with planId:", planId);
+    if (!planId) {
+      console.warn("[DEBUG] planId is missing");
+      return;
+    }
+    
+    try {
+      setIsAuthLoading(true);
+      console.log("[DEBUG] Showing toast info...");
+      toast.info("Iniciando checkout seguro...");
+      
+      console.log("[DEBUG] Sending request to /create-anonymous-checkout...");
+      const res = await api.post('/create-anonymous-checkout', { planId });
+      console.log("[DEBUG] Response from server:", res);
+      
+      if (res.url) {
+        console.log("[DEBUG] Redirecting to:", res.url);
+        window.location.href = res.url;
+        return;
+      } else {
+        console.warn("[DEBUG] Response missing url field");
+      }
+    } catch (err: any) {
+      console.error("[DEBUG] Erro ao iniciar checkout:", err);
+      const msg = err.message || "Erro ao iniciar checkout. Verifique a configuração do Stripe.";
+      toast.error(msg);
+    } finally {
+      setIsAuthLoading(false);
+      console.log("[DEBUG] handleStartPlan finished");
+    }
+  };
+
+  // Fetch public stats for landing page
+  useEffect(() => {
+    if (authView === 'landing' && !isAuthenticated) {
+      fetch('/api/public/stats')
+        .then(res => {
+          if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+          return res.json();
+        })
+        .then(data => {
+          console.log("[STATS] Dados públicos carregados:", data);
+          if (data && typeof data.totalUsers === 'number') {
+            setTotalUsers(data.totalUsers);
+          }
+        })
+        .catch(err => {
+          console.error("Erro ao buscar estatísticas públicas:", err);
+          // Opcional: tentar novamente com delay ou falhar silenciosamente para o usuário
+        });
+    }
+  }, [authView, isAuthenticated]);
+
+  // Debug auth state in production
+  useEffect(() => {
+    if (import.meta.env.PROD) {
+      console.log(`[AUTH DEBUG] Authenticated: ${isAuthenticated}, View: ${authView}, User: ${!!currentUser}`);
+    }
+  }, [isAuthenticated, authView, currentUser]);
+  const [perspective, setPerspective] = useState<User['role'] | null>(null);
+  const [isAuthLoading, setIsAuthLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = storageService.getItem('theme');
+      if (saved) return saved === 'dark';
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    return false;
+  });
+  const [activeRoomId, setActiveRoomId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const rid = urlParams.get('roomId');
+    if (rid) {
+      console.log("[MEET] Room ID detectado:", rid);
+      setActiveRoomId(rid);
+    }
+
+    const path = window.location.pathname;
+    const sessionId = urlParams.get('session_id');
+    const planIdParam = urlParams.get('plan_id');
+
+    if (sessionId) {
+      setStripeSessionId(sessionId);
+      if (planIdParam) {
+        setSelectedPlanId(planIdParam);
+        storageService.setItem('selected_plan', planIdParam);
+      }
+      setAuthView('signup');
+      toast.success("Pagamento confirmado! Finalize seu cadastro.");
+      
+      // Clean up URL without losing session context in state
+      const url = new URL(window.location.href);
+      url.searchParams.delete('session_id');
+      url.searchParams.delete('plan_id');
+      window.history.replaceState({}, '', url.pathname + url.search);
+      return; // Stop here to avoid being overwritten by the next useEffect
+    }
+    
+    if (path === '/success' || urlParams.get('session_id')) {
+      setActiveView('checkout_success');
+      const newUrl = window.location.pathname === '/success' ? '/' : window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+    } else if (path === '/cancel' || urlParams.get('checkout_error')) {
+      setActiveView('checkout_error');
+      const newUrl = window.location.pathname === '/cancel' ? '/' : window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+    }
+
+    if (path === '/privacy') {
+      setAuthView('privacy');
+    } else if (path === '/terms') {
+      setAuthView('terms');
+    }
+
+    (window as any).onJoinMeeting = (id: string) => setActiveRoomId(id);
+    return () => { delete (window as any).onJoinMeeting; };
+  }, []);
+
+  useEffect(() => {
+    const root = window.document.documentElement;
+    if (isDarkMode) {
+      root.classList.add('dark');
+      storageService.setItem('theme', 'dark');
+    } else {
+      root.classList.remove('dark');
+      storageService.setItem('theme', 'light');
+    }
+  }, [isDarkMode]);
+
+  const effectiveUser = useMemo(() => {
+    if (!currentUser) return null;
+    if (currentUser.role !== 'ADMIN' || !perspective) return currentUser;
+    return { ...currentUser, role: perspective };
+  }, [currentUser, perspective]);
+
+  // Apply Personalization Preferences
+  useEffect(() => {
+    const preferences = effectiveUser?.uiPreferences;
+    const root = window.document.documentElement;
+    
+    const container = document.getElementById('crm-app-container');
+    
+    // Default to Agency values if no user preference
+    const primaryColor = preferences?.primaryColor || agencyConfig.primaryColor;
+    const borderRadius = preferences?.borderRadius || 'medium';
+    const theme = preferences?.theme || 'system';
+
+    if (container) {
+      if (primaryColor) {
+        container.style.setProperty('--primary-color', primaryColor);
+      }
+
+      const radiusMap = {
+        none: '0px',
+        small: '4px',
+        medium: '12px',
+        large: '24px',
+        full: '9999px'
+      };
+      container.style.setProperty('--border-radius', radiusMap[borderRadius as keyof typeof radiusMap] || '12px');
+
+      // Density handling
+      if (preferences?.density === 'compact') {
+        container.style.setProperty('--density-factor', '0.8');
+        container.classList.add('density-compact');
+        container.classList.remove('density-relaxed');
+      } else if (preferences?.density === 'relaxed') {
+        container.style.setProperty('--density-factor', '1.2');
+        container.classList.add('density-relaxed');
+        container.classList.remove('density-compact');
+      } else {
+        container.style.setProperty('--density-factor', '1');
+        container.classList.remove('density-compact', 'density-relaxed');
+      }
+    }
+
+    if (theme !== 'system') {
+      setIsDarkMode(theme === 'dark');
+    }
+  }, [effectiveUser?.uiPreferences, agencyConfig.primaryColor]);
+
+  const toggleTheme = () => {
+    setIsDarkMode(prev => !prev);
+  };
+
+  // Check for public modification form URL
+  const [publicOrderId, setPublicOrderId] = useState<string | null>(null);
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderId = urlParams.get('refuseOrderId');
+    if (orderId) {
+      setPublicOrderId(orderId);
+    }
+  }, []);
+
+  // Global State
+  const [leads, setLeads] = useState<Lead[]>(INITIAL_LEADS);
+  const [clients, setClients] = useState<Client[]>(INITIAL_CLIENTS);
+  const [receivables, setReceivables] = useState<Receivable[]>(INITIAL_RECEIVABLES);
+  const [artOrders, setArtOrders] = useState<ArtOrder[]>(INITIAL_ART_ORDERS);
+  const [videoOrders, setVideoOrders] = useState<VideoOrder[]>([]);
+  const [demandTasks, setDemandTasks] = useState<DemandTask[]>([]);
+  const [tickets, setTickets] = useState<SupportTicket[]>([]);
+  const [partnerRequests, setPartnerRequests] = useState<PartnerRequest[]>(INITIAL_PARTNER_REQUESTS);
+  const [partners, setPartners] = useState<Partner[]>(INITIAL_PARTNERS_LIST);
+  const [integrations, setIntegrations] = useState<IntegrationConfig[]>(INITIAL_INTEGRATIONS);
+  const [users, setUsers] = useState<User[]>(INITIAL_USERS);
+  const [agencyKPIs, setAgencyKPIs] = useState<AgencyKPI[]>([]);
+  const [holidays] = useState([{ date: '21/04/2026', name: 'Tiradentes' }]);
+
+  useEffect(() => {
+    (window as any).onNavigate = (view: ViewType) => setActiveView(view);
+    return () => { delete (window as any).onNavigate; };
+  }, []);
+
+  const processPostAuthRedirect = async (user: User) => {
+    const planId = selectedPlanId || storageService.getItem('selected_plan');
+    
+    if (planId && user.role === 'OWNER') {
+      try {
+        toast.info("Redirecionando para o pagamento seguro...");
+        const res = await api.post('/create-checkout-session', { planId });
+        storageService.removeItem('selected_plan');
+        setSelectedPlanId(null);
+        if (res.url) {
+          window.location.href = res.url;
+          return;
+        }
+      } catch (err) {
+        console.error("Erro ao iniciar checkout automático:", err);
+      }
+    }
+    setAuthView('landing');
+  };
+
+  const handleLogin = async (email: string, password: string) => {
+    try {
+      setIsAuthLoading(true);
+      const res = await api.login(email, password);
+      // Set storage BEFORE state to avoid race conditions with components that fetch on mount
+      storageService.setItem('agency_user', JSON.stringify(res.user), true);
+      storageService.setItem('agency_token', res.token, true);
+      setCurrentUser(res.user);
+      setIsAuthenticated(true);
+      await processPostAuthRedirect(res.user);
+    } catch (err) {
+      throw err;
+    } finally {
+      setIsAuthLoading(false);
+    }
+  };
+
+  const handleSignup = async (name: string, email: string, password: string, acceptedTerms: boolean = true) => {
+    try {
+      setIsAuthLoading(true);
+      const res = await api.signup(name, email, password, acceptedTerms, stripeSessionId, selectedPlanId);
+      // Set storage BEFORE state to avoid race conditions
+      storageService.setItem('agency_user', JSON.stringify(res.user), true);
+      storageService.setItem('agency_token', res.token, true);
+      setCurrentUser(res.user);
+      setIsAuthenticated(true);
+      
+      // If we don't have a session ID yet, they might need to be redirected to checkout
+      if (!stripeSessionId) {
+        await processPostAuthRedirect(res.user);
+      }
+      
+      setStripeSessionId(null);
+      setSelectedPlanId(null);
+      storageService.removeItem('selected_plan');
+    } catch (err) {
+      throw err;
+    } finally {
+      setIsAuthLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setCurrentUser(null);
+    storageService.removeItem('agency_user');
+    storageService.removeItem('agency_token');
+    setAuthView('landing');
+  };
+
+  const renderSubscriptionRequired = () => {
+    if (!currentUser) return null;
+    const planId = currentUser.planId || storageService.getItem('selected_plan') || 'plan1';
+    
+    return (
+      <div className="fixed inset-0 z-[9999] bg-white dark:bg-gray-950 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white dark:bg-gray-900 rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 p-8 text-center">
+          <div className="w-20 h-20 bg-amber-100 dark:bg-amber-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6 text-amber-600 dark:text-amber-400">
+            <DollarSign size={40} />
+          </div>
+          <h2 className="text-3xl font-black text-gray-900 dark:text-white mb-4">Assinatura Pendente</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
+            Sua conta foi criada com sucesso, mas a assinatura ainda não está ativa. 
+            Complete o pagamento para liberar o acesso total ao {agencyConfig.name}.
+          </p>
+          <div className="space-y-4">
+            <button 
+              onClick={() => processPostAuthRedirect(currentUser)}
+              className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold transition-all shadow-lg shadow-indigo-200 dark:shadow-none flex items-center justify-center gap-2"
+            >
+              Concluir Pagamento agora
+              <ChevronRight size={20} />
+            </button>
+            <button 
+              onClick={handleLogout}
+              className="w-full py-4 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-2xl font-bold transition-all"
+            >
+              Sair da conta
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  useEffect(() => {
+    (window as any).onLogout = handleLogout;
+    return () => { delete (window as any).onLogout; };
+  }, []);
+
+  // Check persisted auth + Agency Admin embed SSO (?embedToken=&embedUser=)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const embedToken = params.get('embedToken') || embedBoot.embedToken;
+    const embedUserRaw = params.get('embedUser');
+
+    if (embedToken && embedUserRaw) {
+      try {
+        let parsed = embedUserRaw;
+        try {
+          parsed = decodeURIComponent(embedUserRaw);
+        } catch {
+          /* already decoded by URLSearchParams */
+        }
+        const user = JSON.parse(parsed);
+        storageService.setItem('agency_token', embedToken, true);
+        storageService.setItem('agency_user', JSON.stringify(user), true);
+        setCurrentUser(user);
+        setIsAuthenticated(true);
+        stripEmbedTokenFromUrl();
+        return;
+      } catch (e) {
+        console.warn('[embed] payload inválido', e);
+      }
+    }
+
+    const savedUser = storageService.getItem('agency_user');
+    const token = storageService.getItem('agency_token');
+
+    if (savedUser && token) {
+      setCurrentUser(JSON.parse(savedUser));
+      setIsAuthenticated(true);
+      return;
+    }
+
+    setIsAuthenticated(false);
+    setCurrentUser(null);
+    setAuthView((prev) => {
+      if (prev === 'signup' || prev === 'login' || prev === 'privacy' || prev === 'terms') return prev;
+      return isEmbed ? 'login' : 'landing';
+    });
+  }, [embedBoot.embedToken, isEmbed]);
+
+  // Fetch data function
+  const fetchData = async (showLoading = true) => {
+    try {
+      if (showLoading) setIsLoading(true);
+      const data = await api.syncData();
+
+      setLeads(data.leads || []);
+      setClients(data.clients || []);
+      setReceivables(data.receivables || []);
+      setArtOrders(data.artOrders || []);
+      setPartners(data.partners || []);
+      setPartnerRequests(data.partnerRequests || []);
+      setTickets(data.tickets || []);
+      setVideoOrders(data.videoOrders || []);
+      setDemandTasks(data.demandTasks || []);
+      setUsers(data.users || []);
+      setAgencyKPIs(data.agencyKpis || []);
+      
+      if (currentUser && data.users && data.users.length > 0) {
+        const freshSelf = data.users.find((u: any) => u.id === currentUser.id);
+        if (freshSelf) {
+          setCurrentUser(freshSelf);
+          storageService.setItem('agency_user', JSON.stringify(freshSelf));
+        }
+      }
+    } catch (error) {
+      console.error("Erro ao carregar dados:", error);
+    } finally {
+      if (showLoading) setIsLoading(false);
+    }
+  };
+
+  // Fetch data on mount & auth change
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setIsLoading(false);
+      return;
+    }
+    
+    fetchData();
+
+    // Auto-refresh data every 3 minutes to reduce load and stay within rate limits        
+    const interval = setInterval(() => {
+      fetchData(false);
+    }, 180000);
+
+    return () => clearInterval(interval);
+  }, [isAuthenticated]);
+
+  // Real-time synchronization
+  useEffect(() => {
+    if (!isAuthenticated || !currentUser) return;
+
+    // 1. Socket.io Connection
+    const socketPath =
+      (window as unknown as { __CRM_SOCKET_PATH?: string }).__CRM_SOCKET_PATH || '/socket.io';
+    const socket = io({
+      path: socketPath,
+      transports: ['websocket', 'polling'],
+      reconnectionAttempts: 10,
+      reconnectionDelay: 1000,
+    });
+    
+    const ownerId = currentUser.ownerId || currentUser.id;
+    
+    socket.on('connect', () => {
+      console.log("[REALTIME] Socket.io conectado com sucesso!");
+      socket.emit("join-owner-room", ownerId);
+    });
+
+    socket.on("data_changed", (event) => {
+      console.log("[REALTIME] Evento Socket.io recebido:", event);
+      // Invalidate specific queries if we were using useQuery everywhere
+      // For now, call global fetchData
+      fetchData(false);
+    });
+
+    // 2. Supabase Realtime Fallback (Always useful if socket.io is blocked)
+    const channel = supabase
+      .channel('schema-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+        },
+        (payload: any) => {
+          // Check if payload has owner_id and matches current agency
+          const payloadOwnerId = payload.new?.owner_id || payload.old?.owner_id;
+          if (payloadOwnerId === ownerId) {
+            console.log("[REALTIME] Mudança direta no Supabase detectada:", payload);
+            fetchData(false);
+          }
+        }
+      )
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          console.log("[REALTIME] Inscrito no Supabase Realtime com sucesso!");
+        }
+      });
+
+    return () => {
+      socket.disconnect();
+      supabase.removeChannel(channel);
+    };
+  }, [isAuthenticated, currentUser?.id]);
+
+  // Filtro de Menu baseado no cargo
+  const menuItems = useMemo(() => {
+    if (!effectiveUser) return [];
+    const isPartner = effectiveUser.role === 'PARTNER';
+    
+    return [
+      { id: 'dashboard', label: 'Painel', icon: LineChart, roles: ['ADMIN', 'DESIGNER', 'PARTNER', 'EDITOR', 'OWNER'] },
+      { id: 'agency_kpis', label: 'KPIs da Agência', icon: BarChart3, roles: ['ADMIN', 'OWNER'] },
+      { id: 'leads', label: 'Leads', icon: TrendingUp, roles: ['ADMIN', 'OWNER'] },
+      { id: 'clients', label: 'Clientes', icon: Users, roles: ['ADMIN', 'PARTNER', 'OWNER'] },
+      { id: 'finance', label: 'Financeiro', icon: DollarSign, roles: ['ADMIN', 'DESIGNER', 'EDITOR', 'OWNER'] },
+      { id: 'social_posts', label: 'Agendamento de Posts', icon: CalendarClock, roles: ['ADMIN', 'PARTNER', 'OWNER'] },
+      { id: 'design', label: 'Design', icon: Palette, roles: ['ADMIN', 'DESIGNER', 'PARTNER', 'OWNER'] },
+      { id: 'videos', label: 'Edição de Vídeo', icon: Briefcase, roles: ['ADMIN', 'EDITOR', 'PARTNER', 'OWNER'] },
+      { id: 'recordings', label: 'Gravação', icon: Film, roles: ['ADMIN', 'OWNER'] },
+      { id: 'demands', label: 'Demandas', icon: ClipboardList, roles: ['ADMIN', 'OWNER'] },
+      { id: 'prospecting', label: 'Prospecção', icon: Target, roles: ['ADMIN'] },
+      { id: 'productivity', label: 'Produtividade', icon: Activity, roles: ['ADMIN', 'DESIGNER', 'EDITOR', 'OWNER'] },
+      { id: 'drive', label: 'Arquivos Drive', icon: HardDrive, roles: ['ADMIN', 'OWNER'] },
+      { id: 'partners', label: isPartner ? 'Solicitações' : 'Parceiros', icon: Handshake, roles: ['ADMIN', 'PARTNER', 'OWNER'] },
+      { id: 'tickets', label: 'Suporte', icon: MessageSquare, roles: ['ADMIN', 'PARTNER', 'OWNER', 'DESIGNER', 'EDITOR'] },
+      { id: 'admin', label: 'Configurações', icon: Settings, roles: ['ADMIN', 'OWNER', 'PARTNER', 'DESIGNER', 'EDITOR'] },
+    ].filter(item => {
+      // Role check
+      if (!item.roles.includes(effectiveUser.role)) return false;
+
+      // Plan check
+      const planId = effectiveUser.planId || 'plan1';
+      if (planId === 'plan1') {
+        // Plano 1 restricted features
+        if (item.id === 'drive') return false;
+      }
+
+      if (effectiveUser.role === 'OWNER' && item.id === 'partners') {
+        return partners.some(p => p.email === effectiveUser.email);
+      }
+      return true;
+    });
+  }, [effectiveUser, partners]);
+
+  const renderView = () => {
+    if (!effectiveUser) return null;
+    switch (activeView) {
+      case 'dashboard': 
+        return <DashboardView 
+          leads={leads} 
+          clients={clients} 
+          receivables={receivables} 
+          artOrders={artOrders} 
+          videoOrders={videoOrders}
+          partners={partners}
+          partnerRequests={partnerRequests}
+          onViewChange={setActiveView}
+          currentUser={effectiveUser}
+          users={users}
+        />;
+      case 'leads': 
+        return <LeadsView 
+          leads={leads} 
+          setLeads={setLeads} 
+          setClients={setClients}
+          currentUser={effectiveUser}
+          setCurrentUser={setCurrentUser}
+        />;
+      case 'clients': 
+        return <ClientsView 
+          clients={clients} 
+          setClients={setClients} 
+          users={users}
+          partners={partners}
+          currentUser={effectiveUser}
+        />;
+      case 'finance': 
+        return <FinanceView 
+          receivables={receivables} 
+          setReceivables={setReceivables} 
+          clients={clients}
+          currentUser={effectiveUser}
+          users={users}
+        />;
+      case 'social_posts':
+        return <SocialPostSchedulerView
+          clients={clients}
+          currentUser={effectiveUser}
+        />;
+      case 'design': 
+        return <DesignView 
+          artOrders={artOrders} 
+          setArtOrders={setArtOrders} 
+          clients={clients}
+          setClients={setClients}
+          receivables={receivables}
+          setReceivables={setReceivables}
+          partnerRequests={partnerRequests}
+          setPartnerRequests={setPartnerRequests}
+          holidays={holidays}
+          integrations={integrations}
+          currentUser={effectiveUser}
+          users={users}
+        />;
+      case 'partners': 
+        return <PartnersView 
+          partnerRequests={partnerRequests} 
+          setPartnerRequests={setPartnerRequests}
+          partners={partners}
+          setPartners={setPartners}
+          currentUser={effectiveUser}
+          artOrders={artOrders}
+          setArtOrders={setArtOrders}
+          clients={clients}
+          setClients={setClients}
+          users={users}
+          setUsers={setUsers}
+        />;
+      case 'tickets':
+        return <SupportView 
+          tickets={tickets}
+          setTickets={setTickets}
+          currentUser={effectiveUser}
+        />;
+      case 'prospecting':
+        return <ProspectingView />;
+      case 'agency_kpis':
+        return <AgencyKPIsView 
+          leads={leads} 
+          clients={clients} 
+          artOrders={artOrders} 
+          currentUser={effectiveUser} 
+          agencyKPIs={agencyKPIs}
+        />;
+      case 'videos':
+        return <VideoWorkflowView 
+          videoOrders={videoOrders}
+          setVideoOrders={setVideoOrders}
+          clients={clients}
+          setClients={setClients}
+          receivables={receivables}
+          setReceivables={setReceivables}
+          users={users}
+          currentUser={effectiveUser}
+        />;
+      case 'productivity':
+        return <ProductivityView 
+          artOrders={artOrders}
+          videoOrders={videoOrders}
+          demandTasks={demandTasks}
+          users={users}
+        />;
+      case 'drive':
+        return <GoogleDriveManager />;
+      case 'recordings':
+        return <RecordingWorkflowView 
+          tasks={demandTasks}
+          setTasks={setDemandTasks}
+          clients={clients}
+          users={users}
+          currentUser={effectiveUser}
+        />;
+      case 'demands':
+        return <DemandsView 
+          tasks={demandTasks}
+          setTasks={setDemandTasks}
+          clients={clients}
+          users={users}
+        />;
+      case 'admin': 
+        return <AdminView 
+          integrations={integrations} 
+          setIntegrations={setIntegrations} 
+          leads={leads}
+          clients={clients}
+          artOrders={artOrders}
+          receivables={receivables}
+          users={users}
+          setUsers={setUsers}
+          agencyConfig={agencyConfig}
+          setAgencyConfig={setAgencyConfig}
+          currentUser={effectiveUser}
+          setCurrentUser={setCurrentUser}
+        />;
+      case 'checkout_success':
+        return <CheckoutSuccess onGoToDashboard={() => setActiveView('dashboard')} />;
+      case 'checkout_error':
+        return <CheckoutError onRetry={() => setActiveView('admin')} onGoHome={() => setActiveView('dashboard')} />;
+      default: return <DashboardView 
+        leads={leads} 
+        clients={clients} 
+        receivables={receivables} 
+        artOrders={artOrders} 
+        currentUser={effectiveUser} 
+        partners={partners}
+        partnerRequests={partnerRequests}
+      />;
+    }
+  };
+
+  if (activeRoomId && !currentUser) {
+    return (
+      <JitsiMeeting 
+        roomId={activeRoomId} 
+        currentUser={null} 
+        onExit={() => {
+          setActiveRoomId(null);
+          const url = new URL(window.location.href);
+          url.searchParams.delete('roomId');
+          window.history.pushState({}, '', url.pathname + url.search);
+        }} 
+      />
+    );
+  }
+
+  if (publicOrderId) {
+    return (
+      <>
+        <DesignModificationForm 
+          orderId={publicOrderId} 
+          onSuccess={() => {
+            window.history.replaceState({}, '', window.location.pathname);
+            setPublicOrderId(null);
+          }} 
+        />
+        <CookieConsent />
+      </>
+    );
+  }
+
+  if (!isAuthenticated || !currentUser || !effectiveUser) {
+    if (authView === 'privacy') {
+      return (
+        <PrivacyPolicy 
+          onBack={() => {
+            setAuthView('landing');
+            window.history.replaceState({}, '', '/');
+          }} 
+          agencyName={agencyConfig.name}
+          primaryColor={agencyConfig.primaryColor}
+        />
+      );
+    }
+    if (authView === 'terms') {
+      return (
+        <TermsOfUse 
+          onBack={() => {
+            setAuthView('landing');
+            window.history.replaceState({}, '', '/');
+          }} 
+          agencyName={agencyConfig.name}
+          primaryColor={agencyConfig.primaryColor}
+        />
+      );
+    }
+    if (authView === 'landing') {
+      return (
+        <>
+          <LandingPage 
+            onLogin={() => setAuthView('login')} 
+            onSignup={handleStartPlan} 
+            onPrivacy={() => {
+              setAuthView('privacy');
+              window.history.pushState({}, '', '/privacy');
+            }}
+            onTerms={() => {
+              setAuthView('terms');
+              window.history.pushState({}, '', '/terms');
+            }}
+            agencyName={agencyConfig.name}
+            primaryColor={agencyConfig.primaryColor}
+            totalUsers={totalUsers}
+          />
+          <CookieConsent />
+        </>
+      );
+    }
+    return (
+      <>
+        <LoginView 
+          onLogin={handleLogin} 
+          onSignup={handleSignup} 
+          isLoading={isAuthLoading} 
+          initialMode={authView === 'login' ? 'login' : 'signup'}
+          selectedPlanId={selectedPlanId}
+          stripeSessionId={stripeSessionId}
+          onBack={() => {
+            setAuthView('landing');
+            window.history.pushState({}, '', '/');
+          }}
+          onViewTerms={() => {
+            setAuthView('terms');
+            window.history.pushState({}, '', '/terms');
+          }}
+        />
+        <CookieConsent />
+      </>
+    );
+  }
+
+  // Blocking check for inactive subscription
+  if (currentUser?.role === 'OWNER' && currentUser?.subscriptionStatus === 'inactive') {
+    const isAdminAccount = currentUser?.email?.toLowerCase().includes('admin') || 
+                          currentUser?.email?.toLowerCase().includes('suporte');
+    
+    if (!isAdminAccount) {
+      return renderSubscriptionRequired();
+    }
+  }
+
+  return (
+    <div id="crm-app-container" className="flex h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors duration-300 overflow-hidden relative">
+      {/* Mobile Sidebar Overlay */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/20 z-40 md:hidden backdrop-blur-sm" 
+          onClick={() => setIsSidebarOpen(false)} 
+        />
+      )}
+
+      {/* Sidebar — full CRM navigation (also in Agency Admin embed) */}
+      <aside 
+        className={cn(
+          "transition-all duration-300 flex flex-col z-50 border-r border-gray-100 dark:border-gray-800 absolute md:relative h-full top-0 left-0",
+          effectiveUser.uiPreferences?.sidebarStyle === 'glass' 
+            ? "bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl" 
+            : "bg-white dark:bg-gray-900",
+          isSidebarOpen ? "w-64 translate-x-0" : "w-64 md:w-16 -translate-x-full md:translate-x-0"
+        )}
+      >
+        <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+          {isSidebarOpen && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex items-center gap-3 font-bold text-xl tracking-tight text-indigo-500 flex-1"
+            >
+              <div 
+                className="flex items-center justify-center w-10 h-10 flex-shrink-0 rounded-xl shadow-sm"
+                style={{ backgroundColor: agencyConfig.logoBgColor || agencyConfig.primaryColor }}
+              >
+                {agencyConfig.logoUrl ? (
+                  <img src={agencyConfig.logoUrl} alt="Logo" className="w-full h-full object-contain p-1" />
+                ) : (
+                  <Briefcase className="w-6 h-6 text-white" />
+                )}
+              </div>
+              <span className="leading-tight text-lg break-words whitespace-normal max-w-[130px]" style={{ color: agencyConfig.primaryColor }}>{agencyConfig.name}</span>
+            </motion.div>
+          )}
+          <button 
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="p-1.5 rounded-lg transition-colors hover:bg-gray-100 text-gray-500"
+          >
+            {isSidebarOpen ? <X size={18} /> : <Menu size={18} />}
+          </button>
+        </div>
+
+        <nav className="flex-1 overflow-y-auto p-3 space-y-1">
+          {menuItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setActiveView(item.id as ViewType)}
+              className={cn(
+                "w-full flex items-center gap-3 p-2.5 rounded-xl transition-all group relative",
+                activeView === item.id 
+                  ? "bg-indigo-50/50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 shadow-sm border border-indigo-100/50 dark:border-indigo-500/20"
+                  : "text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-indigo-500 dark:hover:text-indigo-400"
+              )}
+            >
+              <item.icon className={cn(
+                "w-5 h-5 min-w-[20px]",
+                activeView === item.id ? "text-indigo-500" : "text-gray-400 group-hover:text-indigo-500"
+              )} />
+              {isSidebarOpen && (
+                <span className="font-medium text-sm whitespace-nowrap flex items-center gap-2">
+                  {item.label}
+                </span>
+              )}
+              {!isSidebarOpen && (
+                <div className="absolute left-full ml-4 px-2 py-1 bg-indigo-600 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 whitespace-nowrap hidden md:block">
+                  {item.label}
+                </div>
+              )}
+            </button>
+          ))}
+        </nav>
+
+        <div className="p-4 border-t border-gray-100 dark:border-gray-800 space-y-3">
+          {currentUser.role === 'ADMIN' && (
+            <div className="flex flex-col gap-1 mb-2">
+              <label className="text-[10px] font-bold text-gray-400 dark:text-gray-400 uppercase tracking-widest px-1">Simular Visão</label>
+              <div className="flex bg-gray-50 dark:bg-gray-800/50 rounded-xl p-1 gap-1">
+                <button 
+                  onClick={() => { setPerspective(null); setActiveView('dashboard'); }}
+                  className={cn(
+                    "flex-1 py-1 rounded-lg text-[9px] font-bold uppercase transition-all",
+                    !perspective ? "bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-400 shadow-sm" : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 border border-transparent"
+                  )}
+                >
+                  Admin
+                </button>
+                <button 
+                  onClick={() => { setPerspective('OWNER'); setActiveView('dashboard'); }}
+                  className={cn(
+                    "flex-1 py-1 rounded-lg text-[9px] font-bold uppercase transition-all",
+                    perspective === 'OWNER' ? "bg-white text-blue-600 shadow-sm" : "text-gray-400 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 border border-transparent"
+                  )}
+                >
+                  Proprietário
+                </button>
+                <button 
+                  onClick={() => { setPerspective('PARTNER'); setActiveView('dashboard'); }}
+                  className={cn(
+                    "flex-1 py-1 rounded-lg text-[9px] font-bold uppercase transition-all",
+                    perspective === 'PARTNER' ? "bg-white text-amber-600 shadow-sm" : "text-gray-400 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 border border-transparent"
+                  )}
+                >
+                  Parceiro
+                </button>
+                <button 
+                  onClick={() => { setPerspective('DESIGNER'); setActiveView('dashboard'); }}
+                  className={cn(
+                    "flex-1 py-1 rounded-lg text-[9px] font-bold uppercase transition-all",
+                    perspective === 'DESIGNER' ? "bg-white text-emerald-600 shadow-sm" : "text-gray-400 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 border border-transparent"
+                  )}
+                >
+                  Design
+                </button>
+                <button 
+                  onClick={() => { setPerspective('EDITOR'); setActiveView('dashboard'); }}
+                  className={cn(
+                    "flex-1 py-1 rounded-lg text-[9px] font-bold uppercase transition-all whitespace-nowrap px-1",
+                    perspective === 'EDITOR' ? "bg-white text-purple-600 shadow-sm" : "text-gray-400 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 border border-transparent"
+                  )}
+                >
+                  Editor <span className="text-[7px] text-amber-500">(Breve)</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className={cn(
+                "w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs border uppercase",
+                !perspective ? "bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800" :
+                perspective === 'OWNER' ? "bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800" :
+                perspective === 'PARTNER' ? "bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800" :
+                perspective === 'DESIGNER' ? "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800" :
+                perspective === 'EDITOR' ? "bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800" :
+                ""
+              )}>
+                {currentUser.name.substring(0, 2)}
+              </div>
+              {isSidebarOpen && (
+                <div className="flex flex-col">
+                  <span className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate max-w-[120px]">{currentUser.name}</span>
+                  <span className="text-[10px] text-gray-400 dark:text-gray-400 uppercase tracking-wider">
+                    {perspective ? `Visualizar: ${perspective === 'OWNER' ? 'Proprietário' : perspective}` : (currentUser.role === 'OWNER' ? 'PROPRIETÁRIO' : currentUser.role)}
+                  </span>
+                </div>
+              )}
+            </div>
+            <button 
+              onClick={handleLogout}
+              className="p-1.5 text-gray-400 hover:text-rose-500 transition-colors rounded-lg hover:bg-rose-50 dark:hover:bg-rose-500/10"
+              title="Sair"
+            >
+              <LogOut size={16} />
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col overflow-hidden relative w-full">
+        <header className="h-16 border-b border-gray-100 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md flex items-center justify-between px-4 md:px-8 sticky top-0 z-10 transition-colors duration-300">
+          <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-300">
+            <button 
+              className="md:hidden p-1 mr-1 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" 
+              onClick={() => setIsSidebarOpen(true)}
+            >
+              <Menu size={20} />
+            </button>
+            <span className="cursor-pointer transition-colors hidden sm:block truncate max-w-[120px]" style={{ color: agencyConfig.primaryColor }}>{agencyConfig.name}</span>
+            <ChevronRight size={14} className="opacity-40 hidden sm:block" />
+            <span className="font-medium text-gray-900 dark:text-gray-100 truncate">
+              {VIEW_LABELS[activeView]}
+            </span>
+          </div>
+          <div className="flex items-center gap-4">
+             {/* Meeting Button Quick Access */}
+             {(effectiveUser.role === 'ADMIN' || effectiveUser.role === 'OWNER') && (
+               <button 
+                onClick={() => {
+                  const id = Math.random().toString(36).substr(2, 9);
+                  setActiveRoomId(id);
+                }}
+                className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl font-bold text-[10px] uppercase tracking-widest border border-indigo-100 dark:border-indigo-500/20"
+               >
+                 <Film size={12} />
+                 Meet
+               </button>
+             )}
+
+             {/* Theme Toggle */}
+             <button 
+               onClick={toggleTheme}
+               type="button"
+               className="p-2 rounded-xl transition-all hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 focus:outline-none"
+               title={isDarkMode ? "Ativar Modo Claro" : "Ativar Modo Escuro"}
+             >
+               {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+             </button>
+
+             {/* Holidays Monthly Widget */}
+             <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-colors duration-300 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/30 text-amber-700 dark:text-amber-400">
+               <CalendarIcon size={12} className="text-amber-500" />
+               <span>Feriados: {holidays.map(h => `${h.date.split('/')[0]}Abr`).join(', ')}</span>
+             </div>
+
+             <div className="h-8 w-[1px] mx-2 bg-gray-100 dark:bg-gray-800" />
+             <NotificationBell onNavigate={setActiveView} />
+             <div className="flex items-center gap-2 cursor-pointer group">
+               <span className="text-xs font-semibold text-gray-400 dark:text-gray-400 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors uppercase tracking-widest italic">Status: Online</span>
+               <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+             </div>
+          </div>
+        </header>
+
+        <section className="flex-1 overflow-y-auto p-8">
+          {isLoading ? (
+            <div className="h-full flex flex-col items-center justify-center gap-4 text-indigo-500">
+              <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+              <p className="text-sm font-medium animate-pulse">Carregando dados da agência...</p>
+            </div>
+          ) : (
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeView}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="max-w-7xl mx-auto"
+              >
+                {renderView()}
+              </motion.div>
+            </AnimatePresence>
+          )}
+        </section>
+      </main>
+
+      {/* Floating Team Chat — full CRM (including Agency Admin embed) */}
+      <AnimatePresence>
+        {isAuthenticated && effectiveUser && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+          >
+            <FloatingChat currentUser={effectiveUser} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <ErrorNotifier />
+      <ToastContainer />
+      <CookieConsent />
+
+      {/* Terms Acceptance Modal for Existing Users */}
+      {isAuthenticated && currentUser && !currentUser.acceptedTerms && (
+        <TermsAcceptanceModal 
+          currentUser={currentUser}
+          onAccept={(updatedUser) => {
+            setCurrentUser(updatedUser);
+            storageService.setItem('agency_user', JSON.stringify(updatedUser), true);
+          }}
+          onReject={() => {
+            handleLogout();
+            toast.error('É necessário aceitar os termos para utilizar o sistema.');
+          }}
+          agencyName={agencyConfig.name}
+          primaryColor={agencyConfig.primaryColor}
+        />
+      )}
+
+      {activeRoomId && (
+        <JitsiMeeting 
+          roomId={activeRoomId} 
+          currentUser={currentUser} 
+          onExit={() => {
+            setActiveRoomId(null);
+            // Clear URL param
+            const url = new URL(window.location.href);
+            url.searchParams.delete('roomId');
+            window.history.pushState({}, '', url.pathname + url.search);
+          }} 
+        />
+      )}
+    </div>
+  );
+}

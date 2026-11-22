@@ -9,9 +9,10 @@
     "apps/api"
   ],
   "scripts": {
-    "dev": "npm run build --workspace @ederson-agencia/shared && concurrently -n web,api -c cyan,magenta \"npm run dev:local-api --workspace @ederson-agencia/web\" \"npm run dev --workspace @ederson-agencia/api\"",
+    "dev": "npm run build --workspace @ederson-agencia/shared && concurrently -n web,api,crm -c cyan,magenta,green \"npm run dev:local-api --workspace @ederson-agencia/web\" \"npm run dev --workspace @ederson-agencia/api\" \"npm run dev:crm\"",
     "dev:web": "npm run build --workspace @ederson-agencia/shared && npm run dev --workspace @ederson-agencia/web",
     "dev:api": "npm run build --workspace @ederson-agencia/shared && npm run dev --workspace @ederson-agencia/api",
+    "dev:crm": "cross-env PORT=3010 CRM_HMR_CLIENT_PORT=5174 npm --prefix apps/amplifica-crm run dev",
     "build": "npm run build --workspaces --if-present",
     "build:web": "npm run build --workspace @ederson-agencia/shared && npm run build --workspace @ederson-agencia/web && node scripts/vercel-postbuild.mjs",
     "vercel-build": "npm run build:web",

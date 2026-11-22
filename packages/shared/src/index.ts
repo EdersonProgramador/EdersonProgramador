@@ -286,6 +286,39 @@ export {
   type MarketingNavSection
 } from "./marketing-operation-nav.js";
 export {
+  AGENCY_OPS_DELIVERABLE_STATUSES,
+  AGENCY_OPS_LANE_IDS,
+  AGENCY_OPS_LANES,
+  AGENCY_OPS_PIPELINE_STAGES,
+  AGENCY_OPS_VERTICAL_IDS,
+  AGENCY_OPS_VERTICALS,
+  agencyOpsDefaultAdminPath,
+  agencyOpsLaneAdminPath,
+  buildAgencyOpsLaneNavSections,
+  getAgencyOpsLane,
+  getAgencyOpsVertical,
+  isAgencyOpsLaneId,
+  isAgencyOpsVerticalId,
+  type AgencyOpsDeliverableStatus,
+  type AgencyOpsLane,
+  type AgencyOpsLaneId,
+  type AgencyOpsPipelineStageId,
+  type AgencyOpsVerticalId,
+  type AgencyOpsVerticalMeta
+} from "./agency-ops-process-lanes.js";
+export {
+  AGENCY_OS_HOME_COPY,
+  AGENCY_OS_HOME_PILLARS,
+  AGENCY_OS_START_HERE_PATH,
+  AGENCY_OS_STUDIO_ADMIN_PATH,
+  AMPLIFICA_CRM_VIEWS,
+  amplificaCrmAdminPath,
+  type AgencyOsHomeLink,
+  type AgencyOsHomePillar,
+  type AgencyOsHomePillarId,
+  type AmplificaCrmView
+} from "./agency-os-home-ia.js";
+export {
   ADMIN_COMERCIAL_STEPS,
   ADMIN_LEGACY_PATH_ALIASES,
   ADMIN_OPERATION_BLOCKS,
@@ -310,6 +343,7 @@ export {
   type AgencyAgentTemplateId
 } from "./agency-agents.js";
 export {
+  BRANDING_AGENCY_OPS_LANE_PATHS,
   BRANDING_LEGACY_PATH_ALIASES,
   BRANDING_OPERATION_NAV,
   brandingNavFlatItems,

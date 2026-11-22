@@ -441,7 +441,16 @@ export async function registerMarketingPlatformRoutes(app: FastifyInstance) {
         updatedAt: true
       }
     });
-    const columns = ["NEW", "QUALIFIED", "WON", "LOST"] as const;
+    const columns = [
+      "NEW",
+      "QUALIFIED",
+      "PROPOSAL",
+      "NEGOTIATION",
+      "CONTRACT",
+      "WON",
+      "ACTIVE",
+      "LOST"
+    ] as const;
     const grouped = Object.fromEntries(columns.map((c) => [c, leads.filter((l) => l.status === c)])) as Record<
       (typeof columns)[number],
       typeof leads
@@ -498,7 +507,9 @@ export async function registerMarketingPlatformRoutes(app: FastifyInstance) {
         whatsapp: Boolean(env.MESSAGING_WHATSAPP_WEBHOOK_URL),
         n8n: Boolean(env.N8N_LEAD_WEBHOOK_URL),
         leadlovers: Boolean(env.LEADLOVERS_API_URL),
-        hotmart: Boolean(env.HOTMART_API_URL)
+        hotmart: Boolean(env.HOTMART_API_URL),
+        openai: Boolean(env.OPENAI_API_KEY),
+        leadNotify: Boolean(env.LEAD_NOTIFY_EMAIL || env.LEAD_NOTIFY_WHATSAPP || env.ADMIN_EMAIL)
       }
     };
   });

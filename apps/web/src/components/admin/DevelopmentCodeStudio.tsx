@@ -654,7 +654,7 @@ export function DevelopmentCodeStudio({
   );
 
   const expandIdeUrl = useMemo(() => {
-    const path = `${AGENCY_APP_BASE}/studio/desenvolvimento`;
+    const path = `${AGENCY_APP_BASE}/admin/studio`;
     const qs = projectId ? `?project=${encodeURIComponent(projectId)}` : "";
     return `${path}${qs}`;
   }, [projectId]);

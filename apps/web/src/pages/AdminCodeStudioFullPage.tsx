@@ -90,10 +90,10 @@ export function AdminCodeStudioFullPage() {
           {saving ? <span className="text-[var(--app-text-muted)]">Salvando…</span> : null}
         </div>
         <Link
-          to={`${ADMIN_BASE}/operacao/desenvolvimento/editor${q}`}
+          to={`${ADMIN_BASE}${q}`}
           className="shrink-0 rounded-md border border-[var(--app-border)] bg-[var(--app-panel)] px-2 py-1 text-xs text-[var(--app-text)] hover:bg-[var(--app-hover)]"
         >
-          Voltar à operação
+          Amplifica CRM
         </Link>
       </header>
 

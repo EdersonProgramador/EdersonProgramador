@@ -1,3 +1,4 @@
+import { env } from "../env.js";
 import type { AgentDraftContext } from "./agent-drafts.js";
 import { buildStructuredAgentDraft } from "./agent-drafts.js";
 
@@ -9,11 +10,11 @@ export async function generateAgentDraft(ctx: AgentDraftContext): Promise<{
   source: "llm" | "structured";
 }> {
   const structured = buildStructuredAgentDraft(ctx);
-  const apiKey = process.env.OPENAI_API_KEY?.trim();
+  const apiKey = env.OPENAI_API_KEY;
   if (!apiKey) return { draft: structured, source: "structured" };
 
-  const baseUrl = (process.env.OPENAI_BASE_URL?.trim() || "https://api.openai.com/v1").replace(/\/$/, "");
-  const model = process.env.OPENAI_MODEL?.trim() || "gpt-4o-mini";
+  const baseUrl = (env.OPENAI_BASE_URL || "https://api.openai.com/v1").replace(/\/$/, "");
+  const model = env.OPENAI_MODEL || "gpt-4o-mini";
 
   try {
     const res = await fetch(`${baseUrl}/chat/completions`, {

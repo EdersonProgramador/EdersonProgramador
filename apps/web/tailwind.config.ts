@@ -16,18 +16,18 @@ export default {
         "blue-glow": "rgb(90 143 184 / <alpha-value>)",
         "blue-deep": "rgb(26 51 72 / <alpha-value>)",
         brand: {
-          primary: "#38bdf8",
-          soft: "#7dd3fc",
-          deep: "#0ea5e9",
-          indigo: "#818cf8",
-          surface: "#020617"
+          primary: "#4f46e5",
+          soft: "#818cf8",
+          deep: "#4338ca",
+          indigo: "#6366f1",
+          surface: "#ffffff"
         },
         "amber-soft": "rgb(201 162 39 / <alpha-value>)",
         "teal-soft": "rgb(45 212 191 / <alpha-value>)"
       },
       fontFamily: {
-        sans: ["DM Sans", "Segoe UI", "system-ui", "sans-serif"],
-        display: ["DM Sans", "Segoe UI", "sans-serif"],
+        sans: ["Poppins", "Segoe UI", "system-ui", "sans-serif"],
+        display: ["Poppins", "Segoe UI", "sans-serif"],
         mono: ["IBM Plex Mono", "ui-monospace", "monospace"]
       },
       boxShadow: {

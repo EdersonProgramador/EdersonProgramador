@@ -1,0 +1,14 @@
+node_modules/
+build/
+coverage/
+.DS_Store
+*.log
+.env*
+secrets/
+!.env.example
+.vercel/
+chat_messages_v2.json
+n8n_interaction_logs.txt
+whatsapp_interaction_logs.txt
+whatsapp_polls.json
+google_tokens.json

@@ -17,6 +17,8 @@
     --blue-matte: #2a4a6b;
     --blue-accent: #3d6a8c;
     --blue-glow: var(--brand-primary-soft);
+    --font-sans: Poppins, "Segoe UI", system-ui, sans-serif;
+    --font-display: Poppins, "Segoe UI", system-ui, sans-serif;
   }
 
   html {
@@ -31,16 +33,26 @@
   }
 
   body {
-    @apply bg-ink text-[var(--app-text)] antialiased;
+    @apply bg-ink font-sans text-[var(--app-text)] antialiased;
     background: var(--cinema-bg);
     background-attachment: fixed;
   }
 
+  body.amplifica-landing-active {
+    background: #ffffff;
+    background-image: none;
+    color: #0f172a;
+  }
+
   body.landing-active {
-    background: #0a1018;
+    background: #ffffff;
     background-image: none;
     /* altura do header fixo: barra + pills (mobile) vs barra única (lg+) */
     --hero-nav-offset: 7.5rem;
+  }
+
+  html[data-theme="night"] body.landing-active {
+    background: #020617;
   }
 
   @media (min-width: 768px) {
@@ -166,7 +178,7 @@
   }
 
   .hero-stat {
-    --stat-accent: var(--brand-primary, #38bdf8);
+    --stat-accent: var(--brand-primary, #4f46e5);
     --stat-glow: color-mix(in srgb, var(--stat-accent) 28%, transparent);
     position: relative;
     overflow: hidden;
@@ -297,7 +309,7 @@
   }
 
   .hero-stat--sky {
-    --stat-accent: #38bdf8;
+    --stat-accent: #4f46e5;
   }
 
   .hero-stat--violet {
@@ -605,7 +617,7 @@
   }
 
   .brand-pillar {
-    --pillar-accent: var(--brand-primary, #38bdf8);
+    --pillar-accent: var(--brand-primary, #4f46e5);
     --pillar-accent-soft: color-mix(in srgb, var(--pillar-accent) 35%, transparent);
     --pillar-surface: color-mix(in srgb, var(--pillar-accent) 8%, rgb(2 6 23));
     border-color: color-mix(in srgb, var(--pillar-accent) 22%, transparent);
@@ -664,7 +676,7 @@
   }
 
   .brand-pillar--systems {
-    --pillar-accent: #38bdf8;
+    --pillar-accent: #4f46e5;
   }
 
   .brand-pillar--ai {
@@ -789,12 +801,12 @@
     48%,
     88% {
       opacity: 1;
-      text-shadow: 0 0 18px color-mix(in srgb, var(--brand-primary, #38bdf8) 45%, transparent);
+      text-shadow: 0 0 18px color-mix(in srgb, var(--brand-primary, #4f46e5) 45%, transparent);
     }
   }
 
   .brand-value-tag {
-    --value-accent: #38bdf8;
+    --value-accent: #4f46e5;
     border-color: rgb(255 255 255 / 0.1);
     background: rgb(255 255 255 / 0.04);
     color: rgb(255 255 255 / 0.42);

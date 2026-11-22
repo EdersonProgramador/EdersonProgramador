@@ -89,7 +89,16 @@ export default defineConfig(({ mode }) => {
       watch: {
         ignored: ["**/public/portfolio/**"]
       },
-      proxy: apiProxy(apiTarget)
+      proxy: {
+        ...apiProxy(apiTarget),
+        // Full path forwarded (CRM vite base = /amplifica-crm/). No rewrite.
+        "/amplifica-crm": {
+          target: "http://127.0.0.1:3010",
+          changeOrigin: true,
+          secure: false,
+          ws: true
+        }
+      }
     }
   };
 });

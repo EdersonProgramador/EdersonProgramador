@@ -841,22 +841,41 @@ export function AdminMarketingCrmPage() {
     }
   }
 
-  const columns = ["NEW", "QUALIFIED", "WON", "LOST"] as const;
-  const labels: Record<string, string> = { NEW: "Novos", QUALIFIED: "Qualificados", WON: "Ganhos", LOST: "Perdidos" };
+  const columns = [
+    "NEW",
+    "QUALIFIED",
+    "PROPOSAL",
+    "NEGOTIATION",
+    "CONTRACT",
+    "WON",
+    "LOST"
+  ] as const;
+  const labels: Record<string, string> = {
+    NEW: "Lead",
+    QUALIFIED: "Qualificação",
+    PROPOSAL: "Proposta",
+    NEGOTIATION: "Negociação",
+    CONTRACT: "Contrato",
+    WON: "Ativo",
+    LOST: "Perdidos"
+  };
   const nextStatus: Record<string, string | null> = {
     NEW: "QUALIFIED",
-    QUALIFIED: "WON",
+    QUALIFIED: "PROPOSAL",
+    PROPOSAL: "NEGOTIATION",
+    NEGOTIATION: "CONTRACT",
+    CONTRACT: "WON",
     WON: null,
     LOST: "NEW"
   };
 
   return (
     <AdminMarketingPlatformShell>
-      <AdminPageHead title="Gestão de vendas" description="Pipeline de leads integrado ao funil e projetos." />
+      <AdminPageHead title="Gestão de vendas" description="Pipeline Agency Ops em 6 estágios + perdidos." />
       <Link className="text-sm text-emerald-400 hover:underline" to={withProjectQuery(`${ADMIN}/leads`)}>
         Abrir lista completa de leads
       </Link>
-      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-7">
         {columns.map((col) => (
           <div key={col} className="marketing-crm-column">
             <h3>

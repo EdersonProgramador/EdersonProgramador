@@ -47,6 +47,29 @@ projects:
                 sync: false
               - key: ADMIN_NAME
                 value: Ederson Programador
+              # Fase 1 — espinha comercial (preencher no Dashboard)
+              - key: LEAD_NOTIFY_EMAIL
+                sync: false
+              - key: LEAD_NOTIFY_WHATSAPP
+                sync: false
+              - key: RESEND_API_KEY
+                sync: false
+              - key: MAIL_FROM
+                sync: false
+              - key: BREVO_API_KEY
+                sync: false
+              - key: BREVO_SENDER_EMAIL
+                sync: false
+              - key: BREVO_SENDER_NAME
+                sync: false
+              # Fase 2 — IA dos agentes
+              - key: OPENAI_API_KEY
+                sync: false
+              - key: OPENAI_MODEL
+                value: gpt-4o-mini
+              # Fase 4 — só se precisar de orquestração externa
+              - key: N8N_LEAD_WEBHOOK_URL
+                sync: false
       # Opcional: disco persistente montado em /var/data/fl-media (vídeos/PDFs do curso FL)
       # - key: FL_MEDIA_ROOT
       #   value: /var/data/fl-media

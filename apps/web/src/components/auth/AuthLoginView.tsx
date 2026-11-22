@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import type { AuthContext, AuthRouteState } from "@ederson-agencia/shared";
 import { ACADEMY_STORE_BASE, loginPathForContext, resolvePostLoginPath } from "@ederson-agencia/shared";
+import { Lock, LogIn, Mail, Zap } from "lucide-react";
 import { ApiError, apiPost, type LoginResponse } from "../../api";
 import { normalizeAuthFields, warmAcademyStoreTestAccount } from "../../lib/academy-store-auth";
 import { BrandLogo } from "../brand/BrandLogo";
 import { useAcademySession, useAgencySession, useAuthStore } from "../../stores/authStore";
+import "../../styles/crm-auth-login.css";
 
 type AuthLoginViewProps = {
   context: AuthContext;
@@ -13,6 +15,8 @@ type AuthLoginViewProps = {
   title?: string;
   subtitle?: string;
   alternateLogin?: { href: string; label: string };
+  /** Amplifica CRM visual theme (agency admin entry). */
+  variant?: "default" | "crm";
 };
 
 export function AuthLoginView({
@@ -20,7 +24,8 @@ export function AuthLoginView({
   allowRegister = false,
   title,
   subtitle,
-  alternateLogin
+  alternateLogin,
+  variant = "default"
 }: AuthLoginViewProps) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -29,23 +34,26 @@ export function AuthLoginView({
   const setSession = useAuthStore((s) => s.setSession);
   const agencySession = useAgencySession();
   const academySession = useAcademySession();
-  const activeSession = context === "agency" ? agencySession : academySession;
+  const sessionForContext = context === "agency" ? agencySession : academySession;
   const [mode, setMode] = useState<"login" | "register">("login");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const isAgency = context === "agency";
-  const heading = title ?? (isAgency ? "Área do cliente — Agência" : "Academia interna");
+  const isCrm = variant === "crm" && isAgency;
+  const heading = title ?? (isCrm ? null : isAgency ? "Área do cliente — Agência" : "Academia interna");
   const description =
     subtitle ??
-    (isAgency
-      ? "Acompanhe pacotes, etapas e entregas do seu projeto contratado."
-      : "Acesso restrito a alunos matriculados. Use o e-mail cadastrado pelo administrador.");
+    (isCrm
+      ? null
+      : isAgency
+        ? "Acompanhe pacotes, etapas e entregas do seu projeto contratado."
+        : "Acesso restrito a alunos matriculados. Use o e-mail cadastrado pelo administrador.");
 
   useEffect(() => {
-    if (!activeSession?.user) return;
-    navigate(resolvePostLoginPath(activeSession.user.role, context, returnPath), { replace: true });
-  }, [activeSession, context, navigate, returnPath]);
+    if (!sessionForContext?.user) return;
+    navigate(resolvePostLoginPath(sessionForContext.user.role, context, returnPath), { replace: true });
+  }, [sessionForContext, context, navigate, returnPath]);
 
   useEffect(() => {
     if (context === "academy") void warmAcademyStoreTestAccount();
@@ -101,6 +109,149 @@ export function AuthLoginView({
     } finally {
       setLoading(false);
     }
+  }
+
+  if (isCrm) {
+    return (
+      <div className="crm-auth">
+        <div className="crm-auth__brand">
+          <div className="crm-auth__mark" aria-hidden>
+            <Zap className="h-7 w-7" />
+          </div>
+          <h1 className="crm-auth__title">
+            Amplifica <span>CRM</span>
+          </h1>
+          <p className="crm-auth__subtitle">
+            {mode === "login" ? "Autenticação de usuário" : "Novo registro"}
+          </p>
+        </div>
+
+        <div className="crm-auth__card">
+          {allowRegister ? (
+            <div className="crm-auth__tabs" role="tablist" aria-label="Modo de acesso">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={mode === "login"}
+                className={`crm-auth__tab${mode === "login" ? " is-active" : ""}`}
+                onClick={() => setMode("login")}
+              >
+                Login
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={mode === "register"}
+                className={`crm-auth__tab${mode === "register" ? " is-active" : ""}`}
+                onClick={() => setMode("register")}
+              >
+                Cadastro
+              </button>
+            </div>
+          ) : null}
+
+          <form className="crm-auth__form" onSubmit={onSubmit}>
+            {mode === "register" && allowRegister ? (
+              <>
+                <div>
+                  <label className="crm-auth__label" htmlFor="crm-auth-name">
+                    Nome completo
+                  </label>
+                  <div className="crm-auth__field">
+                    <span className="crm-auth__icon">
+                      <LogIn size={18} aria-hidden />
+                    </span>
+                    <input
+                      id="crm-auth-name"
+                      className="crm-auth__input"
+                      name="name"
+                      placeholder="Seu nome"
+                      required
+                    />
+                  </div>
+                </div>
+                <input type="hidden" name="role" value="CLIENT" />
+              </>
+            ) : null}
+
+            <div>
+              <label className="crm-auth__label" htmlFor="crm-auth-email">
+                E-mail corporativo
+              </label>
+              <div className="crm-auth__field">
+                <span className="crm-auth__icon">
+                  <Mail size={18} aria-hidden />
+                </span>
+                <input
+                  id="crm-auth-email"
+                  className="crm-auth__input"
+                  type="email"
+                  name="email"
+                  placeholder="seu@email.com"
+                  required
+                  autoComplete="email"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="crm-auth__label" htmlFor="crm-auth-password">
+                Senha de acesso
+              </label>
+              <div className="crm-auth__field">
+                <span className="crm-auth__icon">
+                  <Lock size={18} aria-hidden />
+                </span>
+                <input
+                  id="crm-auth-password"
+                  className="crm-auth__input"
+                  type="password"
+                  name="password"
+                  placeholder="••••••••"
+                  required
+                  minLength={6}
+                  autoComplete={mode === "login" ? "current-password" : "new-password"}
+                />
+              </div>
+            </div>
+
+            {mode === "register" && allowRegister ? (
+              <label className="flex items-start gap-2 text-xs font-medium text-gray-600">
+                <input type="checkbox" name="acceptTerms" className="mt-0.5" required />
+                Li e concordo com os Termos de Uso e a política de privacidade.
+              </label>
+            ) : null}
+
+            {error ? <p className="crm-auth__error">{error}</p> : null}
+
+            <button type="submit" className="crm-auth__submit" disabled={loading}>
+              {loading ? (
+                "Aguarde…"
+              ) : (
+                <>
+                  {mode === "login" ? "Entrar no Sistema" : "Criar minha conta"}
+                  <LogIn size={20} aria-hidden />
+                </>
+              )}
+            </button>
+          </form>
+        </div>
+
+        <div className="crm-auth__footer">
+          {alternateLogin ? (
+            <p>
+              <Link to={alternateLogin.href} state={returnPath ? { from: returnPath } : undefined}>
+                {alternateLogin.label}
+              </Link>
+            </p>
+          ) : null}
+          <p>
+            <Link to="/">Voltar ao site</Link>
+          </p>
+          <p className="crm-auth__hint">Acesso à operação Amplifica CRM</p>
+        </div>
+      </div>
+    );
   }
 
   return (

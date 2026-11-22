@@ -1,132 +1,77 @@
-import { NavLink, Outlet, useSearchParams } from "react-router-dom";
+import { useEffect } from "react";
+import { Link, NavLink, Outlet, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import {
   AGENCY_APP_BASE,
-  ADMIN_OPERATION_BLOCKS,
-  adminComercialStepLabel,
-  BRANDING_LEGACY_PATH_ALIASES,
-  BRANDING_OPERATION_NAV,
-  FORMULA_LEGACY_PATH_ALIASES,
-  FORMULA_OPERATION_NAV,
-  type AdminNavLink
+  AGENCY_OS_STUDIO_ADMIN_PATH,
+  loginPathForContext
 } from "@ederson-agencia/shared";
-import {
-  Bot,
-  FolderKanban,
-  Home,
-  LayoutTemplate,
-  Monitor,
-  Rocket,
-  Settings2,
-  type LucideIcon
-} from "lucide-react";
-import { AdminProcessBreadcrumb } from "./AdminProcessChrome";
-import { DevelopmentPillarSidebarNav } from "./DevelopmentPillarSidebarNav";
-import { PillarSidebarNav } from "./PillarSidebarNav";
-import { BRANDING_SIDEBAR_ICONS, FORMULA_SIDEBAR_ICONS } from "./pillar-sidebar-icons";
+import { Code2, LogOut } from "lucide-react";
+import { useAuthStore } from "../../stores/authStore";
+import { applySiteTheme, useThemeStore } from "../../stores/themeStore";
 import "../../styles/agency-admin.css";
+import "../../styles/agency-os-opus-home.css";
 
 const ADMIN_BASE = `${AGENCY_APP_BASE}/admin`;
-
-const LINK_ICONS: Record<string, LucideIcon> = {
-  inicio: Home,
-  agentes: Bot,
-  projetos: FolderKanban,
-  captura: LayoutTemplate,
-  nutricao: Rocket,
-  vendas: LayoutTemplate,
-  relacionamento: LayoutTemplate,
-  branding: Monitor,
-  desenvolvimento: Monitor,
-  formula: Rocket,
-  automacoes: Settings2,
-  integracoes: Settings2,
-  transacional: Settings2
-};
-
-function AdminNavLinkItem({
-  link,
-  end
-}: {
-  link: AdminNavLink;
-  end?: boolean;
-}) {
-  const [searchParams] = useSearchParams();
-  const projectId = searchParams.get("project")?.trim();
-  const path = link.adminPath ? `${ADMIN_BASE}/${link.adminPath}` : ADMIN_BASE;
-  const toResolved = projectId ? `${path}?project=${encodeURIComponent(projectId)}` : path;
-  const Icon = LINK_ICONS[link.id] ?? LayoutTemplate;
-  const label = link.stepNumber ? adminComercialStepLabel(link) : link.label;
-
-  return (
-    <NavLink
-      to={toResolved}
-      end={end ?? !link.adminPath}
-      className={({ isActive }) => `agency-admin-nav-link${isActive ? " is-active" : ""}`}
-      title={link.purpose}
-    >
-      <Icon className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden />
-      <span className="agency-admin-nav-link__text">{label}</span>
-    </NavLink>
-  );
-}
-
-function flatMobileLinks() {
-  return ADMIN_OPERATION_BLOCKS.flatMap((block) =>
-    block.links.map((link) => ({ blockId: block.id, link }))
-  );
-}
+const CRM_HOME = `${ADMIN_BASE}/crm/dashboard`;
 
 export function AdminOperationsLayout() {
-  const mobile = flatMobileLinks();
+  const [searchParams] = useSearchParams();
+  const projectId = searchParams.get("project")?.trim();
+  const q = projectId ? `?project=${encodeURIComponent(projectId)}` : "";
+  const location = useLocation();
+  const navigate = useNavigate();
+  const clearSession = useAuthStore((s) => s.clearSession);
+  const siteTheme = useThemeStore((s) => s.theme);
+
+  const path = location.pathname.replace(/\/$/, "");
+  const isCrm = path === ADMIN_BASE || path.includes("/admin/crm");
+  const isStudio = path.includes("/admin/studio");
+
+  useEffect(() => {
+    document.body.classList.add("agency-os-opus-active");
+    document.body.classList.remove("agency-funnel-active");
+    applySiteTheme("day");
+    return () => {
+      document.body.classList.remove("agency-os-opus-active");
+      applySiteTheme(siteTheme);
+    };
+  }, [siteTheme]);
 
   return (
-    <div className="agency-admin-layout">
-      <aside className="agency-admin-sidebar" aria-label="Menu da administração">
-        <div className="agency-admin-mobile-nav lg:hidden">
-          {mobile.map(({ blockId, link }) => (
-            <AdminNavLinkItem key={`${blockId}-${link.id}`} link={link} />
-          ))}
-        </div>
-        <div className="agency-admin-sidebar__panel agency-admin-sidebar__desktop-nav">
-          {ADMIN_OPERATION_BLOCKS.map((block) => (
-            <div key={block.id} className="mb-3 last:mb-0">
-              <p className="agency-admin-sidebar__label">{block.label}</p>
-              <p className="agency-admin-sidebar__purpose">{block.purpose}</p>
-              <nav className="flex flex-col gap-0.5" aria-label={block.label}>
-                {block.links.map((link) => (
-                  <AdminNavLinkItem key={link.id} link={link} />
-                ))}
-              </nav>
-              {block.id === "entrega" ? (
-                <div className="agency-admin-sidebar__pillar-block">
-                  <PillarSidebarNav
-                    pillarId="branding"
-                    pillarLabel="Branding · fases"
-                    tone="branding"
-                    sections={BRANDING_OPERATION_NAV}
-                    legacyAliases={BRANDING_LEGACY_PATH_ALIASES}
-                    iconById={BRANDING_SIDEBAR_ICONS}
-                    defaultIcon={Monitor}
-                  />
-                  <DevelopmentPillarSidebarNav />
-                  <PillarSidebarNav
-                    pillarId="formula-lancamento"
-                    pillarLabel="Fórmula · fases"
-                    tone="formula"
-                    sections={FORMULA_OPERATION_NAV}
-                    legacyAliases={FORMULA_LEGACY_PATH_ALIASES}
-                    iconById={FORMULA_SIDEBAR_ICONS}
-                    defaultIcon={Monitor}
-                  />
-                </div>
-              ) : null}
-            </div>
-          ))}
-        </div>
-      </aside>
-      <div className="agency-admin-main">
-        <AdminProcessBreadcrumb />
-        <Outlet />
+    <div
+      className={`opus-workspace${isCrm ? " opus-workspace--crm" : ""}${isStudio ? " opus-workspace--studio" : ""}`}
+    >
+      <div className={`opus-workspace__frame${isCrm ? " opus-workspace__frame--crm" : ""}`}>
+        <header className={`opus-workspace-top${isCrm ? " opus-workspace-top--overlay" : ""}`}>
+          <Link to={`${CRM_HOME}${q}`} className="opus-workspace-top__brand">
+            <span className="opus-workspace-top__name">Amplifica CRM</span>
+          </Link>
+          <nav className="opus-workspace-top__nav" aria-label="Workspace">
+            <NavLink
+              to={`${ADMIN_BASE}/${AGENCY_OS_STUDIO_ADMIN_PATH}${q}`}
+              className={({ isActive }) => `opus-workspace-top__link${isActive ? " is-active" : ""}`}
+            >
+              <Code2 className="h-3.5 w-3.5" aria-hidden />
+              Code Studio
+            </NavLink>
+            <button
+              type="button"
+              className="opus-workspace-top__link opus-workspace-top__link--ghost"
+              aria-label="Sair"
+              onClick={() => {
+                clearSession("agency");
+                navigate(loginPathForContext("agency"), { replace: true });
+              }}
+            >
+              <LogOut className="h-3.5 w-3.5" aria-hidden />
+              Sair
+            </button>
+          </nav>
+        </header>
+
+        <main className={`opus-workspace__main${isCrm ? " opus-workspace__main--crm" : ""}`}>
+          <Outlet />
+        </main>
       </div>
     </div>
   );

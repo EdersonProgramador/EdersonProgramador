@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3009:3000"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+    restart: always
+
+  # Example of how they might run locally with a different port
+  # in accordance with their "3009:3009" comment, I'll map 3009 to 3000

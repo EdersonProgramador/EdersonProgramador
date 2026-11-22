@@ -18,6 +18,14 @@ type OpsOverview = {
   clientsCount?: number;
 };
 
+type AgentsOverview = {
+  ai?: {
+    llmEnabled: boolean;
+    model: string;
+    mode: "llm" | "structured";
+  };
+};
+
 const FLOW = [
   { n: 1, t: "Onboard", d: "Cliente na carteira" },
   { n: 2, t: "Agentes", d: "Especialistas por domínio" },
@@ -31,6 +39,7 @@ export function AgencyOsDashboard({ deepDive = false }: { deepDive?: boolean }) 
   const selectedProjectId = searchParams.get("project")?.trim() ?? "";
 
   const [ops, setOps] = useState<OpsOverview | null>(null);
+  const [aiMode, setAiMode] = useState<AgentsOverview["ai"] | null>(null);
   const [clients, setClients] = useState<BookClient[]>([]);
   const [agents, setAgents] = useState<AgentRow[]>([]);
   const [jobs, setJobs] = useState<AgentJob[]>([]);
@@ -44,7 +53,7 @@ export function AgencyOsDashboard({ deepDive = false }: { deepDive?: boolean }) 
   );
 
   const refresh = useCallback(async () => {
-    const [book, list, pending, overview] = await Promise.all([
+    const [book, list, pending, overview, agentsOverview] = await Promise.all([
       apiGet<{ clients: BookClient[] }>("/agency/admin/agents/book"),
       apiGet<{ agents: AgentRow[] }>("/agency/admin/agents"),
       apiGet<{ jobs: AgentJob[] }>(
@@ -52,12 +61,14 @@ export function AgencyOsDashboard({ deepDive = false }: { deepDive?: boolean }) 
           ? `/agency/admin/agents/jobs?status=PENDING_APPROVAL&projectId=${encodeURIComponent(selectedProjectId)}`
           : "/agency/admin/agents/jobs?status=PENDING_APPROVAL"
       ),
-      apiGet<OpsOverview>("/agency/admin/ops/overview")
+      apiGet<OpsOverview>("/agency/admin/ops/overview"),
+      apiGet<AgentsOverview>("/agency/admin/agents/overview")
     ]);
     setClients(book.clients);
     setAgents(list.agents);
     setJobs(pending.jobs);
     setOps(overview);
+    setAiMode(agentsOverview.ai ?? null);
   }, [selectedProjectId]);
 
   useEffect(() => {
@@ -158,12 +169,19 @@ export function AgencyOsDashboard({ deepDive = false }: { deepDive?: boolean }) 
   return (
     <div className={`agency-os${deepDive ? " agency-os--deep" : ""}`}>
       <header className="agency-os-hero">
-        <p className="agency-os-hero__eyebrow">Agency OS</p>
-        <h1>Multi-client dashboard</h1>
+        <p className="agency-os-hero__eyebrow">Amplifica CRM</p>
+        <h1>Painel multi-cliente</h1>
         <p>
           Agentes especialistas produzem branding, proposta START/BUSINESS/ENTERPRISE, campanhas e stack —
           você aprova antes de gravar.
         </p>
+        {aiMode ? (
+          <p className={`agency-os-ai-badge${aiMode.llmEnabled ? " agency-os-ai-badge--on" : ""}`}>
+            {aiMode.llmEnabled
+              ? `IA LLM ativa · ${aiMode.model}`
+              : "IA em modo estruturado · defina OPENAI_API_KEY na API para enriquecer drafts"}
+          </p>
+        ) : null}
       </header>
 
       <ol className="admin-agents-flow">

@@ -1,71 +1,75 @@
-/* Tokens globais — noite (padrão) e dia */
+/* Tokens — Amplifica indigo/branco (day = padrão do site) */
 
-html[data-theme="night"],
+html[data-theme="day"],
 html:not([data-theme]) {
-  color-scheme: dark;
-  --brand-primary: #38bdf8;
-  --brand-primary-soft: #7dd3fc;
-  --brand-primary-deep: #0ea5e9;
-  --brand-indigo: #818cf8;
-  --brand-surface: #020617;
-  --app-bg: #000000;
-  --app-bg-solid: #000000;
-  --app-bg-rgb: 0 0 0;
-  --app-panel: #0a0f14;
-  --app-text: #f0f4f8;
-  --app-text-muted: #9aaec0;
-  --app-text-subtle: #c5d1dc;
-  --app-border: rgb(255 255 255 / 0.1);
-  --app-border-strong: rgb(255 255 255 / 0.16);
-  --app-surface-elevated: rgb(10 10 12);
-  --app-overlay: rgb(0 0 0 / 0.6);
-  --app-hover: rgb(255 255 255 / 0.06);
-  --app-input-bg: rgb(0 0 0 / 0.5);
-  --cinema-bg: radial-gradient(ellipse 120% 80% at 50% -30%, rgba(42, 74, 107, 0.35), transparent 55%),
-    radial-gradient(circle at 85% 20%, rgba(61, 106, 140, 0.12), transparent 40%),
-    radial-gradient(circle at 10% 80%, rgba(26, 51, 72, 0.5), transparent 45%),
-    linear-gradient(180deg, #000000 0%, #030508 40%, #000000 100%);
-  --course-fg: #eef2f6;
-  --course-muted: #b8c5d4;
-  --course-subtle: #9aadc0;
-  --course-faint: #7d92a8;
-  --course-surface-sidebar: rgb(10 10 12);
-  --course-surface-main: #000000;
-  --course-module-surface: rgb(255 255 255 / 0.02);
-  --course-module-surface-open: rgb(255 255 255 / 0.035);
-  --fichamento-surface: rgb(255 255 255 / 0.03);
-  --fichamento-toolbar: rgb(0 0 0 / 0.2);
-  --fichamento-popover: #1a2332;
-}
-
-html[data-theme="day"] {
   color-scheme: light;
-  --brand-surface: #f8fafc;
-  --app-bg: #f1f5f9;
-  --app-bg-solid: #f1f5f9;
-  --app-bg-rgb: 241 245 249;
+  --brand-primary: #4f46e5;
+  --brand-primary-soft: #818cf8;
+  --brand-primary-deep: #4338ca;
+  --brand-indigo: #6366f1;
+  --brand-surface: #ffffff;
+  --app-bg: #ffffff;
+  --app-bg-solid: #ffffff;
+  --app-bg-rgb: 255 255 255;
   --app-panel: #ffffff;
   --app-text: #0f172a;
   --app-text-muted: #475569;
   --app-text-subtle: #64748b;
-  --app-border: rgb(15 23 42 / 0.12);
-  --app-border-strong: rgb(15 23 42 / 0.18);
+  --app-border: rgb(15 23 42 / 0.1);
+  --app-border-strong: rgb(15 23 42 / 0.16);
   --app-surface-elevated: #ffffff;
   --app-overlay: rgb(15 23 42 / 0.35);
-  --app-hover: rgb(15 23 42 / 0.05);
-  --app-input-bg: #ffffff;
-  --cinema-bg: linear-gradient(180deg, #f8fafc 0%, #eef2f7 45%, #f1f5f9 100%);
+  --app-hover: rgb(79 70 229 / 0.06);
+  --app-input-bg: #f8fafc;
+  --cinema-bg: linear-gradient(180deg, #ffffff 0%, #f8fafc 42%, #eef2ff 100%);
   --course-fg: #0f172a;
   --course-muted: #475569;
   --course-subtle: #64748b;
   --course-faint: #94a3b8;
   --course-surface-sidebar: #ffffff;
-  --course-surface-main: #f1f5f9;
+  --course-surface-main: #f8fafc;
   --course-module-surface: #ffffff;
-  --course-module-surface-open: rgb(248 250 252);
+  --course-module-surface-open: #f8fafc;
   --fichamento-surface: #ffffff;
-  --fichamento-toolbar: rgb(241 245 249);
+  --fichamento-toolbar: #f8fafc;
   --fichamento-popover: #ffffff;
+}
+
+html[data-theme="night"] {
+  color-scheme: dark;
+  --brand-primary: #818cf8;
+  --brand-primary-soft: #a5b4fc;
+  --brand-primary-deep: #4f46e5;
+  --brand-indigo: #6366f1;
+  --brand-surface: #020617;
+  --app-bg: #020617;
+  --app-bg-solid: #020617;
+  --app-bg-rgb: 2 6 23;
+  --app-panel: #0a0f1a;
+  --app-text: #f0f4f8;
+  --app-text-muted: #9aaec0;
+  --app-text-subtle: #c5d1dc;
+  --app-border: rgb(255 255 255 / 0.1);
+  --app-border-strong: rgb(255 255 255 / 0.16);
+  --app-surface-elevated: rgb(10 10 18);
+  --app-overlay: rgb(0 0 0 / 0.6);
+  --app-hover: rgb(129 140 248 / 0.12);
+  --app-input-bg: rgb(0 0 0 / 0.5);
+  --cinema-bg: radial-gradient(ellipse 120% 80% at 50% -30%, rgba(79, 70, 229, 0.28), transparent 55%),
+    radial-gradient(circle at 85% 20%, rgba(99, 102, 241, 0.12), transparent 40%),
+    radial-gradient(circle at 10% 80%, rgba(30, 27, 75, 0.5), transparent 45%),
+    linear-gradient(180deg, #020617 0%, #0b1020 40%, #020617 100%);
+  --course-fg: #eef2f6;
+  --course-muted: #b8c5d4;
+  --course-subtle: #9aadc0;
+  --course-faint: #7d92a8;
+  --course-surface-sidebar: rgb(10 10 18);
+  --course-surface-main: #020617;
+  --course-module-surface: rgb(255 255 255 / 0.02);
+  --course-module-surface-open: rgb(255 255 255 / 0.035);
+  --fichamento-surface: rgb(255 255 255 / 0.03);
+  --fichamento-toolbar: rgb(0 0 0 / 0.2);
+  --fichamento-popover: #1a1f32;
 }
 
 html[data-theme="day"] body {
@@ -98,17 +102,17 @@ html[data-theme="day"] .btn-secondary {
 }
 
 html[data-theme="day"] .btn-secondary:hover {
-  border-color: rgb(14 165 233 / 0.45);
-  background: rgb(224 242 254 / 0.85);
-  color: #0c4a6e;
+  border-color: rgb(79 70 229 / 0.4);
+  background: rgb(238 242 255 / 0.95);
+  color: #3730a3;
 }
 
 html[data-theme="day"] .btn-ghost {
-  color: #0369a1;
+  color: #4f46e5;
 }
 
 html[data-theme="day"] .btn-ghost:hover {
-  color: #0c4a6e;
+  color: #3730a3;
 }
 
 html[data-theme="day"] .input {
@@ -151,7 +155,7 @@ html[data-theme="day"] .pro-headline {
 }
 
 html[data-theme="day"] .hero-title-gradient {
-  background: linear-gradient(135deg, #0f172a 0%, #0369a1 55%, #0ea5e9 100%);
+  background: linear-gradient(135deg, #0f172a 0%, #4f46e5 55%, #6366f1 100%);
   -webkit-background-clip: text;
   background-clip: text;
 }
@@ -195,8 +199,8 @@ html[data-theme="day"] .course-study__toc-link:hover {
 }
 
 html[data-theme="day"] .course-study__toc-link.is-active {
-  background: rgb(14 165 233 / 0.12);
-  box-shadow: inset 0 0 0 1px rgb(14 165 233 / 0.28);
+  background: rgb(79 70 229 / 0.1);
+  box-shadow: inset 0 0 0 1px rgb(79 70 229 / 0.28);
 }
 
 html[data-theme="day"] .course-study__toc-link.is-pending .course-study__toc-status {
@@ -258,7 +262,7 @@ html[data-theme="day"] .fichamento-lesson-block {
 }
 
 html[data-theme="day"] .theme-toggle {
-  border-color: rgb(14 165 233 / 0.35);
+  border-color: rgb(79 70 229 / 0.35);
 }
 
 /* Portal — barra desktop (md+) */
@@ -286,8 +290,8 @@ html[data-theme="day"] .portal-nav-bar .portal-nav-link:hover {
 }
 
 html[data-theme="day"] .portal-nav-bar .portal-nav-link.is-active {
-  background: rgb(14 165 233 / 0.14);
-  color: #0c4a6e;
+  background: rgb(79 70 229 / 0.12);
+  color: #3730a3;
 }
 
 /* Portal — menu mobile (#portal-nav-mobile) */
@@ -337,8 +341,8 @@ html[data-theme="day"] #portal-nav-mobile a:hover {
 }
 
 html[data-theme="day"] #portal-nav-mobile .portal-nav-link.is-active {
-  background: rgb(14 165 233 / 0.14);
-  color: #0c4a6e;
+  background: rgb(79 70 229 / 0.12);
+  color: #3730a3;
 }
 
 html[data-theme="day"] .portal-nav-backdrop {
@@ -372,8 +376,8 @@ html[data-theme="day"] .site-nav nav[aria-label="Seções da página (mobile)"] 
 }
 
 html[data-theme="day"] .course-certificate-banner {
-  border-color: rgb(14 165 233 / 0.25);
-  background: rgb(224 242 254 / 0.65);
+  border-color: rgb(79 70 229 / 0.25);
+  background: rgb(238 242 255 / 0.85);
   color: var(--app-text);
 }
 

@@ -199,6 +199,19 @@ const envSchema = z
     CANVA_REDIRECT_URI: z.preprocess(
       (value) => (typeof value === "string" && value.trim() ? value.trim() : undefined),
       z.string().min(8).optional()
+    ),
+    /** LLM dos agentes Agency OS (OpenAI-compatible). Sem chave → draft estruturado. */
+    OPENAI_API_KEY: z.preprocess(
+      (value) => (typeof value === "string" && value.trim() ? value.trim() : undefined),
+      z.string().min(8).optional()
+    ),
+    OPENAI_BASE_URL: z.preprocess(
+      (value) => (typeof value === "string" && value.trim() ? value.trim().replace(/\/$/, "") : undefined),
+      z.string().url().optional()
+    ),
+    OPENAI_MODEL: z.preprocess(
+      (value) => (typeof value === "string" && value.trim() ? value.trim() : undefined),
+      z.string().min(2).optional()
     )
   })
   .superRefine((data, ctx) => {

@@ -612,3 +612,22 @@ model AgencyAgentJob {
   @@index([status, createdAt])
   @@index([agentId, status])
 }
+
+/** Entregável Kanban Agency Ops (Marketing / Branding / Lançamento). */
+model AgencyOpsDeliverable {
+  id             String   @id @default(cuid())
+  title          String
+  vertical       String
+  status         String   @default("TODO")
+  approvalStatus String   @default("NONE")
+  projectId      String?
+  agentJobId     String?
+  timeMinutes    Int?
+  sortOrder      Int      @default(0)
+  notes          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([vertical, status])
+  @@index([projectId, vertical])
+}

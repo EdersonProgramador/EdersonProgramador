@@ -1,0 +1,973 @@
+import React, { useState, useMemo } from 'react';
+import { Film, Clock, CheckCircle2, AlertCircle, Plus, Send, User as UserIcon, Trash2, Filter, Check, X as XIcon, RefreshCcw, Eye, Copy, ChevronLeft, ChevronRight, Video, Play, Pause, Square, MessageSquare, Upload, Calendar, Link as LinkIcon, Mic } from 'lucide-react';
+import { cn } from '../lib/utils';
+import { VideoOrder, Client, WorkStatus, ApprovalStatus, User, Receivable } from '../types';
+import Modal from './Modal';
+import { api } from '../services/api';
+import { ChatWindow } from './ChatWindow';
+import { notifySuccess, notifyError } from '../lib/utils';
+
+interface VideoWorkflowViewProps {
+  videoOrders: VideoOrder[];
+  setVideoOrders: React.Dispatch<React.SetStateAction<VideoOrder[]>>;
+  clients: Client[];
+  setClients: React.Dispatch<React.SetStateAction<Client[]>>;
+  receivables: Receivable[];
+  setReceivables: React.Dispatch<React.SetStateAction<Receivable[]>>;
+  users: User[];
+  currentUser: any;
+}
+
+export default function VideoWorkflowView({ 
+  videoOrders, 
+  setVideoOrders, 
+  clients, 
+  setClients,
+  receivables,
+  setReceivables,
+  users, 
+  currentUser 
+}: VideoWorkflowViewProps) {
+  const [editorFilter, setEditorFilter] = useState<string>('all');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingOrder, setEditingOrder] = useState<VideoOrder | null>(null);
+  const [chatOrder, setChatOrder] = useState<VideoOrder | null>(null);
+  const [rejectingOrder, setRejectingOrder] = useState<VideoOrder | null>(null);
+  const [rejectionNotes, setRejectionNotes] = useState('');
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingDuration, setRecordingDuration] = useState(0);
+  const [recordedAudioBlob, setRecordedAudioBlob] = useState<Blob | null>(null);
+  const [audioPreviewUrl, setAudioPreviewUrl] = useState<string | null>(null);
+  
+  const mediaRecorderRef = React.useRef<MediaRecorder | null>(null);
+  const chunksRef = React.useRef<Blob[]>([]);
+  const timerRef = React.useRef<NodeJS.Timeout | null>(null);
+  
+  const initialFormData: Partial<VideoOrder> = {
+    title: '',
+    clientId: '',
+    editorId: '',
+    editorName: '',
+    deadline: '',
+    priority: 'medium',
+    progress: 0,
+    status: 'queue',
+    observations: '',
+    postDate: '',
+    materialsLink: ''
+  };
+
+  const [formData, setFormData] = useState<Partial<VideoOrder>>(initialFormData);
+  const [activeTab, setActiveTab] = useState<'all' | 'revision'>('all');
+  const [isUploading, setIsUploading] = useState(false);
+  const videoInputRef = React.useRef<HTMLInputElement>(null);
+
+  const isEditor = currentUser.role === 'EDITOR';
+  const isAdmin = currentUser.role === 'ADMIN';
+  const isOwner = currentUser.role === 'OWNER';
+  const isAdminOrOwner = isAdmin || isOwner;
+  const isPartner = currentUser.role === 'PARTNER';
+
+  // Auto-switch to revision tab if there are videos to review for admin/owner
+  React.useEffect(() => {
+    if (isAdminOrOwner && videoOrders.some(o => o.status === 'review') && activeTab === 'all') {
+      setActiveTab('revision');
+    }
+  }, [isAdminOrOwner, videoOrders.length]);
+
+  const editors = users.filter(u => u.role === 'EDITOR');
+
+  const getEditorWithLowestLoad = () => {
+    if (editors.length === 0) return { id: '', name: '' };
+    const loadMap = editors.map(e => ({
+      id: e.id,
+      name: e.name,
+      taskCount: videoOrders.filter(o => o.editorId === e.id && o.status !== 'done').length
+    }));
+    const best = loadMap.sort((a, b) => a.taskCount - b.taskCount)[0];
+    return { id: best.id, name: best.name };
+  };
+
+  const filteredOrders = useMemo(() => {
+    let orders = [...videoOrders];
+    
+    if (isEditor) {
+      orders = orders.filter(o => o.editorId === currentUser.id);
+    } else if (isPartner) {
+      const partnerClientIds = clients.filter(c => c.partnerId === currentUser.id).map(c => c.id);
+      orders = orders.filter(o => partnerClientIds.includes(o.clientId));
+    }
+
+    if (activeTab === 'revision') {
+      orders = orders.filter(o => o.status === 'review');
+    }
+
+    const filtered = orders.filter(o => editorFilter === 'all' ? true : o.editorId === editorFilter);
+
+    // Priorizar pela menor data de entrega (deadline)
+    return filtered.sort((a, b) => {
+      const parseDate = (d: string) => {
+        if (!d) return Infinity;
+        const parts = d.split('/');
+        if (parts.length === 3) {
+          return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`).getTime();
+        }
+        return Infinity;
+      };
+      return parseDate(a.deadline) - parseDate(b.deadline);
+    });
+  }, [videoOrders, isEditor, isPartner, currentUser.id, clients, editorFilter, activeTab]);
+
+  const partnerClients = useMemo(() => {
+    if (isAdminOrOwner) return clients;
+    if (isPartner) return clients.filter(c => c.partnerId === currentUser.id);
+    return [];
+  }, [clients, isAdminOrOwner, isPartner, currentUser.id]);
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'queue': return 'text-slate-400 bg-slate-50';
+      case 'production': return 'text-sky-600 bg-sky-50';
+      case 'review': return 'text-amber-600 bg-amber-50';
+      case 'done': return 'text-emerald-600 bg-emerald-50';
+      default: return 'text-gray-400 bg-gray-50';
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'queue': return 'Fila';
+      case 'production': return 'Editando';
+      case 'review': return 'Aprovação';
+      case 'done': return 'Entregue';
+      default: return status;
+    }
+  };
+
+  const handleAddOrder = () => {
+    if (partnerClients.length === 0) {
+      alert("Você precisa ter pelo menos um cliente vinculado para solicitar um vídeo.");
+      return;
+    }
+
+    const assigned = (isPartner || isAdminOrOwner) ? getEditorWithLowestLoad() : { id: editors[0]?.id || '', name: editors[0]?.name || '' };
+
+    setEditingOrder(null);
+    setFormData({
+      ...initialFormData,
+      clientId: partnerClients[0].id,
+      editorId: assigned.id,
+      editorName: assigned.name,
+      deadline: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR'),
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleEditOrder = (e: React.MouseEvent, order: VideoOrder) => {
+    e.stopPropagation();
+    setEditingOrder(order);
+    setFormData({
+      ...initialFormData,
+      ...order
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      if (editingOrder) {
+        const updated = await api.updateVideoOrder(editingOrder.id, formData);
+        setVideoOrders(orders => orders.map(o => o.id === editingOrder.id ? { ...o, ...updated } : o));
+      } else {
+        const newOrderData: any = {
+          ...formData
+        };
+        const created = await api.createVideoOrder(newOrderData);
+        setVideoOrders([...videoOrders, created]);
+      }
+      setIsModalOpen(false);
+    } catch (err: any) {
+      alert('Erro ao salvar pedido: ' + err.message);
+    }
+  };
+
+  const handleUpdateStatus = async (id: string, status: WorkStatus) => {
+    const order = videoOrders.find(o => o.id === id);
+    if (!order) return;
+
+    // Apenas o proprietário/admin pode aprovar (finalizar)
+    if (status === 'done' && !isAdminOrOwner) {
+      notifyError("Permissão Negada", "Apenas o proprietário pode aprovar e finalizar o vídeo.");
+      return;
+    }
+
+    // Apenas o proprietário/admin pode tirar de revisão para reprovar (voltar para produção)
+    if (order.status === 'review' && status === 'production' && !isAdminOrOwner) {
+      notifyError("Permissão Negada", "Apenas o proprietário pode reprovar o vídeo.");
+      return;
+    }
+
+    // Para ir para revisão, deve ter vídeo (bloqueio apenas para editores)
+    if (status === 'review' && !order.videoUrl && !isAdminOrOwner) {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'video/*';
+      input.onchange = (ev: any) => {
+        const file = ev.target.files[0];
+        if (file) handleVideoUpload(order.id, file);
+      };
+      input.click();
+      return;
+    }
+
+    let progress = 0;
+    if (status === 'queue') progress = 10;
+    else if (status === 'production') progress = 50;
+    else if (status === 'review') progress = 90;
+    else if (status === 'done') progress = 100;
+    
+    // Update otimista local
+    setVideoOrders(prev => prev.map(o => o.id === id ? { ...o, status, progress, approvedAt: status === 'done' ? new Date().toISOString() : o.approvedAt } : o));
+    
+    try {
+      const updates: any = { status, progress };
+      if (status === 'done') {
+        updates.approvedAt = new Date().toISOString();
+      }
+      await api.updateVideoOrder(id, updates);
+      notifySuccess(`Status atualizado: ${getStatusLabel(status)}`);
+    } catch (err: any) {
+      console.error('Falha ao atualizar status:', err);
+      const latest = await api.getVideoOrders();
+      setVideoOrders(latest);
+    }
+  };
+
+  const handleVideoUpload = async (id: string, file: File) => {
+    if (!file) return;
+    
+    setIsUploading(id as any);
+    try {
+      const res = await api.uploadFile(file);
+      if (res.success) {
+        setVideoOrders(prev => prev.map(o => o.id === id ? { 
+          ...o, 
+          videoUrl: res.url, 
+          status: 'review', 
+          progress: 90 
+        } : o));
+        
+        await api.updateVideoOrder(id, { 
+          videoUrl: res.url, 
+          status: 'review', 
+          progress: 90 
+        });
+        
+        notifySuccess("Vídeo enviado para revisão!");
+      }
+    } catch (err: any) {
+      notifyError("Erro no upload", err.message);
+    } finally {
+      setIsUploading(false as any);
+    }
+  };
+
+  const handleApproveVideo = async (id: string) => {
+    try {
+      const approvedAt = new Date().toISOString();
+      setVideoOrders(prev => prev.map(o => o.id === id ? { 
+        ...o, 
+        status: 'done', 
+        progress: 100,
+        approvedAt 
+      } : o));
+      
+      await api.updateVideoOrder(id, { 
+        status: 'done', 
+        progress: 100,
+        approvedAt
+      });
+      
+      notifySuccess("Vídeo aprovado! Ele ficará disponível por 7 dias.");
+    } catch (err: any) {
+      notifyError("Erro ao aprovar", err.message);
+    }
+  };
+
+  const handleRejectVideo = async () => {
+    if (!rejectingOrder) return;
+    
+    const id = rejectingOrder.id;
+    try {
+      let finalAudioUrl = undefined;
+      
+      if (recordedAudioBlob) {
+        const audioFile = new File([recordedAudioBlob], `rejection_${id}.webm`, { type: 'audio/webm' });
+        const uploadRes = await api.uploadFile(audioFile);
+        if (uploadRes.success) {
+          finalAudioUrl = uploadRes.url;
+        }
+      }
+
+      setVideoOrders(prev => prev.map(o => o.id === id ? { 
+        ...o, 
+        status: 'production', 
+        progress: 50,
+        videoUrl: undefined,
+        rejectionNotes: rejectionNotes || 'Reprovado via áudio/modal',
+        rejectionAudioUrl: finalAudioUrl
+      } : o));
+      
+      await api.updateVideoOrder(id, { 
+        status: 'production', 
+        progress: 50,
+        videoUrl: null, // Clear URL in DB
+        rejectionNotes: rejectionNotes || 'Reprovado via áudio/modal',
+        rejectionAudioUrl: finalAudioUrl
+      });
+      
+      notifySuccess("Vídeo reprovado e arquivos deletados. Voltando para edição.");
+      setRejectingOrder(null);
+      setRejectionNotes('');
+      setRecordedAudioBlob(null);
+      setAudioPreviewUrl(null);
+    } catch (err: any) {
+      notifyError("Erro ao reprovar", err.message);
+    }
+  };
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      chunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
+        setRecordedAudioBlob(audioBlob);
+        setAudioPreviewUrl(URL.createObjectURL(audioBlob));
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+      setRecordingDuration(0);
+      timerRef.current = setInterval(() => {
+        setRecordingDuration(prev => prev + 1);
+      }, 1000);
+    } catch (err: any) {
+      console.error("Erro ao acessar microfone:", err);
+      notifyError("Erro de Microfone", "Não foi possível acessar o microfone. Verifique as permissões.");
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+      if (timerRef.current) clearInterval(timerRef.current);
+    }
+  };
+
+  const formatDuration = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const handleDeleteOrder = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    if (!confirm('Tem certeza que deseja excluir este vídeo?')) return;
+    try {
+      await api.deleteVideoOrder(id);
+      setVideoOrders(orders => orders.filter(o => o.id !== id));
+    } catch (err: any) {
+      alert('Erro ao excluir vídeo: ' + err.message);
+    }
+  };
+
+  const handleDuplicateOrder = async (e: React.MouseEvent, order: VideoOrder) => {
+    e.stopPropagation();
+    try {
+      // Destructure and ignore id to create a new record
+      const { id, status, progress, approvedAt, videoUrl, ...rest } = order as any;
+      const duplicatedData = {
+        ...rest,
+        title: `${order.title} (Cópia)`,
+        status: 'queue' as WorkStatus,
+        progress: 10
+      };
+      const created = await api.createVideoOrder(duplicatedData as any);
+      setVideoOrders(prev => [...prev, created]);
+      notifySuccess("Vídeo duplicado com sucesso!");
+    } catch (err: any) {
+      notifyError("Erro ao duplicar vídeo", err.message);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">Workflow de Vídeo</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-300 font-medium">Gestão de edições, roteiros e entregas finais.</p>
+        </div>
+        <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">
+          <button 
+            onClick={() => setActiveTab('all')}
+            className={cn(
+              "px-4 py-1.5 rounded-lg text-xs font-bold transition-all",
+              activeTab === 'all' ? "bg-white dark:bg-gray-700 text-indigo-500 shadow-sm" : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+            )}
+          >
+            Todos os Pedidos
+          </button>
+          <button 
+            onClick={() => setActiveTab('revision')}
+            className={cn(
+              "px-4 py-1.5 rounded-lg text-xs font-bold transition-all relative",
+              activeTab === 'revision' ? "bg-white dark:bg-gray-700 text-indigo-500 shadow-sm" : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+            )}
+          >
+            Em Revisão
+            {videoOrders.filter(o => o.status === 'review').length > 0 && (
+              <span className="absolute -top-1 -right-1 w-2 h-2 bg-rose-500 rounded-full" />
+            )}
+          </button>
+        </div>
+        {(isPartner || isAdminOrOwner) && (
+          <button 
+            onClick={handleAddOrder}
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-500 text-white rounded-xl text-sm font-semibold hover:bg-indigo-600 transition-all shadow-[0_4px_12px_rgba(99,102,241,0.15)]"
+          >
+            <Plus size={16} />
+            Novo Pedido de Vídeo
+          </button>
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {['queue', 'production', 'review', 'done'].map((status) => {
+          const count = filteredOrders.filter(o => o.status === status).length;
+          return (
+            <div key={status} className="bg-white dark:bg-gray-900 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 flex items-center justify-between transition-all duration-300">
+              <span className="text-xs font-bold text-gray-400 dark:text-gray-400 uppercase tracking-widest leading-none">{getStatusLabel(status)}</span>
+              <span className={cn("inline-flex items-center justify-center w-6 h-6 rounded-lg font-bold text-xs transition-colors duration-300", 
+                  status === 'queue' ? "text-slate-400 bg-slate-50 dark:bg-slate-500/10" :
+                  status === 'production' ? "text-sky-600 bg-sky-50 dark:bg-sky-500/10" :
+                  status === 'review' ? "text-amber-600 bg-amber-50 dark:bg-amber-500/10" :
+                  "text-emerald-600 bg-emerald-50 dark:bg-emerald-500/10"
+              )}>
+                {count}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="flex items-center justify-between">
+        <h2 className="font-bold text-gray-900 dark:text-gray-100 transition-colors duration-300">Pilha de Edição</h2>
+        <div className="flex items-center gap-2">
+           <Filter size={14} className="text-gray-400 dark:text-gray-400" />
+           <select 
+             value={editorFilter || 'all'}
+             onChange={(e) => setEditorFilter(e.target.value)}
+             className="bg-transparent text-xs font-bold text-gray-500 dark:text-gray-300 border-none focus:ring-0 cursor-pointer transition-colors duration-300 outline-none"
+           >
+              <option value="all" className="dark:bg-gray-900">Todos os Editores</option>
+              {editors.map(e => <option key={e.id} value={e.id} className="dark:bg-gray-900">{e.name}</option>)}
+           </select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        {filteredOrders.length === 0 ? (
+          <div className="col-span-full py-20 text-center space-y-4 bg-gray-50 dark:bg-gray-900/50 rounded-3xl border border-dashed border-gray-200 dark:border-gray-800">
+            <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto text-gray-400">
+              <Film size={32} />
+            </div>
+            <p className="text-gray-500 dark:text-gray-400 font-medium">Nenhum vídeo encontrado para os filtros selecionados.</p>
+          </div>
+        ) : (
+          filteredOrders.map((order) => {
+            const client = clients.find(c => c.id === order.clientId);
+            return (
+              <div 
+                key={order.id} 
+                onClick={(e) => handleEditOrder(e, order)}
+                className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 hover:border-indigo-200 dark:hover:border-indigo-500/50 transition-all group shadow-sm hover:shadow-md cursor-pointer"
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className={cn(
+                        "w-2 h-2 rounded-full",
+                        order.priority === 'high' ? "bg-rose-500" : order.priority === 'medium' ? "bg-amber-500" : "bg-sky-500"
+                      )} />
+                      <h3 className="font-bold text-gray-900 dark:text-gray-100 leading-tight group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors uppercase tracking-tight">{order.title}</h3>
+                    </div>
+                    <p className="text-xs font-medium text-gray-400 dark:text-gray-400 italic">Cliente: {client?.name}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {order.status === 'production' && isEditor && (
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const input = document.createElement('input');
+                          input.type = 'file';
+                          input.accept = 'video/*';
+                          input.onchange = (ev: any) => {
+                            const file = ev.target.files[0];
+                            if (file) handleVideoUpload(order.id, file);
+                          };
+                          input.click();
+                        }}
+                        disabled={!!isUploading}
+                        className={cn(
+                          "px-3 py-1 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-lg text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 hover:bg-indigo-100 transition-all",
+                          isUploading === (order.id as any) && "opacity-50 cursor-not-allowed"
+                        )}
+                      >
+                        {isUploading === (order.id as any) ? <RefreshCcw size={12} className="animate-spin" /> : <Upload size={12} />}
+                        {isUploading === (order.id as any) ? 'Enviando...' : 'Subir Vídeo'}
+                      </button>
+                    )}
+                    <select 
+                      value={order.status || 'queue'}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={(e) => handleUpdateStatus(order.id, e.target.value as WorkStatus)}
+                      className={cn("px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border focus:outline-none transition-all duration-300", 
+                          order.status === 'queue' ? "text-slate-400 bg-slate-50 dark:bg-slate-500/10 border-slate-100 dark:border-slate-500/20" :
+                          order.status === 'production' ? "text-sky-600 bg-sky-50 dark:bg-sky-500/10 border-sky-100 dark:border-sky-500/20" :
+                          order.status === 'review' ? "text-amber-600 bg-amber-50 dark:bg-amber-500/10 border-amber-100 dark:border-amber-500/20" :
+                          "text-emerald-600 bg-emerald-50 dark:bg-emerald-500/10 border-emerald-100 dark:border-emerald-500/20"
+                      )}
+                    >
+                      <option value="queue" className="dark:bg-gray-900">Fila</option>
+                      <option value="production" className="dark:bg-gray-900" disabled={order.status === 'review' && !isAdminOrOwner}>Edição</option>
+                      <option value="review" className="dark:bg-gray-900">Revisão</option>
+                      <option value="done" className="dark:bg-gray-900" disabled={!isAdminOrOwner}>Finalizado</option>
+                    </select>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); setChatOrder(order); }}
+                      title="Chat da Tarefa"
+                      className="p-1.5 text-gray-400 dark:text-gray-500 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg transition-all"
+                    >
+                      <MessageSquare size={16} />
+                    </button>
+                    {(isAdminOrOwner || isPartner) && (
+                      <div className="flex items-center gap-1">
+                        <button 
+                          onClick={(e) => handleDuplicateOrder(e, order)}
+                          title="Duplicar Vídeo"
+                          className="p-1.5 text-gray-300 dark:text-gray-500 hover:text-indigo-500 transition-colors"
+                        >
+                          <Copy size={16} />
+                        </button>
+                        <button 
+                          onClick={(e) => handleDeleteOrder(e, order.id)}
+                          className="p-1.5 text-gray-300 dark:text-gray-600 hover:text-rose-500 transition-colors"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                  <div className="flex flex-wrap items-center gap-4 py-4 border-y border-gray-50 dark:border-gray-800 mb-4 transition-colors">
+                    <div className="flex items-center gap-2 text-gray-500 dark:text-gray-300">
+                      <UserIcon size={14} className="text-gray-400" />
+                      <span className="text-xs font-semibold">{order.editorName || 'Sem Responsável'}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-400 dark:text-gray-400">
+                      <Clock size={14} />
+                      <span className="text-xs font-medium">{order.deadline}</span>
+                    </div>
+                    {order.postDate && (
+                      <div className="flex items-center gap-2 text-indigo-500 font-bold">
+                        <Calendar size={14} />
+                        <span className="text-xs uppercase">Postagem: {order.postDate}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {order.observations && (
+                    <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-800">
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-1">
+                        <MessageSquare size={12} /> Roteiro / Observações
+                      </p>
+                      <p className="text-xs text-gray-600 dark:text-gray-300 line-clamp-3">{order.observations}</p>
+                    </div>
+                  )}
+
+                  {order.materialsLink && (
+                    <div className="mb-4">
+                      <a 
+                        href={order.materialsLink} 
+                        target="_blank" 
+                        rel="noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="inline-flex items-center gap-1.5 text-sky-500 hover:text-sky-600 text-[10px] font-bold uppercase tracking-wider bg-sky-50 dark:bg-sky-500/10 px-3 py-1.5 rounded-lg transition-colors"
+                      >
+                        <LinkIcon size={12} /> Acessar Materiais
+                      </a>
+                    </div>
+                  )}
+
+                  <div className="space-y-4">
+                    {order.videoUrl && (
+                      <div className="rounded-xl overflow-hidden bg-black aspect-video relative group/video">
+                        <video 
+                          key={order.videoUrl}
+                          src={order.videoUrl} 
+                          controls 
+                          className="w-full h-full object-contain"
+                          poster="/logo.png"
+                        />
+                      </div>
+                    )}
+                    
+                    {order.status === 'review' && isAdminOrOwner && (
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); handleApproveVideo(order.id); }}
+                          className="flex-1 py-2 bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 hover:bg-emerald-600 transition-colors shadow-sm"
+                        >
+                          <Check size={14} /> Aprovar Vídeo
+                        </button>
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); setRejectingOrder(order); }}
+                          className="flex-1 py-2 bg-rose-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 hover:bg-rose-600 transition-colors shadow-sm"
+                        >
+                          <XIcon size={14} /> Reprovar
+                        </button>
+                      </div>
+                    )}
+
+                    {order.rejectionNotes && order.status !== 'done' && (
+                      <div className="p-3 bg-rose-50 dark:bg-rose-500/10 border border-rose-100 dark:border-rose-500/20 rounded-xl space-y-2">
+                        <p className="text-[10px] font-bold text-rose-500 uppercase tracking-widest mb-1 flex items-center gap-1">
+                          <AlertCircle size={12} /> Motivo da Reprovação
+                        </p>
+                        {order.rejectionNotes && (
+                          <p className="text-xs text-rose-700 dark:text-rose-300 font-medium italic">{order.rejectionNotes}</p>
+                        )}
+                        {order.rejectionAudioUrl && (
+                          <div className="mt-2">
+                            <audio controls className="w-full h-8 opacity-75">
+                              <source src={order.rejectionAudioUrl} type="audio/webm" />
+                            </audio>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-gray-400 dark:text-gray-400 uppercase tracking-widest">Status da Edição</span>
+                      <span className="text-sm font-bold text-indigo-500 dark:text-indigo-400">{order.progress}%</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                      <div 
+                        className={cn(
+                          "h-full rounded-full transition-all duration-700 ease-out shadow-[0_0_8px_rgba(79,70,229,0.3)]",
+                          order.status === 'done' ? "bg-emerald-500" : "bg-indigo-500"
+                        )} 
+                        style={{ width: `${order.progress}%` }} 
+                      />
+                    </div>
+                  </div>
+
+                    <div className="flex gap-2">
+                    {order.videoUrl && (
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.open(order.videoUrl, '_blank');
+                        }}
+                        className="flex-1 py-1.5 bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 rounded-lg text-xs font-bold flex items-center justify-center gap-2 hover:bg-sky-100 transition-colors"
+                      >
+                        <Play size={12} fill="currentColor" /> Assistir Prévia
+                      </button>
+                    )}
+                    {order.status === 'review' && (
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          notifySuccess("Abrindo pauta/briefing... (Função em desenvolvimento)");
+                        }}
+                        className="flex-1 py-1.5 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-lg text-xs font-bold flex items-center justify-center gap-2 hover:bg-amber-100 transition-colors"
+                      >
+                        <Eye size={12} /> Abrir Pauta
+                      </button>
+                    )}
+                    {order.status === 'done' && order.videoUrl && (
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigator.clipboard.writeText(order.videoUrl!);
+                          notifySuccess("Link copiado!");
+                        }}
+                        className="flex-1 py-1.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-lg text-xs font-bold flex items-center justify-center gap-2 hover:bg-emerald-100 transition-colors"
+                      >
+                        <Check size={12} /> Link Finalizado
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      <Modal
+        isOpen={!!chatOrder}
+        onClose={() => setChatOrder(null)}
+        title={`Chat: ${chatOrder?.title}`}
+      >
+        <div className="h-[500px]">
+           {chatOrder && (
+             <ChatWindow 
+               chatType="task"
+               referenceId={chatOrder.id}
+               senderId={currentUser.id}
+               senderName={currentUser.name}
+               ownerId={currentUser.ownerId || currentUser.id}
+             />
+           )}
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={editingOrder ? 'Editar Vídeo' : 'Nova Solicitação de Edição'}
+        footer={
+          <div className="flex justify-end gap-3 px-6 pb-6">
+            <button 
+              onClick={() => setIsModalOpen(false)}
+              className="px-4 py-2 text-sm font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors"
+            >
+              Cancelar
+            </button>
+            <button 
+              onClick={handleSubmit}
+              className="px-6 py-2 text-sm font-semibold text-white bg-indigo-500 hover:bg-indigo-600 rounded-xl transition-colors shadow-[0_4px_12px_rgba(99,102,241,0.15)]"
+            >
+              {editingOrder ? 'Salvar Alterações' : 'Criar Solicitação'}
+            </button>
+          </div>
+        }
+      >
+        <form className="space-y-4">
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-gray-400 dark:text-gray-400 uppercase tracking-widest">Título do Vídeo/Job</label>
+            <input 
+              type="text" 
+              value={formData.title || ''}
+              onChange={e => setFormData({...formData, title: e.target.value})}
+              className="w-full px-4 py-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all text-sm text-gray-900 dark:text-gray-100"
+              placeholder="Ex: Reel Promoção Verão"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-gray-400 dark:text-gray-400 uppercase tracking-widest">Cliente</label>
+              <select 
+                value={formData.clientId || ''}
+                onChange={e => setFormData({...formData, clientId: e.target.value})}
+                className="w-full px-4 py-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all text-sm text-gray-900 dark:text-gray-100 outline-none"
+              >
+                <option value="">Selecione...</option>
+                {partnerClients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-gray-400 dark:text-gray-400 uppercase tracking-widest">Editor</label>
+              <select 
+                value={formData.editorId || ''}
+                onChange={e => {
+                  const editor = editors.find(u => u.id === e.target.value);
+                  setFormData({...formData, editorId: e.target.value, editorName: editor?.name || ''});
+                }}
+                className="w-full px-4 py-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all text-sm text-gray-900 dark:text-gray-100 outline-none"
+              >
+                <option value="">Selecione...</option>
+                {editors.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
+              </select>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-gray-400 dark:text-gray-400 uppercase tracking-widest">Prioridade</label>
+              <select 
+                value={formData.priority || 'medium'}
+                onChange={e => setFormData({...formData, priority: e.target.value as any})}
+                className="w-full px-4 py-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all text-sm text-gray-900 dark:text-gray-100 outline-none"
+              >
+                <option value="low">Baixa</option>
+                <option value="medium">Média</option>
+                <option value="high">Alta</option>
+              </select>
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-gray-400 dark:text-gray-400 uppercase tracking-widest">Data de Postagem</label>
+              <input 
+                type="text" 
+                value={formData.postDate || ''}
+                onChange={e => setFormData({...formData, postDate: e.target.value})}
+                className="w-full px-4 py-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all text-sm text-gray-900 dark:text-gray-100"
+                placeholder="dd/mm/aaaa"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-gray-400 dark:text-gray-400 uppercase tracking-widest">Link de Materiais</label>
+            <input 
+              type="url" 
+              value={formData.materialsLink || ''}
+              onChange={e => setFormData({...formData, materialsLink: e.target.value})}
+              className="w-full px-4 py-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all text-sm text-gray-900 dark:text-gray-100"
+              placeholder="https://link-dos-materiais.com"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-gray-400 dark:text-gray-400 uppercase tracking-widest">Roteiro / Observações</label>
+            <textarea 
+              value={formData.observations || ''}
+              onChange={e => setFormData({...formData, observations: e.target.value})}
+              className="w-full h-32 px-4 py-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all text-sm text-gray-900 dark:text-gray-100 outline-none resize-none"
+              placeholder="Descreva o roteiro ou observações importantes..."
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-gray-400 dark:text-gray-400 uppercase tracking-widest">Prazo Final da Entrega</label>
+            <input 
+              type="text" 
+              value={formData.deadline || ''}
+              onChange={e => setFormData({...formData, deadline: e.target.value})}
+              className="w-full px-4 py-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all text-sm text-gray-900 dark:text-gray-100"
+              placeholder="dd/mm/aaaa"
+            />
+          </div>
+        </form>
+      </Modal>
+
+      <Modal
+        isOpen={!!rejectingOrder}
+        onClose={() => {
+          setRejectingOrder(null);
+          setRecordedAudioBlob(null);
+          setAudioPreviewUrl(null);
+          setIsRecording(false);
+          if (timerRef.current) clearInterval(timerRef.current);
+        }}
+        title="Reprovar Vídeo e Solicitar Ajustes"
+        footer={
+          <div className="flex justify-end gap-3 w-full px-6 pb-6">
+            <button 
+              onClick={() => {
+                setRejectingOrder(null);
+                setRecordedAudioBlob(null);
+                setAudioPreviewUrl(null);
+              }}
+              className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button 
+              onClick={handleRejectVideo}
+              disabled={!rejectionNotes.trim() && !recordedAudioBlob}
+              className="px-6 py-2 bg-rose-600 text-white rounded-xl text-sm font-bold hover:bg-rose-700 transition-all shadow-lg shadow-rose-500/20 disabled:opacity-50"
+            >
+              Confirmar Reprovação
+            </button>
+          </div>
+        }
+      >
+        <div className="space-y-4 p-6 text-gray-900 dark:text-gray-100">
+          <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+            Forneça detalhes sobre o que precisa ser ajustado no vídeo <strong className="text-gray-900 dark:text-white">{rejectingOrder?.title}</strong>.
+          </p>
+          
+          <div className="space-y-3">
+            <div>
+              <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1.5">Feedback por Texto</label>
+              <textarea 
+                value={rejectionNotes}
+                onChange={(e) => setRejectionNotes(e.target.value)}
+                placeholder="Ex: O áudio está baixo nos primeiros 10 segundos, por favor adicione legenda na cena X..."
+                className="w-full h-24 bg-gray-50 dark:bg-gray-800 border dark:border-gray-700 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 transition-all outline-none resize-none"
+              />
+            </div>
+
+            <div className="relative pt-2">
+              <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1.5">Ou Feedback por Áudio</label>
+              
+              {!isRecording ? (
+                <div className="flex items-center gap-3">
+                  <button 
+                    onClick={startRecording}
+                    className="flex items-center gap-2 px-4 py-2 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl text-xs font-bold hover:bg-indigo-100 transition-all border border-indigo-100 dark:border-indigo-500/20 shadow-sm"
+                  >
+                    <Mic size={16} />
+                    {recordedAudioBlob ? 'Gravar Novamente' : 'Gravar Áudio'}
+                  </button>
+                  
+                  {audioPreviewUrl && (
+                    <div className="flex-1 flex items-center gap-2 bg-emerald-50 dark:bg-emerald-500/10 px-3 py-2 rounded-xl border border-emerald-100 dark:border-emerald-500/20">
+                      <audio src={audioPreviewUrl} controls className="h-8 w-full" />
+                      <button 
+                        onClick={() => {
+                          setRecordedAudioBlob(null);
+                          setAudioPreviewUrl(null);
+                        }}
+                        className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-center justify-between bg-rose-50 dark:bg-rose-900/20 px-4 py-3 rounded-xl border border-rose-100 dark:border-rose-900/30">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2.5 h-2.5 rounded-full bg-rose-600 animate-pulse" />
+                    <span className="text-sm font-bold text-rose-600 dark:text-rose-400 tabular-nums uppercase tracking-widest">
+                      Gravando: {formatDuration(recordingDuration)}
+                    </span>
+                  </div>
+                  <button 
+                    onClick={stopRecording}
+                    className="flex items-center gap-2 px-4 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition-all shadow-md"
+                  >
+                    <Square size={14} fill="currentColor" /> PARAR
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+          
+          <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-100 dark:border-amber-900/30 flex items-start gap-3">
+            <AlertCircle size={16} className="text-amber-600 mt-0.5" />
+            <p className="text-[10px] text-amber-700 dark:text-amber-300 font-medium leading-relaxed uppercase tracking-tighter">
+              Ao confirmar, o vídeo atual será deletado e a tarefa voltará para "Edição" para que o editor possa realizar os ajustes solicitados.
+            </p>
+          </div>
+        </div>
+      </Modal>
+    </div>
+  );
+}
+

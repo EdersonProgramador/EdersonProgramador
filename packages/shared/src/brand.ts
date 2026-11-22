@@ -12,6 +12,14 @@ export const BRAND_IDENTITY = {
   slogan: "Soluções digitais que geram resultados",
   sloganSecondary: "Transformando ideias em soluções digitais",
   tagline: "Soluções digitais que geram resultados",
+  /** Sistema principal da agência — CRM + operação (workspace admin). */
+  primarySystem: {
+    name: "Amplifica CRM",
+    shortName: "Amplifica",
+    role: "Sistema principal",
+    description:
+      "CRM e operação da agência Ederson Programador: leads, clientes, projetos, equipe e finanças em um workspace."
+  } as const,
   values: ["Tecnologia", "Confiança", "Inovação", "Resultados"] as const,
   servicePillars: [
     { id: "systems", label: "Desenvolvimento de sistemas" },

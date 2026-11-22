@@ -1,12 +1,40 @@
+import { useEffect } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { ACADEMY_STORE_BASE } from "@ederson-agencia/shared";
 import { BrandLogo } from "./brand/BrandLogo";
 import { ThemeToggle } from "./theme/ThemeToggle";
+import { applySiteTheme, useThemeStore } from "../stores/themeStore";
+import "../styles/crm-auth-login.css";
 
 /** Layout mínimo para telas públicas de login (sem nav de Agência/Academia). */
 export function ShellLayout({ title }: { title: string }) {
   const { pathname } = useLocation();
+  const isCrmLogin = pathname === "/login" || pathname === "/login/";
   const brandTo = pathname.startsWith("/academia/entrar") ? ACADEMY_STORE_BASE : "/";
+  const siteTheme = useThemeStore((s) => s.theme);
+
+  useEffect(() => {
+    if (!isCrmLogin) return;
+    applySiteTheme("day");
+    return () => applySiteTheme(siteTheme);
+  }, [isCrmLogin, siteTheme]);
+
+  if (isCrmLogin) {
+    return (
+      <div className="crm-auth-shell">
+        <header className="app-shell-header sticky top-0 z-50">
+          <div className="mx-auto flex max-w-6xl items-center justify-end gap-2 px-4 py-3">
+            <Link to="/" className="btn-ghost inline-flex min-h-11 items-center text-sm">
+              Voltar ao site
+            </Link>
+          </div>
+        </header>
+        <main className="crm-auth-main">
+          <Outlet />
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="surface-light min-h-screen bg-[var(--app-bg-solid)] text-[var(--app-text)]">

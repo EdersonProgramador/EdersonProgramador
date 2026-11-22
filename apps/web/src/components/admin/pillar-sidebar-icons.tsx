@@ -23,6 +23,15 @@ import {
 } from "lucide-react";
 
 export const MARKETING_SIDEBAR_ICONS: Record<string, LucideIcon> = {
+  comando: Target,
+  pipeline: GitBranch,
+  entrega: ClipboardList,
+  propostas: Sparkles,
+  portal: Monitor,
+  tempo: Workflow,
+  financas: Package,
+  inteligencia: Sparkles,
+  relatorios: BarChart3,
   estatistica: BarChart3,
   sequencia: Workflow,
   automacoes: Radio,
@@ -36,6 +45,15 @@ export const MARKETING_SIDEBAR_ICONS: Record<string, LucideIcon> = {
 };
 
 export const BRANDING_SIDEBAR_ICONS: Record<string, LucideIcon> = {
+  comando: Target,
+  pipeline: GitBranch,
+  entrega: ClipboardList,
+  propostas: Sparkles,
+  portal: Monitor,
+  tempo: Workflow,
+  financas: Package,
+  inteligencia: Sparkles,
+  relatorios: BarChart3,
   estatistica: BarChart3,
   processo: BookOpen,
   alinhamento: ClipboardList,
@@ -66,7 +84,18 @@ export const DEVELOPMENT_SIDEBAR_ICONS: Record<string, LucideIcon> = {
 };
 
 export const FORMULA_SIDEBAR_ICONS: Record<string, LucideIcon> = {
+  comando: Target,
+  pipeline: GitBranch,
+  entrega: ClipboardList,
+  propostas: Sparkles,
+  portal: Monitor,
+  tempo: Workflow,
+  financas: Package,
+  inteligencia: Sparkles,
+  relatorios: BarChart3,
   estatistica: BarChart3,
+  simulador: Rocket,
+  "plano-pdf": BookOpen,
   fundacao: Target,
   teaser: Palette,
   pl: Radio,

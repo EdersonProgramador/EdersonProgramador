@@ -1,17 +1,21 @@
 /**
- * Informação de arquitetura do admin — sistema operacional por processo.
- * Fonte única para sidebar, hubs, breadcrumbs e redirects.
+ * Amplifica CRM — IA mínima para breadcrumbs (home, sem sidebar).
  */
 
-export type AdminNavBlockId = "comando" | "comercial" | "entrega" | "sistema";
+import {
+  AGENCY_OS_HOME_PILLARS,
+  AGENCY_OS_STUDIO_ADMIN_PATH,
+  type AgencyOsHomePillarId
+} from "./agency-os-home-ia.js";
+import { agencyOpsDefaultAdminPath, agencyOpsLaneAdminPath } from "./agency-ops-process-lanes.js";
+
+export type AdminNavBlockId = AgencyOsHomePillarId | "comando";
 
 export type AdminNavLink = {
   id: string;
   label: string;
-  /** Caminho relativo a `/agencia/admin` (sem barra inicial). */
   adminPath: string;
   purpose: string;
-  /** Número da etapa no processo do bloco (quando aplicável). */
   stepNumber?: number;
 };
 
@@ -22,132 +26,93 @@ export type AdminNavBlock = {
   links: readonly AdminNavLink[];
 };
 
-/** Processo comercial único — captura → nutrição → vendas → relacionamento. */
 export const ADMIN_COMERCIAL_STEPS: readonly AdminNavLink[] = [
   {
     id: "captura",
-    label: "Captura",
+    label: "Lead",
     adminPath: "comercial/captura",
     stepNumber: 1,
-    purpose: "Leads novos, CDP e fontes de entrada."
+    purpose: "Lead capture."
   },
   {
-    id: "nutricao",
-    label: "Nutrição",
-    adminPath: "comercial/nutricao",
+    id: "qualificacao",
+    label: "Qualified",
+    adminPath: "comercial/qualificacao",
     stepNumber: 2,
-    purpose: "Campanhas de aquisição, re-marketing e follow-up."
+    purpose: "Qualification."
   },
   {
-    id: "vendas",
-    label: "Vendas",
-    adminPath: "comercial/vendas",
+    id: "proposta",
+    label: "Proposal",
+    adminPath: "comercial/proposta",
     stepNumber: 3,
-    purpose: "Pipeline, funil e conversão em projeto."
+    purpose: "Proposals."
   },
   {
-    id: "relacionamento",
-    label: "Relacionamento",
-    adminPath: "comercial/relacionamento",
+    id: "negociacao",
+    label: "Negotiation",
+    adminPath: "comercial/negociacao",
     stepNumber: 4,
-    purpose: "Clientes ativos e fidelização."
+    purpose: "Negotiation."
+  },
+  {
+    id: "contrato",
+    label: "Contract",
+    adminPath: "comercial/contrato",
+    stepNumber: 5,
+    purpose: "Contract."
+  },
+  {
+    id: "ativo",
+    label: "Active",
+    adminPath: "comercial/relacionamento",
+    stepNumber: 6,
+    purpose: "Active clients."
   }
 ] as const;
 
+/** Sem menu lateral — blocos só para resolver labels/breadcrumbs. */
 export const ADMIN_OPERATION_BLOCKS: readonly AdminNavBlock[] = [
   {
     id: "comando",
-    label: "Comando",
-    purpose: "O que precisa de atenção agora.",
+    label: "Amplifica CRM",
+    purpose: "Home workspace.",
     links: [
+      { id: "inicio", label: "Home", adminPath: "", purpose: "Amplifica CRM home." },
       {
-        id: "inicio",
-        label: "Início",
-        adminPath: "",
-        purpose: "Multi-client dashboard, campanhas e agentes."
-      },
-      {
-        id: "agentes",
-        label: "Agentes IA",
-        adminPath: "agentes",
-        purpose: "Especialistas de branding, proposta, marketing e entrega."
-      },
-      {
-        id: "projetos",
-        label: "Projetos",
-        adminPath: "projetos",
-        purpose: "Carteira de projetos da agência."
+        id: "studio",
+        label: "Code Studio",
+        adminPath: AGENCY_OS_STUDIO_ADMIN_PATH,
+        purpose: "Development studio."
       }
     ]
   },
-  {
-    id: "comercial",
-    label: "Comercial",
-    purpose: "Pipeline comercial em 4 etapas.",
-    links: ADMIN_COMERCIAL_STEPS
-  },
-  {
-    id: "entrega",
-    label: "Entrega",
-    purpose: "Produção por projeto (branding, código, fórmula).",
-    links: [
-      {
-        id: "branding",
-        label: "Branding (ferramenta)",
-        adminPath: "operacao/branding/estatistica",
-        purpose: "Workspace de marca — operação diária via Agentes."
-      },
-      {
-        id: "desenvolvimento",
-        label: "Stack / Studio",
-        adminPath: "operacao/desenvolvimento/stack",
-        purpose: "Stack técnica e Studio de código."
-      },
-      {
-        id: "formula",
-        label: "Fórmula (ferramenta)",
-        adminPath: "operacao/formula-lancamento/simulador",
-        purpose: "Simulador — planejamento via agente Launch planner."
-      }
-    ]
-  },
-  {
-    id: "sistema",
-    label: "Sistema",
-    purpose: "Configuração — não é operação diária.",
-    links: [
-      {
-        id: "automacoes",
-        label: "Automações",
-        adminPath: "automacoes",
-        purpose: "Triggers e passos técnicos."
-      },
-      {
-        id: "integracoes",
-        label: "Integrações",
-        adminPath: "marketing/integracoes",
-        purpose: "Provedores de e-mail, WhatsApp e webhooks."
-      },
-      {
-        id: "transacional",
-        label: "Testes de envio",
-        adminPath: "marketing/transacional",
-        purpose: "Prova de e-mail, SMS e WhatsApp."
-      }
-    ]
-  }
+  ...AGENCY_OS_HOME_PILLARS.map((pillar) => ({
+    id: pillar.id as AdminNavBlockId,
+    label: pillar.label,
+    purpose: pillar.purpose,
+    links: pillar.links.map((l) => ({
+      id: l.id,
+      label: l.label,
+      adminPath: l.adminPath,
+      purpose: l.purpose
+    }))
+  }))
 ] as const;
 
-/** Rotas legadas → caminho canônico sob /agencia/admin. */
 export const ADMIN_LEGACY_PATH_ALIASES: Record<string, string> = {
   leads: "comercial/captura",
   "marketing/cdp": "comercial/captura",
   "marketing/campanhas": "comercial/nutricao",
-  "marketing/crm": "comercial/vendas",
-  funil: "comercial/vendas",
+  "comercial/nutricao": agencyOpsLaneAdminPath("marketing", "pipeline"),
+  "comercial/vendas": agencyOpsLaneAdminPath("marketing", "pipeline"),
+  "marketing/crm": agencyOpsLaneAdminPath("marketing", "pipeline"),
+  funil: agencyOpsLaneAdminPath("marketing", "pipeline"),
   clientes: "comercial/relacionamento",
   "marketing/fidelidade": "comercial/relacionamento",
-  marketing: ""
+  marketing: agencyOpsDefaultAdminPath("marketing"),
+  "operacao/desenvolvimento/editor": AGENCY_OS_STUDIO_ADMIN_PATH,
+  "operacao/desenvolvimento/stack": AGENCY_OS_STUDIO_ADMIN_PATH
 };
 
 export function findAdminNavByAdminPath(adminPath: string): {

@@ -9,6 +9,7 @@ import { z } from "zod";
 import { applyAgentJob } from "../agents/apply-agent-job.js";
 import { generateAgentDraft } from "../agents/llm-draft.js";
 import { requireRole } from "../auth.js";
+import { env } from "../env.js";
 import { prisma } from "../prisma.js";
 import type { Prisma } from "@prisma/client";
 
@@ -111,6 +112,11 @@ export async function registerAgencyAgentsRoutes(app: FastifyInstance) {
       agentsActive,
       deployments,
       pendingJobs,
+      ai: {
+        llmEnabled: Boolean(env.OPENAI_API_KEY),
+        model: env.OPENAI_MODEL ?? "gpt-4o-mini",
+        mode: env.OPENAI_API_KEY ? ("llm" as const) : ("structured" as const)
+      },
       projects: projects.map((p) => ({
         id: p.id,
         title: p.title,

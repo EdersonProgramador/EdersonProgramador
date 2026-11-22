@@ -1,13 +1,6 @@
 import { useEffect } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
-import {
-  ADMIN_LEGACY_PATH_ALIASES,
-  ACADEMY_APP_BASE,
-  ACADEMY_STORE_BASE,
-  AGENCY_APP_BASE,
-  DEVELOPMENT_LEGACY_PATH_ALIASES,
-  formulaNavFlatItems
-} from "@ederson-agencia/shared";
+import { ACADEMY_APP_BASE, ACADEMY_STORE_BASE, AGENCY_APP_BASE } from "@ederson-agencia/shared";
 import { AuthSessionBridge } from "./auth/AuthSessionBridge";
 import { AcademyShellLayout } from "./components/AcademyShellLayout";
 import { AgencyShellLayout } from "./components/AgencyShellLayout";
@@ -19,6 +12,7 @@ import {
   ProtectedRoute
 } from "./components/ProtectedRoute";
 import { ShellLayout } from "./components/ShellLayout";
+import { AmplificaCrmLandingPage } from "./pages/AmplificaCrmLandingPage";
 import { LandingPage } from "./pages/LandingPage";
 import { LaunchPublicPage } from "./pages/LaunchPublicPage";
 import { CadastroPage } from "./pages/CadastroPage";
@@ -35,40 +29,10 @@ import { AcademyStoreCheckoutPage } from "./pages/AcademyStoreCheckoutPage";
 import { CoursesCatalogPage } from "./pages/CoursesCatalogPage";
 import { AdminCourseContentPage } from "./pages/AdminCourseContentPage";
 import { AdminCoursesPage } from "./pages/AdminCoursesPage";
-import {
-  AdminAutomationsPage,
-  AdminProjectsPage,
-  ClientDashboard,
-  FreelancerDashboard
-} from "./pages/DashboardPages";
-import {
-  AdminMarketingChannelsPage,
-  AdminMarketingIntegrationsPage,
-  AdminMarketingTransactionalPage
-} from "./pages/AdminMarketingPlatformPages";
-import {
-  AdminComercialCapturaPage,
-  AdminComercialNutricaoPage,
-  AdminComercialRelacionamentoPage,
-  AdminComercialVendasPage
-} from "./pages/AdminComercialPages";
-import { AdminOpsHomePage } from "./pages/AdminOpsHomePage";
-import { AdminAgentsPage } from "./pages/AdminAgentsPage";
-import { AdminBrandbookPage } from "./pages/AdminBrandbookPage";
-import { AdminFormulaSimuladorPage } from "./pages/AdminFormulaSimuladorPage";
-import { AdminLaunchPlanPdfPage } from "./pages/AdminLaunchPlanPdfPage";
-import { AdminMarketingPlanejamentoPage } from "./pages/AdminMarketingPlanejamentoPage";
-import { AdminBrandingEtapaPage } from "./pages/AdminBrandingEtapaPage";
-import { AdminBrandingProcessPage } from "./pages/AdminBrandingProcessPage";
-import { AdminProductOfferPage } from "./pages/AdminProductOfferPage";
-import { AdminLaunchKitPage } from "./pages/AdminLaunchKitPage";
-import { AdminLaunchPhasePage } from "./pages/AdminLaunchPhasePage";
-import { AdminBrandingHubPage } from "./pages/AdminBrandingHubPage";
-import { AdminDevelopmentHubPage } from "./pages/AdminDevelopmentHubPage";
+import { ClientDashboard, FreelancerDashboard } from "./pages/DashboardPages";
+import { AdminAmplificaCrmPage } from "./pages/AdminAmplificaCrmPage";
 import { AdminCodeStudioFullPage } from "./pages/AdminCodeStudioFullPage";
-import { AdminFormulaHubPage } from "./pages/AdminFormulaHubPage";
 import { AdminOperationsLayout } from "./components/admin/AdminOperationsLayout";
-import { LegacyMarketingStackRoute } from "./components/admin/LegacyMarketingStackRoute";
 import { ProjectDetailPage } from "./pages/ProjectDetailPage";
 import { UserProfilePage } from "./pages/UserProfilePage";
 import { ThemeSync } from "./components/theme/ThemeSync";
@@ -86,11 +50,12 @@ export default function App() {
       <AuthSessionBridge />
       <ThemeSync />
       <Routes>
-        <Route index element={<LandingPage />} />
+        <Route index element={<AmplificaCrmLandingPage />} />
+        <Route path="vsl" element={<LandingPage />} />
         <Route path="l/:slug" element={<LaunchPublicPage />} />
         <Route path="cadastro" element={<CadastroPage />} />
         <Route path="formulario" element={<QualificationFormPage />} />
-        <Route path="lancamento" element={<Navigate to="/cadastro" replace />} />
+        <Route path="lancamento" element={<Navigate to="/vsl" replace />} />
         <Route path="cursos" element={<AcademyPublicSalesPage />} />
         <Route path="cursos/carrinho" element={<AcademyCartPage />} />
         <Route path="cursos/finalizar" element={<AcademyStoreCheckoutPage />} />
@@ -103,76 +68,25 @@ export default function App() {
           <Route path="academia/entrar" element={<AcademyLoginPage />} />
         </Route>
 
-        {/* ——— Agência (projetos, operação) ——— */}
+        {/* Admin CRM — auth is inside Amplifica CRM (single login). Code Studio stays agency-ADMIN. */}
+        <Route path={`${AGENCY_APP_BASE}/admin`} element={<AdminOperationsLayout />}>
+          <Route index element={<Navigate to={`${AGENCY_APP_BASE}/admin/crm/dashboard`} replace />} />
+          <Route path="crm/:view" element={<AdminAmplificaCrmPage />} />
+          <Route path="crm" element={<Navigate to={`${AGENCY_APP_BASE}/admin/crm/dashboard`} replace />} />
+          <Route element={<ProtectedRoute realm="agency" roles={["ADMIN"]} />}>
+            <Route path="studio" element={<AdminCodeStudioFullPage />} />
+          </Route>
+          <Route path="*" element={<Navigate to={`${AGENCY_APP_BASE}/admin/crm/dashboard`} replace />} />
+        </Route>
+        <Route
+          path={`${AGENCY_APP_BASE}/studio/desenvolvimento`}
+          element={<Navigate to={`${AGENCY_APP_BASE}/admin/studio`} replace />}
+        />
+
+        {/* ——— Agência (projetos / cliente) ——— */}
         <Route path={AGENCY_APP_BASE} element={<ProtectedRoute realm="agency" />}>
+          <Route index element={<AgencyHomeRedirect />} />
           <Route element={<AgencyShellLayout title="Operação" />}>
-            <Route index element={<AgencyHomeRedirect />} />
-            <Route element={<ProtectedRoute realm="agency" roles={["ADMIN"]} />}>
-              <Route path="studio/desenvolvimento" element={<AdminCodeStudioFullPage />} />
-              <Route path="admin" element={<AdminOperationsLayout />}>
-                <Route index element={<AdminOpsHomePage />} />
-                <Route path="agentes" element={<AdminAgentsPage />} />
-                <Route path="projetos" element={<AdminProjectsPage />} />
-                <Route path="comercial/captura" element={<AdminComercialCapturaPage />} />
-                <Route path="comercial/nutricao" element={<AdminComercialNutricaoPage />} />
-                <Route path="comercial/vendas" element={<AdminComercialVendasPage />} />
-                <Route path="comercial/relacionamento" element={<AdminComercialRelacionamentoPage />} />
-                <Route path="operacao/marketing/planejamento" element={<AdminMarketingPlanejamentoPage />} />
-                <Route path="operacao/branding/estatistica" element={<AdminBrandingHubPage />} />
-                <Route path="operacao/branding/processo" element={<AdminBrandingProcessPage />} />
-                <Route path="operacao/branding/brandbook" element={<AdminBrandbookPage />} />
-                <Route path="operacao/branding/:etapaId" element={<AdminBrandingEtapaPage />} />
-                <Route path="operacao/desenvolvimento/stack" element={<AdminDevelopmentHubPage />} />
-                <Route path="operacao/desenvolvimento/stack-front-end" element={<AdminDevelopmentHubPage />} />
-                <Route path="operacao/desenvolvimento/stack-back-end" element={<AdminDevelopmentHubPage />} />
-                <Route path="operacao/desenvolvimento/stack-dados" element={<AdminDevelopmentHubPage />} />
-                <Route path="operacao/desenvolvimento/stack-infra" element={<AdminDevelopmentHubPage />} />
-                <Route path="operacao/desenvolvimento/stack-automacao" element={<AdminDevelopmentHubPage />} />
-                <Route path="operacao/desenvolvimento/stack-pagamentos" element={<AdminDevelopmentHubPage />} />
-                <Route path="operacao/desenvolvimento/stack-email" element={<AdminDevelopmentHubPage />} />
-                <Route path="operacao/desenvolvimento/editor" element={<AdminDevelopmentHubPage />} />
-                {Object.entries(DEVELOPMENT_LEGACY_PATH_ALIASES).map(([legacy, canonical]) => (
-                  <Route
-                    key={legacy}
-                    path={legacy}
-                    element={<Navigate to={`${AGENCY_APP_BASE}/admin/${canonical}`} replace />}
-                  />
-                ))}
-                <Route
-                  path="operacao/desenvolvimento/:stackId"
-                  element={<Navigate to={`${AGENCY_APP_BASE}/admin/operacao/desenvolvimento/stack`} replace />}
-                />
-                <Route path="operacao/marketing/:stackId" element={<LegacyMarketingStackRoute />} />
-                <Route path="operacao/formula-lancamento/simulador" element={<AdminFormulaSimuladorPage />} />
-                <Route path="operacao/formula-lancamento/plano-pdf" element={<AdminLaunchPlanPdfPage />} />
-                {formulaNavFlatItems().map((item) => (
-                  <Route key={item.id} path={item.adminPath} element={<AdminFormulaHubPage />} />
-                ))}
-                <Route path="operacao/produto-oferta" element={<AdminProductOfferPage />} />
-                <Route path="operacao/launch-kit" element={<AdminLaunchKitPage />} />
-                <Route path="operacao/:phaseId" element={<AdminLaunchPhasePage />} />
-                <Route path="marketing/transacional" element={<AdminMarketingTransactionalPage />} />
-                <Route path="marketing/canais" element={<AdminMarketingChannelsPage />} />
-                <Route path="marketing/integracoes" element={<AdminMarketingIntegrationsPage />} />
-                <Route path="automacoes" element={<AdminAutomationsPage />} />
-                {Object.entries(ADMIN_LEGACY_PATH_ALIASES).map(([legacy, canonical]) => (
-                  <Route
-                    key={legacy}
-                    path={legacy}
-                    element={
-                      <Navigate
-                        to={
-                          canonical
-                            ? `${AGENCY_APP_BASE}/admin/${canonical}`
-                            : `${AGENCY_APP_BASE}/admin`
-                        }
-                        replace
-                      />
-                    }
-                  />
-                ))}
-              </Route>
-            </Route>
             <Route element={<ProtectedRoute realm="agency" roles={["CLIENT"]} />}>
               <Route path="cliente" element={<ClientDashboard />} />
             </Route>
@@ -199,7 +113,7 @@ export default function App() {
         <Route path="/app" element={<Navigate to={AGENCY_APP_BASE} replace />} />
         <Route path="/app/admin/cursos/*" element={<LegacyAcademyAdminCursosRedirect />} />
         <Route path="/agencia/admin/cursos/*" element={<LegacyAcademyAdminCursosRedirect />} />
-        <Route path="/app/admin/*" element={<Navigate to={`${AGENCY_APP_BASE}/admin/projetos`} replace />} />
+        <Route path="/app/admin/*" element={<Navigate to={`${AGENCY_APP_BASE}/admin/crm/dashboard`} replace />} />
         <Route path="/app/cliente" element={<Navigate to={`${AGENCY_APP_BASE}/cliente`} replace />} />
         <Route path="/app/freelancer" element={<Navigate to={`${AGENCY_APP_BASE}/freelancer`} replace />} />
         <Route path="/app/projetos/:projectId" element={<LegacyProjectRedirect />} />

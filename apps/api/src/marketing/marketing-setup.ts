@@ -35,6 +35,9 @@ export async function evaluateMarketingSetup(): Promise<{
   const funnelTriggers = ["lead.created", "client.hired", "contract.signed", "checkout.completed"] as const;
   const funnelOk = funnelTriggers.every((t) => (byTrigger[t] ?? 0) > 0);
 
+  const leadNotifyOk = Boolean(env.LEAD_NOTIFY_EMAIL || env.LEAD_NOTIFY_WHATSAPP || env.ADMIN_EMAIL);
+  const openaiOk = Boolean(env.OPENAI_API_KEY);
+
   const items: MarketingSetupItem[] = [
     {
       id: "db",
@@ -49,6 +52,26 @@ export async function evaluateMarketingSetup(): Promise<{
       detail: providers.resend ? "Resend" : providers.brevo ? "Brevo" : "Configure RESEND_* ou BREVO_*"
     },
     {
+      id: "lead_notify",
+      label: "Inbox de leads",
+      ok: leadNotifyOk,
+      detail: env.LEAD_NOTIFY_EMAIL
+        ? `E-mail: ${env.LEAD_NOTIFY_EMAIL}`
+        : env.LEAD_NOTIFY_WHATSAPP
+          ? `WhatsApp: ${env.LEAD_NOTIFY_WHATSAPP}`
+          : env.ADMIN_EMAIL
+            ? `Fallback ADMIN_EMAIL`
+            : "Defina LEAD_NOTIFY_EMAIL ou LEAD_NOTIFY_WHATSAPP"
+    },
+    {
+      id: "openai",
+      label: "IA dos agentes (opcional)",
+      ok: openaiOk,
+      detail: openaiOk
+        ? `LLM ativo · ${env.OPENAI_MODEL ?? "gpt-4o-mini"}`
+        : "Sem OPENAI_API_KEY — drafts estruturados"
+    },
+    {
       id: "sms",
       label: "SMS (opcional)",
       ok: Boolean(providers.sms),
@@ -56,7 +79,7 @@ export async function evaluateMarketingSetup(): Promise<{
     },
     {
       id: "whatsapp",
-      label: "WhatsApp (opcional)",
+      label: "WhatsApp outbound (opcional)",
       ok: Boolean(providers.whatsapp),
       detail: providers.whatsapp ? "Webhook ativo" : "MESSAGING_WHATSAPP_WEBHOOK_URL"
     },
@@ -84,11 +107,11 @@ export async function evaluateMarketingSetup(): Promise<{
       id: "webhook",
       label: "Orquestração (n8n)",
       ok: Boolean(providers.n8n || env.MESSAGING_EVENT_WEBHOOK_URL),
-      detail: providers.n8n ? "N8N_LEAD_WEBHOOK_URL" : "Opcional — recomendado"
+      detail: providers.n8n ? "N8N_LEAD_WEBHOOK_URL" : "Opcional — só se precisar de canal externo"
     }
   ];
 
-  const required = items.filter((i) => !["sms", "whatsapp", "webhook", "loyalty"].includes(i.id));
+  const required = items.filter((i) => !["sms", "whatsapp", "webhook", "loyalty", "openai"].includes(i.id));
   const score = required.filter((i) => i.ok).length;
   const total = required.length;
   const ready = score === total;
