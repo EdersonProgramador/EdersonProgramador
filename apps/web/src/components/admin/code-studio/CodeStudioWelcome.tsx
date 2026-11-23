@@ -1,4 +1,5 @@
-import { FilePlus2, FileStack, FolderPlus, FolderSymlink, Keyboard, Sparkles, Upload } from "lucide-react";
+import { Code2, FilePlus2, FileStack, FolderPlus, FolderSymlink, Keyboard, Upload } from "lucide-react";
+import { BRAND_IDENTITY } from "@ederson-agencia/shared";
 
 type CodeStudioWelcomeProps = {
   onNewFile: () => void;
@@ -19,11 +20,14 @@ export function CodeStudioWelcome({
     <div className="dev-code-studio__welcome">
       <div className="dev-code-studio__welcome-inner">
         <div className="dev-code-studio__welcome-brand">
-          <Sparkles className="h-10 w-10 text-sky-400" aria-hidden />
+          <div className="dev-code-studio__welcome-mark" aria-hidden>
+            <Code2 className="h-6 w-6" />
+          </div>
           <div>
-            <h2 className="dev-code-studio__welcome-title">Bem-vindo</h2>
+            <h2 className="dev-code-studio__welcome-title">Code Studio</h2>
             <p className="dev-code-studio__welcome-sub">
-              Ederson Studio · importe arquivo(s) ou uma pasta para montar o projeto; com projeto selecionado, o workspace é salvo na operação (Ctrl+S).
+              {BRAND_IDENTITY.primarySystem.name} · importe arquivo(s) ou uma pasta para montar o projeto; com projeto
+              selecionado, o workspace é salvo na operação (Ctrl+S).
             </p>
           </div>
         </div>

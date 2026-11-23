@@ -1,0 +1,561 @@
+/* Portal do cliente — Agência Ederson Programador (tema claro / layout Amplifica) */
+.agency-client-portal {
+  --acp-indigo: #4f46e5;
+  --acp-indigo-deep: #4338ca;
+  --acp-ink: #111827;
+  --acp-muted: #6b7280;
+  --acp-line: #e5e7eb;
+  --acp-surface: #f9fafb;
+  --acp-canvas: #f3f4f6;
+  min-height: 100dvh;
+  background: var(--acp-canvas);
+  color: var(--acp-ink);
+  font-family: Poppins, "Segoe UI", system-ui, sans-serif;
+}
+
+.agency-client-portal__header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  border-bottom: 1px solid var(--acp-line);
+  background: #fff;
+  box-shadow: 0 1px 0 rgb(17 24 39 / 0.04);
+}
+
+.agency-client-portal__header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 0.85rem 1.25rem;
+}
+
+.agency-client-portal__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+  text-decoration: none;
+  color: inherit;
+}
+
+.agency-client-portal__mark {
+  display: inline-flex;
+  width: 2.35rem;
+  height: 2.35rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.75rem;
+  background: var(--acp-indigo);
+  color: #fff;
+  box-shadow: 0 8px 18px -10px rgb(79 70 229 / 0.65);
+}
+
+.agency-client-portal__eyebrow {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--acp-muted);
+}
+
+.agency-client-portal__name {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--acp-ink);
+}
+
+.agency-client-portal__nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.25rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--acp-muted);
+  text-decoration: none;
+  transition: color 0.15s, background 0.15s;
+}
+
+.agency-client-portal__nav a:hover {
+  color: var(--acp-indigo);
+  background: rgb(79 70 229 / 0.06);
+}
+
+.agency-client-portal__nav a.is-active {
+  color: var(--acp-indigo);
+  background: rgb(79 70 229 / 0.1);
+}
+
+.agency-client-portal__main {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 2.5rem;
+}
+
+.agency-client-portal__hero h1 {
+  margin: 0;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.agency-client-portal__hero p {
+  margin: 0.5rem 0 0;
+  max-width: 36rem;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--acp-muted);
+}
+
+.agency-client-portal__grid {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.75rem;
+}
+
+@media (min-width: 640px) {
+  .agency-client-portal__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .agency-client-portal__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.agency-client-portal__card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.25rem;
+  border: 1px solid var(--acp-line);
+  border-radius: 1rem;
+  background: #fff;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.agency-client-portal__card:hover {
+  border-color: rgb(79 70 229 / 0.35);
+  box-shadow: 0 12px 32px -20px rgb(79 70 229 / 0.35);
+}
+
+.agency-client-portal__card-icon {
+  display: inline-flex;
+  width: 2.5rem;
+  height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.75rem;
+  background: rgb(79 70 229 / 0.1);
+  color: var(--acp-indigo);
+}
+
+.agency-client-portal__card h2 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.agency-client-portal__card p {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--acp-muted);
+}
+
+.agency-client-portal__stat {
+  border: 1px solid var(--acp-line);
+  border-radius: 1rem;
+  padding: 1rem 1.15rem;
+  background: var(--acp-surface);
+}
+
+.agency-client-portal__stat-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--acp-muted);
+}
+
+.agency-client-portal__stat-value {
+  margin-top: 0.35rem;
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+/* —— Amplifica layout (remodelado · Agência Ederson Programador) —— */
+
+.acp-banner {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.75rem;
+  padding: 2rem 1.75rem;
+  background: linear-gradient(135deg, #4f46e5 0%, #312e81 100%);
+  color: #fff;
+  box-shadow: 0 20px 50px -24px rgb(79 70 229 / 0.55);
+}
+
+@media (min-width: 640px) {
+  .acp-banner {
+    padding: 2.5rem 2.25rem;
+  }
+}
+
+.acp-banner__badge {
+  display: inline-flex;
+  margin-bottom: 0.75rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid rgb(255 255 255 / 0.25);
+  background: rgb(255 255 255 / 0.12);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.acp-banner__title {
+  margin: 0;
+  font-size: clamp(1.65rem, 4vw, 2.25rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.acp-banner__subtitle {
+  margin: 0.65rem 0 0;
+  max-width: 32rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.55;
+  color: rgb(224 231 255 / 0.95);
+}
+
+.acp-banner__footer {
+  margin-top: 1.25rem;
+}
+
+.acp-banner__decor {
+  position: absolute;
+  right: -1rem;
+  top: 50%;
+  width: 9rem;
+  height: 9rem;
+  translate: 0 -50%;
+  rotate: -12deg;
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+.acp-stat-grid {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .acp-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .acp-stat-grid--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.acp-stat {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.15rem 1.25rem;
+  border-radius: 1.25rem;
+  border: 1px solid var(--acp-line);
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(17 24 39 / 0.04);
+}
+
+.acp-stat__icon {
+  display: inline-flex;
+  width: 2.75rem;
+  height: 2.75rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1rem;
+}
+
+.acp-stat__label {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--acp-muted);
+}
+
+.acp-stat__value {
+  margin: 0.25rem 0 0;
+  font-size: 1.65rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--acp-ink);
+}
+
+.acp-module-grid {
+  display: grid;
+  gap: 1.25rem;
+  margin-top: 1.75rem;
+}
+
+@media (min-width: 768px) {
+  .acp-module-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.acp-module {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: 1.5rem;
+  border-radius: 2rem;
+  border: 1px solid transparent;
+  background: #fff;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: 0 1px 2px rgb(17 24 39 / 0.04);
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+}
+
+.acp-module:hover {
+  border-color: rgb(79 70 229 / 0.2);
+  box-shadow: 0 16px 40px -24px rgb(79 70 229 / 0.35);
+  transform: translateY(-2px);
+}
+
+.acp-module__icon {
+  display: inline-flex;
+  width: 3rem;
+  height: 3rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, rgb(79 70 229 / 0.12), rgb(79 70 229 / 0.06));
+  color: var(--acp-indigo);
+}
+
+.acp-module__title {
+  margin: 1rem 0 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+.acp-module__desc {
+  margin: 0.5rem 0 0;
+  flex: 1;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--acp-muted);
+}
+
+.acp-module__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 1.25rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--acp-indigo);
+}
+
+.acp-panel {
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  border-radius: 2rem;
+  border: 1px solid var(--acp-line);
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(17 24 39 / 0.04);
+}
+
+@media (min-width: 640px) {
+  .acp-panel {
+    padding: 1.75rem;
+  }
+}
+
+.acp-contact {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: 1.5rem;
+  border: 1px solid var(--acp-line);
+  background: #fff;
+  text-decoration: none;
+  color: inherit;
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+
+.acp-contact:hover {
+  border-color: rgb(79 70 229 / 0.25);
+  box-shadow: 0 12px 32px -22px rgb(79 70 229 / 0.3);
+}
+
+.acp-section-title {
+  margin: 2rem 0 0.75rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--acp-muted);
+}
+
+.acp-plan-grid {
+  display: grid;
+  gap: 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .acp-plan-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.acp-plan {
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+  border-radius: 2rem;
+  border: 1px solid transparent;
+  background: rgb(249 250 251 / 0.85);
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.acp-plan:hover {
+  border-color: var(--acp-line);
+  background: #fff;
+  box-shadow: 0 12px 32px -22px rgb(79 70 229 / 0.25);
+}
+
+.acp-plan--selected {
+  border-color: rgb(79 70 229 / 0.35);
+  background: #fff;
+  box-shadow: 0 0 0 1px rgb(79 70 229 / 0.12), 0 16px 40px -24px rgb(79 70 229 / 0.35);
+}
+
+.acp-plan--featured:not(.acp-plan--selected) {
+  border-color: rgb(79 70 229 / 0.12);
+}
+
+.acp-plan__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.acp-plan__name {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--acp-ink);
+}
+
+.acp-plan__price {
+  margin: 0.35rem 0 0;
+  font-size: 1.65rem;
+  font-weight: 900;
+  color: var(--acp-indigo);
+}
+
+.acp-plan__sub {
+  margin: 0.25rem 0 0;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--acp-muted);
+}
+
+.acp-plan__badge {
+  flex-shrink: 0;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: var(--acp-indigo);
+  color: #fff;
+}
+
+.acp-plan__badge--current {
+  background: #10b981;
+}
+
+.acp-plan__features {
+  flex: 1;
+  margin: 0 0 1.25rem;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.acp-plan__features li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--acp-muted);
+}
+
+.acp-plan__check {
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+  color: var(--acp-indigo);
+}
+
+.acp-plan__entry {
+  margin-bottom: 1rem;
+}
+
+.agency-client-portal .acp-funnel-host {
+  --app-text: var(--acp-ink);
+  --app-text-muted: var(--acp-muted);
+  --app-text-subtle: #9ca3af;
+  --app-border: var(--acp-line);
+  --app-hover: #f3f4f6;
+}
+
+.agency-client-portal .acp-funnel-host .panel {
+  border-radius: 1.5rem;
+  border-color: var(--acp-line);
+  background: #fff;
+  box-shadow: 0 1px 0 rgb(17 24 39 / 0.04);
+}

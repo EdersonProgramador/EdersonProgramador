@@ -1,9 +1,17 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { assertAcademyInternalAdmin, assertAcademySession } from "../auth-access.js";
+import { assertCourseAdminSession } from "../auth-access.js";
 import { getAuthUser, requireRole } from "../auth.js";
-import { PORTAL_CONTENT_KEY } from "../courses/content-key.js";
+import { FL_COURSE } from "@ederson-agencia/shared";
+import {
+  FL_CONTENT_KEY,
+  PORTAL_CONTENT_KEY,
+  effectiveContentKey,
+  normalizeContentKey
+} from "../courses/content-key.js";
 import { ensurePortalStarterContent } from "../courses/portal-starter.js";
+import { buildPortalAdminPreviewPayload } from "../courses/portal-content.js";
+import { resolveStudyPayload } from "../courses/resolve-study-payload.js";
 import { prisma } from "../prisma.js";
 
 const slugField = z
@@ -44,11 +52,9 @@ export async function registerCoursesAdminContentRoutes(app: FastifyInstance) {
   app.addHook("preHandler", async (request, reply) => {
     if (!request.url.startsWith("/admin/courses")) return;
     const user = await getAuthUser(request);
-    if (!user) return reply.code(401).send({ message: "Faça login na Academia." });
+    if (!user) return reply.code(401).send({ message: "Faça login na Agência ou na Academia." });
     try {
-      assertAcademySession(user);
-      requireRole(user, ["ADMIN"]);
-      assertAcademyInternalAdmin(user);
+      assertCourseAdminSession(user);
     } catch (error) {
       const statusCode = (error as { statusCode?: number }).statusCode ?? 403;
       return reply.code(statusCode).send({
@@ -251,5 +257,46 @@ export async function registerCoursesAdminContentRoutes(app: FastifyInstance) {
     if (!lesson) return reply.code(404).send({ message: "Aula não encontrada." });
     await prisma.courseLesson.delete({ where: { id: lesson.id } });
     return { ok: true };
+  });
+
+  app.get("/admin/courses/by-slug/:slug/trail-preview", async (request, reply) => {
+    const { slug } = z.object({ slug: z.string().min(1) }).parse(request.params);
+    const user = await getAuthUser(request);
+    if (!user) return reply.code(401).send({ message: "Faça login na Agência ou na Academia." });
+
+    const course = await prisma.course.findUnique({ where: { slug } });
+    if (!course) return reply.code(404).send({ message: "Curso não encontrado." });
+
+    const key = effectiveContentKey(course.contentKey);
+    const preferFl =
+      key === FL_CONTENT_KEY ||
+      course.slug === FL_COURSE.slug ||
+      normalizeContentKey(course.contentKey) === FL_CONTENT_KEY;
+
+    const portalPreview = preferFl ? null : await buildPortalAdminPreviewPayload(course);
+    const resolved = portalPreview ?? (await resolveStudyPayload(course, user.id));
+    if (!resolved) {
+      return reply.code(501).send({
+        message: "Conteúdo do curso ainda não configurado.",
+        hint: "Adicione módulos e aulas ou publique o conteúdo inicial."
+      });
+    }
+
+    const { source: _source, ...studyBody } = resolved as { source?: string };
+
+    return {
+      preview: true as const,
+      includesDrafts: Boolean(portalPreview),
+      course: {
+        id: course.id,
+        slug: course.slug,
+        title: course.title,
+        summary: course.summary,
+        coverUrl: course.coverUrl,
+        contentKey: course.contentKey,
+        status: course.status
+      },
+      ...studyBody
+    };
   });
 }

@@ -16,6 +16,7 @@ export type StudyCurriculumItem = {
   breadcrumb: string[];
   prev: string | null;
   next: string | null;
+  lessonStatus?: "DRAFT" | "PUBLISHED";
 };
 
 function mapLessonType(lesson: Pick<PublishedLesson, "lessonType" | "documentUrl" | "videoUrl">): "document" | "video" | "article" {
@@ -49,6 +50,7 @@ type PublishedLesson = {
   bodyHtml: string | null;
   videoUrl: string | null;
   documentUrl: string | null;
+  status?: string;
 };
 
 function sectionKey(lesson: Pick<PublishedLesson, "sectionSortOrder" | "sectionTitle">) {
@@ -115,20 +117,14 @@ export async function publishedLessonCountsByCourseIds(courseIds: string[]) {
   return counts;
 }
 
-export async function buildPortalStudyPayload(
+type PortalLessonRow = PublishedLesson & { status?: string };
+
+function buildPortalPayloadFromModules(
   course: Course,
-  completedSlugs: string[]
+  modules: { title: string; lessons: PortalLessonRow[] }[],
+  completedSlugs: string[],
+  options?: { embedLessonHtml?: boolean; includeLessonStatus?: boolean }
 ) {
-  const modules = await prisma.courseModule.findMany({
-    where: { courseId: course.id },
-    orderBy: { sortOrder: "asc" },
-    include: {
-      lessons: {
-        where: { status: "PUBLISHED" },
-        orderBy: { sortOrder: "asc" }
-      }
-    }
-  });
 
   const flatLessons = modules.flatMap((m) => m.lessons);
   if (flatLessons.length === 0) {
@@ -159,8 +155,11 @@ export async function buildPortalStudyPayload(
         const type = mapLessonType(lesson);
         const slug = lesson.slug;
 
-        // HTML da aula é carregado sob demanda (GET …/lessons/:slug) — evita JSON gigante no ENEM.
-        lessonNotes[slug] = { displayTitle: lesson.title };
+        const html = options?.embedLessonHtml ? buildLessonNoteHtml(lesson) : null;
+        lessonNotes[slug] = {
+          displayTitle: lesson.title,
+          ...(html ? { html } : {})
+        };
         if (lesson.videoUrl?.trim()) {
           files[id] = lesson.videoUrl.trim();
         }
@@ -182,7 +181,10 @@ export async function buildPortalStudyPayload(
           countInSection: sectionLessons.length,
           breadcrumb: [mod.title, sectionTitle, lesson.title].filter(Boolean),
           prev: null,
-          next: null
+          next: null,
+          ...(options?.includeLessonStatus && lesson.status
+            ? { lessonStatus: lesson.status as "DRAFT" | "PUBLISHED" }
+            : {})
         });
         order += 1;
       });
@@ -227,6 +229,43 @@ export async function buildPortalStudyPayload(
     telegramMessageMap: {} as Record<string, number>,
     completedSlugs
   };
+}
+
+export async function buildPortalStudyPayload(course: Course, completedSlugs: string[]) {
+  const modules = await prisma.courseModule.findMany({
+    where: { courseId: course.id },
+    orderBy: { sortOrder: "asc" },
+    include: {
+      lessons: {
+        where: { status: "PUBLISHED" },
+        orderBy: { sortOrder: "asc" }
+      }
+    }
+  });
+  return buildPortalPayloadFromModules(
+    course,
+    modules as { title: string; lessons: PortalLessonRow[] }[],
+    completedSlugs
+  );
+}
+
+export async function buildPortalAdminPreviewPayload(course: Course) {
+  const modules = await prisma.courseModule.findMany({
+    where: { courseId: course.id },
+    orderBy: { sortOrder: "asc" },
+    include: {
+      lessons: { orderBy: { sortOrder: "asc" } }
+    }
+  });
+  return buildPortalPayloadFromModules(
+    course,
+    modules as { title: string; lessons: PortalLessonRow[] }[],
+    [],
+    {
+      embedLessonHtml: true,
+      includeLessonStatus: true
+    }
+  );
 }
 
 export async function getPortalLessonNote(courseId: string, lessonSlug: string) {

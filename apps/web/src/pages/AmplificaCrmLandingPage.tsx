@@ -172,7 +172,14 @@ export function AmplificaCrmLandingPage() {
             <a href="#workflow" className="text-xs font-bold uppercase tracking-widest text-slate-500 hover:text-indigo-600 transition-colors">Como Funciona</a>
             <a href="#pricing" className="text-xs font-bold uppercase tracking-widest text-slate-500 hover:text-indigo-600 transition-colors">Pacotes</a>
             <Link to="/vsl" className="text-xs font-bold uppercase tracking-widest text-slate-500 hover:text-indigo-600 transition-colors">VSL</Link>
-            <Link to="/cursos" className="text-xs font-bold uppercase tracking-widest text-slate-500 hover:text-indigo-600 transition-colors">Academia</Link>
+            <Link
+              to="/cursos"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs font-bold uppercase tracking-widest text-slate-500 hover:text-indigo-600 transition-colors"
+            >
+              Academia
+            </Link>
             <button type="button" onClick={onLogin} className="text-xs font-bold uppercase tracking-widest text-slate-900 hover:opacity-70 transition-opacity">Entrar</button>
             <a
               href="#pricing"
@@ -241,7 +248,7 @@ export function AmplificaCrmLandingPage() {
                 onClick={onLogin}
                 className="w-full sm:w-auto px-10 py-5 rounded-full text-sm font-bold text-slate-900 bg-white border border-slate-200 hover:bg-slate-50 transition-all uppercase tracking-widest"
               >
-                Área do cliente
+                Entrar no sistema
               </button>
             </motion.div>
 
@@ -602,7 +609,9 @@ export function AmplificaCrmLandingPage() {
                 <li><Link to="/cadastro" className="text-slate-400 font-bold hover:text-indigo-600 transition-colors uppercase text-[10px] tracking-widest">Contato</Link></li>
                 <li><button type="button" onClick={(e) => { e.preventDefault(); onPrivacy(); }} className="text-slate-400 font-bold hover:text-indigo-600 transition-colors uppercase text-[10px] tracking-widest cursor-pointer">Política de Privacidade</button></li>
                 <li><button type="button" onClick={(e) => { e.preventDefault(); onTerms(); }} className="text-slate-400 font-bold hover:text-indigo-600 transition-colors uppercase text-[10px] tracking-widest cursor-pointer">Termos de Uso</button></li>
+                <li><Link to="/login" className="text-slate-400 font-bold hover:text-indigo-600 transition-colors uppercase text-[10px] tracking-widest">Equipe (CRM)</Link></li>
                 <li><Link to="/login" className="text-slate-400 font-bold hover:text-indigo-600 transition-colors uppercase text-[10px] tracking-widest">Área do cliente</Link></li>
+                <li><Link to="/academia/entrar" className="text-slate-400 font-bold hover:text-indigo-600 transition-colors uppercase text-[10px] tracking-widest">Academia</Link></li>
               </ul>
             </div>
           </div>

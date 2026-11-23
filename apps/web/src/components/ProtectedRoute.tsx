@@ -1,13 +1,16 @@
 import { Navigate, Outlet, useLocation, useParams } from "react-router-dom";
 import type { AgencyRole, AuthContext } from "@ederson-agencia/shared";
 import {
+  ACADEMY_ADMIN_COURSES_BASE,
   ACADEMY_APP_BASE,
+  agencyCrmAcademyContentPath,
   AGENCY_APP_BASE,
   agencyHomePathForRole,
   canAccessAcademy,
   canAccessAgency,
   isAcademyInternalAdmin,
-  loginPathForContext
+  AGENCY_OPERATION_LOGIN_PATH,
+  loginPathForProtectedRealm
 } from "@ederson-agencia/shared";
 import { useAcademySession, useAgencySession, useAuthStore } from "../stores/authStore";
 
@@ -39,7 +42,13 @@ export function ProtectedRoute({
   const returnTo = `${location.pathname}${location.search}`;
 
   if (!user) {
-    return <Navigate to={loginPathForContext(realm)} replace state={{ from: returnTo }} />;
+    return (
+      <Navigate
+        to={loginPathForProtectedRealm(realm)}
+        replace
+        state={{ from: returnTo }}
+      />
+    );
   }
 
   if (realm === "agency" && !canAccessAgency(user)) {
@@ -47,7 +56,9 @@ export function ProtectedRoute({
   }
 
   if (realm === "academy" && !canAccessAcademy(user)) {
-    return <Navigate to="/login" replace state={{ from: returnTo, needAcademy: true }} />;
+    return (
+      <Navigate to={AGENCY_OPERATION_LOGIN_PATH} replace state={{ from: returnTo, needAcademy: true }} />
+    );
   }
 
   if (roles && !roles.includes(user.role)) {
@@ -56,7 +67,8 @@ export function ProtectedRoute({
   }
 
   if (internalAdminOnly && !isAcademyInternalAdmin(user)) {
-    return <Navigate to={ACADEMY_APP_BASE} replace />;
+    const fallback = realm === "agency" ? agencyHomePathForRole(user.role) : ACADEMY_APP_BASE;
+    return <Navigate to={fallback} replace />;
   }
 
   return <Outlet />;
@@ -65,7 +77,9 @@ export function ProtectedRoute({
 /** Redireciona /agencia para o painel do papel. */
 export function AgencyHomeRedirect() {
   const session = useAgencySession();
-  if (!session?.user) return <Navigate to="/login" replace />;
+  if (!session?.user) {
+    return <Navigate to={loginPathForProtectedRealm("agency")} replace />;
+  }
   return <Navigate to={agencyHomePathForRole(session.user.role)} replace />;
 }
 
@@ -83,9 +97,13 @@ export function LegacyAcademyCursosRedirect() {
   return <Navigate to={`${ACADEMY_APP_BASE}/cursos${suffix}`} replace />;
 }
 
-/** /app/admin/cursos/* e /agencia/admin/cursos/* → /academia/admin/cursos/* */
+/** /app/admin/cursos/*, /agencia/admin/cursos/* e legado /academia/admin/cursos/* → ops na agência */
 export function LegacyAcademyAdminCursosRedirect() {
   const { "*": rest } = useParams<{ "*": string }>();
-  const suffix = rest ? `/${rest.replace(/^\//, "")}` : "";
-  return <Navigate to={`${ACADEMY_APP_BASE}/admin/cursos${suffix}`} replace />;
+  const suffix = (rest ?? "").replace(/^\//, "");
+  const contentMatch = suffix.match(/^([^/]+)\/conteudo(?:\/|$)/);
+  if (contentMatch?.[1]) {
+    return <Navigate to={agencyCrmAcademyContentPath(contentMatch[1])} replace />;
+  }
+  return <Navigate to={ACADEMY_ADMIN_COURSES_BASE} replace />;
 }

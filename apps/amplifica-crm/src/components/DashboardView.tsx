@@ -71,6 +71,7 @@ interface DashboardViewProps {
   onViewChange?: (view: any) => void;
   currentUser: User;
   users?: User[];
+  onStartMeeting?: () => void;
 }
 
 const StatCard = ({ title, value, change, icon: Icon, color, index }: any) => (
@@ -111,7 +112,19 @@ const StatCard = ({ title, value, change, icon: Icon, color, index }: any) => (
   </motion.div>
 );
 
-export default function DashboardView({ leads, clients, receivables, artOrders, videoOrders = [], partners, partnerRequests, onViewChange, currentUser, users = [] }: DashboardViewProps) {
+export default function DashboardView({
+  leads,
+  clients,
+  receivables,
+  artOrders,
+  videoOrders = [],
+  partners,
+  partnerRequests,
+  onViewChange,
+  currentUser,
+  users = [],
+  onStartMeeting,
+}: DashboardViewProps) {
   // Lógica de filtragem por papel
   const isDesigner = currentUser.role === 'DESIGNER';
   const isPartner = currentUser.role === 'PARTNER';
@@ -389,12 +402,10 @@ export default function DashboardView({ leads, clients, receivables, artOrders, 
              'Bem-vindo de volta! Aqui está o resumo da sua agência.'}
           </p>
         </div>
-        {(isAdmin || isOwner) && (
-          <button 
-            onClick={() => {
-              const roomId = Math.random().toString(36).substr(2, 9);
-              (window as any).onJoinMeeting?.(roomId);
-            }}
+        {(isAdmin || isOwner) && onStartMeeting && (
+          <button
+            type="button"
+            onClick={onStartMeeting}
             className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-sm transition-all shadow-lg shadow-indigo-500/20 active:scale-95"
           >
             <Video size={18} />
@@ -405,7 +416,7 @@ export default function DashboardView({ leads, clients, receivables, artOrders, 
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard 
-          title={isDesigner || isEditor ? "Ganhos Previstos" : isPartner ? "Gasto (Amplifica CRM)" : "Faturamento Bruto"} 
+          title={isDesigner || isEditor ? "Ganhos Previstos" : isPartner ? "Gasto (Agência Ederson Programador)" : "Faturamento Bruto"} 
           value={`R$ ${totalRevenue.toLocaleString()}`} 
           change={12.5} 
           icon={DollarSign} 

@@ -172,8 +172,20 @@ class MeetingService {
   }
 
   disconnect() {
-    this.socket?.disconnect();
-    this.localStream?.getTracks().forEach(track => track.stop());
+    if (this.socket) {
+      this.socket.off("new-join-request");
+      this.socket.off("request-approved");
+      this.socket.off("request-denied");
+      this.socket.off("user-connected");
+      this.socket.off("user-disconnected");
+    }
+    if (this.peer) {
+      this.peer.destroy();
+      this.peer = null;
+    }
+    this.localStream?.getTracks().forEach((track) => track.stop());
+    this.localStream = null;
+    this.participants.clear();
   }
 }
 

@@ -24,6 +24,7 @@ import { User as AppUser } from '../types';
 import { cn } from '../lib/utils';
 import Peer, { MediaConnection } from 'peerjs';
 import { videoEffectService } from '../services/videoEffectService';
+import { meetingInviteUrl } from '../lib/meetingRoom';
 
 interface MeetingViewProps {
   roomId: string;
@@ -123,7 +124,7 @@ export default function MeetingView({ roomId, currentUser, onExit }: MeetingView
     }
   }, [participants, guestName, currentUser]);
 
-  const meetingLink = `${window.location.origin}/?roomId=${roomId}`;
+  const meetingLink = meetingInviteUrl(roomId);
 
   // UseEffect to update local video element when stream exists
   useEffect(() => {
@@ -499,8 +500,8 @@ export default function MeetingView({ roomId, currentUser, onExit }: MeetingView
   };
 
   const sendEmailInvite = () => {
-    const subject = encodeURIComponent("Convite para Videochamada - Amplifica CRM");
-    const body = encodeURIComponent(`Olá,\n\nVocê foi convidado para participar de uma videochamada.\n\nClique no link abaixo para entrar:\n${meetingLink}\n\nAtenciosamente,\nEquipe Amplifica`);
+    const subject = encodeURIComponent("Convite para Videochamada - Agência Ederson Programador");
+    const body = encodeURIComponent(`Olá,\n\nVocê foi convidado para participar de uma videochamada.\n\nClique no link abaixo para entrar:\n${meetingLink}\n\nAtenciosamente,\nEquipe Ederson Programador`);
     window.location.href = `mailto:?subject=${subject}&body=${body}`;
   };
 

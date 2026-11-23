@@ -91,7 +91,27 @@ export default defineConfig(({ mode }) => {
       },
       proxy: {
         ...apiProxy(apiTarget),
-        // Full path forwarded (CRM vite base = /amplifica-crm/). No rewrite.
+        // CRM é o app padrão em /agencia/admin (página cheia). Code Studio fica no React.
+        "/agencia/admin": {
+          target: "http://127.0.0.1:3010",
+          changeOrigin: true,
+          secure: false,
+          ws: true,
+          // Garante upgrade WS do Socket.IO (path já inclui /agencia/admin no CRM quando CRM_HMR_CLIENT_PORT).
+          configure(proxy) {
+            proxy.on("error", (err) => {
+              console.warn("[vite proxy /agencia/admin]", err.message);
+            });
+          },
+          bypass(req) {
+            const url = req.url || "";
+            if (url.includes("/agencia/admin/studio")) return url;
+            if (url.includes("/agencia/admin/academia")) return url;
+            if (url.includes("/agencia/admin/crm")) return url;
+            return undefined;
+          }
+        },
+        // Legado — mesmo CRM
         "/amplifica-crm": {
           target: "http://127.0.0.1:3010",
           changeOrigin: true,

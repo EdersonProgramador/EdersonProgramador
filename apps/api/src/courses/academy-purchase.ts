@@ -10,6 +10,7 @@ function temporaryPassword(): string {
 }
 
 export async function listPublicSaleCourses() {
+  /** Só cursos autorizados para venda na vitrine (PUBLIC_SALE + preço > 0). */
   const courses = await prisma.course.findMany({
     where: {
       status: "PUBLISHED",
@@ -26,10 +27,12 @@ export async function listPublicSaleCourses() {
       slug: course.slug,
       title: course.title,
       summary: course.summary,
-      priceCents: course.priceCents,
-      currency: course.currency,
+      priceCents: course.priceCents!,
+      currency: course.currency || "BRL",
       coverUrl: course.coverUrl,
-      contentReady: await courseContentReady(course)
+      contentReady: await courseContentReady(course),
+      purchasable: true,
+      visibility: course.visibility
     });
   }
   return cards;

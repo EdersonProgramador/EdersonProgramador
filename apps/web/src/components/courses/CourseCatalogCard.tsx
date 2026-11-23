@@ -47,7 +47,7 @@ export function CourseCatalogCard({ course, variant, onCheckout }: CourseCatalog
           {badge}
           {variant === "mine" && course.locked ? " · aguardando compra" : null}
         </p>
-        <h2 className="mt-2 text-lg font-semibold text-white">{course.title}</h2>
+        <h2 className="mt-2 text-lg font-semibold text-slate-900">{course.title}</h2>
         {course.summary ? (
           <p className="course-text-muted mt-2 flex-1 text-sm leading-relaxed">{course.summary}</p>
         ) : null}

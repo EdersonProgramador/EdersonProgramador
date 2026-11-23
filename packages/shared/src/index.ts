@@ -66,13 +66,29 @@ export type AgencyRole = "ADMIN" | "CLIENT" | "FREELANCER";
 export type { AuthContext, SessionUser } from "./auth-context.js";
 export {
   ACADEMY_ADMIN_COURSES_BASE,
+  AGENCY_ACADEMY_OPS_BASE,
+  AGENCY_CRM_ACADEMY_VIEW,
+  agencyCrmAcademyContentPath,
   ACADEMY_APP_BASE,
   ACADEMY_PROFILE_PATH,
   ACADEMY_STORE_BASE,
+  ACCOUNT_HUB_PATH,
+  ACADEMY_VITRINE_PATH,
+  academyVitrineCoursePath,
   ACADEMY_STORE_CUSTOMER_MARKER,
   AGENCY_PROFILE_PATH,
+  AGENCY_CLIENT_PORTAL_BASE,
+  AGENCY_CLIENT_PORTAL_PROJECT_PATH,
+  AGENCY_CLIENT_PORTAL_SUPPORT_PATH,
+  AGENCY_CLIENT_PORTAL_CONTRACT_PATH,
+  AGENCY_CLIENT_FUNNEL_PATH,
   academyCourseCheckoutPath,
   AGENCY_APP_BASE,
+  AGENCY_CLIENT_LOGIN_PATH,
+  AGENCY_FREELANCER_LOGIN_PATH,
+  AGENCY_OPERATION_LOGIN_PATH,
+  AGENCY_CRM_BASE,
+  AGENCY_SYSTEM_HOME,
   agencyHomePathForRole,
   ACADEMY_INTERNAL_ADMIN_EMAIL,
   canAccessAcademy,
@@ -82,6 +98,8 @@ export {
   homePathAfterLogin,
   inferAuthContextFromPath,
   loginPathForContext,
+  loginPathForProtectedRealm,
+  logoutHomePathForContext,
   resolvePostLoginPath,
   sanitizeReturnPath
 } from "./auth-context.js";
@@ -264,6 +282,14 @@ export {
   type JourneyPhaseKey,
   type PackageTierId
 } from "./project-journey.js";
+export {
+  agencyClientPortalPlans,
+  legacyPlanIdForTier,
+  LEGACY_AMPLIFICA_PLAN_IDS,
+  packageTierFromLegacyPlanId,
+  type AgencyClientPortalPlan,
+  type LegacyAmplificaPlanId
+} from "./agency-client-plans.js";
 export {
   adjacentOperationProductionPhase,
   findBrandingOperationNavContext,

@@ -246,12 +246,31 @@ function formatLiveWhen(iso: string | null) {
   }
 }
 
-export function ClientFunnelPanel() {
+export type ClientFunnelPanelProps = {
+  /** Quando há grid de planos no portal, oculta os cards internos desta etapa. */
+  suppressPackageGrid?: boolean;
+  selectedTier?: PackageTierId;
+  onSelectedTierChange?: (tier: PackageTierId) => void;
+};
+
+export function ClientFunnelPanel({
+  suppressPackageGrid = false,
+  selectedTier: selectedTierProp,
+  onSelectedTierChange
+}: ClientFunnelPanelProps = {}) {
   const ui = AGENCY_FUNNEL_COPY.client;
   const agencyUser = useAgencySession()?.user;
   const [state, setState] = useState<FunnelState | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [tier, setTier] = useState<PackageTierId>("professional");
+  const [internalTier, setInternalTier] = useState<PackageTierId>("professional");
+  const tier = selectedTierProp ?? internalTier;
+  const setTier = useCallback(
+    (next: PackageTierId) => {
+      onSelectedTierChange?.(next);
+      if (selectedTierProp === undefined) setInternalTier(next);
+    },
+    [onSelectedTierChange, selectedTierProp]
+  );
   const [attendedConfirm, setAttendedConfirm] = useState(false);
   const [partyDetails, setPartyDetails] = useState<AgencyContractPartyDetails | null>(null);
   const [acceptTerms, setAcceptTerms] = useState(false);
@@ -266,14 +285,13 @@ export function ClientFunnelPanel() {
     const normalized = await normalizeClientFunnelState(res);
     setState(normalized);
     const fromLead = parsePackageTier(normalized.lead?.packageTier);
-    setTier((prev) => {
-      if (fromLead) return fromLead;
-      if (normalized.tiers.length && !normalized.tiers.some((t) => t.id === prev)) {
-        return normalized.tiers[0]!.id;
-      }
-      return prev;
-    });
-  }, []);
+    let nextTier = tier;
+    if (fromLead) nextTier = fromLead;
+    else if (normalized.tiers.length && !normalized.tiers.some((t) => t.id === tier)) {
+      nextTier = normalized.tiers[0]!.id;
+    }
+    if (nextTier !== tier) setTier(nextTier);
+  }, [setTier, tier]);
 
   useEffect(() => {
     if (agencyUser?.role !== "CLIENT") return;
@@ -571,6 +589,32 @@ export function ClientFunnelPanel() {
 
         {displayStep === "package" && state.canSelectPackage ? (
           <FunnelStepPanel eyebrow={stepEyebrow(2)} title={ui.stepPackageTitle} description={ui.stepPackageDesc}>
+            {suppressPackageGrid ? (
+              <>
+                <p className="rounded-2xl border border-[var(--app-border)] bg-[var(--app-hover)]/40 px-4 py-3 text-sm text-[var(--app-text)]">
+                  Pacote selecionado:{" "}
+                  <strong>{PACKAGE_TIER_CONFIG[tier]?.name ?? tier}</strong>
+                  {state.tiers.find((p) => p.id === tier) ? (
+                    <>
+                      {" "}
+                      — total de referência {formatBRL(state.tiers.find((p) => p.id === tier)!.totalValueCents)} (entrada{" "}
+                      {formatBRL(state.tiers.find((p) => p.id === tier)!.entryValueCents)}).
+                    </>
+                  ) : null}{" "}
+                  Ajuste a escolha na grade de pacotes acima, se necessário.
+                </p>
+                <button
+                  type="button"
+                  className="btn-primary mt-4 w-full sm:w-auto"
+                  disabled={busy || !state.tiers.length}
+                  onClick={() => void hire()}
+                >
+                  {ui.hireCta}
+                </button>
+              </>
+            ) : null}
+            {!suppressPackageGrid ? (
+            <>
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               {state.tiers.map((pkg) => {
                 const selected = tier === pkg.id;
@@ -631,6 +675,8 @@ export function ClientFunnelPanel() {
             >
               {ui.hireCta}
             </button>
+            </>
+            ) : null}
           </FunnelStepPanel>
         ) : null}
 

@@ -3,7 +3,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { assertAcademyInternalAdmin, assertAcademySession, requireAcademyUser } from "../auth-access.js";
+import { assertCourseAdminSession, requireAcademyUser } from "../auth-access.js";
 import { getAuthUser, requireRole } from "../auth.js";
 import { userCanAccessCourse } from "../courses/access.js";
 import { env } from "../env.js";
@@ -215,11 +215,9 @@ export async function registerCourseLibraryRoutes(app: FastifyInstance) {
   app.addHook("preHandler", async (request, reply) => {
     if (!request.url.startsWith("/admin/courses/") || !request.url.includes("/library")) return;
     const user = await getAuthUser(request);
-    if (!user) return reply.code(401).send({ message: "Faça login na Academia." });
+    if (!user) return reply.code(401).send({ message: "Faça login na Agência ou na Academia." });
     try {
-      assertAcademySession(user);
-      requireRole(user, ["ADMIN"]);
-      assertAcademyInternalAdmin(user);
+      assertCourseAdminSession(user);
     } catch (error) {
       const statusCode = (error as { statusCode?: number }).statusCode ?? 403;
       return reply.code(statusCode).send({

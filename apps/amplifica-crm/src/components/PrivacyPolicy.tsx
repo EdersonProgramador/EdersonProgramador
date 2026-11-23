@@ -89,7 +89,7 @@ export default function PrivacyPolicy({ onBack, agencyName, primaryColor }: Priv
                 </h2>
                 <div className="pl-12 space-y-4">
                   <p>
-                    O Amplifica CRM permite conectar contas do Google e Meta seguindo as políticas de "Uso Limitado". 
+                    A Agência Ederson Programador permite conectar contas do Google e Meta seguindo as políticas de "Uso Limitado". 
                   </p>
                   <p>
                     <strong>Dados acessados:</strong> Apenas o necessário para as funções que você ativar (ex: selecionar mídia no Drive ou publicar no Instagram).

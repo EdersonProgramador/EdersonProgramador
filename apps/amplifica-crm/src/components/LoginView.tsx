@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Mail, Lock, LogIn, ShieldCheck, Zap, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { agencyPlanName } from '../plans';
 
 interface LoginViewProps {
   onLogin: (email: string, password: string) => Promise<void>;
@@ -64,7 +65,7 @@ export default function LoginView({
       }
     } catch (err: any) {
       if (err.code === 'SYSTEM_EMPTY') {
-        setError('Bem-vindo ao Amplifica CRM! Crie a primeira conta administrativa para começar.');
+        setError('Bem-vindo à Agência Ederson Programador! Crie a primeira conta administrativa para começar.');
         setMode('signup');
       } else if (err.code === 'RLS_VIOLATION') {
         setError(
@@ -104,7 +105,7 @@ export default function LoginView({
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-600 text-white shadow-lg mb-6">
             <Zap className="w-7 h-7" />
           </div>
-          <h1 className="text-4xl font-black font-display text-gray-900 tracking-tight mb-2 uppercase">Amplifica <span className="text-indigo-600 italic">CRM</span></h1>
+          <h1 className="text-4xl font-black font-display text-gray-900 tracking-tight mb-2 uppercase">Ederson <span className="text-indigo-600 italic">Programador</span></h1>
           <p className="text-gray-400 text-sm font-bold uppercase tracking-widest px-4">
             {mode === 'login' ? 'Autenticação de Usuário' : 'Novo Registro Administrativo'}
           </p>
@@ -113,7 +114,7 @@ export default function LoginView({
             <div className="mt-6 inline-flex items-center gap-3 px-6 py-3 bg-indigo-50 border border-indigo-100 rounded-2xl text-indigo-700 animate-in zoom-in duration-300">
               <Zap size={16} className="fill-indigo-600" />
               <span className="text-xs font-black uppercase tracking-widest">
-                Assinando: <span className="underline">{selectedPlanId === 'plan1' ? 'Growth Pack' : 'Elite Scale'}</span>
+                Assinando: <span className="underline">{agencyPlanName(selectedPlanId)}</span>
               </span>
             </div>
           )}
@@ -254,15 +255,7 @@ export default function LoginView({
                 <button 
                   type="button"
                   onClick={() => { 
-                    if (onBack) {
-                      onBack();
-                      setTimeout(() => {
-                        const el = document.getElementById('pricing');
-                        if (el) el.scrollIntoView({ behavior: 'smooth' });
-                      }, 100);
-                    } else {
-                      setMode('signup'); 
-                    }
+                    setMode('signup'); 
                     setError(null); 
                   }}
                   className="text-sm font-bold text-indigo-600 hover:text-indigo-700 transition-colors"

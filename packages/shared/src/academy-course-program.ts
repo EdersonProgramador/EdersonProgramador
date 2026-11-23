@@ -23,6 +23,8 @@ export type PublicCourseProgram = {
   currency: string;
   coverUrl?: string | null;
   contentReady?: boolean;
+  /** true quando visibility=PUBLIC_SALE e preço > 0 */
+  purchasable?: boolean;
   program: CourseProgramContent;
 };
 

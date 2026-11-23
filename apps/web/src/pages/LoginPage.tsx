@@ -1,15 +1,16 @@
 import { AuthLoginView } from "../components/auth/AuthLoginView";
 
-/** Login principal — Amplifica CRM / Agência. */
+/** Login único da Agência (admin, cliente, freelancer). */
 export function AgencyLoginPage() {
   return (
     <AuthLoginView
       context="agency"
       variant="crm"
       allowRegister
+      subtitle="Equipe, clientes e freelancers — o destino segue o seu perfil após o login."
       alternateLogin={{
         href: "/academia/entrar",
-        label: "Sou aluno — entrar na Academia"
+        label: "Entrar na Academia"
       }}
     />
   );

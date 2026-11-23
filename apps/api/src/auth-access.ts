@@ -63,6 +63,20 @@ export function assertAcademyInternalAdmin(user: { email: string; role: AgencyRo
   }
 }
 
+/** CMS da Academia: login da Agência (operador) ou da Academia (mesmo admin interno). */
+export function assertCourseAdminSession(user: AuthTokenPayload): void {
+  const ctx = user.authContext ?? "agency";
+  if (ctx === "academy") {
+    assertAcademySession(user);
+  } else {
+    assertAgencySession(user);
+  }
+  if (user.role !== "ADMIN") {
+    throw Object.assign(new Error("Acesso restrito ao administrador."), { statusCode: 403 });
+  }
+  assertAcademyInternalAdmin(user);
+}
+
 export async function requireAcademyUser(request: FastifyRequest, reply: FastifyReply) {
   const user = await getAuthUser(request);
   if (!user) {

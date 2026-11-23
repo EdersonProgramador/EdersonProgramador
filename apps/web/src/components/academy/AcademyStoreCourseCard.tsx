@@ -11,6 +11,8 @@ export type AcademyStoreCourseCardData = {
   currency: string;
   coverUrl?: string | null;
   contentReady?: boolean;
+  purchasable?: boolean;
+  visibility?: string;
 };
 
 type AcademyStoreCourseCardProps = {
@@ -28,10 +30,13 @@ export function AcademyStoreCourseCard({
   detailHref,
   onAddToCart
 }: AcademyStoreCourseCardProps) {
-  const price = (course.priceCents / 100).toLocaleString("pt-BR", {
-    style: "currency",
-    currency: course.currency || "BRL"
-  });
+  const purchasable = course.purchasable !== false && course.priceCents > 0;
+  const price = purchasable
+    ? (course.priceCents / 100).toLocaleString("pt-BR", {
+        style: "currency",
+        currency: course.currency || "BRL"
+      })
+    : "Sob consulta";
 
   return (
     <article className="academy-udemy-card academy-inst-card">
@@ -45,27 +50,33 @@ export function AcademyStoreCourseCard({
           />
         </div>
         <div className="academy-udemy-card__body">
-          <h3 className="academy-udemy-card__title">{course.title}</h3>
           <p className="academy-udemy-card__instructor">{instructorLabel}</p>
+          <h3 className="academy-udemy-card__title">{course.title}</h3>
           {course.summary ? <p className="academy-udemy-card__meta line-clamp-3">{course.summary}</p> : null}
           <p className="academy-udemy-card__price">{price}</p>
-          <span className="academy-inst-card__cta mt-3 inline-block text-sm font-medium text-brand-primary">
+          <span className="academy-inst-card__cta mt-3 inline-block text-sm font-bold text-indigo-600">
             {ACADEMY_SALES.courses.openProgram} →
           </span>
         </div>
       </Link>
-      <button
-        type="button"
-        className={`academy-udemy-card__cart-btn academy-sales__cta-cart ${inCart ? "is-in-cart" : ""}`}
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          onAddToCart();
-        }}
-        disabled={inCart}
-      >
-        {inCart ? ACADEMY_CART.inCart : ACADEMY_CART.addToCart}
-      </button>
+      {purchasable ? (
+        <button
+          type="button"
+          className={`academy-udemy-card__cart-btn academy-sales__cta-cart ${inCart ? "is-in-cart" : ""}`}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onAddToCart();
+          }}
+          disabled={inCart}
+        >
+          {inCart ? ACADEMY_CART.inCart : ACADEMY_CART.addToCart}
+        </button>
+      ) : (
+        <Link to={detailHref} className="academy-udemy-card__cart-btn academy-sales__cta-cart">
+          Ver programa
+        </Link>
+      )}
     </article>
   );
 }

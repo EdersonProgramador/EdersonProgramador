@@ -169,7 +169,7 @@ export function AgencyOsDashboard({ deepDive = false }: { deepDive?: boolean }) 
   return (
     <div className={`agency-os${deepDive ? " agency-os--deep" : ""}`}>
       <header className="agency-os-hero">
-        <p className="agency-os-hero__eyebrow">Amplifica CRM</p>
+        <p className="agency-os-hero__eyebrow">Agência Ederson Programador</p>
         <h1>Painel multi-cliente</h1>
         <p>
           Agentes especialistas produzem branding, proposta START/BUSINESS/ENTERPRISE, campanhas e stack —

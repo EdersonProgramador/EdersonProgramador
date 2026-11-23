@@ -1,6 +1,12 @@
 import { useEffect } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
-import { ACADEMY_APP_BASE, ACADEMY_STORE_BASE, AGENCY_APP_BASE } from "@ederson-agencia/shared";
+import {
+  ACADEMY_APP_BASE,
+  ACADEMY_STORE_BASE,
+  ACADEMY_VITRINE_PATH,
+  AGENCY_APP_BASE,
+  AGENCY_CLIENT_PORTAL_CONTRACT_PATH
+} from "@ederson-agencia/shared";
 import { AuthSessionBridge } from "./auth/AuthSessionBridge";
 import { AcademyShellLayout } from "./components/AcademyShellLayout";
 import { AgencyShellLayout } from "./components/AgencyShellLayout";
@@ -25,11 +31,17 @@ import { AcademyCartPage } from "./pages/AcademyCartPage";
 import { AcademyCourseCheckoutPage } from "./pages/AcademyCourseCheckoutPage";
 import { AcademyCourseProgramPage } from "./pages/AcademyCourseProgramPage";
 import { AcademyPublicSalesPage } from "./pages/AcademyPublicSalesPage";
+import { AcademyCoursesInstitutionalPage } from "./pages/AcademyCoursesInstitutionalPage";
 import { AcademyStoreCheckoutPage } from "./pages/AcademyStoreCheckoutPage";
+import { AccountHubPage } from "./pages/AccountHubPage";
 import { CoursesCatalogPage } from "./pages/CoursesCatalogPage";
-import { AdminCourseContentPage } from "./pages/AdminCourseContentPage";
-import { AdminCoursesPage } from "./pages/AdminCoursesPage";
-import { ClientDashboard, FreelancerDashboard } from "./pages/DashboardPages";
+import { AcademyOpsCrmRedirect } from "./pages/AcademyOpsCrmRedirect";
+import { FreelancerDashboard } from "./pages/DashboardPages";
+import { AgencyClientPortalLayout } from "./components/AgencyClientPortalLayout";
+import { AgencyClientPortalHome } from "./pages/agency-client/AgencyClientPortalHome";
+import { AgencyClientProjectPage } from "./pages/agency-client/AgencyClientProjectPage";
+import { AgencyClientSupportPage } from "./pages/agency-client/AgencyClientSupportPage";
+import { AgencyClientContractPage } from "./pages/agency-client/AgencyClientContractPage";
 import { AdminAmplificaCrmPage } from "./pages/AdminAmplificaCrmPage";
 import { AdminCodeStudioFullPage } from "./pages/AdminCodeStudioFullPage";
 import { AdminOperationsLayout } from "./components/admin/AdminOperationsLayout";
@@ -57,6 +69,7 @@ export default function App() {
         <Route path="formulario" element={<QualificationFormPage />} />
         <Route path="lancamento" element={<Navigate to="/vsl" replace />} />
         <Route path="cursos" element={<AcademyPublicSalesPage />} />
+        <Route path="cursos/institucional" element={<AcademyCoursesInstitutionalPage />} />
         <Route path="cursos/carrinho" element={<AcademyCartPage />} />
         <Route path="cursos/finalizar" element={<AcademyStoreCheckoutPage />} />
         <Route path="cursos/:courseSlug/comprar" element={<AcademyCourseCheckoutPage />} />
@@ -65,18 +78,22 @@ export default function App() {
 
         <Route element={<ShellLayout title="Acesso" />}>
           <Route path="login" element={<AgencyLoginPage />} />
+          <Route path="cliente/entrar" element={<Navigate to="/login" replace />} />
+          <Route path="freelancer/entrar" element={<Navigate to="/login" replace />} />
           <Route path="academia/entrar" element={<AcademyLoginPage />} />
+          <Route path="conta" element={<AccountHubPage />} />
         </Route>
 
-        {/* Admin CRM — auth is inside Amplifica CRM (single login). Code Studio stays agency-ADMIN. */}
+        {/* CRM = app padrão em /agencia/admin (página cheia). Bridge crm/* faz hard-nav. Studio no React. */}
         <Route path={`${AGENCY_APP_BASE}/admin`} element={<AdminOperationsLayout />}>
-          <Route index element={<Navigate to={`${AGENCY_APP_BASE}/admin/crm/dashboard`} replace />} />
+          <Route index element={<AdminAmplificaCrmPage />} />
           <Route path="crm/:view" element={<AdminAmplificaCrmPage />} />
           <Route path="crm" element={<Navigate to={`${AGENCY_APP_BASE}/admin/crm/dashboard`} replace />} />
           <Route element={<ProtectedRoute realm="agency" roles={["ADMIN"]} />}>
             <Route path="studio" element={<AdminCodeStudioFullPage />} />
           </Route>
-          <Route path="*" element={<Navigate to={`${AGENCY_APP_BASE}/admin/crm/dashboard`} replace />} />
+          <Route path="academia/*" element={<AcademyOpsCrmRedirect />} />
+          <Route path="*" element={<AdminAmplificaCrmPage />} />
         </Route>
         <Route
           path={`${AGENCY_APP_BASE}/studio/desenvolvimento`}
@@ -86,13 +103,23 @@ export default function App() {
         {/* ——— Agência (projetos / cliente) ——— */}
         <Route path={AGENCY_APP_BASE} element={<ProtectedRoute realm="agency" />}>
           <Route index element={<AgencyHomeRedirect />} />
-          <Route element={<AgencyShellLayout title="Operação" />}>
-            <Route element={<ProtectedRoute realm="agency" roles={["CLIENT"]} />}>
-              <Route path="cliente" element={<ClientDashboard />} />
+          <Route element={<ProtectedRoute realm="agency" roles={["CLIENT"]} />}>
+            <Route element={<AgencyClientPortalLayout />}>
+              <Route path="cliente" element={<AgencyClientPortalHome />} />
+              <Route path="cliente/projeto" element={<AgencyClientProjectPage />} />
+              <Route path="cliente/suporte" element={<AgencyClientSupportPage />} />
+              <Route path="cliente/contratar" element={<AgencyClientContractPage />} />
+              <Route path="projetos/:projectId" element={<ProjectDetailPage />} />
+              <Route path="perfil" element={<UserProfilePage realm="agency" />} />
             </Route>
+            <Route path="contratar" element={<Navigate to={AGENCY_CLIENT_PORTAL_CONTRACT_PATH} replace />} />
+          </Route>
+          <Route element={<AgencyShellLayout title="Operação" />}>
             <Route path="freelancer" element={<FreelancerDashboard />} />
-            <Route path="projetos/:projectId" element={<ProjectDetailPage />} />
-            <Route path="perfil" element={<UserProfilePage realm="agency" />} />
+            <Route element={<ProtectedRoute realm="agency" roles={["FREELANCER", "ADMIN"]} />}>
+              <Route path="projetos/:projectId" element={<ProjectDetailPage />} />
+              <Route path="perfil" element={<UserProfilePage realm="agency" />} />
+            </Route>
           </Route>
         </Route>
 
@@ -100,10 +127,6 @@ export default function App() {
         <Route path={ACADEMY_APP_BASE} element={<ProtectedRoute realm="academy" />}>
           <Route element={<AcademyShellLayout title="Academia" />}>
             <Route index element={<CoursesCatalogPage />} />
-            <Route element={<ProtectedRoute realm="academy" roles={["ADMIN"]} internalAdminOnly />}>
-              <Route path="admin/cursos" element={<AdminCoursesPage />} />
-              <Route path="admin/cursos/:courseId/conteudo" element={<AdminCourseContentPage />} />
-            </Route>
             <Route path="perfil" element={<UserProfilePage realm="academy" />} />
           </Route>
           <Route path="cursos/:courseSlug/*" element={<CourseStudyPage />} />
@@ -113,12 +136,15 @@ export default function App() {
         <Route path="/app" element={<Navigate to={AGENCY_APP_BASE} replace />} />
         <Route path="/app/admin/cursos/*" element={<LegacyAcademyAdminCursosRedirect />} />
         <Route path="/agencia/admin/cursos/*" element={<LegacyAcademyAdminCursosRedirect />} />
-        <Route path="/app/admin/*" element={<Navigate to={`${AGENCY_APP_BASE}/admin/crm/dashboard`} replace />} />
+        <Route path="/app/admin/*" element={<Navigate to={`${AGENCY_APP_BASE}/admin/?view=dashboard`} replace />} />
         <Route path="/app/cliente" element={<Navigate to={`${AGENCY_APP_BASE}/cliente`} replace />} />
         <Route path="/app/freelancer" element={<Navigate to={`${AGENCY_APP_BASE}/freelancer`} replace />} />
         <Route path="/app/projetos/:projectId" element={<LegacyProjectRedirect />} />
         <Route path="/app/cursos/*" element={<LegacyAcademyCursosRedirect />} />
         <Route path="/academia/loja" element={<Navigate to={ACADEMY_STORE_BASE} replace />} />
+        <Route path="/academia/vitrine" element={<Navigate to={ACADEMY_VITRINE_PATH} replace />} />
+        <Route path="/academia/vitrine/*" element={<Navigate to={ACADEMY_VITRINE_PATH} replace />} />
+        <Route path="/academia/admin/cursos/*" element={<LegacyAcademyAdminCursosRedirect />} />
         <Route path="/academia/comprar" element={<Navigate to={ACADEMY_STORE_BASE} replace />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />

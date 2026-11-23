@@ -936,11 +936,11 @@ const LeadAPISettingsView: React.FC<LeadAPISettingsViewProps> = ({ currentUser, 
 -H "X-API-Key: ${currentUser.apiKey || 'SUA_CHAVE_AQUI'}" \\
 -H "Content-Type: application/json" \\
 -d '{
-  "company": "Amplifica Digital",
-  "name": "Guilherme Santos",
-  "email": "gui@amplifica.com.br",
-  "phone": "11999998888",
-  "estimated_value": 2500,
+  "company": "Ederson Programador",
+  "name": "Ederson Programador",
+  "email": "edersonprogramador@gmail.com",
+  "phone": "",
+  "estimated_value": 0,
   "source": "Site Institucional"
 }'`}
                   </pre>

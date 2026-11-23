@@ -16,7 +16,6 @@ import { ConvertLeadModal } from "../components/admin/ConvertLeadModal";
 import { AdminAutomationEditor } from "../components/admin/AdminAutomationEditor";
 import { AdminFunnelEditor } from "../components/portal/AdminFunnelEditor";
 import "../styles/agency-admin.css";
-import { ClientFunnelPanel } from "../components/portal/ClientFunnelPanel";
 import { apiGet, apiPatch } from "../api";
 
 type DashboardStats = Record<string, number>;
@@ -549,23 +548,6 @@ export function AdminDashboard() {
   return <AdminProjectsPage />;
 }
 
-export function ClientDashboard() {
-  const stats = useDashboard();
-  return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold text-[var(--app-text)]">Área do cliente</h1>
-        <p className="text-[var(--app-text-muted)]">
-          Acompanhe em qual etapa está seu aplicativo, entregáveis concluídos e solicite upgrade de pacote quando
-          precisar.
-        </p>
-      </div>
-      <StatGrid stats={stats} />
-      <ClientFunnelPanel />
-      <ProjectsPanel role="CLIENT" />
-    </div>
-  );
-}
 
 export function FreelancerDashboard() {
   const stats = useDashboard();

@@ -25,7 +25,7 @@ import {
   applyTanarStudyFallback,
   COURSES_UI,
   FL_COURSE,
-  loginPathForContext,
+  logoutHomePathForContext,
   TANAR_COURSE,
   tanarBiblePageForLesson
 } from "@ederson-agencia/shared";
@@ -514,10 +514,16 @@ export function CourseStudyPage() {
             <button
               type="button"
               className="btn-secondary inline-flex min-h-11 min-w-11 items-center justify-center p-2"
-              aria-label="Sair da Academia"
+              aria-label="Encerrar sessão"
+              title="Encerrar sessão"
               onClick={() => {
                 clearSession("academy");
-                navigate(loginPathForContext("academy"), { replace: true });
+                try {
+                  sessionStorage.setItem("academy_logged_out", "1");
+                } catch {
+                  /* ignore */
+                }
+                navigate(logoutHomePathForContext("academy"), { replace: true });
               }}
             >
               <LogOut className="h-4 w-4" />

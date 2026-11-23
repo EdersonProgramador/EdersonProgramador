@@ -35,7 +35,10 @@ async function run(sql, label) {
   }
 }
 
-const passwordHash = await bcrypt.hash('admin123', 10);
+const adminEmail = (process.env.ADMIN_EMAIL || 'edersonprogramador@gmail.com').trim().toLowerCase();
+const adminPassword = process.env.ADMIN_PASSWORD || 'admin123456';
+const adminName = process.env.ADMIN_NAME || 'Ederson Programador';
+const passwordHash = await bcrypt.hash(adminPassword, 10);
 
 try {
   await run(`CREATE EXTENSION IF NOT EXISTS "pgcrypto";`, 'pgcrypto');
@@ -91,6 +94,9 @@ try {
     );
   `, 'system_configs');
 
+  // Remove admin fictício antigo e garante o admin real (mesmo da API).
+  await pool.query(`DELETE FROM public.users WHERE email IN ('admin@amplifica.com', $1)`, [adminEmail]);
+  await pool.query(`DELETE FROM public.users WHERE id = '00000000-0000-0000-0000-000000000001'`);
   await pool.query(
     `
     INSERT INTO public.users (
@@ -99,8 +105,8 @@ try {
       plan_id, subscription_status
     ) VALUES (
       '00000000-0000-0000-0000-000000000001',
-      'Admin Local',
-      'admin@amplifica.com',
+      $2,
+      $3,
       $1,
       'OWNER',
       '00000000-0000-0000-0000-000000000001',
@@ -110,19 +116,15 @@ try {
       'plan1',
       'active'
     )
-    ON CONFLICT (email) DO UPDATE SET
-      password = EXCLUDED.password,
-      role = 'OWNER',
-      owner_id = EXCLUDED.id,
-      accepted_terms = TRUE,
-      plan_id = 'plan1',
-      subscription_status = 'active'
     `,
-    [passwordHash]
+    [passwordHash, adminName, adminEmail]
   );
-  console.log('OK seed admin@amplifica.com / admin123');
+  console.log(`OK seed ${adminEmail} (senha = ADMIN_PASSWORD)`);
 
-  const check = await pool.query(`SELECT email, role, subscription_status, owner_id IS NOT NULL AS has_owner FROM users WHERE email = 'admin@amplifica.com'`);
+  const check = await pool.query(
+    `SELECT email, role, subscription_status, owner_id IS NOT NULL AS has_owner FROM users WHERE email = $1`,
+    [adminEmail]
+  );
   console.log('User:', check.rows[0]);
   console.log('Local DB ready.');
 } catch (err) {

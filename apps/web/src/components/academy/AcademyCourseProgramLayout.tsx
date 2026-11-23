@@ -15,11 +15,14 @@ const copy = ACADEMY_SALES;
 export function AcademyCourseProgramLayout({
   course,
   inCart,
-  onAddToCart
+  onAddToCart,
+  backTo = ACADEMY_STORE_BASE
 }: {
   course: PublicCourseProgram;
   inCart: boolean;
   onAddToCart: () => void;
+  /** Lista de programas (vitrine pública ou /academia/vitrine). */
+  backTo?: string;
 }) {
   const { program } = course;
   const price = (course.priceCents / 100).toLocaleString("pt-BR", {
@@ -29,7 +32,7 @@ export function AcademyCourseProgramLayout({
 
   return (
     <article className="academy-inst-program mx-auto max-w-4xl">
-      <Link to={ACADEMY_STORE_BASE} className="text-sm text-brand-primary hover:underline">
+      <Link to={backTo} className="text-sm text-brand-primary hover:underline">
         ← Voltar aos programas
       </Link>
 

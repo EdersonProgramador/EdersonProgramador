@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { 
   LineChart, 
   Users, 
@@ -61,21 +61,20 @@ import DesignModificationForm from './components/DesignModificationForm';
 import NotificationBell from './components/NotificationBell';
 import GoogleDriveManager from './components/GoogleDriveManager';
 import { SocialPostSchedulerView } from './components/SocialPostSchedulerView';
-import { LogOut, Film, ClipboardList, MessageSquare, HardDrive, CalendarClock } from 'lucide-react';
+import { LogOut, Film, ClipboardList, MessageSquare, HardDrive, CalendarClock, Code2, GraduationCap } from 'lucide-react';
 import { ChatWindow } from './components/ChatWindow';
 
-import LandingPage from './components/LandingPage';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsOfUse from './components/TermsOfUse';
 import CheckoutSuccess from './components/CheckoutSuccess';
 import CheckoutError from './components/CheckoutError';
 
-type ViewType = 'dashboard' | 'leads' | 'clients' | 'finance' | 'design' | 'videos' | 'recordings' | 'partners' | 'demands' | 'tickets' | 'admin' | 'prospecting' | 'productivity' | 'drive' | 'personalization' | 'social_posts' | 'checkout_success' | 'checkout_error' | 'agency_kpis';
+type ViewType = 'dashboard' | 'leads' | 'clients' | 'finance' | 'design' | 'videos' | 'recordings' | 'partners' | 'demands' | 'tickets' | 'admin' | 'prospecting' | 'productivity' | 'drive' | 'personalization' | 'social_posts' | 'checkout_success' | 'checkout_error' | 'agency_kpis' | 'academy';
 
 const VALID_VIEWS = new Set<string>([
   'dashboard', 'leads', 'clients', 'finance', 'design', 'videos', 'recordings', 'partners',
   'demands', 'tickets', 'admin', 'prospecting', 'productivity', 'drive', 'personalization',
-  'social_posts', 'checkout_success', 'checkout_error', 'agency_kpis'
+  'social_posts', 'checkout_success', 'checkout_error', 'agency_kpis', 'academy'
 ]);
 
 function readEmbedBoot() {
@@ -112,7 +111,13 @@ import AgencyKPIsView from './components/AgencyKPIsView';
 import ErrorNotifier from './components/ErrorNotifier';
 import { ToastContainer, toast } from './components/ui/Toast';
 import CookieConsent from './components/CookieConsent';
-import JitsiMeeting from './components/JitsiMeeting';
+import MeetingView from './components/MeetingView';
+import AcademyHubView from './academy/AcademyHubView';
+import {
+  clearMeetingRoomFromUrl,
+  createMeetingRoomId,
+  setMeetingRoomInUrl,
+} from './lib/meetingRoom';
 
 import { storageService } from './lib/storage';
 import { io } from 'socket.io-client';
@@ -136,6 +141,7 @@ const VIEW_LABELS: Record<ViewType, string> = {
   checkout_success: 'Pagamento Confirmado',
   checkout_error: 'Erro no Pagamento',
   agency_kpis: 'KPIs da Agência',
+  academy: 'Academia',
   admin: 'Configurações'
 };
 
@@ -145,13 +151,19 @@ const getEnv = (key: string, defaultValue: string) => {
 };
 
 const DEFAULT_AGENCY_CONFIG = {
-  name: getEnv('VITE_COMPANY_NAME', 'Amplifica CRM'),
+  name: getEnv('VITE_COMPANY_NAME', 'Agência Ederson Programador'),
   primaryColor: getEnv('VITE_PRIMARY_COLOR', '#4f46e5'),
   logoBgColor: '#6366f1',
   logoUrl: '',
   currency: 'R$',
   locale: 'pt-BR'
 };
+
+function normalizeAgencyConfigName(name: unknown): string {
+  const raw = typeof name === "string" ? name.trim() : "";
+  if (!raw || /amplifica/i.test(raw)) return DEFAULT_AGENCY_CONFIG.name;
+  return raw;
+}
 
 // Componente de Chat Flutuante Global
 function FloatingChat({ currentUser }: { currentUser: User }) {
@@ -198,13 +210,26 @@ import { supabase } from './lib/supabaseClient';
 export default function App() {
   const queryClient = useQueryClient();
   const embedBoot = useMemo(() => readEmbedBoot(), []);
-  const isEmbed = embedBoot.embed;
+  // embed=1 (legado iframe) ou sessão SSO via query — UI full-page da agência.
+  const isEmbed = embedBoot.embed || Boolean(embedBoot.embedToken);
   const [agencyConfig, setAgencyConfig] = useState(() => {
     try {
       const saved = storageService.getItem('agency_config');
       if (saved) {
         const parsed = JSON.parse(saved);
-        return { ...DEFAULT_AGENCY_CONFIG, ...parsed };
+        const next = {
+          ...DEFAULT_AGENCY_CONFIG,
+          ...parsed,
+          name: normalizeAgencyConfigName(parsed?.name ?? DEFAULT_AGENCY_CONFIG.name)
+        };
+        if (next.name !== parsed?.name) {
+          try {
+            storageService.setItem('agency_config', JSON.stringify(next));
+          } catch {
+            /* ignore persistence errors */
+          }
+        }
+        return next;
       }
     } catch (e) {
       console.error("Erro ao ler agency_config do storageService:", e);
@@ -212,13 +237,16 @@ export default function App() {
     return DEFAULT_AGENCY_CONFIG;
   });
   const [activeView, setActiveView] = useState<ViewType>(embedBoot.view);
-  const [authView, setAuthView] = useState<'landing' | 'login' | 'signup' | 'privacy' | 'terms'>(
-    isEmbed ? 'login' : 'landing'
-  );
+  const [authView, setAuthView] = useState<'login' | 'signup' | 'privacy' | 'terms'>('login');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
+  const [localLoginFallback, setLocalLoginFallback] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return new URLSearchParams(window.location.search).get('nossso') === '1'
+      || sessionStorage.getItem('crm_login_fallback') === '1';
+  });
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [totalUsers, setTotalUsers] = useState<number | null>(null);
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(storageService.getItem('selected_plan') || null);
   const [stripeSessionId, setStripeSessionId] = useState<string | null>(null);
 
@@ -232,60 +260,6 @@ export default function App() {
     window.addEventListener('popstate', apply);
     return () => window.removeEventListener('popstate', apply);
   }, [isEmbed]);
-
-  const handleStartPlan = async (planId?: string) => {
-    console.log("[DEBUG] handleStartPlan called with planId:", planId);
-    if (!planId) {
-      console.warn("[DEBUG] planId is missing");
-      return;
-    }
-    
-    try {
-      setIsAuthLoading(true);
-      console.log("[DEBUG] Showing toast info...");
-      toast.info("Iniciando checkout seguro...");
-      
-      console.log("[DEBUG] Sending request to /create-anonymous-checkout...");
-      const res = await api.post('/create-anonymous-checkout', { planId });
-      console.log("[DEBUG] Response from server:", res);
-      
-      if (res.url) {
-        console.log("[DEBUG] Redirecting to:", res.url);
-        window.location.href = res.url;
-        return;
-      } else {
-        console.warn("[DEBUG] Response missing url field");
-      }
-    } catch (err: any) {
-      console.error("[DEBUG] Erro ao iniciar checkout:", err);
-      const msg = err.message || "Erro ao iniciar checkout. Verifique a configuração do Stripe.";
-      toast.error(msg);
-    } finally {
-      setIsAuthLoading(false);
-      console.log("[DEBUG] handleStartPlan finished");
-    }
-  };
-
-  // Fetch public stats for landing page
-  useEffect(() => {
-    if (authView === 'landing' && !isAuthenticated) {
-      fetch('/api/public/stats')
-        .then(res => {
-          if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-          return res.json();
-        })
-        .then(data => {
-          console.log("[STATS] Dados públicos carregados:", data);
-          if (data && typeof data.totalUsers === 'number') {
-            setTotalUsers(data.totalUsers);
-          }
-        })
-        .catch(err => {
-          console.error("Erro ao buscar estatísticas públicas:", err);
-          // Opcional: tentar novamente com delay ou falhar silenciosamente para o usuário
-        });
-    }
-  }, [authView, isAuthenticated]);
 
   // Debug auth state in production
   useEffect(() => {
@@ -305,6 +279,18 @@ export default function App() {
     return false;
   });
   const [activeRoomId, setActiveRoomId] = useState<string | null>(null);
+
+  const startVideoMeeting = useCallback(() => {
+    const id = createMeetingRoomId();
+    setMeetingRoomInUrl(id);
+    setActiveRoomId(id);
+    toast.success('Sala criada. Compartilhe o link dentro da reunião.');
+  }, []);
+
+  const exitVideoMeeting = useCallback(() => {
+    setActiveRoomId(null);
+    clearMeetingRoomFromUrl();
+  }, []);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -351,8 +337,6 @@ export default function App() {
       setAuthView('terms');
     }
 
-    (window as any).onJoinMeeting = (id: string) => setActiveRoomId(id);
-    return () => { delete (window as any).onJoinMeeting; };
   }, []);
 
   useEffect(() => {
@@ -469,7 +453,6 @@ export default function App() {
         console.error("Erro ao iniciar checkout automático:", err);
       }
     }
-    setAuthView('landing');
   };
 
   const handleLogin = async (email: string, password: string) => {
@@ -519,7 +502,16 @@ export default function App() {
     setCurrentUser(null);
     storageService.removeItem('agency_user');
     storageService.removeItem('agency_token');
-    setAuthView('landing');
+    // Mesma origem (:5174): limpar sessão web da agência senão /login faz SSO e reentra no CRM.
+    try {
+      localStorage.removeItem('ea_token_agency');
+      localStorage.removeItem('ea_token');
+      sessionStorage.removeItem('crm_login_fallback');
+      sessionStorage.setItem('agency_logged_out', '1');
+    } catch {
+      /* ignore */
+    }
+    window.location.assign('/');
   };
 
   const renderSubscriptionRequired = () => {
@@ -581,6 +573,7 @@ export default function App() {
         storageService.setItem('agency_user', JSON.stringify(user), true);
         setCurrentUser(user);
         setIsAuthenticated(true);
+        setAuthChecked(true);
         stripEmbedTokenFromUrl();
         return;
       } catch (e) {
@@ -594,16 +587,39 @@ export default function App() {
     if (savedUser && token) {
       setCurrentUser(JSON.parse(savedUser));
       setIsAuthenticated(true);
+      setAuthChecked(true);
       return;
     }
 
     setIsAuthenticated(false);
     setCurrentUser(null);
     setAuthView((prev) => {
-      if (prev === 'signup' || prev === 'login' || prev === 'privacy' || prev === 'terms') return prev;
-      return isEmbed ? 'login' : 'landing';
+      if (prev === 'signup' || prev === 'privacy' || prev === 'terms') return prev;
+      return 'login';
     });
+    setAuthChecked(true);
   }, [embedBoot.embedToken, isEmbed]);
+
+  // Sem sessão CRM: /login canônico. Se SSO falhou (nossso), fica no LoginView do CRM (sem loop).
+  useEffect(() => {
+    if (!authChecked || isAuthenticated) return;
+    if (authView === 'privacy' || authView === 'terms') return;
+    if (authView === 'signup' || stripeSessionId) return;
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('nossso') === '1' || sessionStorage.getItem('crm_login_fallback') === '1') {
+      sessionStorage.setItem('crm_login_fallback', '1');
+      setLocalLoginFallback(true);
+      if (params.has('nossso')) {
+        params.delete('nossso');
+        const qs = params.toString();
+        window.history.replaceState({}, '', `${window.location.pathname}${qs ? `?${qs}` : ''}`);
+      }
+      return;
+    }
+
+    window.location.replace(`/login?from=${encodeURIComponent('/agencia/admin/?view=dashboard')}`);
+  }, [authChecked, isAuthenticated, authView, stripeSessionId]);
 
   // Fetch data function
   const fetchData = async (showLoading = true) => {
@@ -731,6 +747,8 @@ export default function App() {
       { id: 'prospecting', label: 'Prospecção', icon: Target, roles: ['ADMIN'] },
       { id: 'productivity', label: 'Produtividade', icon: Activity, roles: ['ADMIN', 'DESIGNER', 'EDITOR', 'OWNER'] },
       { id: 'drive', label: 'Arquivos Drive', icon: HardDrive, roles: ['ADMIN', 'OWNER'] },
+      { id: 'code_studio', label: 'Code Studio', icon: Code2, roles: ['ADMIN', 'OWNER'], external: '/agencia/admin/studio' },
+      { id: 'academy', label: 'Academia', icon: GraduationCap, roles: ['ADMIN', 'OWNER'] },
       { id: 'partners', label: isPartner ? 'Solicitações' : 'Parceiros', icon: Handshake, roles: ['ADMIN', 'PARTNER', 'OWNER'] },
       { id: 'tickets', label: 'Suporte', icon: MessageSquare, roles: ['ADMIN', 'PARTNER', 'OWNER', 'DESIGNER', 'EDITOR'] },
       { id: 'admin', label: 'Configurações', icon: Settings, roles: ['ADMIN', 'OWNER', 'PARTNER', 'DESIGNER', 'EDITOR'] },
@@ -767,6 +785,7 @@ export default function App() {
           onViewChange={setActiveView}
           currentUser={effectiveUser}
           users={users}
+          onStartMeeting={startVideoMeeting}
         />;
       case 'leads': 
         return <LeadsView 
@@ -877,6 +896,8 @@ export default function App() {
           clients={clients}
           users={users}
         />;
+      case 'academy':
+        return <AcademyHubView />;
       case 'admin': 
         return <AdminView 
           integrations={integrations} 
@@ -904,21 +925,18 @@ export default function App() {
         currentUser={effectiveUser} 
         partners={partners}
         partnerRequests={partnerRequests}
+        onStartMeeting={startVideoMeeting}
       />;
     }
   };
 
   if (activeRoomId && !currentUser) {
     return (
-      <JitsiMeeting 
-        roomId={activeRoomId} 
-        currentUser={null} 
-        onExit={() => {
-          setActiveRoomId(null);
-          const url = new URL(window.location.href);
-          url.searchParams.delete('roomId');
-          window.history.pushState({}, '', url.pathname + url.search);
-        }} 
+      <MeetingView
+        key={activeRoomId}
+        roomId={activeRoomId}
+        currentUser={null}
+        onExit={exitVideoMeeting}
       />
     );
   }
@@ -942,10 +960,7 @@ export default function App() {
     if (authView === 'privacy') {
       return (
         <PrivacyPolicy 
-          onBack={() => {
-            setAuthView('landing');
-            window.history.replaceState({}, '', '/');
-          }} 
+          onBack={() => setAuthView('login')} 
           agencyName={agencyConfig.name}
           primaryColor={agencyConfig.primaryColor}
         />
@@ -954,57 +969,42 @@ export default function App() {
     if (authView === 'terms') {
       return (
         <TermsOfUse 
-          onBack={() => {
-            setAuthView('landing');
-            window.history.replaceState({}, '', '/');
-          }} 
+          onBack={() => setAuthView('login')} 
           agencyName={agencyConfig.name}
           primaryColor={agencyConfig.primaryColor}
         />
       );
     }
-    if (authView === 'landing') {
+    if (authView === 'signup' || stripeSessionId || localLoginFallback) {
       return (
         <>
-          <LandingPage 
-            onLogin={() => setAuthView('login')} 
-            onSignup={handleStartPlan} 
-            onPrivacy={() => {
-              setAuthView('privacy');
-              window.history.pushState({}, '', '/privacy');
+          <LoginView 
+            onLogin={async (email, password) => {
+              sessionStorage.removeItem('crm_login_fallback');
+              await handleLogin(email, password);
+            }} 
+            onSignup={handleSignup} 
+            isLoading={isAuthLoading} 
+            initialMode={authView === 'signup' || stripeSessionId ? 'signup' : 'login'}
+            selectedPlanId={selectedPlanId}
+            stripeSessionId={stripeSessionId}
+            onBack={() => {
+              sessionStorage.removeItem('crm_login_fallback');
+              window.location.assign('/login');
             }}
-            onTerms={() => {
+            onViewTerms={() => {
               setAuthView('terms');
               window.history.pushState({}, '', '/terms');
             }}
-            agencyName={agencyConfig.name}
-            primaryColor={agencyConfig.primaryColor}
-            totalUsers={totalUsers}
           />
           <CookieConsent />
         </>
       );
     }
     return (
-      <>
-        <LoginView 
-          onLogin={handleLogin} 
-          onSignup={handleSignup} 
-          isLoading={isAuthLoading} 
-          initialMode={authView === 'login' ? 'login' : 'signup'}
-          selectedPlanId={selectedPlanId}
-          stripeSessionId={stripeSessionId}
-          onBack={() => {
-            setAuthView('landing');
-            window.history.pushState({}, '', '/');
-          }}
-          onViewTerms={() => {
-            setAuthView('terms');
-            window.history.pushState({}, '', '/terms');
-          }}
-        />
-        <CookieConsent />
-      </>
+      <div className="min-h-screen flex items-center justify-center bg-white text-gray-500 text-sm font-medium">
+        {authChecked ? 'Redirecionando para o login…' : 'Carregando…'}
+      </div>
     );
   }
 
@@ -1067,20 +1067,30 @@ export default function App() {
         </div>
 
         <nav className="flex-1 overflow-y-auto p-3 space-y-1">
-          {menuItems.map((item) => (
+          {menuItems.map((item) => {
+            const external = "external" in item ? (item as { external?: string }).external : undefined;
+            const isActive = !external && activeView === item.id;
+            return (
             <button
               key={item.id}
-              onClick={() => setActiveView(item.id as ViewType)}
+              type="button"
+              onClick={() => {
+                if (external) {
+                  window.location.assign(external);
+                  return;
+                }
+                setActiveView(item.id as ViewType);
+              }}
               className={cn(
                 "w-full flex items-center gap-3 p-2.5 rounded-xl transition-all group relative",
-                activeView === item.id 
+                isActive
                   ? "bg-indigo-50/50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 shadow-sm border border-indigo-100/50 dark:border-indigo-500/20"
                   : "text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-indigo-500 dark:hover:text-indigo-400"
               )}
             >
               <item.icon className={cn(
                 "w-5 h-5 min-w-[20px]",
-                activeView === item.id ? "text-indigo-500" : "text-gray-400 group-hover:text-indigo-500"
+                isActive ? "text-indigo-500" : "text-gray-400 group-hover:text-indigo-500"
               )} />
               {isSidebarOpen && (
                 <span className="font-medium text-sm whitespace-nowrap flex items-center gap-2">
@@ -1093,7 +1103,8 @@ export default function App() {
                 </div>
               )}
             </button>
-          ))}
+            );
+          })}
         </nav>
 
         <div className="p-4 border-t border-gray-100 dark:border-gray-800 space-y-3">
@@ -1202,11 +1213,9 @@ export default function App() {
           <div className="flex items-center gap-4">
              {/* Meeting Button Quick Access */}
              {(effectiveUser.role === 'ADMIN' || effectiveUser.role === 'OWNER') && (
-               <button 
-                onClick={() => {
-                  const id = Math.random().toString(36).substr(2, 9);
-                  setActiveRoomId(id);
-                }}
+               <button
+                type="button"
+                onClick={startVideoMeeting}
                 className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl font-bold text-[10px] uppercase tracking-widest border border-indigo-100 dark:border-indigo-500/20"
                >
                  <Film size={12} />
@@ -1297,16 +1306,11 @@ export default function App() {
       )}
 
       {activeRoomId && (
-        <JitsiMeeting 
-          roomId={activeRoomId} 
-          currentUser={currentUser} 
-          onExit={() => {
-            setActiveRoomId(null);
-            // Clear URL param
-            const url = new URL(window.location.href);
-            url.searchParams.delete('roomId');
-            window.history.pushState({}, '', url.pathname + url.search);
-          }} 
+        <MeetingView
+          key={activeRoomId}
+          roomId={activeRoomId}
+          currentUser={currentUser}
+          onExit={exitVideoMeeting}
         />
       )}
     </div>

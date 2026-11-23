@@ -1,6 +1,7 @@
 import { Link, useParams } from "react-router-dom";
 import {
   AGENCY_APP_BASE,
+  AGENCY_CLIENT_FUNNEL_PATH,
   AGENCY_OPS_DELIVERABLE_STATUSES,
   AGENCY_OPS_PIPELINE_STAGES,
   agencyOpsLaneAdminPath,
@@ -281,11 +282,16 @@ export function AdminAgencyOpsLanePage({
       {rawLane === "portal" ? (
         <div className="space-y-3">
           <p className="text-sm text-[var(--app-text-muted)]">
-            Portal do cliente (área logada) — progresso, contrato e checkout.
+            Portal do cliente (área logada) — entregas e contratação em /agencia/cliente/contratar.
           </p>
-          <Link className="btn-secondary inline-flex" to={`${AGENCY_APP_BASE}/cliente`}>
-            Abrir portal do cliente
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            <Link className="btn-secondary inline-flex" to={`${AGENCY_APP_BASE}/cliente`}>
+              Abrir portal do cliente
+            </Link>
+            <Link className="btn-secondary inline-flex" to={AGENCY_CLIENT_FUNNEL_PATH}>
+              Funil de contratação
+            </Link>
+          </div>
         </div>
       ) : null}
 

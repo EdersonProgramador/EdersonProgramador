@@ -1,13 +1,15 @@
 import { Lead, Client, Receivable, ArtOrder, Partner, User, SupportTicket, VideoOrder, ClientDocument, AgencyKPI } from '../types';
 import { storageService } from '../lib/storage';
 
-const API_PREFIX =
-  typeof window !== "undefined" &&
-  (window.location.pathname === "/amplifica-crm" ||
-    window.location.pathname.startsWith("/amplifica-crm/"))
-    ? "/amplifica-crm"
-    : "";
+function resolveApiPrefix(): string {
+  if (typeof window === "undefined") return "";
+  const path = window.location.pathname;
+  if (path === "/agencia/admin" || path.startsWith("/agencia/admin/")) return "/agencia/admin";
+  if (path === "/amplifica-crm" || path.startsWith("/amplifica-crm/")) return "/amplifica-crm";
+  return "";
+}
 
+const API_PREFIX = resolveApiPrefix();
 const API_BASE = `${API_PREFIX}/api`;
 
 function toSnakeCase(obj: any): any {
@@ -34,19 +36,22 @@ function toCamelCase(obj: any): any {
   return obj;
 }
 
-async function request(endpoint: string, method: string, data?: any) {
+async function request(
+  endpoint: string,
+  method: string,
+  data?: any,
+  opts?: { silent?: boolean }
+) {
   const url = `${API_BASE}${endpoint}`;
-  
-  // Get user/token from storageService
-  const storedUser = storageService.getItem('agency_user');
-  const user = storedUser ? JSON.parse(storedUser) : null;
+  const silent = opts?.silent === true;
+
   const token = storageService.getItem('agency_token');
-  
+
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
   };
-  
+
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
@@ -57,8 +62,7 @@ async function request(endpoint: string, method: string, data?: any) {
       headers,
       body: data ? JSON.stringify(toSnakeCase(data)) : undefined,
     });
-    
-    // Handle 429 Too Many Requests
+
     if (res.status === 429) {
       console.warn(`[API] Rate limit exceeded for ${url}`);
       throw new Error('Rate exceeded');
@@ -75,19 +79,17 @@ async function request(endpoint: string, method: string, data?: any) {
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       const errorMessage = err.error || `Failed to ${method} ${endpoint}`;
-      
-      // Auto-logout on 401 (if not on login/signup)
+
       if (res.status === 401 && !endpoint.includes('/login') && !endpoint.includes('/signup')) {
         if ((window as any).onLogout) {
           (window as any).onLogout();
         }
       }
-      
-      // Trigger global error notifier (skip for soft errors like SYSTEM_EMPTY)
-      if ((window as any).reportAppError && err.code !== 'SYSTEM_EMPTY') {
+
+      if (!silent && (window as any).reportAppError && err.code !== 'SYSTEM_EMPTY') {
         (window as any).reportAppError(errorMessage, `Endpoint: ${endpoint} (${method})`);
       }
-      
+
       const error: any = new Error(errorMessage);
       error.code = err.code;
       throw error;
@@ -95,7 +97,7 @@ async function request(endpoint: string, method: string, data?: any) {
     const result = await res.json();
     return toCamelCase(result);
   } catch (error) {
-    console.error(`[API] Falha na requisição para ${url}:`, error);
+    if (!silent) console.error(`[API] Falha na requisição para ${url}:`, error);
     throw error;
   }
 }
@@ -421,9 +423,17 @@ export const api = {
     let attempt = 0;
     while (attempt <= maxRetries) {
       try {
-        return await request('/user-notifications', 'GET');
+        const data = await request('/user-notifications', 'GET', undefined, { silent: true });
+        return Array.isArray(data) ? data : [];
       } catch (error: any) {
-        if (attempt === maxRetries || (!error.message?.includes('HTML') && !error.message?.includes('Rate exceeded'))) throw error;
+        if (attempt === maxRetries) {
+          console.warn('[API] notificações indisponíveis:', error?.message || error);
+          return [];
+        }
+        if (!error.message?.includes('HTML') && !error.message?.includes('Rate exceeded')) {
+          console.warn('[API] notificações:', error?.message || error);
+          return [];
+        }
         attempt++;
         await new Promise(resolve => setTimeout(resolve, 2000 * attempt));
       }

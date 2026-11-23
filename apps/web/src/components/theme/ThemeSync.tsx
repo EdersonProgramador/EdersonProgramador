@@ -7,7 +7,11 @@ export function ThemeSync() {
 
   useEffect(() => {
     // Agency OS forces its own light canvas — don't fight it with night funnel theme.
-    if (document.body.classList.contains("agency-os-opus-active")) {
+    if (
+      document.body.classList.contains("agency-os-opus-active") ||
+      document.body.classList.contains("academy-sales-active") ||
+      document.body.classList.contains("academy-portal-active")
+    ) {
       applySiteTheme("day");
       return;
     }

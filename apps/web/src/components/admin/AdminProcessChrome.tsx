@@ -39,7 +39,7 @@ export function AdminProcessBreadcrumb() {
   return (
     <nav className="admin-process__crumb mb-3" aria-label="Processo">
       <Link to={withProjectQuery(ADMIN)} className="admin-process__crumb-link">
-        Amplifica CRM
+        Agência Ederson Programador
       </Link>
       {ctx ? (
         <>

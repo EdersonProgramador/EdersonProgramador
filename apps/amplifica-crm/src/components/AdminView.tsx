@@ -47,6 +47,7 @@ import { ChatWindow } from "./ChatWindow";
 import { EmailConfigView } from "./EmailConfigView";
 
 import { ToastContainer, toast } from "./ui/Toast";
+import { AGENCY_PLANS, getAgencyPlan } from "../plans";
 
 import { meetLogService } from "../services/meetLogService";
 import PersonalizationView from "./PersonalizationView";
@@ -344,52 +345,28 @@ function SubscriptionView({ currentUser }: { currentUser: User }) {
     }
   };
 
-  const plans = [
-    {
-      id: "plan1",
-      name: "Growth Pack",
-      price: "147",
-      features: [
-        "Até 3 membros",
-        "Dashboard",
-        "Financeiro + Lembretes",
-        "Workflow Criativo",
-        "Formulários",
-      ],
-      isCurrent: currentPlanId === "plan1",
-    },
-    {
-      id: "plan2",
-      name: "Elite Scale",
-      price: "247",
-      features: [
-        "Até 8 membros",
-        "Google Drive",
-        "Agendamento Social",
-        "Tudo do Growth Pack",
-      ],
-      isCurrent: currentPlanId === "plan2",
-    },
-  ];
+  const plans = AGENCY_PLANS.map((plan) => ({
+    ...plan,
+    isCurrent: currentPlanId === plan.id,
+  }));
+  const currentPlan = getAgencyPlan(currentPlanId);
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="bg-gradient-to-br from-indigo-600 to-blue-700 rounded-3xl p-10 text-white shadow-2xl relative overflow-hidden">
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 font-[Poppins,system-ui,sans-serif]">
+      <div className="bg-gradient-to-br from-indigo-600 to-indigo-800 rounded-3xl p-10 text-white shadow-2xl relative overflow-hidden">
         <div className="relative z-10">
           <h2 className="text-3xl font-black mb-2 uppercase tracking-tighter">
-            Assinatura Atual
+            Pacote atual
           </h2>
           <p className="text-indigo-100 font-medium mb-6">
-            Você está no plano{" "}
-            <span className="font-bold underline">
-              {currentPlanId === "plan1" ? "Growth Pack" : "Elite Scale"}
-            </span>
+            Você está no pacote{" "}
+            <span className="font-bold underline">{currentPlan.name}</span>
           </p>
           <div className="flex flex-wrap gap-4 items-center mb-6">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20 text-xs font-bold uppercase tracking-widest">
               {currentUser.subscriptionStatus === "active"
-                ? "Assinatura Ativa"
-                : "Assinatura Inativa"}
+                ? "Contrato ativo"
+                : "Contrato inativo"}
             </div>
             {currentUser.subscriptionStatus === "active" && (
               <button
@@ -406,24 +383,27 @@ function SubscriptionView({ currentUser }: { currentUser: User }) {
         <Zap className="absolute top-1/2 right-10 -translate-y-1/2 text-white/10 w-48 h-48 -rotate-12" />
       </div>
 
-      <div className="grid md:grid-cols-2 gap-8">
+      <div className="grid md:grid-cols-3 gap-6">
         {plans.map((plan) => (
           <div
             key={plan.id}
             className={cn(
-              "p-8 rounded-[3rem] border transition-all duration-300 flex flex-col",
+              "p-8 rounded-[2rem] border transition-all duration-300 flex flex-col",
               plan.isCurrent
-                ? "bg-white dark:bg-gray-900 border-indigo-200 dark:border-indigo-900 shadow-xl"
+                ? "bg-white dark:bg-gray-900 border-indigo-200 dark:border-indigo-900 shadow-xl ring-1 ring-indigo-600/10"
                 : "bg-gray-50/50 dark:bg-gray-800/50 border-transparent hover:bg-white dark:hover:bg-gray-900 hover:border-gray-100 dark:hover:border-gray-800 hover:shadow-lg",
             )}
           >
-            <div className="flex justify-between items-start mb-8 transition-colors">
+            <div className="flex justify-between items-start mb-6 transition-colors">
               <div>
                 <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight mb-1">
                   {plan.name}
                 </h3>
-                <div className="text-lg font-bold text-gray-400">
-                  R$ {plan.price}/mês
+                <div className="text-2xl font-black text-indigo-600 tracking-tight">
+                  R$ {plan.price}
+                </div>
+                <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mt-1">
+                  {plan.sub}
                 </div>
               </div>
               {plan.isCurrent && (
@@ -433,13 +413,13 @@ function SubscriptionView({ currentUser }: { currentUser: User }) {
               )}
             </div>
 
-            <ul className="space-y-4 mb-10 flex-grow">
+            <ul className="space-y-3 mb-8 flex-grow">
               {plan.features.map((f, idx) => (
                 <li
                   key={idx}
-                  className="flex items-center gap-3 text-sm font-bold text-gray-600 dark:text-gray-400"
+                  className="flex items-start gap-3 text-sm font-medium text-gray-600 dark:text-gray-400"
                 >
-                  <CheckCircle size={16} className="text-indigo-500" />
+                  <CheckCircle size={16} className="text-indigo-500 mt-0.5 shrink-0" />
                   {f}
                 </li>
               ))}
@@ -449,9 +429,9 @@ function SubscriptionView({ currentUser }: { currentUser: User }) {
               <button
                 disabled={loading}
                 onClick={() => handleUpgrade(plan.id)}
-                className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
+                className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
               >
-                {loading ? "Processando..." : "Mudar para este plano"}
+                {loading ? "Processando..." : "Selecionar este pacote"}
               </button>
             )}
           </div>
@@ -957,7 +937,7 @@ function FormIntegrationsView() {
     let code = "";
     if (type === "html") {
       code = `
-<!-- Formulário de Captura Amplifica CRM - Estilo Minimalista -->
+<!-- Formulário de Captura Agência Ederson Programador - Estilo Minimalista -->
 <style>
   .amplifica-form { font-family: sans-serif; max-width: 400px; padding: 20px; border-radius: 12px; background: #fff; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
   .amplifica-field { margin-bottom: 15px; }
@@ -3090,7 +3070,7 @@ export default function AdminView({
                       Conformidade LGPD
                     </h4>
                     <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
-                      O Amplifica CRM utiliza essa funcionalidade para garantir
+                      A Agência Ederson Programador utiliza essa funcionalidade para garantir
                       que sua agência esteja em conformidade por padrão,
                       solicitando consentimento antes de coletar dados não
                       essenciais.
@@ -3555,7 +3535,7 @@ export default function AdminView({
                 setInviteData({ ...inviteData, email: e.target.value })
               }
               className="w-full px-4 py-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-600"
-              placeholder="contato@amplifica.com"
+              placeholder="contato@edersonprogramador.com.br"
             />
           </div>
           <div className="space-y-1">

@@ -156,7 +156,7 @@ export function EmailConfigView() {
                 value={config.fromAddress || ''}
                 onChange={e => setConfig({ ...config, fromAddress: e.target.value })}
                 className="w-full mt-1 px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl"
-                placeholder="Ex: Amplifica CRM <crm@seu-dominio.com>"
+                placeholder="Ex: Agência Ederson Programador <contato@seu-dominio.com>"
               />
             </div>
           </div>

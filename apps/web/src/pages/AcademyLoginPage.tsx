@@ -5,11 +5,9 @@ export function AcademyLoginPage() {
   return (
     <AuthLoginView
       context="academy"
+      variant="crm"
       allowRegister={false}
-      alternateLogin={{
-        href: "/login",
-        label: "Sou cliente — entrar na Agência"
-      }}
+      subtitle="Acesse suas trilhas, acompanhe o progresso e baixe seus certificados."
     />
   );
 }

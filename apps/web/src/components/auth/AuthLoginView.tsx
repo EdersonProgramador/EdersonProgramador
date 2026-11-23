@@ -1,13 +1,59 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import type { AuthContext, AuthRouteState } from "@ederson-agencia/shared";
-import { ACADEMY_STORE_BASE, loginPathForContext, resolvePostLoginPath } from "@ederson-agencia/shared";
+import {
+  ACADEMY_STORE_BASE,
+  AGENCY_CRM_BASE,
+  AGENCY_SYSTEM_HOME,
+  BRAND_IDENTITY,
+  loginPathForContext,
+  ACCOUNT_HUB_PATH,
+  resolvePostLoginPath
+} from "@ederson-agencia/shared";
 import { Lock, LogIn, Mail, Zap } from "lucide-react";
-import { ApiError, apiPost, type LoginResponse } from "../../api";
+import { ApiError, apiPost, getStoredToken, type LoginResponse } from "../../api";
 import { normalizeAuthFields, warmAcademyStoreTestAccount } from "../../lib/academy-store-auth";
 import { BrandLogo } from "../brand/BrandLogo";
 import { useAcademySession, useAgencySession, useAuthStore } from "../../stores/authStore";
 import "../../styles/crm-auth-login.css";
+
+/** Abre o CRM com SSO embed. Se falhar, usa ?nossso=1 para o CRM mostrar login local (sem loop). */
+async function assignCrmWithSso(dest: string) {
+  const target = new URL(dest, window.location.origin);
+  if (!target.pathname.startsWith(AGENCY_CRM_BASE)) {
+    window.location.assign(dest);
+    return;
+  }
+  let ssoOk = false;
+  try {
+    // Sempre same-origin HTTP do Vite (:5174). https://localhost:5174 não tem TLS → 404/SSL.
+    const embedUrl = `${window.location.protocol}//${window.location.host}${AGENCY_CRM_BASE}/api/embed/session`;
+    const res = await Promise.race([
+      fetch(embedUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: "{}"
+      }),
+      new Promise<null>((resolve) => setTimeout(() => resolve(null), 4000))
+    ]);
+    if (res && "ok" in res && res.ok) {
+      const data = (await res.json()) as { token?: string; user?: unknown };
+      if (data.token && data.user) {
+        target.searchParams.set("embedToken", data.token);
+        target.searchParams.set("embedUser", JSON.stringify(data.user));
+        ssoOk = true;
+      }
+    } else if (res && "status" in res) {
+      console.warn("[SSO] embed/session falhou:", res.status, embedUrl);
+    }
+  } catch (err) {
+    console.warn("[SSO] embed/session erro:", err);
+  }
+  if (!ssoOk) {
+    target.searchParams.set("nossso", "1");
+  }
+  window.location.assign(target.pathname + target.search);
+}
 
 type AuthLoginViewProps = {
   context: AuthContext;
@@ -15,7 +61,7 @@ type AuthLoginViewProps = {
   title?: string;
   subtitle?: string;
   alternateLogin?: { href: string; label: string };
-  /** Amplifica CRM visual theme (agency admin entry). */
+  /** Tema indigo/branco da área do cliente (agência). */
   variant?: "default" | "crm";
 };
 
@@ -30,7 +76,8 @@ export function AuthLoginView({
   const navigate = useNavigate();
   const location = useLocation();
   const routeState = (location.state ?? {}) as AuthRouteState;
-  const returnPath = routeState.from;
+  const fromQuery = new URLSearchParams(location.search).get("from") || undefined;
+  const returnPath = routeState.from ?? fromQuery;
   const setSession = useAuthStore((s) => s.setSession);
   const agencySession = useAgencySession();
   const academySession = useAcademySession();
@@ -38,29 +85,71 @@ export function AuthLoginView({
   const [mode, setMode] = useState<"login" | "register">("login");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
 
   const isAgency = context === "agency";
-  const isCrm = variant === "crm" && isAgency;
-  const heading = title ?? (isCrm ? null : isAgency ? "Área do cliente — Agência" : "Academia interna");
+  const isCrm = variant === "crm";
+  const heading = title ?? (isCrm ? null : isAgency ? "Sistema da agência" : "Academia interna");
   const description =
     subtitle ??
     (isCrm
       ? null
       : isAgency
-        ? "Acompanhe pacotes, etapas e entregas do seu projeto contratado."
+        ? "Acesso à operação e ao sistema da agência Ederson Programador."
         : "Acesso restrito a alunos matriculados. Use o e-mail cadastrado pelo administrador.");
+  const crmSubtitle =
+    subtitle ??
+    (isAgency
+      ? mode === "login"
+        ? "Equipe, clientes e freelancers — o destino segue o seu perfil."
+        : "Cadastro de cliente na agência"
+      : "Acesse suas trilhas, acompanhe o progresso e baixe seus certificados.");
+
+  async function goToDestination(role: LoginResponse["user"]["role"]) {
+    if (!returnPath) {
+      const { agency, academy } = useAuthStore.getState();
+      const dualRealm =
+        context === "agency"
+          ? Boolean(academy?.user && getStoredToken("academy"))
+          : Boolean(agency?.user && getStoredToken("agency"));
+      if (dualRealm) {
+        setRedirecting(true);
+        navigate(ACCOUNT_HUB_PATH, { replace: true });
+        return;
+      }
+    }
+
+    const dest = resolvePostLoginPath(role, context, returnPath);
+    const crmRoot = AGENCY_SYSTEM_HOME.split("?")[0] || "/agencia/admin/";
+    // CRM é app em página cheia (sem iframe). Code Studio continua no React.
+    if (context === "agency" && dest.startsWith(crmRoot.replace(/\/?$/, "")) && !dest.includes("/studio")) {
+      setRedirecting(true);
+      await assignCrmWithSso(dest);
+      return;
+    }
+    navigate(dest, { replace: true });
+  }
 
   useEffect(() => {
-    if (!sessionForContext?.user) return;
-    navigate(resolvePostLoginPath(sessionForContext.user.role, context, returnPath), { replace: true });
-  }, [sessionForContext, context, navigate, returnPath]);
+    if (!sessionForContext?.user || redirecting) return;
+    // Após logout, não reentrar automático (agência SSO / academia).
+    if (context === "agency" && sessionStorage.getItem("agency_logged_out") === "1") {
+      return;
+    }
+    if (context === "academy" && sessionStorage.getItem("academy_logged_out") === "1") {
+      return;
+    }
+    void goToDestination(sessionForContext.user.role);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- session/context drive redirect
+  }, [sessionForContext, context, returnPath]);
 
   useEffect(() => {
+    // Só em background — nunca no caminho crítico do login (API remota já adiciona latência).
     if (context === "academy") void warmAcademyStoreTestAccount();
   }, [context]);
 
-  function goAfterAuth(data: LoginResponse) {
-    navigate(resolvePostLoginPath(data.user.role, context, returnPath), { replace: true });
+  async function goAfterAuth(data: LoginResponse) {
+    await goToDestination(data.user.role);
   }
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -72,24 +161,27 @@ export function AuthLoginView({
     try {
       if (mode === "login") {
         const { email, password } = normalizeAuthFields(form.get("email"), form.get("password"));
-        if (context === "academy") await warmAcademyStoreTestAccount();
+        sessionStorage.removeItem("agency_logged_out");
+        sessionStorage.removeItem("academy_logged_out");
         const data = await apiPost<LoginResponse>("/auth/login", {
           email,
           password,
           context
         });
         setSession(context, data);
-        goAfterAuth(data);
+        await goAfterAuth(data);
         return;
       }
 
+      const companyVal = form.get("company");
+      const githubVal = form.get("github");
       const data = await apiPost<LoginResponse>("/auth/register", {
-        name: form.get("name"),
-        email: form.get("email"),
-        password: form.get("password"),
-        role: form.get("role") ?? "CLIENT",
-        company: form.get("company"),
-        github: form.get("github"),
+        name: String(form.get("name") ?? "").trim(),
+        email: String(form.get("email") ?? "").trim(),
+        password: String(form.get("password") ?? ""),
+        role: "CLIENT",
+        company: companyVal == null || String(companyVal).trim() === "" ? undefined : String(companyVal).trim(),
+        github: githubVal == null ? "" : String(githubVal).trim(),
         acceptTerms: form.get("acceptTerms") === "on",
         context: "agency"
       });
@@ -112,6 +204,22 @@ export function AuthLoginView({
   }
 
   if (isCrm) {
+    if (redirecting) {
+      return (
+        <div className="crm-auth">
+          <div className="crm-auth__brand">
+            <div className="crm-auth__mark" aria-hidden>
+              <Zap className="h-7 w-7" />
+            </div>
+            <h1 className="crm-auth__title">
+              {BRAND_IDENTITY.nameDisplay.primary}{" "}
+              <span>{BRAND_IDENTITY.nameDisplay.secondary}</span>
+            </h1>
+            <p className="crm-auth__subtitle">Abrindo o sistema…</p>
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="crm-auth">
         <div className="crm-auth__brand">
@@ -119,11 +227,10 @@ export function AuthLoginView({
             <Zap className="h-7 w-7" />
           </div>
           <h1 className="crm-auth__title">
-            Amplifica <span>CRM</span>
+            {BRAND_IDENTITY.nameDisplay.primary}{" "}
+            <span>{BRAND_IDENTITY.nameDisplay.secondary}</span>
           </h1>
-          <p className="crm-auth__subtitle">
-            {mode === "login" ? "Autenticação de usuário" : "Novo registro"}
-          </p>
+          <p className={`crm-auth__subtitle${!isAgency ? " crm-auth__subtitle--sentence" : ""}`}>{crmSubtitle}</p>
         </div>
 
         <div className="crm-auth__card">
@@ -176,7 +283,7 @@ export function AuthLoginView({
 
             <div>
               <label className="crm-auth__label" htmlFor="crm-auth-email">
-                E-mail corporativo
+                {isAgency ? "E-mail corporativo" : "E-mail da matrícula"}
               </label>
               <div className="crm-auth__field">
                 <span className="crm-auth__icon">
@@ -229,7 +336,11 @@ export function AuthLoginView({
                 "Aguarde…"
               ) : (
                 <>
-                  {mode === "login" ? "Entrar no Sistema" : "Criar minha conta"}
+                  {mode === "login"
+                    ? isAgency
+                      ? "Entrar no sistema"
+                      : "Entrar na Academia"
+                    : "Criar minha conta"}
                   <LogIn size={20} aria-hidden />
                 </>
               )}
@@ -238,6 +349,7 @@ export function AuthLoginView({
         </div>
 
         <div className="crm-auth__footer">
+          <p className="crm-auth__hint">Agência · Academia · {BRAND_IDENTITY.name}</p>
           {alternateLogin ? (
             <p>
               <Link to={alternateLogin.href} state={returnPath ? { from: returnPath } : undefined}>
@@ -246,9 +358,10 @@ export function AuthLoginView({
             </p>
           ) : null}
           <p>
-            <Link to="/">Voltar ao site</Link>
+            <Link to={context === "academy" ? ACADEMY_STORE_BASE : "/"}>
+              {context === "academy" ? "Retornar" : "Voltar ao site"}
+            </Link>
           </p>
-          <p className="crm-auth__hint">Acesso à operação Amplifica CRM</p>
         </div>
       </div>
     );
@@ -292,10 +405,7 @@ export function AuthLoginView({
         {mode === "register" && allowRegister ? (
           <>
             <input className="input" name="name" placeholder="Nome completo" required />
-            <select className="input" name="role" defaultValue="CLIENT">
-              <option value="CLIENT">Sou cliente</option>
-              <option value="FREELANCER">Sou freelancer</option>
-            </select>
+            <input type="hidden" name="role" value="CLIENT" />
             <input className="input" name="company" placeholder="Empresa (opcional)" />
             <input className="input" name="github" placeholder="GitHub (opcional)" />
           </>
@@ -339,8 +449,11 @@ export function AuthLoginView({
           </p>
         ) : null}
         <p>
-          <Link to="/" className="text-brand-primary hover:underline">
-            Voltar ao site
+          <Link
+            to={context === "academy" ? ACADEMY_STORE_BASE : "/"}
+            className="text-brand-primary hover:underline"
+          >
+            {context === "academy" ? "Retornar" : "Voltar ao site"}
           </Link>
         </p>
         {!allowRegister && mode === "login" ? (

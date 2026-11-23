@@ -98,8 +98,16 @@ function tokenForRequest(url: string): string | null {
   if (isAgencyApiPath(url)) return agencyToken;
   if (isAcademyApiPath(url)) return academyToken ?? agencyToken;
   const pathname = typeof window !== "undefined" ? window.location.pathname : "";
+  if (pathname.startsWith("/agencia/admin/academia")) return agencyToken ?? academyToken;
   if (pathname.startsWith("/academia")) return academyToken ?? agencyToken;
-  if (pathname.startsWith("/agencia") || pathname === "/login") return agencyToken;
+  if (
+    pathname.startsWith("/agencia") ||
+    pathname === "/login" ||
+    pathname === "/cliente/entrar" ||
+    pathname === "/freelancer/entrar"
+  ) {
+    return agencyToken;
+  }
   return agencyToken ?? academyToken;
 }
 
@@ -107,8 +115,16 @@ function realmForRequest(url: string): AuthContext | "unknown" {
   if (isAgencyApiPath(url)) return "agency";
   if (isAcademyApiPath(url)) return "academy";
   const pathname = typeof window !== "undefined" ? window.location.pathname : "";
+  if (pathname.startsWith("/agencia/admin/academia")) return "agency";
   if (pathname.startsWith("/academia")) return "academy";
-  if (pathname.startsWith("/agencia") || pathname === "/login") return "agency";
+  if (
+    pathname.startsWith("/agencia") ||
+    pathname === "/login" ||
+    pathname === "/cliente/entrar" ||
+    pathname === "/freelancer/entrar"
+  ) {
+    return "agency";
+  }
   return "unknown";
 }
 

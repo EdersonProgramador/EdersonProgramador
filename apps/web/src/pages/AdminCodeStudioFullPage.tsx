@@ -1,25 +1,46 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
-import { DEV_CODE_STUDIO_FIELD_ID, type BrandingWorkspaceData } from "@ederson-agencia/shared";
+import { useSearchParams } from "react-router-dom";
+import { BRAND_IDENTITY, DEV_CODE_STUDIO_FIELD_ID, type BrandingWorkspaceData } from "@ederson-agencia/shared";
+import { Briefcase, Code2 } from "lucide-react";
 import { ApiError, apiGet } from "../api";
 import { getProjectWorkspace } from "../api/project-workspace-api";
 import { ADMIN_BASE } from "../components/admin/AdminOperationsLayout";
 import { DevelopmentCodeStudio } from "../components/admin/DevelopmentCodeStudio";
 import { mergeProjectWorkspaceFields, stripStudioFieldWhileLoading } from "../lib/dev-code-studio-workspace-fields";
+import { applySiteTheme } from "../stores/themeStore";
+import "../styles/dev-code-studio.css";
 
 type ProjectOption = { id: string; title: string };
 
-/** IDE em tela cheia (sem menu lateral da operação) — abre em nova aba a partir do studio. */
+const CRM_PRIMARY = "#4f46e5";
+
+/** IDE em tela cheia — visual alinhado ao CRM (Poppins / indigo / branco). */
 export function AdminCodeStudioFullPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const projectId = searchParams.get("project") ?? "";
-  const q = projectId ? `?project=${encodeURIComponent(projectId)}` : "";
 
   const [projects, setProjects] = useState<ProjectOption[]>([]);
   const [fields, setFields] = useState<BrandingWorkspaceData>({});
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    applySiteTheme("day");
+    document.body.classList.add("crm-studio-active");
+    try {
+      const key = "dev-code-studio-editor-theme";
+      const current = localStorage.getItem(key);
+      if (!current || current === "auto" || current === "vs-dark" || current === "dracula") {
+        localStorage.setItem(key, "vs");
+      }
+    } catch {
+      /* ignore */
+    }
+    return () => {
+      document.body.classList.remove("crm-studio-active");
+    };
+  }, []);
 
   useEffect(() => {
     void apiGet<{ projects: ProjectOption[] }>("/agency/projects").then((res) =>
@@ -61,13 +82,25 @@ export function AdminCodeStudioFullPage() {
         : undefined;
 
   return (
-    <div className="dev-code-studio-fullpage fixed inset-0 z-[100] flex flex-col bg-[var(--app-bg-solid)]">
-      <header className="dev-code-studio-fullpage__bar flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-[var(--app-border)] px-3 py-2">
-        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-2 text-xs">
-          <label className="flex min-w-0 items-center gap-2">
-            <span className="shrink-0 text-[var(--app-text-muted)]">Projeto</span>
+    <div className="dev-code-studio-fullpage dev-code-studio-fullpage--crm fixed inset-0 z-[100] flex flex-col">
+      <header className="dev-code-studio-fullpage__crm-top">
+        <div className="dev-code-studio-fullpage__crm-brand">
+          <div className="dev-code-studio-fullpage__crm-mark" style={{ backgroundColor: CRM_PRIMARY }} aria-hidden>
+            <Briefcase className="h-5 w-5 text-white" />
+          </div>
+          <div className="min-w-0">
+            <p className="dev-code-studio-fullpage__crm-name">{BRAND_IDENTITY.primarySystem.name}</p>
+            <p className="dev-code-studio-fullpage__crm-eyebrow">
+              <Code2 className="h-3.5 w-3.5" aria-hidden />
+              Code Studio
+            </p>
+          </div>
+        </div>
+
+        <div className="dev-code-studio-fullpage__crm-tools">
+          <label className="dev-code-studio-fullpage__crm-field">
+            <span>Projeto</span>
             <select
-              className="input max-w-[14rem] min-w-[10rem] text-xs"
               value={projectId}
               onChange={(e) => onProjectChange(e.target.value)}
               aria-label="Projeto para salvar no banco"
@@ -80,24 +113,22 @@ export function AdminCodeStudioFullPage() {
               ))}
             </select>
           </label>
-          {projectId ? (
-            <span className="text-[var(--app-text-muted)]">Workspace salvo no banco</span>
-          ) : (
-            <span className="text-amber-700 dark:text-amber-300">Vincule um projeto para persistir pastas e arquivos no banco</span>
-          )}
-          {loading ? <span className="text-[var(--app-text-muted)]">Carregando…</span> : null}
-          {error ? <span className="text-red-500">{error}</span> : null}
-          {saving ? <span className="text-[var(--app-text-muted)]">Salvando…</span> : null}
+          <p className="dev-code-studio-fullpage__crm-hint">
+            {projectId
+              ? "Workspace salvo no banco"
+              : "Vincule um projeto para persistir pastas e arquivos"}
+            {loading ? " · Carregando…" : ""}
+            {saving ? " · Salvando…" : ""}
+            {error ? ` · ${error}` : ""}
+          </p>
         </div>
-        <Link
-          to={`${ADMIN_BASE}${q}`}
-          className="shrink-0 rounded-md border border-[var(--app-border)] bg-[var(--app-panel)] px-2 py-1 text-xs text-[var(--app-text)] hover:bg-[var(--app-hover)]"
-        >
-          Amplifica CRM
-        </Link>
+
+        <a href={`${ADMIN_BASE}/?view=dashboard`} className="dev-code-studio-fullpage__crm-back">
+          Voltar ao sistema
+        </a>
       </header>
 
-      <div className="dev-code-studio-shell dev-code-studio-shell--fill min-h-0 flex-1 p-2 sm:p-3">
+      <div className="dev-code-studio-shell dev-code-studio-shell--fill dev-code-studio-shell--crm min-h-0 flex-1">
         <DevelopmentCodeStudio
           key={projectId || "local"}
           projectId={projectId || undefined}
@@ -106,6 +137,7 @@ export function AdminCodeStudioFullPage() {
           onStoredChange={(raw) => setFields((prev) => ({ ...prev, [DEV_CODE_STUDIO_FIELD_ID]: raw }))}
           onError={setError}
           onSavingChange={setSaving}
+          uiVariant="crm"
         />
       </div>
     </div>

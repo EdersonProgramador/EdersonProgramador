@@ -60,9 +60,10 @@ export async function getPublicCourseProgram(slug: string): Promise<PublicCourse
     title: course.title,
     summary: course.summary,
     priceCents: course.priceCents!,
-    currency: course.currency,
+    currency: course.currency || "BRL",
     coverUrl: course.coverUrl,
     contentReady: await courseContentReady(course),
+    purchasable: true,
     program: mergeProgramContent(course)
   };
 }

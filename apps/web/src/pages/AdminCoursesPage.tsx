@@ -1,7 +1,12 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { BookOpen, LayoutList, Plus, X } from "lucide-react";
-import { ACADEMY_ADMIN_COURSES_BASE, ACADEMY_APP_BASE, COURSE_COVER, COURSES_UI } from "@ederson-agencia/shared";
+import {
+  ACADEMY_APP_BASE,
+  agencyCrmAcademyContentPath,
+  COURSE_COVER,
+  COURSES_UI
+} from "@ederson-agencia/shared";
 import { apiGet, apiPatch, apiPost } from "../api";
 import { CourseCover } from "../components/courses/CourseCover";
 import "../styles/course-admin.css";
@@ -183,7 +188,7 @@ export function AdminCoursesPage() {
         const res = await apiPost<{ course: { id: string } }>("/admin/courses", payload);
         setMessage(UI.created);
         closeForm();
-        navigate(`${ACADEMY_ADMIN_COURSES_BASE}/${res.course.id}/conteudo`);
+        window.location.assign(agencyCrmAcademyContentPath(res.course.id));
         return;
       }
       await refresh();
@@ -460,13 +465,13 @@ export function AdminCoursesPage() {
                       <td>
                         <div className="course-admin__actions">
                           {!fixed ? (
-                            <Link
-                              to={`${ACADEMY_ADMIN_COURSES_BASE}/${course.id}/conteudo`}
+                            <a
+                              href={agencyCrmAcademyContentPath(course.id)}
                               className="btn-primary inline-flex items-center gap-1 text-xs"
                             >
                               <LayoutList className="h-3.5 w-3.5" aria-hidden />
                               {UI.actionContent}
-                            </Link>
+                            </a>
                           ) : null}
                           <Link
                             to={`${ACADEMY_APP_BASE}/cursos/${course.slug}`}

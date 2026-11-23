@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { AGENCY_PROFILE_PATH, loginPathForContext } from "@ederson-agencia/shared";
+import { AGENCY_PROFILE_PATH, loginPathForContext, logoutHomePathForContext } from "@ederson-agencia/shared";
 import { LogOut } from "lucide-react";
 import { AgencyNav } from "./portal/AgencyNav";
 import { AgencyNotificationsMenu } from "./portal/AgencyNotificationsMenu";
@@ -46,7 +46,15 @@ export function AgencyShellLayout({ title }: { title: string }) {
                   aria-label="Sair da Agência"
                   onClick={() => {
                     clearSession("agency");
-                    navigate(agencyLogin, { replace: true });
+                    try {
+                      sessionStorage.setItem("agency_logged_out", "1");
+                      sessionStorage.removeItem("crm_login_fallback");
+                      localStorage.removeItem("agency_token");
+                      localStorage.removeItem("agency_user");
+                    } catch {
+                      /* ignore */
+                    }
+                    navigate(logoutHomePathForContext("agency"), { replace: true });
                   }}
                 >
                   <LogOut className="h-4 w-4" />

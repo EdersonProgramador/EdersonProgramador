@@ -1,32 +1,87 @@
 import { useEffect } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
-import { ACADEMY_STORE_BASE } from "@ederson-agencia/shared";
-import { BrandLogo } from "./brand/BrandLogo";
-import { ThemeToggle } from "./theme/ThemeToggle";
+import {
+  ACCOUNT_HUB_PATH,
+  ACADEMY_STORE_BASE,
+  AGENCY_OPERATION_LOGIN_PATH,
+  BRAND_IDENTITY
+} from "@ederson-agencia/shared";
+import { Briefcase, GraduationCap } from "lucide-react";
 import { applySiteTheme, useThemeStore } from "../stores/themeStore";
 import "../styles/crm-auth-login.css";
 
-/** Layout mínimo para telas públicas de login (sem nav de Agência/Academia). */
+function authEyebrow(pathname: string, title: string): string {
+  if (pathname === ACCOUNT_HUB_PATH || pathname === `${ACCOUNT_HUB_PATH}/`) return "Minha conta";
+  if (pathname.startsWith("/academia/entrar")) return "Academia";
+  if (
+    pathname === AGENCY_OPERATION_LOGIN_PATH ||
+    pathname === `${AGENCY_OPERATION_LOGIN_PATH}/` ||
+    pathname.startsWith("/cliente/entrar") ||
+    pathname.startsWith("/freelancer/entrar")
+  ) {
+    return "Agência";
+  }
+  return title || "Acesso";
+}
+
+/** Layout mínimo para telas públicas de login (Agência + Academia). */
 export function ShellLayout({ title }: { title: string }) {
   const { pathname } = useLocation();
-  const isCrmLogin = pathname === "/login" || pathname === "/login/";
-  const brandTo = pathname.startsWith("/academia/entrar") ? ACADEMY_STORE_BASE : "/";
+  const isAcademyLogin = pathname.startsWith("/academia/entrar");
+  const isAccountHub = pathname === ACCOUNT_HUB_PATH || pathname === `${ACCOUNT_HUB_PATH}/`;
+  const isAgencyLogin =
+    pathname === AGENCY_OPERATION_LOGIN_PATH ||
+    pathname === `${AGENCY_OPERATION_LOGIN_PATH}/` ||
+    pathname.startsWith("/cliente/entrar") ||
+    pathname.startsWith("/freelancer/entrar");
+  const isAuthShell = isAgencyLogin || isAcademyLogin || isAccountHub;
+  const brandTo = isAcademyLogin || isAccountHub ? ACADEMY_STORE_BASE : "/";
   const siteTheme = useThemeStore((s) => s.theme);
 
   useEffect(() => {
-    if (!isCrmLogin) return;
+    if (!isAuthShell) return;
     applySiteTheme("day");
     return () => applySiteTheme(siteTheme);
-  }, [isCrmLogin, siteTheme]);
+  }, [isAuthShell, siteTheme]);
 
-  if (isCrmLogin) {
+  if (isAuthShell) {
     return (
       <div className="crm-auth-shell">
-        <header className="app-shell-header sticky top-0 z-50">
-          <div className="mx-auto flex max-w-6xl items-center justify-end gap-2 px-4 py-3">
-            <Link to="/" className="btn-ghost inline-flex min-h-11 items-center text-sm">
-              Voltar ao site
+        <header className="app-shell-header crm-auth-top sticky top-0 z-50">
+          <div className="crm-auth-top__inner">
+            <Link to={brandTo} className="crm-auth-top__brand">
+              <span
+                className="crm-auth-top__mark"
+                style={{ backgroundColor: "#4f46e5" }}
+                aria-hidden
+              >
+                {isAcademyLogin ? (
+                  <GraduationCap className="h-4 w-4 text-white" />
+                ) : (
+                  <Briefcase className="h-4 w-4 text-white" />
+                )}
+              </span>
+              <span className="crm-auth-top__copy">
+                <span className="crm-auth-top__name">{BRAND_IDENTITY.name}</span>
+                <span className="crm-auth-top__eyebrow">{authEyebrow(pathname, title)}</span>
+              </span>
             </Link>
+
+            <div className="crm-auth-top__actions">
+              {!isAgencyLogin && !isAcademyLogin ? (
+                <Link to={AGENCY_OPERATION_LOGIN_PATH} className="crm-auth-top__link">
+                  Agência
+                </Link>
+              ) : null}
+              {!isAcademyLogin ? (
+                <Link to="/academia/entrar" className="crm-auth-top__link">
+                  Academia
+                </Link>
+              ) : null}
+              <Link to={isAcademyLogin ? ACADEMY_STORE_BASE : "/"} className="crm-auth-top__back">
+                Voltar ao site
+              </Link>
+            </div>
           </div>
         </header>
         <main className="crm-auth-main">
@@ -39,19 +94,19 @@ export function ShellLayout({ title }: { title: string }) {
   return (
     <div className="surface-light min-h-screen bg-[var(--app-bg-solid)] text-[var(--app-text)]">
       <header className="app-shell-header sticky top-0 z-50">
-        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:py-4">
-          <div className="min-w-0">
-            <Link to={brandTo} className="group inline-block">
-              <BrandLogo size="sm" />
-            </Link>
-            <p className="mt-1.5 truncate pl-11 text-xs text-[var(--app-text-muted)] sm:max-w-xs">{title}</p>
-          </div>
-          <div className="flex min-w-0 shrink-0 items-center justify-end gap-2 sm:gap-3">
-            <ThemeToggle compact />
-            <Link to="/" className="btn-ghost inline-flex min-h-11 items-center text-sm">
-              Voltar ao site
-            </Link>
-          </div>
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:py-4">
+          <Link to="/" className="crm-auth-top__brand">
+            <span className="crm-auth-top__mark" style={{ backgroundColor: "#4f46e5" }} aria-hidden>
+              <Briefcase className="h-4 w-4 text-white" />
+            </span>
+            <span className="crm-auth-top__copy">
+              <span className="crm-auth-top__name">{BRAND_IDENTITY.name}</span>
+              <span className="crm-auth-top__eyebrow">{title}</span>
+            </span>
+          </Link>
+          <Link to="/" className="crm-auth-top__back">
+            Voltar ao site
+          </Link>
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-4 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:py-8">

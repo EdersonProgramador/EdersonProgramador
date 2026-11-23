@@ -1,13 +1,19 @@
 import { useEffect } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { ACADEMY_PROFILE_PATH, loginPathForContext } from "@ederson-agencia/shared";
+import {
+  ACADEMY_APP_BASE,
+  ACADEMY_PROFILE_PATH,
+  BRAND_IDENTITY,
+  loginPathForContext,
+  logoutHomePathForContext
+} from "@ederson-agencia/shared";
+import { GraduationCap, LogOut } from "lucide-react";
 import { ProfileAvatarNavLink } from "./profile/ProfileAvatarCircle";
-import { LogOut } from "lucide-react";
 import { AcademyNav } from "./portal/AcademyNav";
-import { BrandLogo } from "./brand/BrandLogo";
-import { ThemeToggle } from "./theme/ThemeToggle";
 import { prefetchMyCourses } from "../courses/catalog-cache";
 import { useAcademySession, useAuthStore } from "../stores/authStore";
+import { applySiteTheme, useThemeStore } from "../stores/themeStore";
+import "../styles/academy-portal.css";
 
 export function AcademyShellLayout({ title }: { title: string }) {
   const session = useAcademySession();
@@ -16,23 +22,48 @@ export function AcademyShellLayout({ title }: { title: string }) {
   const location = useLocation();
   const user = session?.user;
   const academyLogin = loginPathForContext("academy");
+  const siteTheme = useThemeStore((s) => s.theme);
 
   useEffect(() => {
     if (session?.token) prefetchMyCourses();
   }, [session?.token]);
 
+  useEffect(() => {
+    document.body.classList.add("academy-portal-active");
+    applySiteTheme("day");
+    return () => {
+      document.body.classList.remove("academy-portal-active");
+      applySiteTheme(siteTheme);
+    };
+  }, [siteTheme]);
+
+  function logoutAcademy() {
+    clearSession("academy");
+    try {
+      sessionStorage.setItem("academy_logged_out", "1");
+    } catch {
+      /* ignore */
+    }
+    navigate(logoutHomePathForContext("academy"), { replace: true });
+  }
+
   return (
-    <div className="surface-light min-h-screen bg-[var(--app-bg-solid)] text-[var(--app-text)]">
-      <header className="app-shell-header sticky top-0 z-50 border-b border-[var(--app-border)]">
-        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:py-4">
-          <div className="min-w-0">
-            <BrandLogo size="sm" interactive={false} />
-            <p className="mt-1.5 truncate pl-11 text-xs text-[var(--app-text-muted)]">
-              Academia interna · {title}
-            </p>
-          </div>
-          <div className="flex min-w-0 shrink-0 items-center justify-end gap-2 sm:gap-3">
-            <ThemeToggle compact />
+    <div className="academy-portal">
+      <header className="app-shell-header academy-portal__header sticky top-0 z-50">
+        <div className="academy-portal__inner">
+          <Link to={ACADEMY_APP_BASE} className="academy-portal__brand">
+            <span className="academy-portal__mark" aria-hidden>
+              <GraduationCap className="h-5 w-5" />
+            </span>
+            <span className="academy-portal__brand-copy">
+              <span className="academy-portal__brand-name">{BRAND_IDENTITY.name}</span>
+              <span className="academy-portal__brand-eyebrow">
+                Academia interna · {title}
+              </span>
+            </span>
+          </Link>
+
+          <div className="academy-portal__actions">
             {user ? (
               <>
                 <AcademyNav user={user} />
@@ -40,11 +71,9 @@ export function AcademyShellLayout({ title }: { title: string }) {
                 <button
                   type="button"
                   className="btn-secondary inline-flex min-h-11 min-w-11 items-center justify-center p-2"
-                  aria-label="Sair da Academia"
-                  onClick={() => {
-                    clearSession("academy");
-                    navigate(academyLogin, { replace: true });
-                  }}
+                  aria-label="Encerrar sessão"
+                  title="Encerrar sessão"
+                  onClick={logoutAcademy}
                 >
                   <LogOut className="h-4 w-4" />
                 </button>
@@ -53,7 +82,7 @@ export function AcademyShellLayout({ title }: { title: string }) {
               <Link
                 to={academyLogin}
                 state={{ from: `${location.pathname}${location.search}` }}
-                className="btn-ghost inline-flex min-h-11 items-center text-sm"
+                className="btn-primary inline-flex min-h-11 items-center px-5 text-sm font-bold"
               >
                 Entrar
               </Link>
@@ -61,7 +90,7 @@ export function AcademyShellLayout({ title }: { title: string }) {
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-4 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:py-8">
+      <main className="academy-portal__main">
         <Outlet />
       </main>
     </div>

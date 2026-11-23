@@ -1,9 +1,11 @@
 /**
- * Home Amplifica CRM — sistema principal da agência Ederson Programador
+ * Home da agência Ederson Programador — sistema principal
  * (Negócios · Operações · Recursos · Crescimento · Sistema)
  *
- * Links `crm/:view` abrem o Amplifica CRM embutido (apps/amplifica-crm).
+ * Links abrem o CRM em `/agencia/admin/?view=…` (app padrão, sem iframe).
  */
+
+import { AGENCY_APP_BASE } from "./auth-context.js";
 
 export type AgencyOsHomePillarId =
   | "negocios"
@@ -28,8 +30,8 @@ export type AgencyOsHomePillar = {
 };
 
 export const AGENCY_OS_HOME_COPY = {
-  brand: "Amplifica CRM",
-  product: "Amplifica CRM",
+  brand: "Ederson Programador",
+  product: "Agência Ederson Programador",
   headline: "Sistema principal da agência Ederson Programador",
   subhead:
     "CRM e operação em um só lugar: clientes, projetos, equipe, finanças e recursos — sem planilhas nem caos de abas.",
@@ -59,7 +61,7 @@ export const AGENCY_OS_HOME_COPY = {
 /** Path do Studio de código dentro do workspace admin. */
 export const AGENCY_OS_STUDIO_ADMIN_PATH = "studio";
 
-/** Views do Amplifica CRM embutido (`/agencia/admin/crm/:view`). */
+/** Views do CRM (`/agencia/admin/?view=`). */
 export const AMPLIFICA_CRM_VIEWS = [
   "dashboard",
   "agency_kpis",
@@ -77,13 +79,14 @@ export const AMPLIFICA_CRM_VIEWS = [
   "partners",
   "tickets",
   "personalization",
+  "academy",
   "admin"
 ] as const;
 
 export type AmplificaCrmView = (typeof AMPLIFICA_CRM_VIEWS)[number];
 
 export function amplificaCrmAdminPath(view: AmplificaCrmView): string {
-  return `crm/${view}`;
+  return `${AGENCY_APP_BASE}/admin/?view=${encodeURIComponent(view)}`;
 }
 
 export const AGENCY_OS_HOME_PILLARS: readonly AgencyOsHomePillar[] = [

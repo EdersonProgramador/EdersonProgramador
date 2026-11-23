@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import type { PackageTierId } from "@ederson-agencia/shared";
-import { AGENCY_APP_BASE, agencyHomePathForRole } from "@ederson-agencia/shared";
+import {
+  AGENCY_APP_BASE,
+  AGENCY_CLIENT_FUNNEL_PATH,
+  agencyHomePathForRole
+} from "@ederson-agencia/shared";
 import { ADMIN_BASE } from "../components/admin/AdminOperationsLayout";
 import { apiGet, apiPatch, apiPost } from "../api";
 import {
@@ -50,7 +54,7 @@ export function ProjectDetailPage() {
         <p className="text-[var(--app-text-muted)]">
           Este projeto aguarda assinatura do contrato digital antes de iniciar as etapas de entrega.
         </p>
-        <Link to={`${AGENCY_APP_BASE}/cliente`} className="btn-primary inline-flex text-sm">
+        <Link to={AGENCY_CLIENT_FUNNEL_PATH} className="btn-primary inline-flex text-sm">
           Ir para assinatura do contrato
         </Link>
       </div>
@@ -63,7 +67,7 @@ export function ProjectDetailPage() {
         <p className="text-[var(--app-text-muted)]">
           Contrato assinado. Conclua o checkout (entrada) na área do cliente para liberar a jornada.
         </p>
-        <Link to={`${AGENCY_APP_BASE}/cliente`} className="btn-primary inline-flex text-sm">
+        <Link to={AGENCY_CLIENT_FUNNEL_PATH} className="btn-primary inline-flex text-sm">
           Ir para checkout
         </Link>
       </div>

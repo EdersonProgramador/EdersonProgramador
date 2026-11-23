@@ -20,8 +20,12 @@ const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
   role: z.enum(["CLIENT", "FREELANCER"]).default("CLIENT"),
-  company: z.string().optional(),
-  github: z.string().url().optional().or(z.literal("")),
+  company: z.string().nullish(),
+  github: z
+    .union([z.string(), z.null()])
+    .optional()
+    .transform((v) => (v == null ? "" : v.trim()))
+    .pipe(z.union([z.literal(""), z.string().url()])),
   acceptTerms: z.literal(true, {
     errorMap: () => ({ message: "Aceite os termos para continuar." })
   }),
@@ -114,12 +118,18 @@ export async function registerAuthRoutes(app: FastifyInstance) {
       return reply.code(409).send({ message: "Já existe uma conta com este e-mail." });
     }
 
+    if (body.role !== "CLIENT") {
+      return reply.code(400).send({
+        message: "Cadastro público disponível apenas para clientes. Freelancers e equipe são criados no CRM."
+      });
+    }
+
     const user = await prisma.user.create({
       data: {
         name: body.name.trim(),
         email,
         passwordHash: await hashPassword(body.password),
-        role: body.role,
+        role: "CLIENT",
         company: body.company?.trim() || null,
         github: body.github?.trim() || null
       }

@@ -59,6 +59,8 @@ type DevelopmentCodeStudioProps = {
   onStoredChange: (raw: string) => void;
   onError: (message: string) => void;
   onSavingChange?: (saving: boolean) => void;
+  /** Alinha chrome do IDE ao tema claro indigo/Poppins do CRM. */
+  uiVariant?: "default" | "crm";
 };
 
 function storedRawEchoesSnapshot(storedRaw: string | undefined, snapshot: DevCodeStudioSnapshot): boolean {
@@ -195,10 +197,12 @@ export function DevelopmentCodeStudio({
   storedRaw,
   onStoredChange,
   onError,
-  onSavingChange
+  onSavingChange,
+  uiVariant = "default"
 }: DevelopmentCodeStudioProps) {
   const uiNight = useUiThemeNight();
   const [editorThemeChoice, setEditorThemeChoice] = useState<EditorThemeChoice>(() => {
+    if (uiVariant === "crm") return "vs";
     try {
       const v = localStorage.getItem(EDITOR_THEME_KEY) as EditorThemeChoice | null;
       if (v === "vs" || v === "vs-dark" || v === "dracula" || v === "auto") return v;
@@ -207,7 +211,14 @@ export function DevelopmentCodeStudio({
     }
     return "auto";
   });
-  const monacoTheme: MonacoColorThemeId = editorThemeChoice === "auto" ? (uiNight ? "vs-dark" : "vs") : editorThemeChoice;
+  const monacoTheme: MonacoColorThemeId =
+    uiVariant === "crm" && (editorThemeChoice === "auto" || editorThemeChoice === "vs")
+      ? "vs"
+      : editorThemeChoice === "auto"
+        ? uiNight
+          ? "vs-dark"
+          : "vs"
+        : editorThemeChoice;
   const shellUi: "light" | "dark" = monacoTheme === "vs" ? "light" : "dark";
   const editorRef = useRef<MonacoEditor.IStandaloneCodeEditor | null>(null);
   const paneRef = useRef<HTMLDivElement | null>(null);
@@ -937,7 +948,11 @@ export function DevelopmentCodeStudio({
   };
 
   return (
-    <div className="dev-code-studio" data-theme={shellUi} aria-busy={persistenceStatus.pending || undefined}>
+    <div
+      className={`dev-code-studio${uiVariant === "crm" ? " dev-code-studio--crm" : ""}`}
+      data-theme={shellUi}
+      aria-busy={persistenceStatus.pending || undefined}
+    >
       <input
         ref={fileInputRef}
         type="file"

@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { assertAcademyInternalAdmin, assertAcademySession } from "../auth-access.js";
+import { assertCourseAdminSession } from "../auth-access.js";
 import { getAuthUser, requireRole } from "../auth.js";
 import { PORTAL_CONTENT_KEY } from "../courses/content-key.js";
 import { ensurePortalStarterContent } from "../courses/portal-starter.js";
@@ -29,11 +29,9 @@ export async function registerCoursesAdminRoutes(app: FastifyInstance) {
   app.addHook("preHandler", async (request, reply) => {
     if (!request.url.startsWith("/admin/courses")) return;
     const user = await getAuthUser(request);
-    if (!user) return reply.code(401).send({ message: "Faça login na Academia." });
+    if (!user) return reply.code(401).send({ message: "Faça login na Agência ou na Academia." });
     try {
-      assertAcademySession(user);
-      requireRole(user, ["ADMIN"]);
-      assertAcademyInternalAdmin(user);
+      assertCourseAdminSession(user);
     } catch (error) {
       const statusCode = (error as { statusCode?: number }).statusCode ?? 403;
       return reply.code(statusCode).send({

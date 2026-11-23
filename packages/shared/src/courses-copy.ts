@@ -62,6 +62,22 @@ export const COURSES_UI = {
     emptyStoreLink: "Ver cursos à venda",
     loading: "Carregando cursos…"
   },
+  internalAnalysis: {
+    title: "Análise dos programas",
+    subtitle:
+      "Painel interno: status, visibilidade, matrículas e prévia de trilhas. Sem checkout — a vitrine pública fica em /cursos.",
+    kicker: "Operação",
+    manage: "Gerenciar cursos",
+    backCatalog: "Meus cursos",
+    loading: "Carregando programas…",
+    listTitle: "Programas cadastrados",
+    listEmpty: "Nenhum programa cadastrado.",
+    publicPage: "Página pública",
+    enrollmentsTotal: (n: number) => `${n} matrícula${n === 1 ? "" : "s"} no total`,
+    statsPublished: "Publicados",
+    statsDraft: "Rascunhos",
+    statsSale: "À venda (público)"
+  },
   store: {
     title: "Cursos à venda",
     subtitle:

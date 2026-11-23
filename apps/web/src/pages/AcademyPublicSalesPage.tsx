@@ -4,7 +4,6 @@ import {
   ACADEMY_APP_BASE,
   ACADEMY_CART,
   ACADEMY_SALES,
-  ACADEMY_STORE_BASE,
   ACADEMY_STORE_PATHS,
   academyCourseProgramPath
 } from "@ederson-agencia/shared";
@@ -23,6 +22,7 @@ type StoreCourse = AcademyStoreCourseCardData;
 
 const copy = ACADEMY_SALES;
 
+/** Vitrine institucional + catálogo público alinhado à API `/public/academy/catalog`. */
 export function AcademyPublicSalesPage() {
   const [courses, setCourses] = useState<StoreCourse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,7 +39,9 @@ export function AcademyPublicSalesPage() {
       try {
         const data = await apiGet<{ courses: StoreCourse[] }>("/public/academy/catalog");
         setCourses(data.courses);
-        if (data.courses[0]) setLeadCourseSlug(data.courses[0].slug);
+        const firstBuyable = data.courses.find((c) => c.purchasable !== false && c.priceCents > 0);
+        if (firstBuyable) setLeadCourseSlug(firstBuyable.slug);
+        else if (data.courses[0]) setLeadCourseSlug(data.courses[0].slug);
       } catch (err) {
         setError(err instanceof ApiError ? err.message : "Não foi possível carregar os cursos.");
       } finally {
@@ -74,9 +76,9 @@ export function AcademyPublicSalesPage() {
   }
 
   const sectionNav = (
-    <nav className="flex items-center gap-1" aria-label="Seções">
+    <nav className="academy-sales__section-nav" aria-label="Seções">
       {copy.nav.map((item) => (
-        <a key={item.href} href={item.href} className="rounded-lg px-3 py-2 text-sm text-white/75 hover:text-white">
+        <a key={item.href} href={item.href}>
           {item.label}
         </a>
       ))}
@@ -85,72 +87,97 @@ export function AcademyPublicSalesPage() {
 
   return (
     <AcademyStoreShell nav={sectionNav}>
-      <section className="academy-sales__hero academy-inst-hero relative overflow-hidden px-4 pb-16 pt-12 sm:pt-20">
-        <div className="mesh-hero pointer-events-none absolute inset-0 opacity-60" aria-hidden />
+      <section className="academy-sales__hero academy-inst-hero relative overflow-hidden px-6 pb-24 pt-28 sm:pt-36">
         <div className="relative mx-auto max-w-4xl text-center">
-          <p className="academy-sales__eyebrow text-xs uppercase tracking-[0.25em]">{copy.brand}</p>
-          <h1 className="academy-sales__hero-title mt-4 text-balance text-3xl font-bold leading-tight sm:text-4xl md:text-[2.75rem]">
+          <p className="academy-sales__eyebrow">{copy.brand}</p>
+          <h1 className="academy-sales__hero-title mt-6 text-balance text-4xl font-black tracking-tight sm:text-6xl md:text-7xl">
             {copy.hero.headline}
           </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-[var(--as-muted)] sm:text-lg">{copy.hero.subheadline}</p>
-          <p className="academy-sales__trust-bar mt-6">{copy.hero.trustLine}</p>
-          <a href="#programas" className="btn-primary academy-sales__cta-primary mt-8 inline-flex min-h-12 items-center px-8 text-base">
-            {copy.hero.primaryCta}
-          </a>
+          <p className="mx-auto mt-6 max-w-2xl text-base font-medium leading-relaxed text-slate-500 sm:text-lg">
+            {copy.hero.subheadline}
+          </p>
+          <p className="academy-sales__trust-bar mt-8">{copy.hero.trustLine}</p>
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+            <a href="#programas" className="academy-sales__cta-primary">
+              {copy.hero.primaryCta}
+            </a>
+            <a href="#proposta" className="academy-sales__cta-ghost">
+              Receber proposta
+            </a>
+          </div>
         </div>
       </section>
 
-      <section id="instituicao" className="academy-inst-section scroll-mt-24 border-t border-white/10 px-4 py-16">
-        <div className="mx-auto max-w-6xl">
+      <section id="instituicao" className="academy-inst-section scroll-mt-28 px-6 py-24">
+        <div className="mx-auto max-w-7xl">
           <div className="mx-auto max-w-3xl text-center">
-            <h2 className="text-2xl font-bold sm:text-3xl">{copy.institute.title}</h2>
-            <p className="mt-4 text-base leading-relaxed text-[var(--as-muted)]">{copy.institute.body}</p>
+            <span className="academy-sales__section-kicker">Instituição</span>
+            <h2 className="mt-4 text-3xl font-black tracking-tight text-slate-900 sm:text-5xl">{copy.institute.title}</h2>
+            <p className="mt-5 text-base font-medium leading-relaxed text-slate-500 sm:text-lg">{copy.institute.body}</p>
           </div>
-          <ul className="mt-12 grid gap-6 md:grid-cols-3">
+          <ul className="mt-16 grid gap-6 md:grid-cols-3">
             {copy.institute.pillars.map((pillar) => (
-              <li key={pillar.title} className="panel border-white/10 bg-white/[0.04] p-6 text-center md:text-left">
-                <h3 className="text-lg font-semibold">{pillar.title}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-[var(--as-muted)]">{pillar.body}</p>
+              <li key={pillar.title} className="academy-sales__pillar">
+                <h3 className="text-lg font-bold text-slate-900">{pillar.title}</h3>
+                <p className="mt-3 text-sm font-medium leading-relaxed text-slate-500">{pillar.body}</p>
               </li>
             ))}
           </ul>
         </div>
       </section>
 
-      <section id="programas" className="academy-sales__catalog academy-inst-section scroll-mt-24 border-t border-white/10 px-4 py-16">
-        <div className="mx-auto max-w-6xl">
+      <section id="caminho" className="academy-inst-section academy-inst-section--muted scroll-mt-28 px-6 py-24">
+        <div className="mx-auto max-w-7xl">
+          <div className="mx-auto max-w-3xl text-center">
+            <span className="academy-sales__section-kicker">Jornada</span>
+            <h2 className="mt-4 text-3xl font-black tracking-tight text-slate-900 sm:text-5xl">{copy.path.title}</h2>
+            <p className="mt-5 text-base font-medium leading-relaxed text-slate-500 sm:text-lg">{copy.path.subtitle}</p>
+          </div>
+          <ol className="mt-16 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+            {copy.path.steps.map((step, index) => (
+              <li key={step.title} className="academy-sales__step-card">
+                <span className="academy-sales__step-index">{String(index + 1).padStart(2, "0")}</span>
+                <h3 className="mt-4 text-lg font-bold text-slate-900">{step.title}</h3>
+                <p className="mt-3 text-sm font-medium leading-relaxed text-slate-500">{step.body}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      <section id="programas" className="academy-sales__catalog academy-inst-section scroll-mt-28 px-6 py-24">
+        <div className="mx-auto max-w-7xl">
           <header className="mx-auto max-w-2xl text-center">
-            <h2 className="text-2xl font-bold sm:text-3xl">{copy.courses.title}</h2>
-            <p className="mt-3 text-sm text-[var(--as-muted)] sm:text-base">{copy.courses.subtitle}</p>
+            <span className="academy-sales__section-kicker">Catálogo</span>
+            <h2 className="mt-4 text-3xl font-black tracking-tight text-slate-900 sm:text-5xl">{copy.courses.title}</h2>
+            <p className="mt-5 text-base font-medium text-slate-500 sm:text-lg">{copy.courses.subtitle}</p>
           </header>
 
           {loading ? (
-            <div className="academy-sales__course-track mt-10" aria-busy="true">
-              <ul className="academy-inst-program-grid">
-                {[0, 1, 2].map((i) => (
-                  <li key={i}>
-                    <AcademyStoreCourseCardSkeleton />
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <ul className="academy-inst-program-grid mt-14" aria-busy="true">
+              {[0, 1, 2].map((i) => (
+                <li key={i}>
+                  <AcademyStoreCourseCardSkeleton />
+                </li>
+              ))}
+            </ul>
           ) : null}
 
           {!loading && error ? (
-            <div className="panel mx-auto mt-10 max-w-xl border-white/10 bg-white/[0.03] p-6 text-center">
-              <p className="text-sm text-white/70">{error || copy.courses.loadError}</p>
-              <a href="#proposta" className="btn-secondary mt-5 inline-flex min-h-10 items-center px-5 text-sm">
+            <div className="academy-sales__empty mx-auto mt-14 max-w-xl text-center">
+              <p className="text-sm font-medium text-slate-500">{error || copy.courses.loadError}</p>
+              <a href="#proposta" className="academy-sales__cta-ghost mt-5 inline-flex">
                 {copy.courses.loadErrorCta}
               </a>
             </div>
           ) : null}
 
           {!loading && !error && courses.length === 0 ? (
-            <p className="mt-10 text-center text-white/55">{copy.courses.empty}</p>
+            <p className="mt-14 text-center text-sm font-medium text-slate-400">{copy.courses.empty}</p>
           ) : null}
 
           {!loading && !error && courses.length > 0 ? (
-            <ul className="academy-inst-program-grid mt-10">
+            <ul className="academy-inst-program-grid mt-14">
               {courses.map((course) => (
                 <li key={course.id}>
                   <AcademyStoreCourseCard
@@ -167,25 +194,26 @@ export function AcademyPublicSalesPage() {
         </div>
       </section>
 
-      <section id="proposta" className="academy-sales__proposta scroll-mt-24 border-t border-white/10 px-4 py-16 pb-24">
-        <div className="mx-auto max-w-6xl">
-          <aside className="academy-sales__capture panel mx-auto max-w-xl border-emerald-500/25 bg-white/[0.03] p-6 sm:p-8">
-            <h2 className="text-xl font-semibold sm:text-2xl">{copy.lead.formTitle}</h2>
+      <section id="proposta" className="academy-sales__proposta academy-inst-section--muted scroll-mt-28 px-6 py-24 pb-28">
+        <div className="mx-auto max-w-xl">
+          <aside className="academy-sales__capture">
+            <span className="academy-sales__section-kicker">Contato</span>
+            <h2 className="mt-3 text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">{copy.lead.formTitle}</h2>
 
             {leadSuccess ? (
-              <p className="mt-4 rounded-lg border border-green-500/30 bg-green-500/10 p-4 text-sm text-green-100">
+              <p className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-medium text-emerald-800">
                 <strong>{copy.lead.successTitle}</strong>
                 <br />
                 {leadSuccess}
               </p>
             ) : null}
 
-            <form className="mt-5 space-y-4" onSubmit={(e) => void onLeadSubmit(e)}>
+            <form className="mt-6 space-y-4" onSubmit={(e) => void onLeadSubmit(e)}>
               {courses.length > 0 ? (
-                <label className="block text-sm text-white/70">
+                <label className="block text-sm font-bold text-slate-700">
                   Programa de interesse
                   <select
-                    className="input mt-1.5 w-full"
+                    className="academy-sales__input mt-1.5 w-full"
                     name="courseSlug"
                     value={leadCourseSlug}
                     onChange={(e) => setLeadCourseSlug(e.target.value)}
@@ -200,9 +228,15 @@ export function AcademyPublicSalesPage() {
                   </select>
                 </label>
               ) : null}
-              <input className="input w-full" name="name" placeholder={copy.lead.name} required disabled={leadSubmitting} />
               <input
-                className="input w-full"
+                className="academy-sales__input w-full"
+                name="name"
+                placeholder={copy.lead.name}
+                required
+                disabled={leadSubmitting}
+              />
+              <input
+                className="academy-sales__input w-full"
                 type="email"
                 name="email"
                 placeholder={copy.lead.email}
@@ -211,7 +245,7 @@ export function AcademyPublicSalesPage() {
                 disabled={leadSubmitting}
               />
               <input
-                className="input w-full"
+                className="academy-sales__input w-full"
                 type="tel"
                 name="phone"
                 placeholder={copy.lead.phone}
@@ -219,12 +253,12 @@ export function AcademyPublicSalesPage() {
                 autoComplete="tel"
                 disabled={leadSubmitting}
               />
-              <label className="flex items-start gap-2 text-xs text-white/65">
+              <label className="flex items-start gap-2 text-xs font-medium text-slate-500">
                 <input type="checkbox" name="acceptMarketing" className="mt-0.5" required disabled={leadSubmitting} />
                 {copy.lead.terms}
               </label>
-              {leadError ? <p className="text-sm text-red-300">{leadError}</p> : null}
-              <button type="submit" className="btn-secondary w-full min-h-11" disabled={leadSubmitting}>
+              {leadError ? <p className="text-sm font-bold text-rose-600">{leadError}</p> : null}
+              <button type="submit" className="academy-sales__cta-primary w-full" disabled={leadSubmitting}>
                 {leadSubmitting ? copy.lead.submitting : copy.lead.submit}
               </button>
             </form>
@@ -232,18 +266,14 @@ export function AcademyPublicSalesPage() {
         </div>
       </section>
 
-      <footer className="academy-sales__footer border-t px-4 py-8 text-center text-sm text-white/45">
-        <Link to={ACADEMY_STORE_PATHS.cart} className="text-brand-primary hover:underline">
-          {ACADEMY_CART.cartTitle}
-        </Link>
-        <span className="mx-2 text-white/25">·</span>
-        <Link to="/academia/entrar" state={{ from: ACADEMY_APP_BASE }} className="text-brand-primary hover:underline">
+      <footer className="academy-sales__footer px-6 py-10 text-center text-sm">
+        <Link to={ACADEMY_STORE_PATHS.cart}>{ACADEMY_CART.cartTitle}</Link>
+        <span className="mx-2 opacity-30">·</span>
+        <Link to="/academia/entrar" state={{ from: ACADEMY_APP_BASE }}>
           {copy.footer.portal}
         </Link>
-        <span className="mx-2 text-white/25">·</span>
-        <Link to="/" className="text-white/45 hover:text-white/70">
-          {copy.footer.agency}
-        </Link>
+        <span className="mx-2 opacity-30">·</span>
+        <Link to="/">{copy.footer.agency}</Link>
       </footer>
     </AcademyStoreShell>
   );

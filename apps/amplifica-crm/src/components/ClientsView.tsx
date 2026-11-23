@@ -602,7 +602,7 @@ export default function ClientsView({ clients, setClients, users, partners, curr
                   >
                     {!isOwner && <option value="">Venda Direta (Sem Parceiro)</option>}
                     {partners
-                      .filter(p => !isOwner || p.agencyName === 'Amplifica CRM')
+                      .filter(p => !isOwner || p.agencyName === 'Agência Ederson Programador' || p.agencyName === 'Amplifica CRM' || p.agencyName === 'Ederson Programador')
                       .map(p => <option key={p.id} value={p.id}>{p.agencyName} ({p.name})</option>)}
                   </select>
                 </div>

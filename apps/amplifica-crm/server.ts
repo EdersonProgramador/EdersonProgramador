@@ -62,23 +62,31 @@ const stripe = stripeSecretKey ? new Stripe(stripeSecretKey) : null;
 const OFFICIAL_DOMAIN = "https://crm.amplifamarketing.com.br";
 const APP_URL = process.env.APP_URL || process.env.VITE_APP_URL || OFFICIAL_DOMAIN;
 
-// Plans definition matching user request
+// Pacotes da Agência Ederson Programador (START / BUSINESS / ENTERPRISE)
 const PLANS = {
   plan1: {
     id: 'plan1',
-    name: 'Growth Pack',
-    price: 147,
+    name: 'START',
+    price: 4700,
     maxMembers: 3,
     features: ['dashboard', 'finance', 'workflow', 'personalization', 'productivity', 'forms', 'support'],
-    priceId: process.env.STRIPE_PLAN1_PRICE_ID || 'price_1QxX' 
+    priceId: process.env.STRIPE_PLAN1_PRICE_ID || 'price_1QxX'
   },
   plan2: {
     id: 'plan2',
-    name: 'Elite Scale',
-    price: 247,
+    name: 'BUSINESS',
+    price: 15700,
     maxMembers: 8,
     features: ['dashboard', 'finance', 'workflow', 'personalization', 'productivity', 'forms', 'support', 'scheduler', 'google_drive'],
     priceId: process.env.STRIPE_PLAN2_PRICE_ID || 'price_1QxY'
+  },
+  plan3: {
+    id: 'plan3',
+    name: 'ENTERPRISE',
+    price: 30700,
+    maxMembers: 20,
+    features: ['dashboard', 'finance', 'workflow', 'personalization', 'productivity', 'forms', 'support', 'scheduler', 'google_drive'],
+    priceId: process.env.STRIPE_PLAN3_PRICE_ID || process.env.STRIPE_PLAN2_PRICE_ID || 'price_1QxZ'
   }
 };
 
@@ -146,20 +154,24 @@ async function startServer() {
   app.use(compression());
   app.set('trust proxy', 1);
 
-  // Agency proxy keeps /amplifica-crm/* for Vite assets; API/socket/env stay on root routes.
+  // Agency Vite proxies /agencia/admin/* (and legacy /amplifica-crm/*); strip for Express API routes.
   app.use((req, _res, next) => {
     const u = req.url || "";
-    const stripPrefixes = [
-      "/amplifica-crm/api",
-      "/amplifica-crm/env-config.js",
-      "/amplifica-crm/socket.io",
-      "/amplifica-crm/sw.js",
-      "/amplifica-crm/logo.svg",
-      "/amplifica-crm/manifest.json",
-      "/amplifica-crm/vite-hmr"
-    ];
-    if (stripPrefixes.some((p) => u === p || u.startsWith(p + "/") || u.startsWith(p + "?"))) {
-      req.url = u.slice("/amplifica-crm".length) || "/";
+    const roots = ["/agencia/admin", "/amplifica-crm"] as const;
+    for (const root of roots) {
+      const apiPaths = [
+        `${root}/api`,
+        `${root}/env-config.js`,
+        `${root}/socket.io`,
+        `${root}/sw.js`,
+        `${root}/logo.svg`,
+        `${root}/manifest.json`,
+        `${root}/vite-hmr`
+      ];
+      if (apiPaths.some((p) => u === p || u.startsWith(p + "/") || u.startsWith(p + "?"))) {
+        req.url = u.slice(root.length) || "/";
+        break;
+      }
     }
     next();
   });
@@ -370,12 +382,19 @@ async function startServer() {
     console.error('[CRITICAL] Uncaught Exception:', err);
   });
 
+  // Atrás do Vite :5174 o client usa path /agencia/admin/socket.io (agency-proxy-boot).
+  const agencyProxySocket = Boolean(process.env.CRM_HMR_CLIENT_PORT);
   const io = new Server(httpServer, {
+    path: agencyProxySocket ? "/agencia/admin/socket.io" : "/socket.io",
     cors: { 
       origin: (origin, callback) => {
         const allowedOrigins = [
           APP_URL,
           "https://crm.amplifamarketing.com.br",
+          "http://localhost:5174",
+          "https://localhost:5174",
+          "http://127.0.0.1:5174",
+          "https://127.0.0.1:5174",
         ];
         
         // Exact matching or strictly defined development environments
@@ -383,7 +402,7 @@ async function startServer() {
           !origin || 
           allowedOrigins.includes(origin) || 
           /^https:\/\/.*\.run\.app$/.test(origin) || 
-          /^http:\/\/localhost(:\d+)?$/.test(origin)
+          /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)
         ) {
           callback(null, true);
         } else {
@@ -598,7 +617,7 @@ async function startServer() {
   app.get("/env-config.js", (req, res) => {
     // Collect all possible variants of Supabase variables
     const config = {
-      VITE_COMPANY_NAME: process.env.VITE_COMPANY_NAME || "Amplifica CRM",
+      VITE_COMPANY_NAME: process.env.VITE_COMPANY_NAME || "Agência Ederson Programador",
       VITE_PRIMARY_COLOR: process.env.VITE_PRIMARY_COLOR || "#4f46e5",
       VITE_SUPABASE_URL: process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || "",
       VITE_SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || "",
@@ -1416,13 +1435,37 @@ async function startServer() {
       return res.status(403).json({ error: "Embed session forbidden" });
     }
     try {
-      const { data: userRaw, error } = await supabase
-        .from("users")
-        .select("*")
-        .eq("email", "admin@amplifica.com")
-        .maybeSingle();
-      if (error) throw error;
-      if (!userRaw) return res.status(404).json({ error: "Usuário embed não encontrado. Rode npm run db:setup." });
+      const embedEmail = (
+        process.env.ADMIN_EMAIL ||
+        process.env.VITE_ADMIN_EMAIL ||
+        "edersonprogramador@gmail.com"
+      )
+        .trim()
+        .toLowerCase();
+      let userRaw: Record<string, unknown> | null = null;
+      const byEmail = await supabase.from("users").select("*").eq("email", embedEmail).maybeSingle();
+      if (byEmail.error) throw byEmail.error;
+      userRaw = byEmail.data;
+      // Fallback: qualquer OWNER/ADMIN no CRM (dev local sem seed do e-mail canônico).
+      if (!userRaw) {
+        const byRole = await supabase
+          .from("users")
+          .select("*")
+          .in("role", ["OWNER", "ADMIN"])
+          .limit(1);
+        if (byRole.error) throw byRole.error;
+        userRaw = byRole.data?.[0] ?? null;
+      }
+      if (!userRaw) {
+        const anyUser = await supabase.from("users").select("*").limit(1);
+        if (anyUser.error) throw anyUser.error;
+        userRaw = anyUser.data?.[0] ?? null;
+      }
+      if (!userRaw) {
+        return res.status(404).json({
+          error: "Usuário embed não encontrado. Rode npm run db:setup."
+        });
+      }
       const user = keysToCamel(userRaw);
       const tokenPayload = {
         id: user.id,
@@ -2418,17 +2461,17 @@ async function startServer() {
   if (process.env.NODE_ENV !== "production") {
     console.log("[STARTUP] Modo Desenvolvimento: Ativando Vite Middleware...");
     const { createServer: createViteServer } = await import("vite");
-    // Behind Agency Vite (:5174/amplifica-crm) disable HMR WS (proxy path mismatch).
+    // Behind Agency Vite (:5174/agencia/admin) disable HMR WS when proxied.
     const agencyProxyHmr = Boolean(process.env.CRM_HMR_CLIENT_PORT);
     const vite = await createViteServer({
-      base: "/amplifica-crm/",
+      base: "/agencia/admin/",
       server: {
         middlewareMode: true,
         hmr: agencyProxyHmr
           ? false
           : {
               server: httpServer,
-              path: "/amplifica-crm/vite-hmr",
+              path: "/agencia/admin/vite-hmr",
               clientPort: PORT
             }
       },

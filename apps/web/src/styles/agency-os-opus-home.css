@@ -166,6 +166,15 @@ body.agency-os-opus-active {
   gap: 0.25rem;
 }
 
+.opus-workspace--studio .opus-workspace__frame--studio,
+.opus-workspace__main--studio {
+  padding: 0;
+  margin: 0;
+  max-width: none;
+  min-height: 100dvh;
+  background: #ffffff;
+}
+
 .opus-workspace__main--crm {
   margin-top: 0;
   flex: 1;

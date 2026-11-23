@@ -1,5 +1,5 @@
 /**
- * Amplifica CRM — IA mínima para breadcrumbs (home, sem sidebar).
+ * Agência Ederson Programador — IA mínima para breadcrumbs (home, sem sidebar).
  */
 
 import {
@@ -75,10 +75,10 @@ export const ADMIN_COMERCIAL_STEPS: readonly AdminNavLink[] = [
 export const ADMIN_OPERATION_BLOCKS: readonly AdminNavBlock[] = [
   {
     id: "comando",
-    label: "Amplifica CRM",
+    label: "Agência Ederson Programador",
     purpose: "Home workspace.",
     links: [
-      { id: "inicio", label: "Home", adminPath: "", purpose: "Amplifica CRM home." },
+      { id: "inicio", label: "Home", adminPath: "", purpose: "Home do sistema da agência." },
       {
         id: "studio",
         label: "Code Studio",

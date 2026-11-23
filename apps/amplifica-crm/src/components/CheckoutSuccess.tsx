@@ -25,7 +25,7 @@ export default function CheckoutSuccess({ onGoToDashboard }: CheckoutSuccessProp
           BEM-VINDO AO ELITE!
         </h1>
         <p className="text-slate-500 font-medium leading-relaxed mb-10">
-          Sua assinatura foi processada com sucesso. Agora você tem acesso total às ferramentas avançadas do Amplifica CRM.
+          Sua assinatura foi processada com sucesso. Agora você tem acesso total às ferramentas avançadas da Agência Ederson Programador.
         </p>
 
         <div className="space-y-4 mb-10">

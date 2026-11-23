@@ -21,7 +21,9 @@ export async function ensureSeedCourses(log: FastifyBaseLogger) {
       title: FL_COURSE.title,
       summary: FL_COURSE.summary,
       status: "PUBLISHED",
-      visibility: "INTERNAL",
+      visibility: "PUBLIC_SALE",
+      priceCents: 99700,
+      currency: "BRL",
       contentKey: FL_CONTENT_KEY,
       coverUrl: FL_COURSE.coverUrl,
       sortOrder: 0
@@ -30,6 +32,9 @@ export async function ensureSeedCourses(log: FastifyBaseLogger) {
       title: FL_COURSE.title,
       summary: FL_COURSE.summary,
       status: "PUBLISHED",
+      visibility: "PUBLIC_SALE",
+      priceCents: 99700,
+      currency: "BRL",
       contentKey: FL_CONTENT_KEY,
       coverUrl: FL_COURSE.coverUrl
     }
@@ -41,6 +46,16 @@ export async function ensureSeedCourses(log: FastifyBaseLogger) {
   await ensureTanarCourse(prisma, log);
   await ensureEnemCronogramaCourse(prisma, log);
   await ensureCabalasRabinoDuduCourse(prisma, log);
+
+  /** Garante vitrine pública com pelo menos o FL + USP com preço. */
+  await prisma.course.updateMany({
+    where: { slug: { in: [FL_COURSE.slug, USP_LEITURA_SLUG] }, status: "PUBLISHED" },
+    data: { visibility: "PUBLIC_SALE", currency: "BRL" }
+  });
+  await prisma.course.updateMany({
+    where: { slug: USP_LEITURA_SLUG, status: "PUBLISHED", OR: [{ priceCents: null }, { priceCents: { lte: 0 } }] },
+    data: { priceCents: 49700 }
+  });
 
   const portalCourses = await prisma.course.findMany({
     where: {
