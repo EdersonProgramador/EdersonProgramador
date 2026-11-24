@@ -34,7 +34,6 @@ export function AdminAmplificaCrmPage() {
       const target = new URL(AGENCY_CRM_BASE + "/", window.location.origin);
       target.searchParams.set("view", view);
 
-      // SSO opcional — timeout curto para não segurar a abertura do CRM.
       try {
         const res = await Promise.race([
           fetch(`${AGENCY_CRM_BASE}/api/embed/session`, {
@@ -42,17 +41,28 @@ export function AdminAmplificaCrmPage() {
             headers: { "Content-Type": "application/json" },
             body: "{}"
           }),
-          new Promise<null>((resolve) => setTimeout(() => resolve(null), 250))
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), 4000))
         ]);
-        if (res && "ok" in res && res.ok) {
-          const data = (await res.json()) as { token?: string; user?: unknown };
-          if (data.token && data.user) {
-            target.searchParams.set("embedToken", data.token);
-            target.searchParams.set("embedUser", JSON.stringify(data.user));
-          }
+
+        if (!res || !res.ok || !res.headers.get("content-type")?.includes("application/json")) {
+          throw new Error("O serviço do CRM não está conectado a este domínio.");
         }
-      } catch {
-        /* CRM ainda abre; login interno cobre o SSO */
+
+        const data = (await res.json()) as { token?: string; user?: unknown };
+        if (!data.token || !data.user) {
+          throw new Error("O serviço do CRM não retornou uma sessão válida.");
+        }
+        target.searchParams.set("embedToken", data.token);
+        target.searchParams.set("embedUser", JSON.stringify(data.user));
+      } catch (cause) {
+        if (!cancelled) {
+          setError(
+            cause instanceof Error
+              ? cause.message
+              : "Não foi possível conectar ao serviço do CRM."
+          );
+        }
+        return;
       }
 
       if (!cancelled) {
@@ -60,9 +70,7 @@ export function AdminAmplificaCrmPage() {
       }
     };
 
-    void enter().catch(() => {
-      if (!cancelled) setError("Não foi possível abrir o sistema da agência.");
-    });
+    void enter();
 
     return () => {
       cancelled = true;
