@@ -47,13 +47,14 @@ O repositório inclui [`render.yaml`](render.yaml) (projeto **edersonprogramador
 2. Antes do primeiro deploy, defina no serviço **ederson-agencia-api** (secrets, não commitar):
    - `ADMIN_EMAIL` — e-mail do admin
    - `ADMIN_PASSWORD` — mesma senha do login (mín. 6; recomendado 12+)
+   - `DATABASE_URL` — URL direta do banco Neon (`ederson_agencia_import` na branch `render-migration-20261124`; host sem `-pooler`)
 3. Aguarde o deploy; copie a URL pública (ex.: `https://ederson-agencia-api.onrender.com`).
 4. Teste: `GET https://…/health` → `{ "status": "ok" }`.
 5. **Vercel** → Settings → Environment Variables:
    - `VITE_API_URL` = URL da API (sem barra no final)
    - Redeploy do front (Production).
 
-`JWT_SECRET` e `DATABASE_URL` vêm do Blueprint. Depois do primeiro admin criado, pode setar `ADMIN_BOOTSTRAP=false` no Render.
+`JWT_SECRET` vem do Blueprint; `DATABASE_URL` é configurada como secret no serviço Render e não é sincronizada pelo Blueprint. Depois do primeiro admin criado, pode setar `ADMIN_BOOTSTRAP=false` no Render.
 
 No **plano free**, as migrations rodam no **start** do serviço (não há `preDeployCommand`).
 
