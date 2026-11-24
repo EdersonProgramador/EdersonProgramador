@@ -1,5 +1,6 @@
 node_modules/
 build/
+dist/
 coverage/
 .DS_Store
 *.log
@@ -12,3 +13,4 @@ n8n_interaction_logs.txt
 whatsapp_interaction_logs.txt
 whatsapp_polls.json
 google_tokens.json
+logs/whatsapp_debug.txt

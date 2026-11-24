@@ -1,21 +1,39 @@
 import fs from 'fs';
 import path from 'path';
+import { randomUUID } from 'crypto';
 import { fileURLToPath } from 'url';
 import pg from 'pg';
 import bcrypt from 'bcrypt';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '..');
 
-const DATABASE_URL = process.env.DATABASE_URL;
-if (!DATABASE_URL) {
-  console.error('DATABASE_URL is required');
-  process.exit(1);
+const databaseUrl = process.env.DATABASE_URL;
+if (!databaseUrl) {
+  throw new Error('DATABASE_URL is required');
+}
+
+const databaseHost = new URL(databaseUrl).hostname;
+const isLocalDatabase = ['localhost', '127.0.0.1', '::1', '[::1]'].includes(databaseHost);
+if (!isLocalDatabase && process.env.ALLOW_REMOTE_DB_SETUP !== 'true') {
+  throw new Error('Refusing to initialize a remote database. Set ALLOW_REMOTE_DB_SETUP=true only for a disposable development database.');
+}
+
+const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+const adminPassword = process.env.ADMIN_PASSWORD;
+const adminName = process.env.ADMIN_NAME?.trim() || 'Admin Local';
+if (!adminEmail || !adminPassword || adminPassword.length < 12) {
+  throw new Error('Set ADMIN_EMAIL and ADMIN_PASSWORD (at least 12 characters) before running setup.');
 }
 
 const pool = new pg.Pool({
-  connectionString: DATABASE_URL,
-  ssl: DATABASE_URL.includes('neon.tech') ? { rejectUnauthorized: false } : undefined,
+  connectionString: databaseUrl,
+  ssl: databaseUrl.includes('neon.tech') || databaseUrl.includes('sslmode=require')
+    ? { rejectUnauthorized: false }
+    : undefined,
 });
 
 async function runFile(relativePath) {
@@ -27,20 +45,13 @@ async function runFile(relativePath) {
 }
 
 async function run(sql, label) {
-  try {
-    await pool.query(sql);
-    console.log(`OK ${label}`);
-  } catch (err) {
-    console.warn(`WARN ${label}: ${err.message}`);
-  }
+  await pool.query(sql);
+  console.log(`OK ${label}`);
 }
 
-const adminEmail = (process.env.ADMIN_EMAIL || 'edersonprogramador@gmail.com').trim().toLowerCase();
-const adminPassword = process.env.ADMIN_PASSWORD || 'admin123456';
-const adminName = process.env.ADMIN_NAME || 'Ederson Programador';
-const passwordHash = await bcrypt.hash(adminPassword, 10);
-
 try {
+  const passwordHash = await bcrypt.hash(adminPassword, 10);
+
   await run(`CREATE EXTENSION IF NOT EXISTS "pgcrypto";`, 'pgcrypto');
   await run(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`, 'uuid-ossp');
 
@@ -94,9 +105,6 @@ try {
     );
   `, 'system_configs');
 
-  // Remove admin fictício antigo e garante o admin real (mesmo da API).
-  await pool.query(`DELETE FROM public.users WHERE email IN ('admin@amplifica.com', $1)`, [adminEmail]);
-  await pool.query(`DELETE FROM public.users WHERE id = '00000000-0000-0000-0000-000000000001'`);
   await pool.query(
     `
     INSERT INTO public.users (
@@ -104,32 +112,36 @@ try {
       accepted_terms, terms_accepted_at, terms_version,
       plan_id, subscription_status
     ) VALUES (
-      '00000000-0000-0000-0000-000000000001',
+      $1,
       $2,
       $3,
-      $1,
+      $4,
       'OWNER',
-      '00000000-0000-0000-0000-000000000001',
+      $1,
       TRUE,
       NOW(),
       '1.0',
       'plan1',
       'active'
     )
+    ON CONFLICT (email) DO NOTHING
     `,
-    [passwordHash, adminName, adminEmail]
+    [randomUUID(), adminName, adminEmail, passwordHash]
   );
-  console.log(`OK seed ${adminEmail} (senha = ADMIN_PASSWORD)`);
+  console.log('OK local admin seed (existing account is not modified)');
 
   const check = await pool.query(
     `SELECT email, role, subscription_status, owner_id IS NOT NULL AS has_owner FROM users WHERE email = $1`,
     [adminEmail]
   );
-  console.log('User:', check.rows[0]);
+  if (!check.rows[0] || check.rows[0].role !== 'OWNER') {
+    throw new Error(`ADMIN_EMAIL ${adminEmail} already exists but is not an OWNER; no account was changed.`);
+  }
+  console.log('Local admin ready:', check.rows[0]);
   console.log('Local DB ready.');
 } catch (err) {
   console.error(err);
-  process.exit(1);
+  process.exitCode = 1;
 } finally {
   await pool.end();
 }

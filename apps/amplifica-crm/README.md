@@ -3,7 +3,7 @@
   <p><b>Sistema White Label de Gestão para Agências de Marketing</b></p>
   <p>
     <img src="https://img.shields.io/badge/status-active-success.svg" alt="Status Active" />
-    <img src="https://img.shields.io/badge/version-2.9.51-blue" alt="Version" />
+    <img src="https://img.shields.io/badge/version-2.9.53-blue" alt="Version" />
     <img src="https://img.shields.io/badge/tech-React%2019%20%7C%20Express%20%7C%20Supabase-purple" alt="Tech Stack" />
     <img src="https://img.shields.io/badge/database-Supabase%20(PostgreSQL)-orange" alt="Database" />
     <img src="https://img.shields.io/badge/integrations-Facebook%20%7C%20Google%20%7C%20WhatsApp-brightgreen" alt="Integrations" />
@@ -148,6 +148,8 @@ npm run dev
 ```
 
 Acesse [http://localhost:3000](http://localhost:3000).
+
+Para usar PostgreSQL local sem credenciais Supabase, configure `DATABASE_URL`, `ADMIN_EMAIL` e `ADMIN_PASSWORD` no `.env` e execute `npm run db:setup` uma única vez. A senha deve ter ao menos 12 caracteres. O script só aceita banco local por padrão; defina `ALLOW_REMOTE_DB_SETUP=true` apenas para uma base remota descartável de desenvolvimento. Contas já existentes não são excluídas nem têm senha ou permissões alteradas.
 
 ### Docker Compose
 

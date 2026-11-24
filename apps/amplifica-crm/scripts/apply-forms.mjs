@@ -16,10 +16,15 @@ if (!url) {
 
 const pool = new pg.Pool({
   connectionString: url,
-  ssl: url.includes('neon.tech') ? { rejectUnauthorized: false } : undefined,
+  ssl: url.includes('neon.tech') || url.includes('sslmode=require')
+    ? { rejectUnauthorized: false }
+    : undefined,
 });
 
-await pool.query(sql);
-const check = await pool.query(`SELECT to_regclass('public.form_integrations') AS t`);
-console.log('OK form_integrations =', check.rows[0].t);
-await pool.end();
+try {
+  await pool.query(sql);
+  const check = await pool.query(`SELECT to_regclass('public.form_integrations') AS t`);
+  console.log('OK form_integrations =', check.rows[0].t);
+} finally {
+  await pool.end();
+}
